@@ -1,6 +1,6 @@
 /**
  * @shared-world/simulation-core public API.
- * Sprint 0 domain types, config/name-data validation, canonical JSON, and Sha256Provider contracts (S00-002).
+ * Sprint 0 domain types, config/name-data validation, canonical JSON, Sha256Provider, and seeded RNG.
  */
 export const SIMULATION_CORE_PACKAGE_NAME = "@shared-world/simulation-core" as const;
 
@@ -115,6 +115,9 @@ export {
 
 export type { Sha256Provider } from "./sha256-provider.js";
 export { computeConfigHash, computeNameDataHash } from "./sha256-provider.js";
+
+export type { SeededRng, SeededRngFactory, SeededRngState } from "./rng.js";
+export { createSeededRng, deriveSeed, importSeededRng, RNG_ALGORITHM_VERSION } from "./rng.js";
 
 export type {
   ValidationFailure,
