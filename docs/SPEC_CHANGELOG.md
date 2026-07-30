@@ -1,5 +1,12 @@
 # 変更履歴
 
+## 2026-07-31：world.year_stats_finalized追加とイベント基盤同期
+
+- Sprint 0ミニ仕様を`S0-SPEC-0.1.5`へ更新（ゲーム仕様は`SPEC-0.1.1`のまま）。
+- `simulationId`材料を`SPEC-0.1.1|S0-SPEC-0.1.5|...`へ更新。
+- S00-004の`year_stats_finalized`遷移を`world.year_stats_finalized`へ対応付け、payloadと3月第4週の日時規則を03ミニ仕様へ追加。
+- 01発生イベント一覧へ`world.year_stats_finalized`を追加。
+
 ## 2026-07-31：16歳正式デビューと最低ランク付与の確定
 
 - ゲーム仕様を`SPEC-0.1.1`、Sprint 0ミニ仕様を`S0-SPEC-0.1.4`へ更新。

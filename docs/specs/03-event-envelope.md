@@ -1,6 +1,6 @@
 # 03 構造化イベント共通形式ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.4`
+- ミニ仕様バージョン：`S0-SPEC-0.1.5`
 
 ## 1. 目的
 
@@ -56,6 +56,7 @@ interface EventEnvelope<TPayload extends object = Record<string, unknown>> {
 | eventType | 用途 |
 |---|---|
 | `world.started` | 初期世界開始 |
+| `world.year_stats_finalized` | 完了した世界年の3月第4週終了時の年次統計確定 |
 | `world.year_started` | 世界2年以降の4月第1週 |
 | `family.initialized` | 初期家系登録 |
 | `lineage.initialized` | 初期流派登録 |
@@ -74,6 +75,21 @@ interface EventEnvelope<TPayload extends object = Record<string, unknown>> {
 - `nextCareerStatus`：常に`active_competitor`
 - `rank`：付与した共通ランク定義の最低ランク
 - `previousRank`は未デビューのため持たせない
+
+### `world.year_stats_finalized`
+
+S00-004の`kind: "year_stats_finalized"`遷移を`eventType: "world.year_stats_finalized"`へ変換する。
+
+payload：
+
+```ts
+{ worldYear: number }
+```
+
+- `entities`の必須配列はすべて空配列。
+- `worldDate`は完了した世界年の3月第4週。
+- `worldYear`がYのとき：`year=Y`、`month=3`、`weekOfMonth=4`、`absoluteWeek=Y*48-1`。
+- 年境界では遷移順を維持し、`world.year_stats_finalized` → `world.year_started` → 人物イベントの順とする。
 
 ## 6. payload
 

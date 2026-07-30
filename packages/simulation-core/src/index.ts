@@ -1,7 +1,7 @@
 /**
  * @shared-world/simulation-core public API.
  * Sprint 0 domain types, config/name-data validation, canonical JSON, Sha256Provider,
- * seeded RNG, and world calendar / age eligibility.
+ * seeded RNG, world calendar / age eligibility, and structured EventEnvelope.
  */
 export const SIMULATION_CORE_PACKAGE_NAME = "@shared-world/simulation-core" as const;
 
@@ -163,6 +163,61 @@ export { computeConfigHash, computeNameDataHash } from "./sha256-provider.js";
 
 export type { SeededRng, SeededRngFactory, SeededRngState } from "./rng.js";
 export { createSeededRng, deriveSeed, importSeededRng, RNG_ALGORITHM_VERSION } from "./rng.js";
+
+export type {
+  EventEntities,
+  EventEnvelope,
+  EventImportance,
+  EventOrigin,
+  FamilyInitializedPayload,
+  LineageInitializedPayload,
+  PersonAgedPayload,
+  PersonCareerStatusChangedPayload,
+  PersonDebutedPayload,
+  PersonForceRetiredPayload,
+  PersonInitializedPayload,
+  RelationshipInitializedPayload,
+  SimulationCompletedPayload,
+  Sprint0EventType,
+  ValidationFailedPayload,
+  WorldStartedPayload,
+  WorldYearStartedPayload,
+  WorldYearStatsFinalizedPayload,
+} from "./events/types.js";
+export {
+  CAREER_STATUSES,
+  EVENT_ENVELOPE_SCHEMA_VERSION,
+  EVENT_IMPORTANCES,
+  EVENT_ORIGINS,
+  SPRINT0_EVENT_TYPES,
+  emptyEventEntities,
+  isCareerStatus,
+  isEventImportance,
+  isEventOrigin,
+  isRank,
+  isSprint0EventType,
+} from "./events/types.js";
+export { assertEventIdMatchesSequence, eventIdFromSequence } from "./events/event-id.js";
+export type {
+  EventFactoryCommon,
+  SimulationCompletedFactoryInput,
+  ValidationFailedFactoryInput,
+} from "./events/factories.js";
+export {
+  createFamilyInitializedEvent,
+  createLineageInitializedEvent,
+  createPersonInitializedEvent,
+  createRelationshipInitializedEvent,
+  createSimulationCompletedEvent,
+  createValidationFailedEvent,
+  createWorldDateForYearStatsFinalized,
+  createWorldStartedEvent,
+} from "./events/factories.js";
+export type { ConvertWorldCalendarTransitionsInput } from "./events/from-transitions.js";
+export { convertWorldCalendarTransitions } from "./events/from-transitions.js";
+export { eventsToJsonl } from "./events/jsonl.js";
+export type { KnownEntityIds, ValidateEventSequenceOptions } from "./events/validate.js";
+export { validateEventEnvelope, validateEventSequence } from "./events/validate.js";
 
 export type {
   ValidationFailure,
