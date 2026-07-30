@@ -1,6 +1,11 @@
-export const RANKS = ["F", "E", "D", "C", "B", "A", "S"] as const;
+export const RANK_ORDER = ["F", "E", "D", "C", "B", "A", "S"] as const;
 
-export type Rank = (typeof RANKS)[number];
+export type Rank = (typeof RANK_ORDER)[number];
+
+/** Same ordered rank definition as RANK_ORDER (single shared array). */
+export const RANKS = RANK_ORDER;
+
+export const MINIMUM_RANK: Rank = RANK_ORDER[0];
 
 export type Sex = "male" | "female";
 

@@ -1,6 +1,6 @@
 # 01 世界暦・一斉加齢ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.3`
+- ミニ仕様バージョン：`S0-SPEC-0.1.4`
 
 ## 1. 目的
 
@@ -84,7 +84,7 @@ interface WorldDate {
 | 到達年齢 | Sprint 0の処理 |
 |---:|---|
 | 8 | `child` → `trainee` |
-| 16 | `active_competitor`へ変更しデビュー資格を有効化。大会・初期ランク付与はしない |
+| 16 | `active_competitor`へ変更し、共通ランク定義の最低ランクを`currentRank`と`highestRank`へ付与する。大会・昇格はしない |
 | 18 | 自律引退可能資格を有効化。判断はしない |
 | 42 | `active_competitor` → `retired`、ランクを引退履歴へ移す |
 
@@ -102,6 +102,7 @@ interface WorldDate {
 - `world.year_started`（世界2年以降）
 - `person.aged`
 - `person.career_status_changed`
+- `person.debuted`
 - `person.force_retired`
 - `simulation.completed`
 - `validation.failed`
@@ -117,7 +118,7 @@ interface WorldDate {
 5. 世界1年初期化時に加齢・`world.year_started`を生成しない。
 6. 世界2年4月第1週に対象人物が全員1歳加齢。
 7. 同一年に2回加齢しない。
-8. 8、16、18、42歳の資格・状態更新。
+8. 8、16、18、42歳の資格・状態更新。16歳到達時に共通ランク定義の最低ランクを付与する。
 9. 42歳到達時に強制引退し、ランク履歴を保持。
 10. deceased、waiting、stoppedは加齢しない。
 11. 100年実行で4,800ステップ、年次統計100行。

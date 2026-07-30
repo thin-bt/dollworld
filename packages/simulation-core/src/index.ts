@@ -1,6 +1,7 @@
 /**
  * @shared-world/simulation-core public API.
- * Sprint 0 domain types, config/name-data validation, canonical JSON, Sha256Provider, and seeded RNG.
+ * Sprint 0 domain types, config/name-data validation, canonical JSON, Sha256Provider,
+ * seeded RNG, and world calendar / age eligibility.
  */
 export const SIMULATION_CORE_PACKAGE_NAME = "@shared-world/simulation-core" as const;
 
@@ -70,7 +71,51 @@ export type {
   Rank,
   Sex,
 } from "./enums.js";
-export { RANKS } from "./enums.js";
+export { MINIMUM_RANK, RANK_ORDER, RANKS } from "./enums.js";
+
+export type {
+  AgeEligibility,
+  CareerTransitionResult,
+  PersonCareerTransition,
+} from "./age-status.js";
+export {
+  applyAgeBasedCareerUpdates,
+  computeCurrentAge,
+  deriveAgeEligibility,
+  isLivingPerson,
+  withRecalculatedAge,
+} from "./age-status.js";
+
+export type {
+  PersonAgedTransition,
+  StepOneWeekResult,
+  WorldCalendarState,
+  WorldCalendarTransition,
+  YearStartResult,
+  YearStartedTransition,
+  YearStatsFinalizedTransition,
+} from "./world-calendar.js";
+export {
+  applyYearStart,
+  createInitialWorldCalendarState,
+  stepOneWeek,
+  stepWeeks,
+} from "./world-calendar.js";
+
+export type { WeekOfMonth, WorldDate, WorldMonth } from "./world-date.js";
+export {
+  WORLD_MONTH_ORDER,
+  advanceOneWeek,
+  advanceWeeks,
+  createInitialWorldDate,
+  createWorldDate,
+  fromAbsoluteWeek,
+  isAprilWeek1,
+  isMarchWeek4,
+  isSameWorldDate,
+  toAbsoluteWeek,
+  validateWorldDate,
+} from "./world-date.js";
 
 export type {
   EventId,

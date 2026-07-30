@@ -1,6 +1,6 @@
 # 03 構造化イベント共通形式ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.3`
+- ミニ仕様バージョン：`S0-SPEC-0.1.4`
 
 ## 1. 目的
 
@@ -63,9 +63,17 @@ interface EventEnvelope<TPayload extends object = Record<string, unknown>> {
 | `relationship.initialized` | 初期関係登録 |
 | `person.aged` | 4月第1週の一斉加齢 |
 | `person.career_status_changed` | 年齢段階変更 |
+| `person.debuted` | 16歳到達時の正式デビューと初期ランク付与 |
 | `person.force_retired` | 42歳到達 |
 | `simulation.completed` | 実行完了 |
 | `validation.failed` | 不変条件違反 |
+
+`person.debuted`のpayload最低項目：
+
+- `previousCareerStatus`：デビュー直前の`child`または`trainee`
+- `nextCareerStatus`：常に`active_competitor`
+- `rank`：付与した共通ランク定義の最低ランク
+- `previousRank`は未デビューのため持たせない
 
 ## 6. payload
 
@@ -82,8 +90,8 @@ interface EventEnvelope<TPayload extends object = Record<string, unknown>> {
   "eventId": "event_000000043",
   "simulationId": "simulation_a1b2c3d4e5f60718",
   "sequence": 42,
-  "eventType": "person.aged",
-  "importance": "minor",
+  "eventType": "person.debuted",
+  "importance": "normal",
   "worldDate": { "year": 3, "month": 4, "weekOfMonth": 1, "absoluteWeek": 96 },
   "origin": "simulation",
   "sourceProcessor": "age-progression",
@@ -94,9 +102,9 @@ interface EventEnvelope<TPayload extends object = Record<string, unknown>> {
     "relationshipIds": []
   },
   "payload": {
-    "previousAge": 15,
-    "newAge": 16,
-    "debutEligibilityActivated": true
+    "previousCareerStatus": "trainee",
+    "nextCareerStatus": "active_competitor",
+    "rank": "F"
   }
 }
 ```
