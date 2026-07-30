@@ -1,0 +1,9 @@
+**/*.md
+docs/**
+tasks/**
+prompts/**
+data/**
+config/**
+package-lock.json
+**/dist/**
+**/node_modules/**

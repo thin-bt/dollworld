@@ -82,8 +82,8 @@
 
 ## S00-001の固定環境
 
-- Node.js 24.18.0 LTS
-- npm 11.16.0
+- Node.js `>=24.18.0 <27`（推奨LTSは24.18.0、Node.js 26も許容）
+- npm 11.16.0（`>=11.16.0 <12`）
 - TypeScript 6.0.3
 - Vitest 4.1.10
 - ESLint 10.7.0 + `@eslint/js` 10.0.1

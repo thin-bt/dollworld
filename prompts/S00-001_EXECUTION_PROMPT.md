@@ -27,7 +27,7 @@
 - `tasks/S00-001.md` の範囲だけを実装してください。
 - npm workspacesを使い、workspace対象は `packages/*` と `apps/*` にしてください。
 - Sprint 0では `packages/simulation-core` だけを実装してください。
-- Node.jsは`>=24.18.0 <25`、npmは`>=11.16.0 <12`、`packageManager`は`npm@11.16.0`、ESM、TypeScript strictを使用してください。
+- Node.jsは`>=24.18.0 <27`（推奨LTSは24.18.0、Node.js 26も許容）、npmは`>=11.16.0 <12`、`packageManager`は`npm@11.16.0`、ESM、TypeScript strictを使用してください。
 - 依存バージョンは `docs/TECHNICAL_DECISIONS.md` に固定されたものを使用してください。
 - ESLint 10のflat config、Vitest、Prettierを設定し、`.gitattributes`でテキスト改行をLFへ固定してください。
 - ルートpackage名を`shared-world-observation-game`、初期workspace package名を`@shared-world/simulation-core`にし、双方を`private: true`にしてください。
