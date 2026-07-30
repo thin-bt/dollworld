@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.1.0",
+  "nameDataVersion": "NAMES-0.1.2",
+  "locale": "ja-JP",
+  "style": "common-western-fantasy",
+  "displayFormat": "{givenName}・{familyName}",
+  "files": {
+    "family": {
+      "path": "family-names.json",
+      "count": 200,
+      "sha256": "582f26a5d66291865f5f3e5efacd187e31c67b15443358d1433aff227c389828"
+    },
+    "male": {
+      "path": "male-given-names.json",
+      "count": 400,
+      "sha256": "0d31dc18c73a6fc2bceb9ae442cd3ae1051417743a1bc5e2ffc93ed58e511e01"
+    },
+    "female": {
+      "path": "female-given-names.json",
+      "count": 400,
+      "sha256": "8877ef98df3b9519dc68a7213d9bbf8d753cf9361ca1a0ccf4368933e156d68b"
+    },
+    "neutral": {
+      "path": "neutral-given-names.json",
+      "count": 100,
+      "sha256": "5f4180fbb32e977f8d689550ac2901e46725309d61a3d3c11b9c4e6d6626a4ac"
+    }
+  },
+  "selectionPolicy": {
+    "familyNames": "初期家系には重複なしで選択する。候補不足時はエラーとし、暗黙に再利用しない。",
+    "givenNames": "性別別候補を基本とし、設定確率で共通名候補を使用する。",
+    "duplicateLivingFullNameWithinFamily": "同時に存命する同一家系内の完全同名は、候補配列を決定的に次へ走査して回避する。乱数の再抽選は行わない。",
+    "historicalReuse": "世代が異なり存命期間が重ならない場合は、祖先名の再使用を許可する。",
+    "rng": "候補配列の順序を固定し、Seeded RNGのみで選択する。"
+  },
+  "hashAlgorithm": "sha256-canonical-json-v1"
+}
