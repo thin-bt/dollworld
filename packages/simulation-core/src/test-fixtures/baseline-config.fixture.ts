@@ -1,0 +1,114 @@
+import type { InitialWorldConfig } from "../config/types.js";
+
+/**
+ * Test-only in-memory fixture shaped like config/initial-world.config.json.
+ * Not the canonical config source of truth, and not part of the production build.
+ */
+export const baselineConfigFixture: InitialWorldConfig = {
+  schemaVersion: "0.2.3",
+  profileId: "baseline-small-v1",
+  purpose: "Sprint 0の再現性・参照整合性・性能検証用。ゲーム正式値ではない。",
+  world: {
+    startYear: 1,
+    startMonth: 4,
+    startWeekOfMonth: 1,
+    weeksPerMonth: 4,
+    monthsPerYear: 12,
+    birthMonth: 4,
+    birthWeekOfMonth: 1,
+  },
+  population: {
+    totalLiving: 600,
+    initialUserFounderCount: 0,
+    sexRatioMale: 0.5,
+    ageBands: [
+      { minAge: 0, maxAge: 7, count: 80 },
+      { minAge: 8, maxAge: 15, count: 120 },
+      { minAge: 16, maxAge: 41, count: 220 },
+      { minAge: 42, maxAge: 70, count: 180 },
+    ],
+    activeRankDistribution: {
+      F: 70,
+      E: 55,
+      D: 40,
+      C: 30,
+      B: 15,
+      A: 8,
+      S: 2,
+    },
+  },
+  history: {
+    initialDeceasedAncestors: 200,
+    minimumGenerationDepth: 1,
+    maximumGenerationDepth: 3,
+    earliestHistoricalYear: -180,
+    minimumAgeAtDeath: 18,
+    maximumAgeAtDeath: 90,
+    createExistingRelationships: true,
+    createPastTournamentHistory: false,
+  },
+  relationships: {
+    knownParentCoverage: 0.7,
+    retiredSpouseCoverage: 0.45,
+    formalMasterCoverageAge8To41: 0.65,
+    minimumParentAgeAtChildbirth: 18,
+    maximumBiologicalParents: 2,
+    twoKnownParentsCoverageAmongCovered: 0.6,
+  },
+  families: {
+    initialFamilyCount: 100,
+    minimumMembersPerFamily: 1,
+    maximumMembersPerFamily: 12,
+    baseBirthRateRange: {
+      min: 0.08,
+      max: 0.28,
+    },
+  },
+  lineages: {
+    initialLineageCount: 24,
+    initialQualifiedMasters: 45,
+    techniqueFocusWeights: {
+      unarmed: 0.34,
+      sword: 0.33,
+      magic: 0.33,
+    },
+  },
+  abilities: {
+    minimum: 0,
+    maximum: 100,
+    initialSurfaceValueRange: { min: 15, max: 65 },
+    initialGeneticValueRange: { min: 10, max: 90 },
+    initialAptitudeRange: { min: 20, max: 80 },
+    initialAptitudeGeneticValueRange: { min: 10, max: 90 },
+  },
+  nameData: {
+    manifestPath: "data/names/name-data.manifest.json",
+    requiredVersion: "NAMES-0.1.2",
+    neutralGivenNameProbability: 0.1,
+    familyNameSelection: "without_replacement",
+    avoidDuplicateLivingFullNameWithinFamily: true,
+    displayFormat: "{givenName}・{familyName}",
+  },
+  simulation: {
+    defaultSeed: 12345,
+    rngAlgorithm: "xoshiro128ss-v1",
+    defaultYears: 100,
+    benchmarkYears: [10, 50, 100, 300],
+    emitWeeklyEvents: false,
+  },
+  validationTargets: {
+    maximumInitialPopulationMismatch: 0,
+    maximumBrokenReferenceCount: 0,
+    sameSeedMustMatch: true,
+    differentSeedShouldDiffer: true,
+  },
+  performanceTargets: {
+    warningSecondsFor600People100Years: 30,
+    warningSecondsFor2000People100Years: 120,
+    measureOnlyPopulation: 5000,
+  },
+};
+
+export function cloneBaselineConfig(): InitialWorldConfig {
+  return JSON.parse(JSON.stringify(baselineConfigFixture)) as InitialWorldConfig;
+}
