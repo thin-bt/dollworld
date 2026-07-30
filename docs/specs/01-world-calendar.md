@@ -1,6 +1,6 @@
 # 01 世界暦・一斉加齢ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.4`
+- ミニ仕様バージョン：`S0-SPEC-0.1.5`
 
 ## 1. 目的
 
@@ -99,6 +99,7 @@ interface WorldDate {
 ## 10. 発生イベント
 
 - `world.started`
+- `world.year_stats_finalized`
 - `world.year_started`（世界2年以降）
 - `person.aged`
 - `person.career_status_changed`

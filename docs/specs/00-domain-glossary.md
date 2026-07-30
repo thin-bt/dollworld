@@ -1,6 +1,6 @@
 # 00 ドメイン用語・共通型ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.4`
+- ミニ仕様バージョン：`S0-SPEC-0.1.5`
 
 ## 1. 目的
 
@@ -52,7 +52,7 @@ Sprint 0必須型：`WorldId`、`PersonId`、`FamilyId`、`LineageId`、`Relatio
 - `simulationId`の材料は次の順で固定する。
 
 ```text
-SPEC-0.1.1|S0-SPEC-0.1.4|<configHash>|<seedの10進整数>|<nameDataHash>|xoshiro128ss-v1
+SPEC-0.1.1|S0-SPEC-0.1.5|<configHash>|<seedの10進整数>|<nameDataHash>|xoshiro128ss-v1
 ```
 
 このUTF-8文字列のSHA-256を小文字16進数化し、先頭16桁から`simulation_<16hex>`を生成する。区切り、順序、大小文字を変更しない。
