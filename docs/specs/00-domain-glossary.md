@@ -1,6 +1,6 @@
 # 00 ドメイン用語・共通型ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.3`
+- ミニ仕様バージョン：`S0-SPEC-0.1.4`
 
 ## 1. 目的
 
@@ -52,7 +52,7 @@ Sprint 0必須型：`WorldId`、`PersonId`、`FamilyId`、`LineageId`、`Relatio
 - `simulationId`の材料は次の順で固定する。
 
 ```text
-SPEC-0.1.0|S0-SPEC-0.1.3|<configHash>|<seedの10進整数>|<nameDataHash>|xoshiro128ss-v1
+SPEC-0.1.1|S0-SPEC-0.1.4|<configHash>|<seedの10進整数>|<nameDataHash>|xoshiro128ss-v1
 ```
 
 このUTF-8文字列のSHA-256を小文字16進数化し、先頭16桁から`simulation_<16hex>`を生成する。区切り、順序、大小文字を変更しない。
@@ -87,9 +87,16 @@ Sprint 0では18〜41歳の自律引退は実装せず、42歳到達時の強制
 ### 導出資格
 
 - `canEnterLineage`：8〜41歳、存命、活動中、未引退
-- `canDebut`：16〜41歳、存命、活動中、未引退
+- `canDebut`：16〜41歳、存命、活動中、childまたはtrainee
 - `canVoluntarilyRetire`：18〜41歳、存命、活動中、現役
 - `mustRetire`：42歳以上、存命、現役
+- 死亡済み人物の導出資格はすべて`false`
+
+### 16歳正式デビュー
+
+- 16歳到達時に正式デビューし、`careerStatus`を`active_competitor`へ変更する。
+- デビュー時に共通ランク定義の最低ランク（現在の体系ではF）を`currentRank`と`highestRank`へ付与する。
+- デビュー時期を人物AIが遅らせることはない。
 
 ## 5. 出生情報
 
@@ -130,7 +137,7 @@ Sprint 0では18〜41歳の自律引退は実装せず、42歳到達時の強制
 - `currentRank`は現役競技者だけが持ち、未デビュー者・引退者は持たない。
 - 引退時は直前の`currentRank`を`retirementRank`へ保存し、`currentRank`を外す。
 - `highestRank`は生涯履歴として引退後・死亡後も保持する。
-- 16歳未満はランクなし。
+- 16歳未満はランクなし。16歳到達時の正式デビューで最低ランクを付与する。
 - A・Sは共通の`open`クラス。
 - 最高位は通常ランクではなく称号。
 - Sprint 0では初期履歴として保持するだけで大会・昇格を処理しない。
