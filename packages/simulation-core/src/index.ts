@@ -226,3 +226,28 @@ export type {
   ValidationSuccess,
 } from "./validation.js";
 export { failure, isSuccess, success } from "./validation.js";
+
+export { generateInitialWorld } from "./initial-world/generate.js";
+export { validateInitialWorldSnapshot } from "./initial-world/validate-snapshot.js";
+export type {
+  InitialGenerationSummary,
+  InitialWorldGenerationInput,
+  InitialWorldGenerationResult,
+  InitialWorldSnapshot,
+  InitialWorldValidationSummary,
+  TargetActualPair,
+  TargetActualRate,
+} from "./initial-world/types.js";
+export { InitialWorldGenerationError } from "./initial-world/errors.js";
+export { buildSimulationIdMaterial, createSimulationId } from "./initial-world/simulation-id.js";
+export {
+  allocateByLargestRemainderOrdered,
+  expandAllocationToList,
+} from "./initial-world/largest-remainder.js";
+export {
+  FIXED_WORLD_ID,
+  INITIAL_WORLD_SNAPSHOT_SCHEMA_VERSION,
+  INITIAL_WORLD_SOURCE_PROCESSOR,
+  S0_SPEC_VERSION,
+  SIMULATION_SPEC_VERSION,
+} from "./initial-world/constants.js";
