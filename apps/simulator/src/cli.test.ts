@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { toCanonicalJson } from "@shared-world/simulation-core";
@@ -54,17 +54,22 @@ describe("node-sha256-provider", () => {
 
 describe("runCli", () => {
   it("shows help and exits 0", () => {
-    const result = runCli(["--help"], { cwd: REPO_ROOT });
+    const dir = makeTempDir();
+    const result = runCli(["--help"], { cwd: REPO_ROOT, outputRoot: join(dir, "output") });
     expect(result.exitCode).toBe(EXIT_SUCCESS);
     expect(result.stdout).toContain("--years");
     expect(result.stdout).toContain("--seed");
     expect(result.stdout).toContain("--config");
     expect(result.stderr).toBe("");
+    expect(existsSync(join(dir, "output"))).toBe(false);
   });
 
   it("runs a normal 1-year simulation and prints a concise summary", () => {
+    const dir = makeTempDir();
+    const outputRoot = join(dir, "output");
     const result = runCli(["--years", "1", "--seed", "12345", "--config", BASELINE_CONFIG], {
       cwd: REPO_ROOT,
+      outputRoot,
     });
     expect(result.exitCode).toBe(EXIT_SUCCESS);
     expect(result.stderr).toBe("");
@@ -77,17 +82,24 @@ describe("runCli", () => {
     expect(result.stdout).toMatch(/initialLineages=\d+/);
     expect(result.stdout).toMatch(/finalWorldDate=\d+-\d+-W\d+@\d+/);
     expect(result.stdout).toContain("weeksExecuted=48");
+    expect(result.stdout).toMatch(/runId=run_\d{8}T\d{9}Z_\d{4}/);
+    expect(result.stdout).toContain("outputDirectory=");
+    expect(result.stdout).toContain("7 files written");
     expect(result.stdout).not.toContain('"persons"');
     expect(result.stdout).not.toContain("events=");
   }, 60_000);
 
   it("rejects missing --years", () => {
+    const dir = makeTempDir();
+    const outputRoot = join(dir, "output");
     const result = runCli(["--seed", "12345", "--config", BASELINE_CONFIG], {
       cwd: REPO_ROOT,
+      outputRoot,
     });
     expect(result.exitCode).toBe(EXIT_USAGE_ERROR);
     expect(result.stderr).toContain("--years");
     expect(result.stdout).toBe("");
+    expect(existsSync(outputRoot)).toBe(false);
   });
 
   it("rejects missing --seed", () => {

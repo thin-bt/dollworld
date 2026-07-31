@@ -5,7 +5,9 @@ import {
   createSeededRng,
   createWorldEngineState,
   generateInitialWorld,
-  runWorldYears,
+  RNG_ALGORITHM_VERSION,
+  S0_SPEC_VERSION,
+  SIMULATION_SPEC_VERSION,
   validateInitialWorldConfig,
   type Sha256Provider,
 } from "@shared-world/simulation-core";
@@ -16,6 +18,14 @@ import {
   resolveConfigPath,
 } from "./file-loader.js";
 import { createNodeSha256Provider } from "./node-sha256-provider.js";
+import { buildAndWriteRunOutput } from "./output/build-run-output.js";
+import { createNodeFsOps, type FsOps } from "./output/fs-ops.js";
+import { createRunIdGenerator, type Clock, type RunIdGenerator } from "./output/run-id.js";
+import {
+  runSimulationWithYearlyCapture,
+  type SimulationWithYearlyResult,
+} from "./output/run-simulation-yearly.js";
+import { summarizeValidationFailure } from "./output/validation-report.js";
 
 export const EXIT_SUCCESS = 0;
 export const EXIT_RUNTIME_ERROR = 1;
@@ -44,6 +54,21 @@ export type CliResult = {
 export type RunCliOptions = {
   cwd: string;
   sha256Provider?: Sha256Provider;
+  /** Injected clock for RunId generation (tests). Default: real UTC now. */
+  clock?: Clock;
+  /** Injected RunId generator. Default: createRunIdGenerator(clock). */
+  runIdGenerator?: RunIdGenerator;
+  /** Output root directory. Default: <cwd>/output */
+  outputRoot?: string;
+  /** Filesystem operations (tests may inject failures). */
+  fs?: FsOps;
+  /** Optional hook after temp write, before rename (tests). */
+  afterTempWrite?: (tempDirectory: string) => void;
+  /**
+   * Optional transform of the completed simulation before output (tests).
+   * Used to inject broken integrity without env-var production branches.
+   */
+  transformSimulation?: (result: SimulationWithYearlyResult) => SimulationWithYearlyResult;
 };
 
 type ParsedCliArgs =
@@ -166,6 +191,8 @@ function buildSummary(input: {
     absoluteWeek: number;
   };
   weeksExecuted: number;
+  runId: string;
+  outputDirectory: string;
 }): string {
   const date = input.finalWorldDate;
   return [
@@ -178,6 +205,9 @@ function buildSummary(input: {
     `initialLineages=${String(input.initialLineageCount)}`,
     `finalWorldDate=${String(date.year)}-${String(date.month)}-W${String(date.weekOfMonth)}@${String(date.absoluteWeek)}`,
     `weeksExecuted=${String(input.weeksExecuted)}`,
+    `runId=${input.runId}`,
+    `outputDirectory=${input.outputDirectory}`,
+    "7 files written",
   ].join("\n");
 }
 
@@ -186,6 +216,10 @@ function runSimulation(
   options: RunCliOptions,
 ): CliResult {
   const sha256Provider = options.sha256Provider ?? createNodeSha256Provider();
+  const fs = options.fs ?? createNodeFsOps();
+  const clock = options.clock ?? (() => new Date());
+  const runIdGenerator = options.runIdGenerator ?? createRunIdGenerator(clock);
+  const outputRoot = options.outputRoot ?? fs.join(options.cwd, "output");
   const absoluteConfigPath = resolveConfigPath(options.cwd, args.configPath);
 
   let configJson: unknown;
@@ -227,6 +261,9 @@ function runSimulation(
   }
 
   try {
+    const realStartedAt = clock();
+    const startedMs = Date.now();
+
     const configHash = computeConfigHash(config, sha256Provider);
     const nameDataHash = computeNameDataHash(nameData.manifest, sha256Provider);
     const generated = generateInitialWorld({
@@ -239,23 +276,69 @@ function runSimulation(
       sha256Provider,
     });
 
-    const engineState = createWorldEngineState(generated.snapshot);
-    const result = runWorldYears({
-      state: engineState,
-      processors: [],
+    // Keep an independent initial snapshot for output (engine clones its own copy).
+    const initialSnapshot = generated.snapshot;
+    const engineState = createWorldEngineState(initialSnapshot);
+    const simulationRaw = runSimulationWithYearlyCapture({
+      initialState: engineState,
       years: args.years,
       startSequence: generated.initialEvents.length,
+      processors: [],
+      priorEvents: generated.initialEvents,
     });
+    const simulation =
+      options.transformSimulation !== undefined
+        ? options.transformSimulation(simulationRaw)
+        : simulationRaw;
+
+    const realEndedAt = clock();
+    const totalMilliseconds = Date.now() - startedMs;
+    const runId = runIdGenerator.next();
+
+    const written = buildAndWriteRunOutput({
+      fs,
+      outputRoot,
+      runId,
+      cwd: options.cwd,
+      seed: args.seed,
+      years: args.years,
+      configSchemaVersion: config.schemaVersion,
+      nameDataVersion: nameData.manifest.nameDataVersion,
+      configHash,
+      nameDataHash,
+      rngAlgorithm: RNG_ALGORITHM_VERSION,
+      simulationSpecVersion: SIMULATION_SPEC_VERSION,
+      miniSpecVersion: S0_SPEC_VERSION,
+      performanceTargets: config.performanceTargets,
+      initialSnapshot,
+      simulation,
+      initialEvents: generated.initialEvents,
+      realStartedAt,
+      realEndedAt,
+      totalMilliseconds,
+      ...(options.afterTempWrite !== undefined ? { afterTempWrite: options.afterTempWrite } : {}),
+    });
+
+    if (!written.validationReport.overallPassed) {
+      const reason = summarizeValidationFailure(written.validationReport);
+      return {
+        exitCode: EXIT_RUNTIME_ERROR,
+        stdout: "",
+        stderr: `validation failed: ${reason}\n`,
+      };
+    }
 
     const summary = buildSummary({
       years: args.years,
       seed: args.seed,
-      simulationId: result.state.simulationId,
-      initialPersonCount: generated.snapshot.persons.length,
-      initialFamilyCount: generated.snapshot.families.length,
-      initialLineageCount: generated.snapshot.lineages.length,
-      finalWorldDate: result.state.worldDate,
-      weeksExecuted: result.weeksExecuted,
+      simulationId: simulation.finalState.simulationId,
+      initialPersonCount: initialSnapshot.persons.length,
+      initialFamilyCount: initialSnapshot.families.length,
+      initialLineageCount: initialSnapshot.lineages.length,
+      finalWorldDate: simulation.finalState.worldDate,
+      weeksExecuted: simulation.weeksExecuted,
+      runId,
+      outputDirectory: written.atomic.runDirectory,
     });
 
     return {

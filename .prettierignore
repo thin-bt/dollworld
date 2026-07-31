@@ -7,3 +7,4 @@ config/**
 package-lock.json
 **/dist/**
 **/node_modules/**
+/output/**
