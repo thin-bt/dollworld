@@ -1,0 +1,23 @@
+{
+  "name": "@shared-world/simulator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "simulate": "node dist/main.js"
+  },
+  "dependencies": {
+    "@shared-world/simulation-core": "*"
+  }
+}
