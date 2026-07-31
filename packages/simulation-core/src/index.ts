@@ -251,3 +251,25 @@ export {
   S0_SPEC_VERSION,
   SIMULATION_SPEC_VERSION,
 } from "./initial-world/constants.js";
+
+export type {
+  ProcessorRngEntry,
+  ProcessorRuntimeState,
+  RunWorldOneWeekInput,
+  RunWorldWeeksInput,
+  RunWorldYearsInput,
+  WorldEngineErrorContext,
+  WorldEngineRunResult,
+  WorldEngineState,
+  WorldProcessor,
+  YearStatsFinalizedNotice,
+} from "./world-engine/index.js";
+export {
+  WorldEngineError,
+  cloneWorldEngineState,
+  createWorldEngineState,
+  runWorldOneWeek,
+  runWorldWeeks,
+  runWorldYears,
+  validateWorldEngineState,
+} from "./world-engine/index.js";
