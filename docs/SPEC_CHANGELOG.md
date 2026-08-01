@@ -1,5 +1,20 @@
 # 変更履歴
 
+## 2026-08-01：Sprint 1仕様統合（SPEC-0.1.2／S1-SPEC-0.1.10-draft）
+
+- ゲーム仕様を`SPEC-0.1.2`へ更新。Sprint 0ミニ仕様は`S0-SPEC-0.1.5`を維持。
+- Sprint 1ミニ仕様`S1-SPEC-0.1.10-draft`として`docs/specs/08`〜`14`を追加（成長、技、修行・習得、戦闘状態、ターン解決、結果・ログ、Sprint 1設定スキーマ）。
+- 現役年齢の境界を明確化し、41歳を現役最終年齢、42歳到達時の4月第1週年初処理での強制引退、公式戦参加可能年齢を16〜41歳へ統一。
+- 成長年齢係数を35〜41歳帯へ合わせ、42歳以上の正式訓練係数を0とした。
+- 技の必要能力と前提技・前提熟練度を分離し、戦闘内消耗区分（小技・中技・大技・奥義）と習得難度を別管理とした。
+- 基礎最大耐久`100+体力`、最大精神力`50+精神`、試合内消耗0〜100と消耗帯補正、人物AIによる降参、`unable_to_continue`を定義。
+- 戦闘識別子に`MatchId`を使用し、戦闘RNG（World RNGからのbattleSeed、Resolver連続消費、Strategy派生seed）の再現性契約を追加。
+- Sprint 1新規run向けに`SimulationIdentity` schemaVersion `0.3.0`を追加。Sprint 0の既存`simulationId`材料式はlegacy契約として維持する。
+- `RunBattleCommitPlan`によるWorld RNG／MatchId生成器／人物効果／開始・終了イベント候補／BattleResultの原子的commit契約を追加。
+- `structuralValidation`と`commitPlanHash`の検証工程を分離し、structuralValidationはcommitPlanHashを検証せず、確定後にcommitPlanHashを計算する。
+- 固定7出力ファイルを維持し、`initial-world.json`へ`RunRuleSnapshot`を1件保存する。Sprint 1人物一時状態の初期値（現在精神力・技状態・重点習得技）を追加。
+- EventEnvelopeは新規runで`0.2.0`（必須`matchIds`、`battle.started`／`battle.finished`）とし、既存`0.1.0`の読込契約は維持する。
+
 ## 2026-07-31：world.year_stats_finalized追加とイベント基盤同期
 
 - Sprint 0ミニ仕様を`S0-SPEC-0.1.5`へ更新（ゲーム仕様は`SPEC-0.1.1`のまま）。

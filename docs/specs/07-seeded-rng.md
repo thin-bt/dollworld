@@ -66,6 +66,44 @@ return result
 
 基準label例：`initial-world`、`names/family`、`names/person`、`relationships/parent`、`relationships/marriage`、`relationships/master`、`abilities`。
 
+### Sprint 1戦闘RNG
+
+#### World RNGと戦闘専用RNG
+
+- 戦闘入力の全検証が成功した後、World RNGからuint32を固定1回だけ取得して`battleSeed`とする。
+- 成功時は1回進んだ`nextWorldRngState`を呼出側へ返し、WorldStateへ保存する。
+- 入力検証失敗時はWorld RNGを消費しない。
+- BattleResolverはbattleSeedから単一の戦闘専用`rngState`を初期化し、行動順、発動、命中、ダメージ、間合い、防御、負傷、最終判定の順に連続消費する。
+- Resolverの各用途ごとにderiveSeedを呼ばない。分岐により未実行となった判定のRNGは消費しない。
+
+#### Strategy用派生seed
+
+Strategyの同点解消だけはResolver RNGから分離し、`deriveSeed(parentSeed, label)`の2引数APIを使用する。
+
+```text
+battle/strategy/turn-0001/side-a
+battle/strategy/turn-0001/side-b
+```
+
+- ターン番号は4桁ゼロ埋め
+- sideは`side-a`、`side-b`
+- 可変要素は安定したASCII labelへ決定的に連結する
+- 表示名、翻訳文字列、配列index、現実時刻を使用しない
+- Strategy候補はaction enum、TechniqueId順でcanonical化し、同点時だけ派生RNGを1回使用する
+- Strategy RNGはWorld RNGとResolver rngStateを進めない
+
+#### 最終判定
+
+判定の最終同点解消はResolverの現在rngStateを1回進める。`battle/judge/tie-break`等の別派生seedは使用しない。
+
+#### ログ
+
+- 行動順決定は各ターン1件のBattleTurnOrderLogへ、rngStateBeforeOrder、sideA／sideB order roll、必要時tie-break roll、rngStateAfterOrderを記録する。
+- 各BattleActionLogには、行動順決定後のrngStateBefore／rngStateAfterと、実際に実行したRNG判定のrollを記録する。
+- 発動、命中、ダメージ、移動、間合い変化阻止、通常負傷、重大負傷のうち実行した判定を欠落させない。
+- 先手BattleActionLog.rngStateBeforeはBattleTurnOrderLog.rngStateAfterOrderと一致する。
+- StrategyについてはstrategySeedを別に記録し、Resolver RNGと混在させない。
+
 ## 7. golden sequence
 
 seed 12345の初期状態：

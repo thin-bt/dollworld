@@ -141,14 +141,95 @@ manifest不整合時は生成中止。
 - 数値はJSONの有限数だけを許可し、`-0`は`0`へ正規化する。
 - `schemaVersion`、`profileId`、`configHash`を出力へ保存。
 
-## 12. エラー方針
+## 12. Sprint 1 SimulationIdentity
+
+Sprint 1以降に開始する新規runでは、設定ハッシュ・seed・仕様版に加え、Sprint 1の決定的ルール入力を含む`SimulationIdentity`から`simulationId`を生成する。Sprint 1仕様版は`S1-SPEC-0.1.10-draft`。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
+
+```text
+SimulationIdentity
+- schemaVersion: "0.3.0"
+- seed
+- initialWorldConfigHash
+- sprint1ConfigHash
+- techniqueCatalogHash
+- battleProfileAdapterVersion
+- matchIdGeneratorVersion
+- initialMatchIdGeneratorStateHash
+- defaultBattleStrategyVersion
+- specVersions:
+    - { specSetId: "main", version: "SPEC-0.1.2" }
+    - { specSetId: "sprint0", version: "S0-SPEC-0.1.5" }
+    - { specSetId: "sprint1", version: "S1-SPEC-0.1.10-draft" }
+- rngAlgorithmVersion
+- canonicalJsonVersion
+- hashAlgorithm: "SHA-256"
+```
+
+- `specVersions`は`specSetId`昇順へcanonical正規化する。
+- `seed`はrunへ渡された決定的seedそのものを使用し、派生seedやexecutionIdを使用しない。
+- `initialWorldConfigHash`、`sprint1ConfigHash`、`techniqueCatalogHash`は各完全内容のcanonical JSON SHA-256と一致必須。
+- `battleProfileAdapterVersion`は11仕様の人物正規化adapter版と一致必須。
+- `matchIdGeneratorVersion`は00ミニ仕様の決定的MatchId生成器版と一致必須。
+- `initialMatchIdGeneratorStateHash`はfresh runのseed・generatorVersion・固定namespaceから生成した初期MatchIdGeneratorStateのcanonical SHA-256と一致必須。任意状態から開始するresume runは保存済みruntime checkpointを使用し、新しいSimulationIdentityを作り直さない。
+- `defaultBattleStrategyVersion`は12仕様の標準Strategy実装版と一致必須。標準runでscripted actionsを使用しない。
+- `rngAlgorithmVersion`は07仕様の実装版文字列と一致必須。
+- `canonicalJsonVersion`は実際にhash算出へ使用するcanonical JSON実装版と一致必須。
+- `hashAlgorithm`はSprint 1では`SHA-256`へ固定し、別名や暗黙既定値を許可しない。
+- 現実時刻、executionId、Git commit、OS、Node、パス、処理時間、メモリは含めない。
+
+生成順序:
+
+```text
+simulationIdentityHash
+= SHA-256(canonicalJson(SimulationIdentity))
+
+simulationId
+= existingSimulationIdFactory(simulationIdentityHash)
+```
+
+1. 初期世界設定、Sprint1Config、TechniqueCatalogを検証する。
+2. seed、matchIdGeneratorVersion、固定namespaceからfresh run用の初期MatchIdGeneratorStateを生成し、`initialMatchIdGeneratorStateHash`を算出する。
+3. 各設定・カタログhashを算出する。
+4. `SimulationIdentity`をcanonical化して`simulationIdentityHash`を算出する。
+5. 既存のSimulationId branded constructor／factoryへhashを渡し、`simulationId`を生成する。
+6. `simulationId`生成後に11仕様のRunRuleSnapshotを構築する。
+7. 最後に`runRuleSnapshotHash`を算出する。
+
+`runRuleSnapshotHash`をsimulationId生成入力へ含めない。RunRuleSnapshotはsimulationIdを含むため、含めると循環依存になる。
+
+保存と検証:
+
+- `run-metadata.json`へ`simulationIdentity`全文と`simulationIdentityHash`を1件保存する。
+- `initial-world.json.runRuleSnapshot.simulationIdentityHash`とrun-metadataの値を一致させる。
+- EventEnvelope、BattleState、BattleResultの`simulationId`は同じ値を使用する。
+- 同じSimulationIdentityでsimulationIdが全文一致することを必須とする。
+- いずれかの決定的入力が異なる場合、simulationIdも異なることを必須とする。
+- 同じversion文字列でcanonical内容またはhashが異なる入力を拒否する。
+
+旧run互換:
+
+- 旧runは保存済みsimulationIdをそのまま読み、legacy identityとして扱う。
+- Sprint 1の新規writerは必ず本規定を使用する。
+- legacy runへSprint 1イベントや戦闘結果を追記しない。
+- legacy final-worldまたは途中worldからSprint 1継続runを生成するmigrationは本Sprintの対象外とする。将来実装する場合も新しいSimulationIdentityとsimulationIdを必要とし、旧runを変更してはならない。
+
+必須テスト:
+
+- 同一identityでsimulationId一致
+- seed、各hash、各spec version、battle profile adapter version、MatchId generator version、初期MatchId generator state hash、DefaultBattleStrategy version、RNG version、canonical JSON versionのどれか1つが異なるとsimulationId差分
+- executionId、現実時刻、処理時間の差はsimulationIdへ影響しない
+- runRuleSnapshotHashをidentityへ含めないこと
+- run-metadata、initial-world、EventEnvelope、BattleState、BattleResultのsimulationId一致
+- legacy runを暗黙変換しないこと
+
+## 13. エラー方針
 
 - 可能な範囲で複数エラーをまとめる。
 - JSONパス、実値、期待条件を含める。
 - 自動補正しない。
 - 目標割合の丸めだけは警告・実績出力。
 
-## 13. 受入テスト
+## 14. 受入テスト
 
 1. 基準設定を読み込める。
 2. 未知キーを拒否。
@@ -169,6 +250,7 @@ manifest不整合時は生成中止。
 17. seed範囲外・非整数・RNG名不一致を拒否。
 18. 家名候補と個人名候補に同一文字列があれば拒否。
 
-## 14. 対象外
+## 15. 対象外
 
 MySQLテーブル、ORM、正式バランス、管理画面、自動チューニング。
+Sprint 1設定本体・技カタログの詳細キーは`docs/specs/14-sprint1-config-schema.md`を参照する。

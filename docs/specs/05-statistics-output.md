@@ -28,10 +28,12 @@ output/<run-id>/
 ## 3. RunId・simulationId
 
 - RunId：実行ごとに異なってよい非決定的識別子。形式は`run_YYYYMMDDTHHMMSSmmmZ_<4桁連番>`とし、UTC・ASCIIだけを使用する。同一ミリ秒内はプロセス内連番で衝突を避ける。
-- simulationId：00ミニ仕様の固定文字列・順序から決定的に生成。
+- simulationId：Sprint 0は00ミニ仕様の固定文字列・順序から決定的に生成。Sprint 1以降の新規runは02ミニ仕様のSimulationIdentityから生成。
 - 決定性比較ではrun-id、現実時刻、性能値、パスを除外。
 
 ## 4. `run-metadata.json`
+
+Sprint 0の必須内容:
 
 - runId、simulationId
 - SPEC、ミニ仕様、技術決定、設定、名前データの各バージョン
@@ -41,9 +43,43 @@ output/<run-id>/
 - 正常／異常終了
 - 7ファイルの一覧
 
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、次を追加する。
+
+```text
+- schemaVersion: "0.3.0"
+- simulationIdentity: SimulationIdentity
+- simulationIdentityHash: string
+- eventEnvelopeSchemaVersion: "0.2.0"
+```
+
+- `simulationIdentityHash`は全文から再計算一致必須。
+- `simulationId`は02ミニ仕様に従ってidentity hashから生成する。
+- executionId、現実時刻、性能情報はidentityへ含めない。
+
 ## 5. `initial-world.json`
 
 初期世界スナップショット全文とgenerationSummaryを保持する。世界1年4月第1週、年初処理反映済み。再読込・不変条件検証可能であること。
+
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、トップレベルへ完全な`runRuleSnapshot`を1件だけ保存する。
+
+```text
+- schemaVersion: "0.3.0"
+- runRuleSnapshot: RunRuleSnapshot
+- persons[*].sprint1StateSchemaVersion: "0.1.0"
+- persons[*].currentMental
+- persons[*].techniqueStates
+- persons[*].learningFocusTechniqueId
+```
+
+- `runRuleSnapshot.simulationId`はinitial worldおよびrun-metadataのsimulationIdと一致必須。
+- `runRuleSnapshot.simulationIdentityHash`はrun-metadataの値と一致必須。
+- `runRuleSnapshot.battleProfileAdapterVersion`、`matchIdGeneratorVersion`、`initialMatchIdGeneratorStateHash`、`defaultBattleStrategyVersion`はSimulationIdentityの値と一致必須。
+- `runRuleSnapshotHash`を再計算して検証する。
+- 各BattleState／BattleResultは完全設定・完全技カタログを複製せず、hashと軽量な`BattleRulesSnapshotRef`だけを保持する。
+- replayまたは詳細戦闘ログの再読込時は、同じrunの`initial-world.json.runRuleSnapshot`を参照する。
+- run内に戦闘が0件でもRunRuleSnapshotを保存する。
+- 同一SimulationIdentityではRunRuleSnapshot全文とhashが一致する。
+- `run-rule-snapshot.json`等の8ファイル目を追加しない。
 
 ## 6. `final-world.json`
 
@@ -56,7 +92,40 @@ output/<run-id>/
 
 100年実行時は4,800週後、世界101年4月第1週。
 
-## 7. `yearly-statistics.csv`
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.2.0`とし、各人物へ次を直接1組だけ保持する。
+
+```text
+- schemaVersion: "0.2.0"
+- persons[*].sprint1StateSchemaVersion: "0.1.0"
+- persons[*].currentMental
+- persons[*].techniqueStates
+- persons[*].learningFocusTechniqueId
+```
+
+- nested複製や同義フィールドを禁止する。
+- `currentMental`、`techniqueStates`、`learningFocusTechniqueId`をfinal world hashと同seed比較対象へ含める。
+- `techniqueStates`はTechniqueId昇順・重複なし。
+- Sprint 0のlegacy final-world 0.1.0へ新フィールドを暗黙追記しない。
+- archived legacy run自体は書き換えずread-onlyとする。Sprint 0 final-worldや途中worldをSprint 1の継続run入力へ変換する機能は本Sprintの対象外とし、暗黙migrationしない。
+- 未知schemaVersionは拒否し、0.1.0 readerと0.2.0 validatorを分離する。
+
+## 7. 文書schemaVersionと互換
+
+| 文書 | 新規runのschemaVersion | 追加内容 |
+|---|---|---|
+| `run-metadata.json` | `0.3.0` | SimulationIdentity 0.3.0、identity hash、EventEnvelope版 |
+| `initial-world.json` | `0.3.0` | RunRuleSnapshot 0.4.0、Sprint1PersonState初期値 |
+| `final-world.json` | `0.2.0` | Sprint1PersonState、技習得・熟練・現在精神力 |
+
+- 既存Sprint 0の`0.1.0` readerは維持する。
+- `0.1.0`文書へ新フィールドを暗黙追加して書き戻さない。
+- 旧版から新しい文書版へ変換する場合は明示migrationを使用し、旧ファイルを変更しない。SimulationIdentityとRunRuleSnapshotを再構築できる全決定的入力が残っていない旧runはmigration不可とし、read-only legacyのまま扱う。
+- 未知schemaVersionは拒否する。
+- schemaVersion別validatorを分離し、各旧版と新版本の必須キーを混在させない。
+
+Sprint 1以降に開始したrunでは、`events.jsonl`の全行が`run-metadata.eventEnvelopeSchemaVersion`と一致する。新規runでは値を`0.2.0`へ固定する。1つのevents.jsonlへ`0.1.0`と`0.2.0`を混在させない。過去runの読込は0.1.0を許可するが、新規イベントを追記しない。
+
+## 8. `yearly-statistics.csv`
 
 UTF-8、ヘッダーあり。各世界年の3月第4週終了後に1行。100年実行で100行（ヘッダー除く）。
 
@@ -77,11 +146,11 @@ UTF-8、ヘッダーあり。各世界年の3月第4週終了後に1行。100年
 
 未実装の出生・死亡・大会等は0に偽装せず、Sprint 0のCSV列へ入れない。
 
-## 8. `events.jsonl`
+## 9. `events.jsonl`
 
 03-event-envelope準拠、sequence順、UTF-8、1行1件。何も起きない週は出力不要。
 
-## 9. `validation-report.json`
+## 10. `validation-report.json`
 
 - 検証名、合否、違反件数
 - 対象ID、理由、重大度
@@ -90,7 +159,7 @@ UTF-8、ヘッダーあり。各世界年の3月第4週終了後に1行。100年
 
 参照不整合と再現性違反は失敗。
 
-## 10. `performance.json`
+## 11. `performance.json`
 
 - 実行環境のNode・OS・CPU情報（取得可能範囲）
 - 総処理時間
@@ -101,13 +170,24 @@ UTF-8、ヘッダーあり。各世界年の3月第4週終了後に1行。100年
 
 性能基準超過は警告であり、機能不整合がなければSprint 0失敗にはしない。
 
-## 11. 決定性比較
+## 12. 決定性比較
 
 同一設定・シード・仕様版・名前版・RNG版・実装コミットで以下が一致：initial-worldの決定的項目、events全行、yearly-statistics全行、final-worldの決定的項目、simulationId。
 
+Sprint 1以降の新規runでは、固定7ファイルのrename前検証へ次を追加する。
+
+- run-metadata／initial-world／final-worldの文書schemaVersion
+- SimulationIdentity全文（adapter／MatchId generator版・initialMatchIdGeneratorStateHashを含む）、identity hash、simulationIdの再計算一致
+- `initial-world.json.runRuleSnapshot`のschemaVersion、simulationIdentityHash、config identity、catalog identity、hash
+- `run-metadata.eventEnvelopeSchemaVersion`とevents.jsonl全行の一致
+- RunRuleSnapshotが1件だけで、BattleState／BattleResultへ完全設定・完全カタログが重複保存されていないこと
+- final-worldの全人物Sprint1PersonStateとworld hash再計算一致
+
+SimulationIdentityとRunRuleSnapshotは決定的入力なので同seed比較対象に含める。現実日時、executionId、処理時間、メモリ等の非決定的値は従来どおり除外する。
+
 除外：run-id、現実日時、処理時間、メモリ、パス、環境情報。
 
-## 12. 受入テスト
+## 13. 受入テスト
 
 1. 7ファイルを生成。
 2. 100年でCSV100行。
@@ -119,6 +199,25 @@ UTF-8、ヘッダーあり。各世界年の3月第4週終了後に1行。100年
 8. final日時が指定年数と一致。
 9. イベントsequenceが連続・重複なし。
 
-## 13. 対象外
+Sprint 1追加:
+
+- 固定7ファイルの件数・名称がSprint 1導入前後で不変
+- run-metadata.json 0.3.0の必須フィールド
+- initial-world.json 0.3.0の必須フィールド
+- final-world.json 0.2.0の必須フィールドと人物状態検証
+- 旧版reader互換、run-metadata／initial-worldの全決定的入力がある場合だけの明示文書migration、入力不足時とlegacy final-worldのread-only維持
+- 未知文書schemaVersion拒否
+- simulationIdentityHashとsimulationId再計算一致
+- initial-world.jsonへRunRuleSnapshotを正確に1件保存
+- RunRuleSnapshot hash再計算一致
+- 戦闘0件runでもsnapshotあり
+- 複数戦闘で完全設定・完全技カタログを試合ごとに複製しない
+- run-metadataのeventEnvelopeSchemaVersionと全EventEnvelope行が一致
+- 0.1.0／0.2.0混在runをrename前検証で拒否
+- 同一条件でSimulationIdentityとRunRuleSnapshot全文一致
+- final-worldのsprint1StateSchemaVersion／currentMental／techniqueStates／learningFocusTechniqueIdがsame seedで全文一致
+- legacy final-worldへSprint 1フィールドを暗黙追記しない
+
+## 14. 対象外
 
 グラフ、Webダッシュボード、MySQL保存、ゲーム性の自動断定、NPC上限確定、戦闘ログ容量実測。
