@@ -18,7 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "wiki:check": "node --test ./scripts/wiki-check.test.mjs && node ./scripts/check-wiki.mjs",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run wiki:check && npm run build",
     "simulate": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/main.js",
     "verify:sprint0": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/verify-sprint0-main.js"
   },
