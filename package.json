@@ -19,7 +19,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
-    "simulate": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/main.js"
+    "simulate": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/main.js",
+    "verify:sprint0": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/verify-sprint0-main.js"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

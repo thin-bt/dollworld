@@ -29,6 +29,8 @@ export type SimulationWithYearlyResult = {
   nextSequence: number;
   weeksExecuted: number;
   finalIntegrity: ReferenceIntegrityResult;
+  /** Final processor RNG states after the last week (includes year-end capture processor). */
+  processorRuntimeState: ProcessorRuntimeState;
 };
 
 type YearEndCaptureSink = {
@@ -179,6 +181,10 @@ export function runSimulationWithYearlyCapture(input: {
     });
   }
 
+  if (runtime === undefined) {
+    throw new Error("processorRuntimeState was not produced by yearly simulation");
+  }
+
   return {
     finalState: state,
     events: allEvents,
@@ -186,5 +192,6 @@ export function runSimulationWithYearlyCapture(input: {
     nextSequence: sequence,
     weeksExecuted,
     finalIntegrity: evaluateReferenceIntegrity(state),
+    processorRuntimeState: runtime,
   };
 }
