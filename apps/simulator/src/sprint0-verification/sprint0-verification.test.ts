@@ -41,6 +41,7 @@ import { verifyFixedSevenDirents, verifyFixedSevenFilesOnDisk } from "./fixed-se
 import { verifyRunInvariants } from "./invariant-verification.js";
 import { invalidateCompletionReport, writeCompletionReportAtomic } from "./report-io.js";
 import { runIsolatedPopulationPerformance } from "./run-population-performance.js";
+import { verifySameSeedPair } from "./same-seed-verification.js";
 import { buildScaledPopulationConfig, loadBaselineConfig } from "./scaled-config.js";
 
 const REPO_ROOT = join(import.meta.dirname, "../../../..");
@@ -118,6 +119,23 @@ function boundaryEntry(seed: number, passed: boolean): BoundarySeedVerification 
     passed,
   };
 }
+
+const passedSameSeedRuns = [
+  {
+    run: "first" as const,
+    invariantsPassed: true,
+    validationPassed: true,
+    terminationPassed: true,
+    sevenFilesPassed: true,
+  },
+  {
+    run: "second" as const,
+    invariantsPassed: true,
+    validationPassed: true,
+    terminationPassed: true,
+    sevenFilesPassed: true,
+  },
+];
 
 const passedBoundary = {
   passed: true,
@@ -461,6 +479,7 @@ describe("sprint0 short-horizon verification", () => {
       alternateSeed: SPRINT0_ALTERNATE_SEED,
       boundarySeeds: [0, 4294967295],
       sameSeed: { passed: true, differences: [] },
+      sameSeedRuns: passedSameSeedRuns,
       differentSeed: {
         passed: true,
         simulationIdsDiffer: true,
@@ -483,6 +502,143 @@ describe("sprint0 short-horizon verification", () => {
     expect(completion.boundarySeedDeterminism.status).toBe("failed");
     expect(completion.boundarySeedDeterminism.results[0]?.determinismStatus).toBe("passed");
     expect(completion.boundarySeedDeterminism.results[0]?.runs).toHaveLength(2);
+  }, 180_000);
+
+  it("fails overall when only the same-seed second run breaks fixed 7 files", () => {
+    const outputRoot = join(makeTempDir(), "output");
+    const baseline = loadBaselineConfig(REPO_ROOT);
+    // Short runs exercise the same aggregation path as years100a/years100b.
+    const years100a = executeSprint0Run({
+      repoRoot: REPO_ROOT,
+      outputRoot,
+      config: baseline,
+      seed: SPRINT0_PRIMARY_SEED,
+      years: 1,
+    });
+    const years100b = executeSprint0Run({
+      repoRoot: REPO_ROOT,
+      outputRoot,
+      config: baseline,
+      seed: SPRINT0_PRIMARY_SEED,
+      years: 1,
+    });
+
+    const healthy = verifySameSeedPair({ config: baseline, first: years100a, second: years100b });
+    expect(healthy.determinism.passed).toBe(true);
+    expect(healthy.passed).toBe(true);
+    expect(healthy.runs[0]?.sevenFilesPassed).toBe(true);
+    expect(healthy.runs[1]?.sevenFilesPassed).toBe(true);
+
+    writeFileSync(join(years100b.runDirectory, "stray-second-only.json"), "{}\n", "utf8");
+    expect(compareSameSeedRuns(years100a, years100b).passed).toBe(true);
+    expect(verifyFixedSevenFilesOnDisk(years100a.runDirectory).passed).toBe(true);
+    expect(verifyFixedSevenFilesOnDisk(years100b.runDirectory).passed).toBe(false);
+
+    const broken = verifySameSeedPair({ config: baseline, first: years100a, second: years100b });
+    expect(broken.determinism.passed).toBe(true);
+    expect(broken.runs[0]?.sevenFilesPassed).toBe(true);
+    expect(broken.runs[1]?.sevenFilesPassed).toBe(false);
+    expect(broken.passed).toBe(false);
+
+    const completion = buildSprint0CompletionReport({
+      generatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      commitId: null,
+      workingTreeDirty: false,
+      simulationSpecVersion: "SPEC-0.1.1",
+      miniSpecVersion: "S0-SPEC-0.1.5",
+      configSchemaVersion: baseline.schemaVersion,
+      nameDataVersion: years100a.initialSnapshot.nameDataVersion,
+      rngAlgorithm: "xoshiro128ss-v1",
+      primarySeed: SPRINT0_PRIMARY_SEED,
+      alternateSeed: SPRINT0_ALTERNATE_SEED,
+      boundarySeeds: [0, 4294967295],
+      sameSeed: broken.determinism,
+      sameSeedRuns: broken.runs,
+      differentSeed: {
+        passed: true,
+        simulationIdsDiffer: true,
+        initialWorldDiffers: true,
+        finalWorldDiffers: true,
+        detail: "ok",
+      },
+      boundarySeedDeterminism: passedBoundary,
+      invariants: { passed: false, issues: broken.issues },
+      yearProfiles: [],
+      populationProfiles: [],
+      sevenFilesOk: false,
+      validationSamplesOk: false,
+      notPerformed: [],
+    });
+    expect(completion.overallPassed).toBe(false);
+    expect(completion.sameSeedComparison.status).toBe("failed");
+    expect(completion.sameSeedComparison.differenceCount).toBe(0);
+    expect(completion.sameSeedComparison.runs[0]?.sevenFilesPassed).toBe(true);
+    expect(completion.sameSeedComparison.runs[1]?.sevenFilesPassed).toBe(false);
+    expect(completion.sevenFiles.status).toBe("failed");
+  }, 180_000);
+
+  it("fails overall when only the same-seed second run has failed validation", () => {
+    const outputRoot = join(makeTempDir(), "output");
+    const baseline = loadBaselineConfig(REPO_ROOT);
+    const years100a = executeSprint0Run({
+      repoRoot: REPO_ROOT,
+      outputRoot,
+      config: baseline,
+      seed: SPRINT0_PRIMARY_SEED,
+      years: 1,
+    });
+    const years100b = executeSprint0Run({
+      repoRoot: REPO_ROOT,
+      outputRoot,
+      config: baseline,
+      seed: SPRINT0_PRIMARY_SEED,
+      years: 1,
+    });
+
+    years100b.validationReport = {
+      ...years100b.validationReport,
+      overallPassed: false,
+    };
+
+    expect(compareSameSeedRuns(years100a, years100b).passed).toBe(true);
+    const broken = verifySameSeedPair({ config: baseline, first: years100a, second: years100b });
+    expect(broken.determinism.passed).toBe(true);
+    expect(broken.runs[0]?.validationPassed).toBe(true);
+    expect(broken.runs[1]?.validationPassed).toBe(false);
+    expect(broken.passed).toBe(false);
+
+    const completion = buildSprint0CompletionReport({
+      generatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      commitId: null,
+      workingTreeDirty: false,
+      simulationSpecVersion: "SPEC-0.1.1",
+      miniSpecVersion: "S0-SPEC-0.1.5",
+      configSchemaVersion: baseline.schemaVersion,
+      nameDataVersion: years100a.initialSnapshot.nameDataVersion,
+      rngAlgorithm: "xoshiro128ss-v1",
+      primarySeed: SPRINT0_PRIMARY_SEED,
+      alternateSeed: SPRINT0_ALTERNATE_SEED,
+      boundarySeeds: [0, 4294967295],
+      sameSeed: broken.determinism,
+      sameSeedRuns: broken.runs,
+      differentSeed: {
+        passed: true,
+        simulationIdsDiffer: true,
+        initialWorldDiffers: true,
+        finalWorldDiffers: true,
+        detail: "ok",
+      },
+      boundarySeedDeterminism: passedBoundary,
+      invariants: { passed: false, issues: broken.issues },
+      yearProfiles: [],
+      populationProfiles: [],
+      sevenFilesOk: true,
+      validationSamplesOk: false,
+      notPerformed: [],
+    });
+    expect(completion.overallPassed).toBe(false);
+    expect(completion.sameSeedComparison.status).toBe("failed");
+    expect(completion.sameSeedComparison.runs[1]?.validationPassed).toBe(false);
   }, 180_000);
 
   it("removes the population worker temp directory on success and on failure", () => {
@@ -565,6 +721,7 @@ describe("sprint0 short-horizon verification", () => {
       alternateSeed: SPRINT0_ALTERNATE_SEED,
       boundarySeeds: [0, 4294967295],
       sameSeed: { passed: true, differences: [] },
+      sameSeedRuns: passedSameSeedRuns,
       differentSeed: {
         passed: true,
         simulationIdsDiffer: true,
@@ -612,6 +769,7 @@ describe("sprint0 short-horizon verification", () => {
       alternateSeed: 99999,
       boundarySeeds: [0],
       sameSeed: { passed: true, differences: [] },
+      sameSeedRuns: passedSameSeedRuns,
       differentSeed: {
         passed: true,
         simulationIdsDiffer: true,
@@ -671,6 +829,7 @@ describe("sprint0 short-horizon verification", () => {
       alternateSeed: SPRINT0_ALTERNATE_SEED,
       boundarySeeds: [0, 4294967295],
       sameSeed: { passed: true, differences: [] },
+      sameSeedRuns: passedSameSeedRuns,
       differentSeed: {
         passed: true,
         simulationIdsDiffer: true,
@@ -841,6 +1000,7 @@ describe("sprint0 short-horizon verification", () => {
       alternateSeed: 99999,
       boundarySeeds: [0],
       sameSeed: { passed: true, differences: [] },
+      sameSeedRuns: passedSameSeedRuns,
       differentSeed: {
         passed: true,
         simulationIdsDiffer: true,
@@ -918,6 +1078,7 @@ describe("sprint0 short-horizon verification", () => {
           },
         ],
       },
+      sameSeedRuns: passedSameSeedRuns,
       differentSeed: {
         passed: true,
         simulationIdsDiffer: true,

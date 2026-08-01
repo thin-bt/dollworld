@@ -22,11 +22,11 @@ import {
 } from "./completion-report.js";
 import { compareDifferentSeedRuns, compareSameSeedRuns } from "./determinism-verification.js";
 import { executeSprint0Run } from "./execute-run.js";
-import { verifyFixedSevenFilesOnDisk } from "./fixed-seven-files.js";
 import { tryGetWorkingTreeDirty } from "./git-working-tree.js";
-import { verifyRunInvariants, type InvariantIssue } from "./invariant-verification.js";
+import type { InvariantIssue } from "./invariant-verification.js";
 import { writeCompletionReportAtomic } from "./report-io.js";
 import { runIsolatedPopulationPerformance } from "./run-population-performance.js";
+import { verifyRunIndependentChecks, type IndependentRunCheck } from "./same-seed-verification.js";
 import { buildScaledPopulationConfig, loadBaselineConfig } from "./scaled-config.js";
 
 export type Sprint0VerificationSuiteResult = {
@@ -41,6 +41,13 @@ export type RunSprint0VerificationInput = {
   /** Optional absolute path for the completion report JSON. Defaults under workRoot. */
   reportPath?: string;
 };
+
+function yearProfileFromChecks(
+  artifacts: Parameters<typeof buildYearProfile>[0],
+  checks: IndependentRunCheck,
+): YearProfileResult {
+  return buildYearProfile(artifacts, checks.invariantsPassed, checks.sevenFilesPassed);
+}
 
 /**
  * Full Sprint 0 verification suite used by `npm run verify:sprint0`.
@@ -97,7 +104,31 @@ export function runSprint0Verification(
     years: 10,
   });
 
+  // Keep per-run checks in distinct variables so years100a / years100b cannot collide.
+  const years10Checks = verifyRunIndependentChecks(years10, baseline);
+  const years50Checks = verifyRunIndependentChecks(years50, baseline);
+  const years100aChecks = verifyRunIndependentChecks(years100a, baseline);
+  const years100bChecks = verifyRunIndependentChecks(years100b, baseline);
+  const years300Checks = verifyRunIndependentChecks(years300, baseline);
+  const altSeed10Checks = verifyRunIndependentChecks(altSeed10, baseline);
+
   const sameSeed = compareSameSeedRuns(years100a, years100b);
+  const sameSeedRuns = [
+    {
+      run: "first" as const,
+      invariantsPassed: years100aChecks.invariantsPassed,
+      validationPassed: years100aChecks.validationPassed,
+      terminationPassed: years100aChecks.terminationPassed,
+      sevenFilesPassed: years100aChecks.sevenFilesPassed,
+    },
+    {
+      run: "second" as const,
+      invariantsPassed: years100bChecks.invariantsPassed,
+      validationPassed: years100bChecks.validationPassed,
+      terminationPassed: years100bChecks.terminationPassed,
+      sevenFilesPassed: years100bChecks.sevenFilesPassed,
+    },
+  ];
   const differentSeed = compareDifferentSeedRuns(years10, altSeed10);
 
   const boundarySeedDeterminism = verifyBoundarySeeds({
@@ -108,56 +139,46 @@ export function runSprint0Verification(
     years: 1,
   });
 
-  const invariantTargets = [years10, years50, years100a, years300, altSeed10];
-  const invariantByLabel = new Map<string, ReturnType<typeof verifyRunInvariants>>();
-  const invariantIssues: InvariantIssue[] = [...boundarySeedDeterminism.issues];
-  for (const target of invariantTargets) {
-    const label = `${String(target.years)}y-${String(target.config.population.totalLiving)}p-${String(target.seed)}`;
-    const result = verifyRunInvariants(target, target.config);
-    invariantByLabel.set(label, result);
-    if (!result.passed) {
-      invariantIssues.push(...result.issues);
-    }
-  }
+  const invariantIssues: InvariantIssue[] = [
+    ...boundarySeedDeterminism.issues,
+    ...years10Checks.issues,
+    ...years50Checks.issues,
+    ...years100aChecks.issues,
+    ...years100bChecks.issues,
+    ...years300Checks.issues,
+    ...altSeed10Checks.issues,
+  ];
 
+  // yearProfile 100-year row must use years100a only (never overwritten by years100b).
   const yearProfiles: YearProfileResult[] = [
-    buildYearProfile(
-      years10,
-      invariantByLabel.get(
-        `10y-${String(baseline.population.totalLiving)}p-${String(years10.seed)}`,
-      )?.passed === true,
-    ),
-    buildYearProfile(
-      years50,
-      invariantByLabel.get(
-        `50y-${String(baseline.population.totalLiving)}p-${String(years50.seed)}`,
-      )?.passed === true,
-    ),
-    buildYearProfile(
-      years100a,
-      invariantByLabel.get(
-        `100y-${String(baseline.population.totalLiving)}p-${String(years100a.seed)}`,
-      )?.passed === true,
-    ),
-    buildYearProfile(
-      years300,
-      invariantByLabel.get(
-        `300y-${String(baseline.population.totalLiving)}p-${String(years300.seed)}`,
-      )?.passed === true,
-    ),
+    yearProfileFromChecks(years10, years10Checks),
+    yearProfileFromChecks(years50, years50Checks),
+    yearProfileFromChecks(years100a, years100aChecks),
+    yearProfileFromChecks(years300, years300Checks),
   ];
 
   // Drop references to large year-run artifacts before spawning population workers.
   // Population RSS is measured in fresh child processes regardless.
   const nameDataVersion = years100a.initialSnapshot.nameDataVersion;
-  const sevenFilesFromYearRuns = invariantTargets.every((a) => {
-    const disk = verifyFixedSevenFilesOnDisk(a.runDirectory);
-    return (
-      a.validationReport.overallPassed &&
-      a.runMetadata.termination.kind === "completed" &&
-      disk.passed
-    );
-  });
+  const sevenFilesFromYearRuns =
+    years10Checks.sevenFilesPassed &&
+    years50Checks.sevenFilesPassed &&
+    years100aChecks.sevenFilesPassed &&
+    years100bChecks.sevenFilesPassed &&
+    years300Checks.sevenFilesPassed &&
+    altSeed10Checks.sevenFilesPassed &&
+    years10Checks.validationPassed &&
+    years50Checks.validationPassed &&
+    years100aChecks.validationPassed &&
+    years100bChecks.validationPassed &&
+    years300Checks.validationPassed &&
+    altSeed10Checks.validationPassed &&
+    years10Checks.terminationPassed &&
+    years50Checks.terminationPassed &&
+    years100aChecks.terminationPassed &&
+    years100bChecks.terminationPassed &&
+    years300Checks.terminationPassed &&
+    altSeed10Checks.terminationPassed;
 
   const config2000 = buildScaledPopulationConfig(baseline, 2000);
   const config5000 = buildScaledPopulationConfig(baseline, 5000);
@@ -237,6 +258,7 @@ export function runSprint0Verification(
     alternateSeed: SPRINT0_ALTERNATE_SEED,
     boundarySeeds: SPRINT0_BOUNDARY_SEEDS,
     sameSeed,
+    sameSeedRuns,
     differentSeed,
     boundarySeedDeterminism,
     invariants,

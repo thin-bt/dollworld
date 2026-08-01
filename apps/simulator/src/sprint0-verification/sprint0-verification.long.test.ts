@@ -90,6 +90,13 @@ describe("sprint0 long-horizon verification", () => {
 
   it("keeps same-seed, different-seed, and boundary determinism results", () => {
     expect(suite.report.sameSeedComparison.status).toBe("passed");
+    expect(suite.report.sameSeedComparison.runs).toHaveLength(2);
+    for (const run of suite.report.sameSeedComparison.runs) {
+      expect(run.invariantsPassed).toBe(true);
+      expect(run.validationPassed).toBe(true);
+      expect(run.terminationPassed).toBe(true);
+      expect(run.sevenFilesPassed).toBe(true);
+    }
     expect(suite.report.differentSeedComparison.status).toBe("passed");
     expect(suite.report.boundarySeedDeterminism.status).toBe("passed");
     expect(suite.report.boundarySeedDeterminism.results).toHaveLength(2);

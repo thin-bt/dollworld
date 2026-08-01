@@ -8,6 +8,7 @@ import type {
 } from "./determinism-verification.js";
 import type { InvariantVerificationResult } from "./invariant-verification.js";
 import type { Sprint0RunArtifacts } from "./execute-run.js";
+import type { SameSeedRunCheck } from "./same-seed-verification.js";
 
 export type VerificationCheckStatus = "passed" | "failed" | "not_performed" | "warning";
 
@@ -147,6 +148,7 @@ export type Sprint0CompletionReport = {
     status: VerificationCheckStatus;
     differenceCount: number;
     differences: DeterminismComparisonResult["differences"];
+    runs: SameSeedRunCheck[];
   };
   differentSeedComparison: {
     status: VerificationCheckStatus;
@@ -223,6 +225,7 @@ export function buildFinalYearStatistics(row: YearlyStatisticsRow): YearProfileF
 export function buildYearProfile(
   artifacts: Sprint0RunArtifacts,
   invariantsPassed: boolean,
+  sevenFilesPassed: boolean,
 ): YearProfileResult {
   const lastYear = artifacts.simulation.yearEnds[artifacts.simulation.yearEnds.length - 1];
   if (lastYear === undefined) {
@@ -242,9 +245,7 @@ export function buildYearProfile(
     maxRssMeasurementScope: "not_measured_per_run",
     outputBytes: artifacts.performance.output.totalBytes,
     invariantsPassed,
-    sevenFilesPassed:
-      artifacts.validationReport.overallPassed &&
-      artifacts.runMetadata.termination.kind === "completed",
+    sevenFilesPassed,
     finalYearStatistics: buildFinalYearStatistics(lastYear.row),
   };
 }
@@ -319,6 +320,8 @@ export function buildSprint0CompletionReport(input: {
   alternateSeed: number;
   boundarySeeds: readonly number[];
   sameSeed: DeterminismComparisonResult;
+  /** Independent checks for the same-seed first/second runs (years100a / years100b). */
+  sameSeedRuns: readonly SameSeedRunCheck[];
   differentSeed: DifferentSeedComparisonResult;
   boundarySeedDeterminism: {
     passed: boolean;
@@ -335,6 +338,16 @@ export function buildSprint0CompletionReport(input: {
   const functionalFailures: string[] = [];
   if (!input.sameSeed.passed) {
     functionalFailures.push("same_seed_comparison");
+  }
+  for (const run of input.sameSeedRuns) {
+    if (
+      !run.invariantsPassed ||
+      !run.validationPassed ||
+      !run.terminationPassed ||
+      !run.sevenFilesPassed
+    ) {
+      functionalFailures.push(`same_seed_run_${run.run}`);
+    }
   }
   if (!input.differentSeed.passed) {
     functionalFailures.push("different_seed_comparison");
@@ -383,9 +396,20 @@ export function buildSprint0CompletionReport(input: {
       boundary: [...input.boundarySeeds],
     },
     sameSeedComparison: {
-      status: input.sameSeed.passed ? "passed" : "failed",
+      status:
+        input.sameSeed.passed &&
+        input.sameSeedRuns.every(
+          (run) =>
+            run.invariantsPassed &&
+            run.validationPassed &&
+            run.terminationPassed &&
+            run.sevenFilesPassed,
+        )
+          ? "passed"
+          : "failed",
       differenceCount: input.sameSeed.differences.length,
       differences: input.sameSeed.differences,
+      runs: [...input.sameSeedRuns],
     },
     differentSeedComparison: {
       status: input.differentSeed.passed ? "passed" : "failed",

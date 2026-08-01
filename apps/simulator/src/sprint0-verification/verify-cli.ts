@@ -41,6 +41,12 @@ export function runVerifySprint0Cli(repoRoot: string): VerifySprint0CliResult {
       `warningCount=${String(result.report.warningCount)}`,
       `reportPath=${result.reportPath}`,
       `sameSeed=${result.report.sameSeedComparison.status}`,
+      `sameSeedRuns=${result.report.sameSeedComparison.runs
+        .map(
+          (run) =>
+            `${run.run}[inv=${String(run.invariantsPassed)},val=${String(run.validationPassed)},term=${String(run.terminationPassed)},files=${String(run.sevenFilesPassed)}]`,
+        )
+        .join(" ")}`,
       `differentSeed=${result.report.differentSeedComparison.status}`,
       `boundarySeedVerification=${result.report.boundarySeedDeterminism.status}`,
       `invariants=${result.report.invariants.status}`,
