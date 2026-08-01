@@ -1,6 +1,6 @@
 # 14 Sprint 1共通設定スキーマ付録
 
-- 仕様版: `S1-SPEC-0.1.10-draft`
+- 仕様版: `S1-SPEC-0.1.11`
 - 状態: 08〜13が参照する型付き設定の固定構造
 - 対象: 成長、週間Planner、技習得、戦闘、戦闘後効果
 - 非対象: 初期世界生成設定、正式技一覧、大会設定
@@ -268,8 +268,8 @@ techniqueBalance
     advanced: 56..75
     secret: 76..100
 - basicAttackProfiles:
-    martial:
-      primaryStats: [strength, technique]
+    unarmed:
+      primaryStats: [strength, skill]
       usableRanges: [contact, close]
       preferredRanges: [contact, close]
       power: 20
@@ -282,7 +282,7 @@ techniqueBalance
       effectiveMastery: 50
       activationCheck: false
     sword:
-      primaryStats: [technique, strength]
+      primaryStats: [skill, strength]
       usableRanges: [close, middle]
       preferredRanges: [close]
       power: 20
@@ -309,7 +309,7 @@ techniqueBalance
       activationCheck: false
 ```
 
-配列順も固定し、09仕様と完全一致させる。基本攻撃はTechniqueDefinition・TechniqueCatalogへ含めず、Sprint1Config hashへ含める。
+配列順も固定し、09仕様と完全一致させる。基本攻撃はTechniqueDefinition・TechniqueCatalogへ含めず、Sprint1Config hashへ含める。`basicAttackProfiles`のキーは`unarmed | sword | magic`とし、`TechniqueCategory`／`DomainAptitude`／`AptitudeKey`と同じキーで系統適性を取得する。`martial`と暗黙対応は禁止する。
 
 ## 7. battle
 
@@ -363,7 +363,7 @@ hit
 
 ### 7.3 damageFormula
 
-08〜13のdraft値を一か所に保持する。
+08〜13の暫定値を一か所に保持する。
 
 ```text
 damageFormula
@@ -371,8 +371,8 @@ damageFormula
 - aptitudeDivisor: 250
 - masteryBase: 0.80
 - masteryDivisor: 500
-- vitalityDefenseWeight: 0.45
-- techniqueDefenseWeight: 0.20
+- staminaDefenseWeight: 0.45
+- skillDefenseWeight: 0.20
 - conditionDefenseWeight: 0.10
 - fatigueDefensePenaltyWeight: 0.05
 - injuryDefensePenaltyWeight: 0.10
@@ -403,7 +403,7 @@ defense
 
 movement
 - speedWeight: 0.50
-- techniqueWeight: 0.30
+- skillWeight: 0.30
 - actionBonus: 5
 - opponentPreferredRangeControlBonus: 5
 - opposingMovementBonus: 10
@@ -447,7 +447,7 @@ injury
     40PercentOrMore: 25
 - fatigueChancePerPoint: 0.10
 - existingInjuryChancePerPoint: 0.10
-- vitalityReductionPerPoint: 0.08
+- staminaReductionPerPoint: 0.08
 - injuryPronenessChancePerPointFrom50: 0.10
 - maximumPercent: 95
 - guardedChanceFactor: 0.50
@@ -594,7 +594,8 @@ postEffects
 - weeklyPlannerのlearningTargetWeights／practiceTargetWeightsは各合計100
 - burdenPenaltyMultipliersByActionは4行動すべてを必須とし、restの3倍率は0
 - ageFactorsByProfile、currentValueFactors、teacherFactors、discipleCountFactors、fatigueFactors、injuryFactors、masteryCurrentValueFactors、basicAttackProfilesは列挙キーの欠落・追加を拒否
-- basicAttackProfilesのprimaryStatsは基礎能力固定順、usableRanges／preferredRangesは`contact < close < middle < long`へ正規化し、preferredRangesはusableRangesの部分集合
+- basicAttackProfilesのprimaryStatsは基礎能力固定順（`stamina < strength < skill < speed < spirit < magic`）、usableRanges／preferredRangesは`contact < close < middle < long`へ正規化し、preferredRangesはusableRangesの部分集合
+- basicAttackProfilesのキーは`unarmed | sword | magic`のみ。`martial`を拒否する
 - basicAttackProfilesはmentalCost=0、priority=0、speedModifier=0、rangeShiftAfterUse=none、injuryModifier=0、effectiveMastery=50、activationCheck=falseを必須とする
 - TechniqueDefinitionで整数指定された項目へ小数を許可しない
 - 0..100値は範囲外拒否

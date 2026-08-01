@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.10-draft`
+- 仕様版: `S1-SPEC-0.1.11`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -85,7 +85,7 @@ ResolveBattleTurnResult =
 ```text
 BattleAction =
   use_technique
-  | basic_attack(profile: martial | sword | magic)
+  | basic_attack(profile: unarmed | sword | magic)
   | basic_defense
   | evade(direction: hold | approach_one | retreat_one)
   | approach
@@ -226,15 +226,15 @@ ActivationChancePercent
 正本の式を使用する。
 
 ```text
-effectiveAttackerTechnique
-= attackerTechnique * attackerConsumptionPerformanceFactor
+effectiveAttackerSkill
+= attackerSkill * attackerConsumptionPerformanceFactor
 
 effectiveDefenderSpeed
 = defenderSpeed * defenderConsumptionPerformanceFactor
 
 FinalHitChancePercent
 = techniqueBaseAccuracy
-+ (effectiveAttackerTechnique - effectiveDefenderSpeed) * 0.35
++ (effectiveAttackerSkill - effectiveDefenderSpeed) * 0.35
 + (mastery - 50) * 0.20
 + (domainAptitude - 50) * 0.10
 + rangeModifier
@@ -283,9 +283,11 @@ PrimaryStatValue
 
 系統別の代表値:
 
-- martial: strengthを中心に、技ごとにvitality／speed／techniqueを参照
-- sword: techniqueとstrengthを中心にspeedを参照
-- magic: magicを中心にspirit／techniqueを参照
+- unarmed: strengthを中心に、技ごとにstamina／speed／skillを参照
+- sword: skillとstrengthを中心にspeedを参照
+- magic: magicを中心にspirit／skillを参照
+
+`domainAptitude`は`TechniqueCategory`／`BasicAttackProfile`と同じ`unarmed | sword | magic`キーで取得する。`martial`や暗黙対応は使用しない。
 
 ### 10.2 ダメージ式 `[Sprint 1暫定]`
 
@@ -303,8 +305,8 @@ defenderConditionModifier
 - defenderInjury * 0.10
 
 DefenseValue
-= defenderVitality * 0.45
-+ defenderTechnique * 0.20
+= defenderStamina * 0.45
++ defenderSkill * 0.20
 + defenderConditionModifier
 
 RawDamage
@@ -393,13 +395,13 @@ guardedDamage = max(1, floor(normalDamage * guardedDamageFactor))
 ```text
 MoverBaseScore
 = moverSpeed * moverConsumptionPerformanceFactor * 0.50
-+ moverTechnique * moverConsumptionPerformanceFactor * 0.30
++ moverSkill * moverConsumptionPerformanceFactor * 0.30
 + moverStateModifier
 + battle.movement.actionBonus
 
 OpponentBaseScore
 = opponentSpeed * opponentConsumptionPerformanceFactor * 0.50
-+ opponentTechnique * opponentConsumptionPerformanceFactor * 0.30
++ opponentSkill * opponentConsumptionPerformanceFactor * 0.30
 + opponentStateModifier
 + opponentPreferredRangeControlBonus
 + opposingMovementBonus
@@ -519,7 +521,7 @@ additiveInjuryChance
 = baseChance
 + fatigue * 0.10
 + existingInjury * 0.10
-- vitality * 0.08
+- stamina * 0.08
 + (injuryProneness - 50) * 0.10
 + technique.injuryModifier
 
@@ -605,8 +607,8 @@ inBattleConsumptionAfter
 | 85..100 | 0.70 | 同30％低下、負傷・降参が起きやすい |
 
 - 行動順ではspeedへperformanceFactorを掛ける
-- 命中ではattackerTechniqueとdefenderSpeedへ各自のperformanceFactorを掛ける
-- 移動ではspeedとtechniqueへperformanceFactorを掛ける
+- 命中ではattackerSkillとdefenderSpeedへ各自のperformanceFactorを掛ける
+- 移動ではspeedとskill（moverSkill／opponentSkill）へperformanceFactorを掛ける
 - 85..100では最終負傷率へ `battle.consumption.highBandInjuryMultiplier` を掛ける `[Sprint 1暫定既定値1.25]`
 - 85..100では19節の自動降参スコアへ `battle.strategy.highConsumptionSurrenderBonus` を加算する
 - 補正帯は正本値として固定し、性能調整を理由に境界を変更しない

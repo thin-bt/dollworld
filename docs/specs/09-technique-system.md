@@ -1,6 +1,6 @@
 # 09 技データ・習得仕様
 
-- 仕様版: `S1-SPEC-0.1.10-draft`
+- 仕様版: `S1-SPEC-0.1.11`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 技定義、技分類、習得進捗、熟練度、使用条件
 - 非対象: 師匠が教える技の自律判断、独自技生成、派生、失伝
@@ -24,12 +24,14 @@
 ## 2. 技系統
 
 ```text
-TechniqueCategory = martial | sword | magic
+TechniqueCategory = unarmed | sword | magic
 ```
 
-- `martial`: 筋力・速度・体力を生かす。接近戦と連続技に強い
+- `unarmed`: 筋力・速度・体力を生かす。接近戦と連続技に強い
 - `sword`: 技量・筋力・速度を生かす。間合い・精度・反撃を重視
 - `magic`: 魔力が威力、精神が回数・制御・安定性へ影響
+
+`TechniqueCategory`は08仕様の`DomainAptitude`、Sprint 0公開型`AptitudeKey`、流派主系統、`BasicAttackProfile`と同一キーとする。`martial`は使用せず、別名対応表も設けない。系統適性の取得は`category`キーそのもので行い、暗黙変換を禁止する。
 
 Sprint 1では複合系統技を実装しない。ただし `sourceTechniqueIds` を保持できる構造は維持する。
 
@@ -114,7 +116,7 @@ TechniqueCatalogIdentity
 
 TechniqueDefinition内の配列は、意味的に集合として扱うものをhash計算前に次の固定順へ正規化する。入力順を意味として扱わない。
 
-- `primaryStats`: `vitality < strength < technique < speed < spirit < magic`
+- `primaryStats`: `stamina < strength < skill < speed < spirit < magic`
 - `usableRanges`／`preferredRanges`: `contact < close < middle < long`
 - `prerequisiteTechniqueIds`／`sourceTechniqueIds`: TechniqueId昇順
 - `prerequisiteTechniqueMastery`: `techniqueId`昇順
@@ -482,15 +484,15 @@ DedicatedPracticeGainHundredths
 ### 11.1 基本攻撃プロファイル
 
 ```text
-BasicAttackProfile = martial | sword | magic
+BasicAttackProfile = unarmed | sword | magic
 ```
 
 正本の「各系統が精神切れでも使用できる無消費攻撃」を満たすため、3系統の組込みプロファイルを持つ。
 
 | profile | primaryStats | usableRanges | preferredRanges | power | accuracy | mentalCost |
 |---|---|---|---|---:|---:|---:|
-| martial | strength, technique | contact, close | contact, close | 20 | 75 | 0 |
-| sword | technique, strength | close, middle | close | 20 | 75 | 0 |
+| unarmed | strength, skill | contact, close | contact, close | 20 | 75 | 0 |
+| sword | skill, strength | close, middle | close | 20 | 75 | 0 |
 | magic | magic, spirit | middle, long | long | 20 | 75 | 0 |
 
 共通:
@@ -507,7 +509,7 @@ BasicAttackProfile = martial | sword | magic
 - 熟練度・使用回数の成長対象外
 - 基本防御も精神消費0
 
-Sprint 1では装備システムを扱わないため、3プロファイルは戦闘参加条件を満たす人物が選択可能とする。DefaultBattleStrategyは期待値を比較して1つを選び、人物の最高手段を固定的にmartialへ寄せない。
+Sprint 1では装備システムを扱わないため、3プロファイルは戦闘参加条件を満たす人物が選択可能とする。DefaultBattleStrategyは期待値を比較して1つを選び、人物の最高手段を固定的にunarmedへ寄せない。
 
 ## 12. 使用可能条件
 
@@ -531,7 +533,7 @@ Sprint 1では装備システムを扱わないため、3プロファイルは�
 - 人物ごとのPersonTechniqueState TechniqueId一意・TechniqueId昇順
 - name空文字不可
 - categoryは3系統のみ
-- primaryStatsは1件以上、重複なし。canonical順は`vitality < strength < technique < speed < spirit < magic`
+- primaryStatsは1件以上、重複なし。canonical順は`stamina < strength < skill < speed < spirit < magic`
 - usableRangesは1件以上、重複なし。canonical順は`contact < close < middle < long`
 - preferredRangesはusableRangesの部分集合で、usableRangesと同じ間合い順へ正規化
 - rangeShiftAfterUseは3値のいずれか
@@ -581,7 +583,7 @@ Sprint 1では装備システムを扱わないため、3プロファイルは�
 - Sprint 1で独学候補0件、予約係数0.40は未使用
 - 師匠ありの係数境界
 - 熟練度80以降の鈍化
-- martial／sword／magicの3基本攻撃が精神消費0で使用可能
+- unarmed／sword／magicの3基本攻撃が精神消費0で使用可能
 - basic_attack(profile)が熟練度状態を持たないこと
 - requiredStatsFactorの空条件・未達・ちょうど達成・超過境界
 - prerequisiteTechniqueMasteryの境界

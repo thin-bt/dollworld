@@ -1,6 +1,6 @@
 # 11 戦闘開始状態仕様
 
-- 仕様版: `S1-SPEC-0.1.10-draft`
+- 仕様版: `S1-SPEC-0.1.11`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 1対1戦闘の入力、開始状態、参加者スナップショット、戦闘専用RNG
 - 非対象: 大会組合せ、昇格、戦績永続化、観戦画面
@@ -145,13 +145,13 @@ World人物から戦闘入力へ変換するadapterを`battle-profile-adapter-0.
 正本の暫定値を使用する。
 
 ```text
-baseMaxDurability = 100 + vitality
+baseMaxDurability = 100 + stamina
 baseMaxMental = 50 + spirit
 ```
 
 ### 5.1 開始値
 
-正本の `baseMaxDurability = 100 + vitality` を維持し、疲労・負傷・調子による開始時補正は `currentDurability` へ適用する。基礎最大値そのものは変更しない。
+正本の `baseMaxDurability = 100 + stamina` を維持し、疲労・負傷・調子による開始時補正は `currentDurability` へ適用する。基礎最大値そのものは変更しない。
 
 ```text
 maxDurability = baseMaxDurability
@@ -169,9 +169,15 @@ startDurabilityPercent
 
 currentDurability
 = max(1, floor(maxDurability * startDurabilityPercent / 100))
-
-currentMental = clamp(0, maxMental, participant.currentMental)
 ```
+
+`currentMental`の開始規則:
+
+- `maxMental = 50 + spirit`
+- 入力人物の`currentMental`が整数かつ`0..maxMental`であることを開始前に検証する
+- 範囲外、非整数、欠落は`StartBattleResult` failureとし、World RNGとMatchIdGeneratorStateを消費しない
+- 正常値は変更せず`BattleParticipantSnapshot.currentMental`へコピーする
+- clampによる不正入力の補正は禁止する
 
 Sprint 1暫定既定値:
 
@@ -252,7 +258,7 @@ BattleParticipantSnapshot
 初期値:
 
 - sprint1StateSchemaVersion = 入力人物の`0.1.0`
-- baseMaxDurability = 100 + vitality
+- baseMaxDurability = 100 + stamina
 - maxDurability = baseMaxDurability
 - startDurabilityPercent = 5.1節の式
 - currentDurability = 開始補正後の1..maxDurability
@@ -508,6 +514,7 @@ InternalCreateBattleStateInput
 - deceased／waiting／stopped
 - ageAtBattleがworldDate・birthYearと不整合、または戦闘種別の年齢条件外
 - 数値範囲外
+- currentMentalが整数でない、または0..maxMental（50+spirit）の範囲外
 - 負傷度がunableToContinueThreshold以上
 - 重複TechniqueId
 - 不正間合い
@@ -602,12 +609,12 @@ BattleState生成だけではイベントを出さない。全ターン詳細は
 
 - 4間合い全値
 - 標準初期間合いmiddle
-- baseMaxDurability=maxDurability=100+vitality
+- baseMaxDurability=maxDurability=100+stamina
 - maxMental=50+spirit
 - condition／fatigue／injuryによる開始currentDurability補正
 - unableToContinueThreshold以上の入力人物拒否
 - startDurabilityPercentの下限・上限
-- currentMentalの持越しとclamp
+- currentMentalの持越しと範囲外開始前失敗（clamp禁止）
 - injuryの戦闘内コピーと元人物非変更
 - unableToContinue初期値false
 - 開始補正でmaxDurability自体を変更しないこと

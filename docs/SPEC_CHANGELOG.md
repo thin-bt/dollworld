@@ -1,5 +1,14 @@
 # 変更履歴
 
+## 2026-08-01：Sprint 1受入監査修正（S1-SPEC-0.1.11）
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.10-draft`から正式版`S1-SPEC-0.1.11`へ確定。SimulationIdentity.specVersionsのsprint1版も同値へ更新。
+- `BaseStat`をSprint 0公開型`AbilityKey`（`stamina | strength | skill | speed | spirit | magic`）へ完全統一。`vitality`／`technique`を基礎能力キーとして使用しない。
+- `TechniqueCategory`／`BasicAttackProfile`／`DomainAptitude`を`unarmed | sword | magic`へ統一し、`martial`と暗黙対応を廃止。
+- 戦闘開始時の`currentMental`は0..maxMentalの整数検証のみとし、範囲外は開始前失敗。clampによる補正を禁止。
+- 戦闘命中・移動式の能力参照名を`skill`へ統一。
+- `SPEC.md`冒頭へSprint 0／Sprint 1ミニ仕様版を併記。`SPEC_INDEX.md`へSprint 1領域索引を追加。`SPEC_PREPARATION_PLAN.md`へ08〜14の作成・受入監査済み状態を記載。
+
 ## 2026-08-01：Sprint 1仕様統合（SPEC-0.1.2／S1-SPEC-0.1.10-draft）
 
 - ゲーム仕様を`SPEC-0.1.2`へ更新。Sprint 0ミニ仕様は`S0-SPEC-0.1.5`を維持。

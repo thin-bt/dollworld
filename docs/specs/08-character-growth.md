@@ -1,6 +1,6 @@
 # 08 人物能力・成長仕様
 
-- 仕様版: `S1-SPEC-0.1.10-draft`
+- 仕様版: `S1-SPEC-0.1.11`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 人物能力、遺伝値、適性、週間成長、一時状態
 - 非対象: 出生時の遺伝生成、師匠選択、独自技、恒久的な加齢衰退、引退判断
@@ -28,24 +28,26 @@ Sprint 0で定義済みの人物能力型を変更せず、週次成長と戦闘
 
 ```text
 BaseStat =
-  vitality
+  stamina
   | strength
-  | technique
+  | skill
   | speed
   | spirit
   | magic
 ```
 
-Sprint 0の公開型で `technique` 等の正式名が異なる場合は、既存公開型を優先する。
+`BaseStat`はSprint 0公開型`AbilityKey`と同一とする。`vitality`や`technique`を基礎能力キーとして使用しない。
 
 ### 2.2 系統適性
 
 ```text
 DomainAptitude =
-  martial
+  unarmed
   | sword
   | magic
 ```
+
+`DomainAptitude`はSprint 0公開型`AptitudeKey`、および09仕様の`TechniqueCategory`／`BasicAttackProfile`、流派主系統と同一キーとする。`martial`は使用せず、暗黙の別名対応も設けない。
 
 ### 2.3 能力値の3層
 
