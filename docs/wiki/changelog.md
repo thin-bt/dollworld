@@ -5,8 +5,10 @@ authority: explanatory
 scope: cross-sprint
 sources:
   - docs/wiki/index.md
+  - docs/SPRINT_1_BACKLOG.md
+  - docs/SPEC_CHANGELOG.md
   - tag:sprint0-complete
-last_verified: 2026-08-01
+last_verified: 2026-08-03
 ---
 
 # Wiki更新履歴
@@ -16,6 +18,18 @@ last_verified: 2026-08-01
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。
 
 ## 履歴
+
+### 2026-08-03 — Sprint 1実装バックログ定義 受入監査修正同期
+
+- `PersonTechniqueState`保存構造の所有をS01-001へ明示するバックログ修正をWikiタスクへ反映
+- S01-001／S01-002／S01-003の責務境界を同期
+- Sprint 1 実装は未着手のまま
+
+### 2026-08-03 — Sprint 1実装バックログ定義同期
+
+- `docs/SPRINT_1_BACKLOG.md`（S01-001〜S01-009）定義に伴う Wiki タスク索引・ページ追加
+- `tasks/index.md` の scope を `cross-sprint` へ変更
+- Sprint 1 実装は未着手のまま（タスク定義のみ）
 
 ### 2026-08-01 — S01-000 Sprint 1 LLM Wiki同期 受入監査修正
 

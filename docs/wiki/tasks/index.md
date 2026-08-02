@@ -1,21 +1,25 @@
 ---
-title: Sprint 0 タスク索引
+title: タスク索引
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - docs/SPRINT_0_BACKLOG.md
+  - docs/SPRINT_1_BACKLOG.md
   - tag:sprint0-complete
-last_verified: 2026-08-01
+  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
+last_verified: 2026-08-03
 ---
 
-# Sprint 0 タスク索引
+# タスク索引
 
 ## 概要
 
-S00-001〜S00-010 の説明ページへの索引。各タスクの正本は `tasks/S00-xxx.md` である。
+Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞれ `docs/SPRINT_0_BACKLOG.md`／`tasks/S00-xxx.md`、および `docs/SPRINT_1_BACKLOG.md` である。本Wikiは正本ではない。
 
 ## 現在確定している内容
+
+### Sprint 0（実装済み）
 
 | ID | Wiki | 主な実装 commit |
 |---|---|---|
@@ -30,14 +34,39 @@ S00-001〜S00-010 の説明ページへの索引。各タスクの正本は `tas
 | S00-009 | [S00-009.md](S00-009.md) | `4958ba8c841c9ad2aff00d62579e2863af54f099` |
 | S00-010 | [S00-010.md](S00-010.md) | `19161dcaa932753e07e2333d65ea464915ad85aa` / `504fa3cc16346dd0c6480e8328e42518e68215d3` |
 
+### Sprint 1（実装未着手・タスク定義済み）
+
+正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.11`。実装は未着手。
+
+共有型所有の要約（詳細は正本）:
+
+- `TechniqueId`／`PersonTechniqueState`保存構造: S01-001
+- `Sprint1PersonState`組立: S01-002
+- TechniqueCatalogと技状態の意味的validation: S01-003
+
+| ID | Wiki | 依存 |
+|---|---|---|
+| S01-001 | [S01-001.md](S01-001.md) | なし |
+| S01-002 | [S01-002.md](S01-002.md) | S01-001 |
+| S01-003 | [S01-003.md](S01-003.md) | S01-001、S01-002 |
+| S01-004 | [S01-004.md](S01-004.md) | S01-002、S01-003 |
+| S01-005 | [S01-005.md](S01-005.md) | S01-001、S01-002、S01-003 |
+| S01-006 | [S01-006.md](S01-006.md) | S01-005 |
+| S01-007 | [S01-007.md](S01-007.md) | S01-006 |
+| S01-008 | [S01-008.md](S01-008.md) | S01-004、S01-007 |
+| S01-009 | [S01-009.md](S01-009.md) | S01-008 |
+
+次の実装着手は S01-001。
+
 ## 関連する正本
 
 - [`docs/SPRINT_0_BACKLOG.md`](../../SPRINT_0_BACKLOG.md)
-- [`tasks/`](../../../tasks/)
+- [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)
+- [`tasks/`](../../../tasks/)（Sprint 0個別タスク）
 
 ## 関連するコード
 
-該当なし（索引）。
+該当なし（索引）。Sprint 1実装は未着手。
 
 ## 関連するテスト
 
@@ -46,10 +75,11 @@ S00-001〜S00-010 の説明ページへの索引。各タスクの正本は `tas
 ## 関連する判断
 
 - [../sprints/sprint0.md](../sprints/sprint0.md)
+- [../sprints/sprint1.md](../sprints/sprint1.md)
 
 ## 未解決事項
 
-- Sprint 1 仕様は確定済み（`S1-SPEC-0.1.11`）。実装タスクページはタスク定義後に追加する。現在は [../sprints/sprint1.md](../sprints/sprint1.md) を参照。
+該当なし。
 
 ## 関連Wikiページ
 
