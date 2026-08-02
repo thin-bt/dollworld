@@ -2,27 +2,30 @@
 title: LLM Wiki 入口
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - docs/SPEC.md
   - docs/SPRINT_0_BACKLOG.md
   - docs/TECHNICAL_DECISIONS.md
+  - docs/SPEC_PREPARATION_PLAN.md
   - tag:sprint0-complete
   - commit:504fa3cc16346dd0c6480e8328e42518e68215d3
+  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
 last_verified: 2026-08-01
 related:
   - governance.md
   - sprints/sprint0.md
-  - sprints/sprint1-pending.md
+  - sprints/sprint1.md
 ---
 
 # LLM Wiki 入口
 
 ## 概要
 
-このWikiは、Sprint 0で確定した仕様・設計判断・不変条件・タスク履歴を横断参照するための**説明・索引**です。正本ではありません。実装や仕様判断の根拠には使わないでください。
+このWikiは、確定した仕様・設計判断・不変条件・タスク履歴を横断参照するための**説明・索引**です。正本ではありません。実装や仕様判断の根拠には使わないでください。
 
-基点: タグ `sprint0-complete`（commit `504fa3cc16346dd0c6480e8328e42518e68215d3`）。
+Sprint 0 基点: タグ `sprint0-complete`（commit `504fa3cc16346dd0c6480e8328e42518e68215d3`）。  
+Sprint 1 仕様確定: `S1-SPEC-0.1.11`（commit `2800d3b959e575f57660c27b344507dd0e38ddb6`）。実装は未着手。
 
 ## 正本の優先順位
 
@@ -40,7 +43,7 @@ related:
 2. 本ページ（`docs/wiki/index.md`）
 3. 対象領域の [invariants](invariants/index.md) ページ
 4. 対象領域の [architecture](architecture/index.md) ページ
-5. 対象 [task](tasks/index.md) ページ
+5. 対象 [task](tasks/index.md) ページ（定義済みのもの）
 6. 関連コードとテスト
 
 ## 概念別リンク
@@ -50,14 +53,27 @@ related:
 - [不変条件](invariants/index.md)
 - [設計判断](decisions/index.md)
 
+## Sprint 1入口
+
+- [Sprint 1概要](sprints/sprint1.md)
+- [能力・適性](glossary/abilities-and-aptitudes.md)
+- [技・熟練度](glossary/techniques-and-mastery.md)
+- [週間処理](invariants/weekly-training-and-learning.md)
+- [戦闘ライフサイクル](architecture/battle-lifecycle.md)
+- [戦闘開始不変条件](invariants/battle-start.md)
+- [ターン解決](invariants/battle-turn-resolution.md)
+- [結果・ログ](invariants/battle-result-and-log.md)
+- [Sprint1Config／SimulationIdentity](decisions/sprint1-identity-and-config.md)
+
 ## タスク別リンク
 
 - [Sprint 0 タスク索引](tasks/index.md)（S00-001〜S00-010）
+- Sprint 1 実装タスクページはタスク定義後に追加（現在は [Sprint 1概要](sprints/sprint1.md) を参照）
 
 ## Sprint別リンク
 
 - [Sprint 0](sprints/sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprints/sprint1-pending.md) — **定義修正中のため未収録**（pending入口のみ）
+- [Sprint 1](sprints/sprint1.md) — 仕様確定済み・実装未着手（`S1-SPEC-0.1.11`）
 
 ## その他
 
@@ -74,3 +90,4 @@ related:
 
 - [governance.md](governance.md)
 - [sprints/sprint0.md](sprints/sprint0.md)
+- [sprints/sprint1.md](sprints/sprint1.md)

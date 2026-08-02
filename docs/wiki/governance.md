@@ -2,7 +2,7 @@
 title: Wiki運用規則
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - AGENTS.md
   - docs/AI_DEVELOPMENT_RULES.md
@@ -15,7 +15,7 @@ last_verified: 2026-08-01
 
 ## 概要
 
-本ページは `docs/wiki` の運用規則をまとめた説明です。ゲーム仕様そのものを定義しません。
+本ページは `docs/wiki` **全体**へ適用する運用規則をまとめた説明です。Sprint 0・Sprint 1 を問わず適用する。ゲーム仕様そのものを定義しません。
 
 ## 現在確定している内容
 
@@ -24,6 +24,7 @@ last_verified: 2026-08-01
 - Wikiは説明・索引であり、正本ではない
 - Wikiだけを根拠に実装しない
 - 実装前に正式仕様と関連テストを確認する
+- Sprint 1 仕様ページも正本ではなく、正本は `docs/SPEC.md` と `docs/specs/*.md` である
 
 ### 記録の範囲
 

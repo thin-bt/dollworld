@@ -2,7 +2,7 @@
 title: 用語集索引
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - docs/specs/00-domain-glossary.md
   - docs/SPEC.md
@@ -13,13 +13,20 @@ last_verified: 2026-08-01
 
 ## 概要
 
-Sprint 0で頻出する用語への入口。定義の正本はミニ仕様と SPEC である。
+Sprint 0・Sprint 1を横断する用語索引。定義の正本はミニ仕様と SPEC である。
 
 ## 現在確定している内容
+
+### Sprint 0（実装済み）
 
 - [世界日時（WorldDate）](world-date.md)
 - [シミュレーション識別（simulationId / eventId 等）](simulation-identity.md)
 - [ProcessorRuntimeState](processor-runtime-state.md)
+
+### Sprint 1（仕様確定済み・実装未着手）
+
+- [能力と適性（AbilityKey／AptitudeKey）](abilities-and-aptitudes.md)
+- [技と熟練度](techniques-and-mastery.md)
 
 ## 関連する正本
 
@@ -28,14 +35,22 @@ Sprint 0で頻出する用語への入口。定義の正本はミニ仕様と SP
 
 ## 関連するコード
 
+Sprint 0 用語に対応する実装:
+
 - `packages/simulation-core/src/domain.ts`
 - `packages/simulation-core/src/world-date.ts`
 - `packages/simulation-core/src/ids.ts`
 
+Sprint 1 用語の実装コードは未着手。
+
 ## 関連するテスト
+
+Sprint 0 用語に対応するテスト:
 
 - `packages/simulation-core/src/domain.test.ts`
 - `packages/simulation-core/src/world-date.test.ts`
+
+Sprint 1 用語の実装テストは未着手。
 
 ## 関連する判断
 

@@ -2,11 +2,13 @@
 title: docs/wiki README
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - docs/wiki/index.md
   - docs/wiki/governance.md
+  - docs/wiki/sprints/sprint1.md
   - tag:sprint0-complete
+  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
 last_verified: 2026-08-01
 ---
 
@@ -14,12 +16,24 @@ last_verified: 2026-08-01
 
 ## 概要
 
-`docs/wiki` は LLM と人間が Sprint 0 の確定知識へ到達するための索引です。**正本ではありません。**
+`docs/wiki` は LLM と人間が確定知識へ到達するための **Sprint横断** の索引です。**正本ではありません。** Sprint 0 限定ではありません。
 
 ## 現在確定している内容
 
 - Sprint 0（タグ `sprint0-complete`）の説明・索引ページが存在する
-- Sprint 1 の具体仕様は収録しない（[`sprints/sprint1-pending.md`](sprints/sprint1-pending.md) の pending 入口のみ）
+- Sprint 1 仕様 `S1-SPEC-0.1.11` の説明・索引を収録する（実装は未着手）
+
+## Sprint 1入口
+
+- [Sprint 1概要](sprints/sprint1.md)
+- [能力・適性](glossary/abilities-and-aptitudes.md)
+- [技・熟練度](glossary/techniques-and-mastery.md)
+- [週間処理](invariants/weekly-training-and-learning.md)
+- [戦闘ライフサイクル](architecture/battle-lifecycle.md)
+- [戦闘開始不変条件](invariants/battle-start.md)
+- [ターン解決](invariants/battle-turn-resolution.md)
+- [結果・ログ](invariants/battle-result-and-log.md)
+- [Sprint1Config／SimulationIdentity](decisions/sprint1-identity-and-config.md)
 
 ## 使い方
 
@@ -55,3 +69,4 @@ last_verified: 2026-08-01
 
 - [index.md](index.md)
 - [changelog.md](changelog.md)
+- [sprints/sprint1.md](sprints/sprint1.md)

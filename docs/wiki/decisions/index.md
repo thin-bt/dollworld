@@ -2,7 +2,7 @@
 title: 設計判断索引
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - docs/TECHNICAL_DECISIONS.md
   - docs/SPRINT_0_BACKLOG.md
@@ -13,12 +13,19 @@ last_verified: 2026-08-01
 
 ## 概要
 
-Sprint 0 で固定された技術判断・性能扱いへの入口。正本は TECHNICAL_DECISIONS とバックログである。
+Sprint 0・Sprint 1を横断する設計判断索引。正本は TECHNICAL_DECISIONS・正式ミニ仕様・バックログである。
 
 ## 現在確定している内容
 
+### Sprint 0（実装済み技術判断）
+
 - [Sprint 0 技術判断要約](sprint0.md)
 - [性能警告の扱い](performance-warnings.md)
+
+### Sprint 1（仕様ベースライン・identity・config判断）
+
+- [Sprint 1仕様ベースライン](sprint1-spec-baseline.md)
+- [Sprint1ConfigとSimulationIdentity](sprint1-identity-and-config.md)
 
 ## 関連する正本
 
@@ -27,7 +34,7 @@ Sprint 0 で固定された技術判断・性能扱いへの入口。正本は T
 
 ## 関連するコード
 
-該当なし（判断の索引）。
+該当なし（判断の索引）。Sprint 1 の実装コードは未着手。
 
 ## 関連するテスト
 
@@ -45,3 +52,4 @@ Sprint 0 で固定された技術判断・性能扱いへの入口。正本は T
 
 - [../architecture/workspace.md](../architecture/workspace.md)
 - [../sprints/sprint0.md](../sprints/sprint0.md)
+- [../sprints/sprint1.md](../sprints/sprint1.md)

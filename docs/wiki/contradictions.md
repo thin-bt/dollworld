@@ -2,13 +2,16 @@
 title: 矛盾記録
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - docs/SPEC.md
   - docs/TECHNICAL_DECISIONS.md
   - docs/SPRINT_0_BACKLOG.md
+  - docs/SPEC_CHANGELOG.md
+  - docs/SPEC_PREPARATION_PLAN.md
   - tag:sprint0-complete
   - commit:504fa3cc16346dd0c6480e8328e42518e68215d3
+  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
 last_verified: 2026-08-01
 ---
 
@@ -16,17 +19,24 @@ last_verified: 2026-08-01
 
 ## 概要
 
-Wiki作成・更新時に発見した、正本・コード・テスト間の矛盾を記録する。自動修正は行わない。
+Wiki作成・更新時に発見した、正本・コード・テスト間の矛盾を記録する。Sprint 0・Sprint 1 を横断する記録である。自動修正は行わない。
 
 ## 現在確定している内容
 
-現時点で、Sprint 0の正本・コード・テスト間に、Wiki作成作業で新たに確認された未解決の矛盾はない。
+現時点で、次を確認したうえで、今回の Wiki 同期後に確認されている未解決矛盾はない。
+
+- Sprint 0 の確定実装・正本（`sprint0-complete`）
+- Sprint 1 の確定仕様 `S1-SPEC-0.1.11`（commit `2800d3b959e575f57660c27b344507dd0e38ddb6`）
+
+Sprint 1 実装は未着手のため、Sprint 1 のコード・テストとの整合確認済みとは扱わない。
 
 ## 関連する正本
 
 - [`docs/SPEC.md`](../SPEC.md)
 - [`docs/TECHNICAL_DECISIONS.md`](../TECHNICAL_DECISIONS.md)
 - [`docs/SPRINT_0_BACKLOG.md`](../SPRINT_0_BACKLOG.md)
+- [`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)
+- [`docs/SPEC_PREPARATION_PLAN.md`](../SPEC_PREPARATION_PLAN.md)
 
 ## 関連するコード
 

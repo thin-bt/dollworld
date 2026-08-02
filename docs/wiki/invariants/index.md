@@ -2,7 +2,7 @@
 title: 不変条件索引
 status: current
 authority: explanatory
-scope: sprint0
+scope: cross-sprint
 sources:
   - docs/AI_DEVELOPMENT_RULES.md
   - docs/SPRINT_0_BACKLOG.md
@@ -14,9 +14,11 @@ last_verified: 2026-08-01
 
 ## 概要
 
-Sprint 0 で検証される不変条件・決定性・出力契約への入口。正本はミニ仕様と検証コードである。
+Sprint 0・Sprint 1を横断する不変条件索引。正本はミニ仕様である。検証状態は Sprint ごとに異なる。
 
 ## 現在確定している内容
+
+### Sprint 0（コード・自動テストで実装・検証済み）
 
 - [暦・加齢](calendar.md)
 - [識別と参照整合](identity-and-reference.md)
@@ -26,6 +28,16 @@ Sprint 0 で検証される不変条件・決定性・出力契約への入口�
 
 AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、死亡者非処理、16歳未満ランクなし、42歳以上引退、参照整合、親子・師弟循環なし、同一シード一致。詳細は正本と検証器を確認すること。
 
+### Sprint 1（`S1-SPEC-0.1.11` で確定した実装前の仕様不変条件）
+
+- [人物成長](character-growth.md)
+- [週間訓練・習得](weekly-training-and-learning.md)
+- [戦闘開始](battle-start.md)
+- [ターン解決](battle-turn-resolution.md)
+- [戦闘結果・ログ](battle-result-and-log.md)
+
+Sprint 1 不変条件を既存の Sprint 0 自動テストで検証済みとは扱わない。
+
 ## 関連する正本
 
 - [`docs/AI_DEVELOPMENT_RULES.md`](../../AI_DEVELOPMENT_RULES.md)
@@ -34,13 +46,21 @@ AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、
 
 ## 関連するコード
 
+Sprint 0:
+
 - `apps/simulator/src/sprint0-verification/invariant-verification.ts`
 - `apps/simulator/src/output/world-integrity.ts`
 
+Sprint 1 の実装コードは未着手。
+
 ## 関連するテスト
+
+Sprint 0:
 
 - `apps/simulator/src/sprint0-verification/sprint0-verification.test.ts`
 - `packages/simulation-core` 各領域のテスト
+
+Sprint 1 の実装テストは未着手。
 
 ## 関連する判断
 

@@ -49,9 +49,10 @@ S00-001〜S00-010 の説明ページへの索引。各タスクの正本は `tas
 
 ## 未解決事項
 
-該当なし。
+- Sprint 1 仕様は確定済み（`S1-SPEC-0.1.11`）。実装タスクページはタスク定義後に追加する。現在は [../sprints/sprint1.md](../sprints/sprint1.md) を参照。
 
 ## 関連Wikiページ
 
 - [../sprints/sprint0.md](../sprints/sprint0.md)
+- [../sprints/sprint1.md](../sprints/sprint1.md)
 - [../index.md](../index.md)

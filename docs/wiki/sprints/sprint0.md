@@ -69,4 +69,4 @@ S00-001〜S00-010。詳細は [../tasks/index.md](../tasks/index.md)。
 ## 関連Wikiページ
 
 - [../tasks/S00-010.md](../tasks/S00-010.md)
-- [sprint1-pending.md](sprint1-pending.md)
+- [sprint1.md](sprint1.md)
