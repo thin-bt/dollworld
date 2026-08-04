@@ -8,7 +8,7 @@ sources:
   - docs/SPRINT_1_BACKLOG.md
   - docs/SPEC_CHANGELOG.md
   - tag:sprint0-complete
-last_verified: 2026-08-03
+last_verified: 2026-08-04
 ---
 
 # Wiki更新履歴
@@ -18,6 +18,45 @@ last_verified: 2026-08-03
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。
 
 ## 履歴
+
+### 2026-08-04 — S01-001 第5回受入監査修正（単位契約）
+
+- weeklyPlanner の整数 score 罰／上限と strategy の整数 surrender score／threshold を `number` に修正（BasisPoints誤分類を解消）
+- BasisPoints は小数 factor／ratio／multiplier／per-point 係数のみ。field名に weight があっても整数 score は number
+- `countNumericLeaves` を package root から非公開化。型契約テストを追加
+- Sprint 1全体は未完了（次はS01-002）
+
+### 2026-08-04 — S01-001 第4回受入監査修正（厳密basis points／API境界）
+
+- basis points変換は `value * 10000` が safe integer の場合だけ成功（Math.round／許容差なし）
+- raw／normalized ネスト型を分離。`BasisPoints` を normalized 係数 field に使用。無検証 brand API を削除
+- `validateNormalizedSprint1Config` を追加。normalized clone／freeze は registry canonical 照合付き
+- deprecated alias（`createDefaultSprint1Config` 等）と registry introspection を非公開化
+- Sprint 1全体は未完了（次はS01-002）
+
+### 2026-08-03 — S01-001 第3回受入監査修正（basis points）
+
+- raw `Sprint1ConfigInput`とnormalized `Sprint1Config`を分離。小数係数はvalidation時にbasis points整数化
+- config hash／registryは正規化後canonical JSONを固定。固定SHA-256 fixtureを更新
+- normalized configの全number leafはsafe integer。次はS01-002。Sprint 1全体は未完了
+
+### 2026-08-03 — S01-001 第2回受入監査修正
+
+- reflection全経路（getPrototypeOf／Array.isArray／length descriptor／ownKeys）をValidationResult failureへ変換
+- public clone／freezeもvalidation経由の`ValidationResult`へ変更（getter／toJSON非実行）
+- `sprint1-balance-0.2.0` canonical SHA-256固定fixtureとregistry不変化を追加
+- Sprint 1全体は未完了（次はS01-002）
+
+### 2026-08-03 — S01-001 受入監査修正
+
+- configVersion registryによる内容一意性、public hash入口のvalidation必須化、hardened plain-data snapshot／deep freeze、配列extra property拒否、RangeShiftAfterUse完全union、specVersions canonical正規化をWikiタスクへ反映
+- Sprint 1全体は未完了（次はS01-002）
+
+### 2026-08-03 — S01-001 Sprint 1ドメイン型・設定基盤
+
+- S01-001（TechniqueId／PersonTechniqueState保存型／Sprint1Config／canonical・hash／SimulationIdentity）を実装
+- `PersonTechniqueState`保存型の所有境界（S01-001）を維持し、S01-003で再定義しない
+- Sprint 1全体は未完了（次はS01-002）
 
 ### 2026-08-03 — Sprint 1実装バックログ定義 受入監査修正同期
 

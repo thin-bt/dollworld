@@ -13,6 +13,7 @@ declare const SimulationIdBrand: unique symbol;
 declare const RunIdBrand: unique symbol;
 declare const TournamentIdBrand: unique symbol;
 declare const MatchIdBrand: unique symbol;
+declare const TechniqueIdBrand: unique symbol;
 
 export type WorldId = string & { readonly [WorldIdBrand]: "WorldId" };
 export type PersonId = string & { readonly [PersonIdBrand]: "PersonId" };
@@ -26,6 +27,8 @@ export type RunId = string & { readonly [RunIdBrand]: "RunId" };
 export type TournamentId = string & { readonly [TournamentIdBrand]: "TournamentId" };
 /** Reserved for future event envelopes; not generated in Sprint 0. */
 export type MatchId = string & { readonly [MatchIdBrand]: "MatchId" };
+/** Technique catalog entry id. Format assignment is deferred; storage is a non-empty string. */
+export type TechniqueId = string & { readonly [TechniqueIdBrand]: "TechniqueId" };
 
 export function asWorldId(value: string): WorldId {
   return value as WorldId;
@@ -65,4 +68,8 @@ export function asTournamentId(value: string): TournamentId {
 
 export function asMatchId(value: string): MatchId {
   return value as MatchId;
+}
+
+export function asTechniqueId(value: string): TechniqueId {
+  return value as TechniqueId;
 }

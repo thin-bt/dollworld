@@ -1,7 +1,8 @@
 /**
  * @shared-world/simulation-core public API.
  * Sprint 0 domain types, config/name-data validation, canonical JSON, Sha256Provider,
- * seeded RNG, world calendar / age eligibility, and structured EventEnvelope.
+ * seeded RNG, world calendar / age eligibility, structured EventEnvelope,
+ * and Sprint 1 shared domain/config foundation (S01-001).
  */
 export const SIMULATION_CORE_PACKAGE_NAME = "@shared-world/simulation-core" as const;
 
@@ -126,6 +127,7 @@ export type {
   RelationshipId,
   RunId,
   SimulationId,
+  TechniqueId,
   TournamentId,
   WorldId,
 } from "./ids.js";
@@ -138,9 +140,87 @@ export {
   asRelationshipId,
   asRunId,
   asSimulationId,
+  asTechniqueId,
   asTournamentId,
   asWorldId,
 } from "./ids.js";
+
+export type {
+  BasicAttackProfile,
+  BasicAttackProfileInput,
+  BattleConfig,
+  BattleConfigInput,
+  BattleRange,
+  BasisPointsMinMax,
+  GrowthConfig,
+  GrowthConfigInput,
+  NumericMinMax,
+  PersonTechniqueState,
+  RangeShiftAfterUse,
+  SimulationIdentity,
+  SpecSetId,
+  SpecVersionEntry,
+  Sprint1Config,
+  Sprint1ConfigInput,
+  Sprint1ConfigIdentity,
+  TechniqueBalanceConfig,
+  TechniqueBalanceConfigInput,
+  TechniqueCategory,
+  TechniqueLearningConfig,
+  TechniqueLearningConfigInput,
+  TemporaryConditionConfig,
+  TemporaryConditionConfigInput,
+  WeeklyPlannerConfig,
+  WeeklyPlannerConfigInput,
+} from "./sprint1/types.js";
+export { BATTLE_RANGES, RANGE_SHIFT_AFTER_USE, TECHNIQUE_CATEGORIES } from "./sprint1/types.js";
+export type { BasisPoints } from "./sprint1/basis-points.js";
+export { BASIS_POINTS_SCALE, normalizeBasisPoints } from "./sprint1/basis-points.js";
+export {
+  ABILITY_CANONICAL_ORDER,
+  BATTLE_PROFILE_ADAPTER_VERSION,
+  CANONICAL_JSON_VERSION,
+  DEFAULT_BATTLE_STRATEGY_VERSION,
+  EXPECTED_SPEC_VERSIONS,
+  HASH_ALGORITHM,
+  MAIN_SPEC_VERSION_FOR_IDENTITY,
+  MATCH_ID_GENERATOR_VERSION,
+  S0_SPEC_VERSION_FOR_IDENTITY,
+  S1_SPEC_VERSION,
+  SIMULATION_IDENTITY_SCHEMA_VERSION,
+  SPRINT1_CONFIG_SCHEMA_VERSION,
+  SPRINT1_CONFIG_VERSION_DEFAULT,
+} from "./sprint1/constants.js";
+export {
+  PERSON_TECHNIQUE_STATE_KEYS,
+  clonePersonTechniqueState,
+  freezePersonTechniqueState,
+  validatePersonTechniqueState,
+} from "./sprint1/person-technique-state.js";
+export { createDefaultSprint1ConfigInput } from "./sprint1/sprint1-config-defaults.js";
+export {
+  validateNormalizedSprint1Config,
+  validateSprint1Config,
+} from "./sprint1/validate-sprint1-config.js";
+export {
+  SPRINT1_BALANCE_0_2_0_CANONICAL_SHA256,
+  SPRINT1_BALANCE_0_2_0_CONFIG_VERSION,
+} from "./sprint1/sprint1-config-canonical-fixture.js";
+export {
+  cloneSprint1ConfigInput,
+  cloneValidatedSprint1Config,
+  computeSprint1ConfigHash,
+  freezeSprint1ConfigInput,
+  freezeValidatedSprint1Config,
+  getDefaultSprint1Config,
+} from "./sprint1/sprint1-config.js";
+export {
+  computeSimulationIdentityHash,
+  createExpectedSpecVersions,
+  createSimulationIdFromIdentity,
+  createSimulationIdFromIdentityHash,
+  validateSimulationIdentity,
+} from "./sprint1/simulation-identity.js";
 
 export type {
   NameCandidateCategory,
