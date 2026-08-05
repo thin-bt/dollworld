@@ -33,10 +33,11 @@
 | ミニ仕様08〜14（`S1-SPEC-0.1.11`） | 仕様定義済み・受入監査済み |
 | LLM Wiki同期 | 同期済み |
 | 実装バックログ | 定義済み（`docs/SPRINT_1_BACKLOG.md`、S01-001〜S01-009） |
-| S01-001 ドメイン型・設定基盤 | **実装完了**（受入監査修正込み: 厳密basis points、単位契約（整数score≠BasisPoints）、raw／normalized分離、normalized validator、registry内部化、固定canonical SHA、hardened reflection） |
-| Sprint 1全体 | **未完了**（S01-002以降は未着手） |
+| S01-001 ドメイン型・設定基盤 | **実装完了**（master統合済み） |
+| S01-002 人物能力・成長状態 | **実装完了**（Sprint1PersonState／一時状態VO／成長端数／factor selector／初期化adapter） |
+| Sprint 1全体 | **未完了**（S01-003以降は未着手） |
 
-次の実装着手タスクは **S01-002**（人物能力・成長状態）である。Sprint 1全体の実装完了とは書かない。
+次の実装着手タスクは **S01-003**（技カタログ・熟練度・習得状態）である。Sprint 1全体の実装完了とは書かない。
 
 Sprint 1実装時は、正本`SPEC-0.1.2`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述を参照する。
 

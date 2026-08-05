@@ -8,6 +8,7 @@ import type {
 import type { WorldEngineState } from "./types.js";
 import { toWorldEngineError } from "./errors.js";
 import { validateWorldEngineState } from "./validate-state.js";
+import { cloneValidatedPlainJson } from "../sprint1/plain-data.js";
 
 function cloneStatValueTriple(value: StatValueTriple): StatValueTriple {
   return {
@@ -37,7 +38,7 @@ function cloneAptitudes(value: AptitudeScores): AptitudeScores {
 }
 
 function clonePersonCore(person: Person) {
-  return {
+  const core = {
     personId: person.personId,
     givenName: person.givenName,
     familyName: person.familyName,
@@ -49,6 +50,13 @@ function clonePersonCore(person: Person) {
     abilities: cloneAbilities(person.abilities),
     aptitudes: cloneAptitudes(person.aptitudes),
   };
+  if (person.sprint1State !== undefined) {
+    return {
+      ...core,
+      sprint1State: cloneValidatedPlainJson(person.sprint1State),
+    };
+  }
+  return core;
 }
 
 export function clonePerson(person: Person): Person {

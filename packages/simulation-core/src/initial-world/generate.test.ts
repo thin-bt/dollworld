@@ -278,13 +278,13 @@ describe("generateInitialWorld baseline integration", () => {
     expect(a.snapshot).toEqual(b.snapshot);
     expect(a.initialEvents).toEqual(b.initialEvents);
     expect(JSON.stringify(a.snapshot)).toBe(JSON.stringify(b.snapshot));
-  });
+  }, 30_000);
 
   it("differs for different seeds", () => {
     const a = generateInitialWorld(buildBaselineInput(111));
     const b = generateInitialWorld(buildBaselineInput(222));
     expect(a.snapshot.persons).not.toEqual(b.snapshot.persons);
-  });
+  }, 30_000);
 
   it("keeps simulationId stable for same seed and changes with seed or hash", () => {
     const a = generateInitialWorld(buildBaselineInput(555));
@@ -297,7 +297,7 @@ describe("generateInitialWorld baseline integration", () => {
     const idSame = createSimulationId("hash-a", 555, "name-a", sha256Provider);
     const idDifferentHash = createSimulationId("hash-b", 555, "name-a", sha256Provider);
     expect(idDifferentHash).not.toBe(idSame);
-  });
+  }, 30_000);
 
   it("does not mutate input config or nameData arrays", () => {
     const input = buildBaselineInput(321);

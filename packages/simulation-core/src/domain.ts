@@ -11,6 +11,7 @@ import type {
   Sex,
 } from "./enums.js";
 import type { FamilyId, LineageId, PersonId, RelationshipId } from "./ids.js";
+import type { Sprint1PersonState } from "./sprint1/sprint1-person-state.js";
 
 export type PersonName = {
   givenName: string;
@@ -27,6 +28,8 @@ type PersonCore = PersonName & {
   abilities: AbilityScores;
   aptitudes: AptitudeScores;
   lineageId?: LineageId;
+  /** Present after attachSprint1PersonStateToInitialWorld (08 §6.2 / S01-002). */
+  sprint1State?: Sprint1PersonState;
 };
 
 type LivingPersonShared = PersonCore & {

@@ -222,6 +222,71 @@ export {
   validateSimulationIdentity,
 } from "./sprint1/simulation-identity.js";
 
+export {
+  GROWTH_PROFILES,
+  isGrowthProfile,
+  validateGrowthProfile,
+} from "./sprint1/growth-profile.js";
+export type { GrowthProfile } from "./sprint1/growth-profile.js";
+export {
+  INJURY_STAGES,
+  deriveInjuryStage,
+  selectInjuryGrowthFactor,
+} from "./sprint1/injury-stage.js";
+export type { InjuryStage } from "./sprint1/injury-stage.js";
+export { deriveMaxMental } from "./sprint1/max-mental.js";
+export {
+  PERSON_TEMPORARY_CONDITION_KEYS,
+  clonePersonTemporaryCondition,
+  freezePersonTemporaryCondition,
+  validatePersonTemporaryCondition,
+} from "./sprint1/person-temporary-condition.js";
+export type { PersonTemporaryCondition } from "./sprint1/person-temporary-condition.js";
+export {
+  STAT_GROWTH_REMAINDER_KEYS,
+  cloneStatGrowthRemainderCollection,
+  freezeStatGrowthRemainderCollection,
+  validateStatGrowthRemainder,
+  validateStatGrowthRemainderCollection,
+} from "./sprint1/stat-growth-remainder.js";
+export type {
+  StatGrowthRemainder,
+  StatGrowthRemainderCollection,
+} from "./sprint1/stat-growth-remainder.js";
+export {
+  cloneGrowthPotentialScores,
+  freezeGrowthPotentialScores,
+  validateGrowthPotentialScores,
+} from "./sprint1/growth-potential.js";
+export type { GrowthPotentialScores } from "./sprint1/growth-potential.js";
+export {
+  SPRINT1_PERSON_STATE_KEYS,
+  SPRINT1_PERSON_STATE_SCHEMA_VERSION,
+  cloneSprint1PersonState,
+  createInitialSprint1PersonState,
+  freezeSprint1PersonState,
+  validateSprint1PersonState,
+} from "./sprint1/sprint1-person-state.js";
+export type {
+  Sprint1PersonState,
+  Sprint1PersonStateContext,
+} from "./sprint1/sprint1-person-state.js";
+export {
+  TEACHER_FACTOR_KEYS,
+  selectAgeGrowthFactor,
+  selectCurrentValueGrowthFactor,
+  selectDiscipleCountGrowthFactor,
+  selectFatigueGrowthFactor,
+  selectTeacherGrowthFactor,
+} from "./sprint1/growth-factor-selectors.js";
+export type { TeacherFactorKey } from "./sprint1/growth-factor-selectors.js";
+export {
+  isFormalTrainingEligible,
+  isWeeklyStateUpdateEligible,
+} from "./sprint1/weekly-update-eligibility.js";
+export type { WeeklyEligibilityPerson } from "./sprint1/weekly-update-eligibility.js";
+export { attachSprint1PersonStateToInitialWorld } from "./sprint1/attach-sprint1-person-state.js";
+
 export type {
   NameCandidateCategory,
   NameCandidateFile,

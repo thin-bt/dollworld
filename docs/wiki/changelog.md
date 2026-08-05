@@ -19,6 +19,26 @@ last_verified: 2026-08-04
 
 ## 履歴
 
+### 2026-08-05 — S01-002 最終受入監査修正（fresh initial date 固定）
+
+- `attachSprint1PersonStateToInitialWorld` は `worldDate` が 1年4月第1週・absoluteWeek=0 のときだけ成功
+- 有効な途中／checkpoint world（週送り後）を adapter 固有条件で拒否。日時巻戻し・ID再採番なし
+- `cloneWorldEngineState` による validate／clone／revalidate を再利用
+- Sprint 1全体は未完了（次はS01-003）
+
+### 2026-08-04 — S01-002 受入監査修正（初期化adapter入力検証）
+
+- `attachSprint1PersonStateToInitialWorld` が付与前に `validateWorldEngineState` で世界全体を検証
+- raw Person 部分読み／spread を廃止し、検証済み Person を clone してから `sprint1State` を付与
+- getter／class／symbol／Proxy／必須欠落／参照壊れの negative 試験を追加
+- Sprint 1全体は未完了（次はS01-003）
+
+### 2026-08-04 — S01-002 人物能力・成長状態を実装
+
+- `Sprint1PersonState`（4項目）／一時状態VO／成長端数／GrowthProfile／InjuryStage／factor selector／週間適格predicate／`attachSprint1PersonStateToInitialWorld`を追加
+- Personへ`sprint1State?`のみ追加。growthPotential等のWorldState本統合はS01-008へ送る
+- S01-003へカタログ意味validation、S01-004へ週間更新を引渡し。Sprint 1全体は未完了
+
 ### 2026-08-04 — S01-001 第5回受入監査修正（単位契約）
 
 - weeklyPlanner の整数 score 罰／上限と strategy の整数 surrender score／threshold を `number` に修正（BasisPoints誤分類を解消）
