@@ -1063,6 +1063,46 @@ export function requireIntegerAtLeast(
   return value;
 }
 
+/**
+ * Like `requireIntegerAtLeast`, but additionally requires `Number.isSafeInteger`.
+ * Use for fields whose contract is "safe integer >= minimum" (e.g. TechniqueDefinition
+ * `mentalCost`). Does not change the contract of `requireInteger` /
+ * `requireIntegerAtLeast` callers.
+ */
+export function requireSafeIntegerAtLeast(
+  object: Record<string, unknown>,
+  key: string,
+  parentPath: string,
+  minimum: number,
+  issues: ValidationIssue[],
+): number | undefined {
+  const path = childPath(parentPath, key);
+  if (!hasOwn(object, key)) {
+    issues.push({ path, message: "required key is missing", expected: "safe integer" });
+    return undefined;
+  }
+  const value = object[key];
+  if (typeof value !== "number" || !Number.isSafeInteger(value)) {
+    issues.push({
+      path,
+      message: "value must be a safe integer",
+      actual: value,
+      expected: "safe integer",
+    });
+    return undefined;
+  }
+  if (value < minimum) {
+    issues.push({
+      path,
+      message: `value must be a safe integer >= ${String(minimum)}`,
+      actual: value,
+      expected: `>= ${String(minimum)}`,
+    });
+    return undefined;
+  }
+  return value;
+}
+
 export function requireLiteralInteger(
   object: Record<string, unknown>,
   key: string,

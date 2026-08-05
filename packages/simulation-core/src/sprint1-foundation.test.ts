@@ -76,16 +76,18 @@ describe("S01-001 public API surface", () => {
     expect(typeof techniqueId).toBe("string");
   });
 
-  it("exports Sprint1Config helpers and does not expose TechniqueCatalog APIs", async () => {
+  it("exports Sprint1Config helpers and does not expose Battle or weekly mutation APIs", async () => {
     const api = await import("./index.js");
     expect(typeof api.getDefaultSprint1Config).toBe("function");
     expect(typeof api.validateSprint1Config).toBe("function");
     expect(typeof api.computeSprint1ConfigHash).toBe("function");
     expect(typeof api.validatePersonTechniqueState).toBe("function");
     expect(typeof api.validateSimulationIdentity).toBe("function");
+    expect(typeof api.validateTechniqueCatalog).toBe("function");
+    expect(typeof api.computeTechniqueCatalogHash).toBe("function");
     expect(
       Object.keys(api).filter((key) =>
-        /TechniqueCatalog|learnTechnique|BattleState|BattleResult/.test(key),
+        /learnTechnique|BattleState|BattleResult|weeklyPlannerApi/.test(key),
       ),
     ).toEqual([]);
   });

@@ -287,6 +287,68 @@ export {
 export type { WeeklyEligibilityPerson } from "./sprint1/weekly-update-eligibility.js";
 export { attachSprint1PersonStateToInitialWorld } from "./sprint1/attach-sprint1-person-state.js";
 
+export {
+  ACTION_TRAITS_KEYS,
+  INITIAL_TECHNIQUE_CATALOG_DATA_VERSION,
+  LEARNING_PROGRESS_STANDARD_BY_TIER,
+  LEARNING_TARGET_DERIVED_STATUSES,
+  LEARNING_TIERS,
+  TECHNIQUE_CONSUMPTION_CLASSES,
+  TECHNIQUE_DEFINITION_SCHEMA_VERSION,
+  TECHNIQUE_PRIORITIES,
+  isLearningTargetDerivedStatus,
+  isLearningTier,
+  isTechniqueConsumptionClass,
+  isTechniquePriority,
+} from "./sprint1/technique-enums.js";
+export type {
+  ActionTraits,
+  LearningTargetDerivedStatus,
+  LearningTier,
+  TechniqueConsumptionClass,
+  TechniquePriority,
+} from "./sprint1/technique-enums.js";
+export {
+  TECHNIQUE_DEFINITION_KEYS,
+  cloneTechniqueDefinition,
+  freezeTechniqueDefinition,
+  validateTechniqueDefinition,
+} from "./sprint1/technique-definition.js";
+export type {
+  TechniqueDefinition,
+  TechniqueMasteryRequirement,
+} from "./sprint1/technique-definition.js";
+export {
+  cloneTechniqueCatalog,
+  computeTechniqueCatalogHash,
+  freezeTechniqueCatalog,
+  validateTechniqueCatalog,
+  validateTechniqueCatalogAgainstIdentity,
+} from "./sprint1/technique-catalog.js";
+export type { TechniqueCatalog, TechniqueCatalogIdentity } from "./sprint1/technique-catalog.js";
+export { validateSprint1PersonTechniqueSemantics } from "./sprint1/technique-person-semantics.js";
+export type { TechniqueSemanticsPersonContext } from "./sprint1/technique-person-semantics.js";
+export {
+  deriveLearningTargetStatus,
+  evaluateTechniqueAcquisitionConditions,
+} from "./sprint1/technique-acquisition.js";
+export type {
+  TechniqueAcquisitionConditionResult,
+  TechniqueLearnerContext,
+} from "./sprint1/technique-acquisition.js";
+export { deriveRequiredStatsFactor } from "./sprint1/technique-required-stats-factor.js";
+export {
+  deriveInitialMasteryHundredths,
+  deriveTechniqueEffectiveMasteryHundredths,
+  selectMasteryCurrentValueFactor,
+} from "./sprint1/technique-mastery.js";
+export { teacherCanTeach } from "./sprint1/technique-teacher.js";
+export type { TeacherCanTeachContext } from "./sprint1/technique-teacher.js";
+export {
+  deriveBasicAttackEffectiveMasteryHundredths,
+  getBasicAttackProfile,
+} from "./sprint1/technique-basic-attack.js";
+
 export type {
   NameCandidateCategory,
   NameCandidateFile,

@@ -7,8 +7,8 @@ sources:
   - docs/specs/09-technique-system.md
   - docs/specs/10-training-and-learning.md
   - docs/specs/14-sprint1-config-schema.md
-  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - commit:efd5ee1fcf1149d755778a031f08a9f7bba377d5
+last_verified: 2026-08-05
 related:
   - abilities-and-aptitudes.md
   - ../invariants/weekly-training-and-learning.md
@@ -54,11 +54,19 @@ related:
 
 ## 関連するコード
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1/technique-definition.ts`
+- `packages/simulation-core/src/sprint1/technique-catalog.ts`
+- `packages/simulation-core/src/sprint1/technique-person-semantics.ts`
+- `packages/simulation-core/src/sprint1/technique-acquisition.ts`
+- `packages/simulation-core/src/sprint1/technique-mastery.ts`
+- `packages/simulation-core/src/sprint1/technique-teacher.ts`
+- `packages/simulation-core/src/sprint1/technique-basic-attack.ts`
+
+S01-003でカタログ／意味validation／習得条件／熟練度参照を実装済み。正式技一覧・週間更新は未着手。数値式の正本は 09・14。
 
 ## 関連するテスト
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
 
 ## 関連する判断
 
@@ -66,7 +74,7 @@ related:
 
 ## 未解決事項
 
-該当なし。
+正式な production 技一覧は 09 後続事項。週間進捗・熟練加算は S01-004。RunRuleSnapshot 接続は S01-005。Sprint 1全体は未完了。
 
 ## 関連Wikiページ
 

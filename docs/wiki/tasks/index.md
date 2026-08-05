@@ -7,8 +7,8 @@ sources:
   - docs/SPRINT_0_BACKLOG.md
   - docs/SPRINT_1_BACKLOG.md
   - tag:sprint0-complete
-  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-04
+  - commit:efd5ee1fcf1149d755778a031f08a9f7bba377d5
+last_verified: 2026-08-05
 ---
 
 # タスク索引
@@ -42,13 +42,13 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 - `TechniqueId`／`PersonTechniqueState`保存構造: S01-001（implemented）
 - `Sprint1PersonState`組立: S01-002（implemented）
-- TechniqueCatalogと技状態の意味的validation: S01-003（pending）
+- TechniqueCatalogと技状態の意味的validation: S01-003（implemented）
 
 | ID | Wiki | 状態 | 依存 |
 |---|---|---|---|
 | S01-001 | [S01-001.md](S01-001.md) | implemented | なし |
 | S01-002 | [S01-002.md](S01-002.md) | implemented | S01-001 |
-| S01-003 | [S01-003.md](S01-003.md) | pending | S01-001、S01-002 |
+| S01-003 | [S01-003.md](S01-003.md) | implemented | S01-001、S01-002 |
 | S01-004 | [S01-004.md](S01-004.md) | pending | S01-002、S01-003 |
 | S01-005 | [S01-005.md](S01-005.md) | pending | S01-001、S01-002、S01-003 |
 | S01-006 | [S01-006.md](S01-006.md) | pending | S01-005 |
@@ -56,7 +56,7 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 | S01-008 | [S01-008.md](S01-008.md) | pending | S01-004、S01-007 |
 | S01-009 | [S01-009.md](S01-009.md) | pending | S01-008 |
 
-次の実装着手は S01-003。
+次の実装着手は S01-004。
 
 ## 関連する正本
 

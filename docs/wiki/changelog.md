@@ -8,7 +8,8 @@ sources:
   - docs/SPRINT_1_BACKLOG.md
   - docs/SPEC_CHANGELOG.md
   - tag:sprint0-complete
-last_verified: 2026-08-04
+  - commit:efd5ee1fcf1149d755778a031f08a9f7bba377d5
+last_verified: 2026-08-05
 ---
 
 # Wiki更新履歴
@@ -18,6 +19,25 @@ last_verified: 2026-08-04
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。
 
 ## 履歴
+
+### 2026-08-05 — S01-003 最終受入監査修正2（provider境界／検証順）
+
+- `validateTechniqueCatalogAgainstIdentity` は expectedIdentity を先に検証し、不正時は SHA provider を呼ばない
+- `validateSprint1PersonTechniqueSemantics` は Sprint1PersonState 構造を catalog より先に検証し、不正時は SHA provider を呼ばない
+- 次はS01-004。Sprint 1全体は未完了
+
+### 2026-08-05 — S01-003 受入監査修正（teacher定義結び付け／progress cap／safe mentalCost／context harden）
+
+- `teacherCanTeach(definition, context)` へ変更。閾値は `TechniqueDefinition.teachingProficiencyRequired` のみ。師匠状態の TechniqueId 一致を必須
+- `deriveLearningTargetStatus` は定義と state の TechniqueId 一致、および progress の `0..cap` を強制（cap+1 は failure）
+- `mentalCost` を safe integer に限定。`TechniqueSemanticsPersonContext` は `spiritSurfaceValue` のみへ harden
+- 次はS01-004。Sprint 1全体は未完了
+
+### 2026-08-05 — S01-003 技カタログ・熟練度・習得状態を実装
+
+- `TechniqueDefinition`／`TechniqueCatalogIdentity`／`TechniqueCatalog`、catalog hash、参照整合、PersonTechniqueState 意味validation、習得条件、LearningTargetDerivedStatus、requiredStatsFactor、mastery 参照、teacherCanTeach、basicAttackProfiles 分離を追加
+- 正式な production 技一覧は未作成。週間更新・RNG・戦闘・WorldEngine は未実装
+- 次はS01-004。Sprint 1全体は未完了
 
 ### 2026-08-05 — S01-002 最終受入監査修正（fresh initial date 固定）
 

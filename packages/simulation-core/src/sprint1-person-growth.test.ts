@@ -205,7 +205,7 @@ describe("S01-002 public API / types", () => {
     expect("countNumericLeaves" in api).toBe(false);
     expect(
       Object.keys(api).filter((key) =>
-        /TechniqueCatalog|weeklyPlanner|BattleState|BattleResult/.test(key),
+        /weeklyPlanner|BattleState|BattleResult|learnTechniqueMutation/.test(key),
       ),
     ).toEqual([]);
   });

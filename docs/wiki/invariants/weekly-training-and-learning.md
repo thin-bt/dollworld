@@ -7,8 +7,8 @@ sources:
   - docs/specs/10-training-and-learning.md
   - docs/specs/14-sprint1-config-schema.md
   - docs/specs/09-technique-system.md
-  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - commit:efd5ee1fcf1149d755778a031f08a9f7bba377d5
+last_verified: 2026-08-05
 related:
   - character-growth.md
   - ../glossary/techniques-and-mastery.md
@@ -39,11 +39,21 @@ related:
 
 ## 関連するコード
 
-該当なし（Sprint 1 実装は未着手）。
+S01-003の純粋候補判定入口（週間更新・RNG・イベントは未実装）:
+
+- `evaluateTechniqueAcquisitionConditions`
+- `deriveLearningTargetStatus`
+- `deriveRequiredStatsFactor`
+- `selectMasteryCurrentValueFactor`
+- `teacherCanTeach`
+
+実装ファイル: `packages/simulation-core/src/sprint1/technique-*.ts`
+
+S01-004で週間Planner・progress／mastery実更新・RNG・訓練イベントを扱う。
 
 ## 関連するテスト
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`（習得条件・derived status 等）
 
 ## 関連する判断
 
@@ -51,7 +61,7 @@ related:
 
 ## 未解決事項
 
-該当なし。
+週間更新・RNG・EventEnvelope は S01-004 未実装。Sprint 1全体は未完了。
 
 ## 関連Wikiページ
 
