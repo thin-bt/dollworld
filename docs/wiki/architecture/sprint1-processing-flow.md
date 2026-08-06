@@ -66,11 +66,15 @@ World 人物を戦闘中に直接書き換えず、snapshot と結果経由で�
 
 ## 関連するコード
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1/`（S01-001〜003）
+- 週間Processor（S01-004）以降は未実装
 
 ## 関連するテスト
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1-foundation.test.ts`
+- `packages/simulation-core/src/sprint1-person-growth.test.ts`
+- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断
 

@@ -28,6 +28,9 @@ related:
 - 同一入力・同一 RNG 状態で決定的に一致する
 - 入力改ざんや不正値を暗黙補正しない
 - Sprint 1 で扱わない大会日程等を週間処理へ混入しない（10 の対象外）
+- `S1-SPEC-0.1.12`で明文化: 強制休養は`severe_injury`／`fatigue_threshold`のみ（`unableToContinueThreshold`は戦闘専用）
+- rest fallback reasons・scoreHundredths整数式・TrainingProcessorRuntimeState・event責務順は 10／14 を正とする
+- S01-004週間Processor実装は未着手
 
 詳細なスコア式・係数は 10・14 を読むこと。
 

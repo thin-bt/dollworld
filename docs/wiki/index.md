@@ -11,7 +11,8 @@ sources:
   - tag:sprint0-complete
   - commit:504fa3cc16346dd0c6480e8328e42518e68215d3
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - commit:259a219d29b626c4678e5b248b8a8453861797f9
+last_verified: 2026-08-05
 related:
   - governance.md
   - sprints/sprint0.md
@@ -25,7 +26,7 @@ related:
 このWikiは、確定した仕様・設計判断・不変条件・タスク履歴を横断参照するための**説明・索引**です。正本ではありません。実装や仕様判断の根拠には使わないでください。
 
 Sprint 0 基点: タグ `sprint0-complete`（commit `504fa3cc16346dd0c6480e8328e42518e68215d3`）。  
-Sprint 1 仕様確定: `S1-SPEC-0.1.11`（commit `2800d3b959e575f57660c27b344507dd0e38ddb6`）。実装は未着手。
+Sprint 1 仕様現行版: `S1-SPEC-0.1.12`（`0.1.11` 確定 commit `2800d3b959e575f57660c27b344507dd0e38ddb6`、`0.1.12` は週間処理契約clarification）。Sprint 1全体の実装は未完了（S01-001〜003は実装済み、次はS01-004）。
 
 ## 正本の優先順位
 
@@ -67,13 +68,13 @@ Sprint 1 仕様確定: `S1-SPEC-0.1.11`（commit `2800d3b959e575f57660c27b344507
 
 ## タスク別リンク
 
-- [Sprint 0 タスク索引](tasks/index.md)（S00-001〜S00-010）
-- Sprint 1 実装タスクページはタスク定義後に追加（現在は [Sprint 1概要](sprints/sprint1.md) を参照）
+- [Sprint 0／Sprint 1 タスク索引](tasks/index.md)
+- S01-001〜003 implemented、次は S01-004、S01-005〜009 pending
 
 ## Sprint別リンク
 
 - [Sprint 0](sprints/sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprints/sprint1.md) — 仕様確定済み・実装未着手（`S1-SPEC-0.1.11`）
+- [Sprint 1](sprints/sprint1.md) — 仕様 `S1-SPEC-0.1.12`（全体未完了、次はS01-004）
 
 ## その他
 

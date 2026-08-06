@@ -28,7 +28,7 @@ Sprint 0・Sprint 1を横断する不変条件索引。正本はミニ仕様で�
 
 AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、死亡者非処理、16歳未満ランクなし、42歳以上引退、参照整合、親子・師弟循環なし、同一シード一致。詳細は正本と検証器を確認すること。
 
-### Sprint 1（`S1-SPEC-0.1.11` で確定した実装前の仕様不変条件）
+### Sprint 1（`S1-SPEC-0.1.12` で確定した実装前の仕様不変条件）
 
 - [人物成長](character-growth.md)
 - [週間訓練・習得](weekly-training-and-learning.md)
@@ -51,7 +51,9 @@ Sprint 0:
 - `apps/simulator/src/sprint0-verification/invariant-verification.ts`
 - `apps/simulator/src/output/world-integrity.ts`
 
-Sprint 1 の実装コードは未着手。
+Sprint 1（S01-001〜003）:
+
+- `packages/simulation-core/src/sprint1/`
 
 ## 関連するテスト
 
@@ -60,7 +62,12 @@ Sprint 0:
 - `apps/simulator/src/sprint0-verification/sprint0-verification.test.ts`
 - `packages/simulation-core` 各領域のテスト
 
-Sprint 1 の実装テストは未着手。
+Sprint 1（S01-001〜003）:
+
+- `packages/simulation-core/src/sprint1-foundation.test.ts`
+- `packages/simulation-core/src/sprint1-person-growth.test.ts`
+- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断
 

@@ -12,7 +12,8 @@ sources:
   - tag:sprint0-complete
   - commit:504fa3cc16346dd0c6480e8328e42518e68215d3
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - commit:259a219d29b626c4678e5b248b8a8453861797f9
+last_verified: 2026-08-05
 ---
 
 # 矛盾記録
@@ -23,12 +24,14 @@ Wiki作成・更新時に発見した、正本・コード・テスト間の矛�
 
 ## 現在確定している内容
 
-現時点で、次を確認したうえで、今回の Wiki 同期後に確認されている未解決矛盾はない。
+現時点で、今回の Wiki 同期後に確認されている未解決矛盾はない。
 
 - Sprint 0 の確定実装・正本（`sprint0-complete`）
-- Sprint 1 の確定仕様 `S1-SPEC-0.1.11`（commit `2800d3b959e575f57660c27b344507dd0e38ddb6`）
+- Sprint 1 の `S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`
+- Sprint 1 の現行仕様は `S1-SPEC-0.1.12`（2026-08-05 の週間処理契約clarification）。`2800d3b...` を 0.1.12 の内容 commit として扱わない
+- 実装状態: S01-001〜S01-003 実装済み、次は S01-004。Sprint 1 全体は未完了
 
-Sprint 1 実装は未着手のため、Sprint 1 のコード・テストとの整合確認済みとは扱わない。
+未来の未作成 commit hash を捏造して sources へ書かない。
 
 ## 関連する正本
 
@@ -40,11 +43,14 @@ Sprint 1 実装は未着手のため、Sprint 1 のコード・テストとの�
 
 ## 関連するコード
 
-該当なし。
+- `packages/simulation-core/src/sprint1/`（S01-001〜003）
 
 ## 関連するテスト
 
-該当なし。
+- `packages/simulation-core/src/sprint1-foundation.test.ts`
+- `packages/simulation-core/src/sprint1-person-growth.test.ts`
+- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断
 

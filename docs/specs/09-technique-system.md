@@ -1,6 +1,6 @@
 # 09 技データ・習得仕様
 
-- 仕様版: `S1-SPEC-0.1.11`
+- 仕様版: `S1-SPEC-0.1.12`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 技定義、技分類、習得進捗、熟練度、使用条件
 - 非対象: 師匠が教える技の自律判断、独自技生成、派生、失伝
@@ -341,7 +341,7 @@ LearningTargetDerivedStatus = progressing | acquirable | blocked_at_cap
 - 未達前提技が存在する場合、Plannerは有効な未達前提技を別のfocus候補として評価できる。
 - 必要能力だけが不足する場合、Plannerは当該技を再度`learn_technique`へ選ばず、能力訓練または休養を選ぶ。
 - Sprint 1で変化しない必要適性が不足する場合、その人物にとって当該技は`blocked_at_cap`かつ再選択不能とし、適性を成長可能と推測しない。後続仕様で適性変化が導入された場合だけ再評価できる。
-- 人物状態が変化して全条件を満たした時点で、上限保持済みの技は再び候補となり、追加進捗RNGを消費せず習得完了判定を行う。
+- 人物状態が変化して全条件を満たした時点で、上限保持済みの技は再び候補となり、追加進捗RNGを消費せず習得完了判定を行う（10仕様§6.2.1の`acquirable`週間契約）。
 
 ## 8. 週間習得進捗
 
@@ -383,9 +383,34 @@ TechniqueLearningContext
 - PersonId、TechniqueId、表示名、配列順、乱数から値を推測しない。
 - 同じ入力フィールドからの正規化規則を変更する場合はSprint 1ミニ仕様版を上げる。
 - 実際に使用した3値と各変換後係数を`factorBreakdown`へ保存する。
-- 習得練習1回につきRNGを1回消費する
+- 習得練習1回につきRNGを1回消費する（`acquirable`即時習得は10仕様§6.2.1どおり0回）
 - 進捗は浮動小数点で保存せず、`learningProgressTenths` の整数固定小数点で小数第1位まで保持する `[Sprint 1暫定]`
-- 毎週の加算後に `learningProgressRequired * 10` へclampし、条件待ち期間の無制限増加を禁止する
+- 入力時は`learningProgressTenths`を`0..learningProgressRequired * 10`でvalidationし、範囲外を拒否する。不正入力をclampして成功させない
+- 週間進捗の正常適用後だけ、`learningProgressRequired * 10`を上限として`min`する
+
+### 8.0 整数積とRNG係数（08／14共通契約）
+
+複数BasisPoints係数の積は08仕様§5.3の`multiplyBasisPointsFloor`を正本とする。効果RNG係数は08仕様§5.4の`drawInclusiveBasisPoints`を正本とする。
+
+```text
+WeeklyProgressTenths
+= multiplyBasisPointsFloor(
+    baseWeeklyProgressTenths,
+    [
+      aptitudeFactor,
+      requiredStatsFactor,
+      learningTraitFactor,
+      teacherTransmissionFactor,
+      compatibilityFactor,
+      discipleCountFactor,
+      fatigueFactor,
+      injuryFactor,
+      rngFactor
+    ]
+  )
+```
+
+各factorはnormalized BasisPoints。`rngFactor`は`techniqueLearning.rngFactorRange`（既定9000..11000）から`drawInclusiveBasisPoints`で取得する。
 
 ### 8.1 Sprint 1教授可否
 
@@ -438,17 +463,20 @@ teacherCanTeach
 
 ```text
 DedicatedPracticeGainHundredths
-= floor(
-    techniqueLearning.masteryGainHundredths.dedicatedPractice
-    * masteryCurrentValueFactor
-    * masteryPracticeRngFactor
+= multiplyBasisPointsFloor(
+    masteryGainHundredths.dedicatedPractice,
+    [
+      masteryCurrentValueFactor,
+      masteryPracticeRngFactor
+    ]
   )
 ```
 
-- `masteryPracticeRngFactor` は `techniqueLearning.masteryPracticeRngFactorRange=0.90..1.10` から1回取得する
+- `masteryPracticeRngFactor` は `techniqueLearning.masteryPracticeRngFactorRange`（既定0.90..1.10 → 9000..11000 BasisPoints）から`drawInclusiveBasisPoints`で1回取得する
+- 数学契約は08仕様§5.3／§5.4を正本とする
 - 専用反復が確定した後は、熟練度100到達等で実増分が0でもRNGを1回消費する
 - 関連能力の通常修行、公式戦、模擬戦の熟練度上昇には追加RNGを使用しない
-- 進捗・熟練度更新は整数固定小数点でfloorし、浮動小数点値を保存しない
+- 進捗・熟練度更新は整数固定小数点で扱い、浮動小数点値を保存しない
 
 ### 9.2 関連能力の通常修行
 
@@ -457,8 +485,15 @@ DedicatedPracticeGainHundredths
 - 候補が0件なら通常修行熟練度は発生しない
 - 候補が1件以上なら、表示熟練度が最も低い技を1件だけ選ぶ
 - 同値の場合はTechniqueId昇順で決め、RNGを使用しない
-- 選ばれた技へ `masteryHundredths +50`（表示+0.5）を適用し、現在値係数を掛ける
-- 能力成長と熟練度更新は10仕様の同じ人物更新トランザクションでcommitする
+- 選ばれた技へ次を適用し、能力成長と同じ人物更新トランザクションでcommitする
+
+```text
+NormalTrainingMasteryGainHundredths
+= multiplyBasisPointsFloor(
+    masteryGainHundredths.normalTraining,
+    [masteryCurrentValueFactor]
+  )
+```
 
 
 ## 10. 発動安定性用データ
@@ -595,6 +630,8 @@ Sprint 1では装備システムを扱わないため、3プロファイルは�
 - 前提技循環検出
 - 派生元循環検出
 - 習得進捗tenths・熟練度hundredthsの加算と上限
+- `WeeklyProgressTenths`／`DedicatedPracticeGainHundredths`／`NormalTrainingMasteryGainHundredths`の`multiplyBasisPointsFloor`
+- 効果RNGの`drawInclusiveBasisPoints`（9000／11000両端）
 - 未保持技の仮想0評価、focus確定時の原子的状態作成、TechniqueId昇順挿入
 - teacherCanTeachの有効師弟関係・師匠習得済み・熟練閾値境界
 - same seed一致

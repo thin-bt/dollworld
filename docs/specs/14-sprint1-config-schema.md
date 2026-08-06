@@ -1,6 +1,6 @@
 # 14 Sprint 1共通設定スキーマ付録
 
-- 仕様版: `S1-SPEC-0.1.11`
+- 仕様版: `S1-SPEC-0.1.12`
 - 状態: 08〜13が参照する型付き設定の固定構造
 - 対象: 成長、週間Planner、技習得、戦闘、戦闘後効果
 - 非対象: 初期世界生成設定、正式技一覧、大会設定
@@ -25,7 +25,8 @@ Sprint1Config
 - 必須キー欠落を0や空配列で補完しない
 - 全数値は有限値
 - 小数はJSON numberで入力できるが、validation時にbasis points（10000倍整数）へ正規化し、決定処理は整数演算を使用する
-- 乗算途中はbasis points精度を保持し、各仕様で名前が付いた最終値の算出時に`floor`する。負値を含む補正は最終丸め後に対象範囲へclampする
+- 複数BasisPoints係数の積は08仕様§5.3の`multiplyBasisPointsFloor`（最終1回floor）を正本とする。factorごとのsequential floorは禁止
+- 負値を含む補正は最終丸め後に対象範囲へclampする
 - 確率値は12仕様どおり整数％へfloorしてから乱数と比較する
 - Strategy候補点はbasis points整数へ正規化後に比較する
 - ルートの`Sprint1Config.configVersion`だけを版識別子とする。`battle.configVersion`を重複保持しない
@@ -65,6 +66,7 @@ Sprint1ConfigIdentity
 | BattleState.schemaVersion | `0.5.0` | terminalReasonと両ActionSourceIdentityを含む戦闘状態構造 |
 | BattleResult.schemaVersion | `0.5.0` | summaryLogHashと両ActionSourceIdentityを含む戦闘結果構造 |
 | EventEnvelope.schemaVersion | `0.2.0` | 共通イベント構造変更 |
+| TrainingProcessorRuntimeState.schemaVersion | `0.1.0` | 週間訓練Processorの再開・集計状態 |
 
 - schemaVersionとdata/config versionを同じ意味で使用しない
 - 同じ版文字列のcanonical内容は不変
@@ -130,6 +132,31 @@ growth
 - 正式師匠なし・資格なし親ではteacherFactor=0.75を使用し、discipleCountFactorは1.00として追加減衰させない
 - 正式師匠ありの場合、対象弟子を含む門下人数は1以上であり、discipleCountFactorsの該当帯を使用する
 - 門下人数0を正式師匠ありとして入力する場合は不正とする
+- 成長素質係数の整数式は08仕様の`growthPotentialFactorBasisPoints`を正本とする。`potentialMinimumFactor`／`potentialMaximumFactor`をnormalized BasisPoints化した値で境界`0→6500`／`50→10000`／`100→13500`を満たすこと
+- `GrowthInput.motivationFactor`の入力契約（必須・8000..11500 BasisPoints・欠落補完禁止）も08仕様を正本とする
+- 複数BasisPoints係数の積は08仕様§5.3の`multiplyBasisPointsFloor`を正本とする。能力成長は次式:
+
+```text
+GrowthGainMilliPoints
+= multiplyBasisPointsFloor(
+    baseMilliPointsPerTraining,
+    [
+      growthPotentialFactor,
+      ageFactor,
+      currentValueFactor,
+      teacherFactor,
+      discipleCountFactor,
+      fatigueFactor,
+      injuryFactor,
+      motivationFactor,
+      rngFactor
+    ]
+  )
+```
+
+- 効果RNG係数は08仕様§5.4の`drawInclusiveBasisPoints(rng, minimumBp, maximumBp) = rng.nextInt(minimumBp, maximumBp + 1)`を正本とする。Sprint 1既定は`rngMinimumFactor`／`rngMaximumFactor`のnormalized値9000..11000（両端含む2001値）。`nextFloat`補間・半開区間・％取得後100倍・`Math.round`・moduloは禁止
+- 「RNGを1回消費する」は公開`nextInt`を1回呼ぶこと。内部rejection samplingのuint32回数は固定1とは定義しない
+- 固定テスト: `base=500`、`factors=[6500,9000,11500]` → final-floor 336（sequential floor 335は正式結果にしない）
 
 ## 3. temporaryCondition
 
@@ -202,21 +229,67 @@ weeklyPlanner
 ```
 
 - personality等のcontext scoreは入力側で-20..20へ正規化する
-- baseFatiguePenalty=`floor(fatigue/5) * baseFatiguePenaltyPerFivePoints`
-- baseInjuryPenalty=`floor(injury/5) * baseInjuryPenaltyPerFivePoints`
-- baseMentalExhaustionPenaltyは`1-currentMental/maxMental`を0..baseMentalExhaustionPenaltyMaximumへ線形変換する
-- train／learn／practiceは各base penaltyへ`burdenPenaltyMultipliersByAction`を掛けて減算する
-- restはburden penaltyを減算せず、疲労・負傷・精神消耗から`restNeedBonuses`を算出して加算する
-- fatigue bonus=`min(fatigueMaximum, floor(fatigue/5) * fatiguePerFivePoints)`
-- injury bonus=`min(injuryMaximum, floor(injury/5) * injuryPerFivePoints)`
-- mental bonus=`floor((1-currentMental/maxMental) * mentalExhaustionMaximum)`。maxMental<=0は設定補完せず人物状態不正
+- Planner比較は整数`scoreHundredths`のみを使用し、表示用小数や`Math.round`を挟まない。負値はJavaScript truncateではなく`mathematicalFloor`を使う
+- `baseScoreHundredths = baseScore * 100`
+- `contextNumerator = Σ(contextValue * contextWeightBasisPoints)`、`contextScoreHundredths = mathematicalFloor(contextNumerator / 100)`
+- `baseFatiguePenalty = floor(fatigue / 5) * baseFatiguePenaltyPerFivePoints`
+- `baseInjuryPenalty = floor(injury / 5) * baseInjuryPenaltyPerFivePoints`
+- `baseMentalExhaustionPenalty = floor((maxMental - currentMental) * baseMentalExhaustionPenaltyMaximum / maxMental)`。`maxMental<=0`は設定補完せず人物状態不正
+- action別負担: `penaltyHundredths = floor(basePenalty * burdenPenaltyMultiplierBasisPoints / 100)`。train／learn／practiceへ減算し、restの3倍率は0のため減算しない
+- rest fatigue bonus hundredths: `min(fatigueMaximum * 100, floor(floor(fatigue / 5) * fatiguePerFivePointsBasisPoints / 100))`
+- rest injury bonus hundredthsも同式（`injuryMaximum`／`injuryPerFivePointsBasisPoints`）
+- rest mental bonus hundredths: `floor((maxMental - currentMental) * mentalExhaustionMaximum / maxMental) * 100`
+- ActionScoreHundredthsは上記整数値の加減のみで求める（10仕様）
+- `StatTargetScoreHundredths`は`statTargetWeights`のnormalized BasisPointsを使い、次式とする。
+
+```text
+StatTargetScoreHundredths
+= floor(
+    (
+      (100 - currentValue)
+        * statTargetWeights.remainingCapacity
+      + growthPotential
+        * statTargetWeights.growthPotential
+      + relatedAptitude
+        * statTargetWeights.relatedAptitude
+      + teacherRecommendation
+        * statTargetWeights.teacherRecommendation
+    ) / 100
+  )
+```
+
+既定`10000`／`10000`／`5000`／`10000`は旧10暫定浮動小数式と一致する
 - `trainStat`／`learnTechnique`／`practiceTechnique`は10仕様の`train_stat`／`learn_technique`／`practice_technique`へ一対一対応する
-- scoreはhundredthsの整数固定小数点へ変換して比較する
 - 基礎スコアは10仕様の表と一致させる
-- learningTargetWeightsとpracticeTargetWeightsは各合計100
+- learningTargetWeightsとpracticeTargetWeightsは各合計100の整数weight
 - styleMatchとteacherPriorityは0..100。存在しないstyleMatchは50、師匠なしteacherPriorityは0
 - recentPracticeNeedは10仕様の12週線形式を使用する
 - スコア同点時だけRNGを使用する
+- `battle.injury.unableToContinueThreshold`は戦闘中の続行不能判定専用であり、週間Plannerの強制休養（`WeeklyForcedRestReason`）へ使用しない
+- `TrainingProcessorRuntimeState.schemaVersion`は`0.1.0`。構造・初期値・`actionCounts`キー・`processedPersonCount`集計規則・累積契約は10仕様§9を正本とする
+- `LearningTargetScoreHundredths`／`PracticeTargetScoreHundredths`の整数式は10仕様§6.2／§6.3を正本とする。要約:
+
+```text
+LearningTargetScoreHundredths
+= aptitudeContributionHundredths
++ requiredStatsContributionHundredths
++ progressContributionHundredths
++ teacherContributionHundredths
++ styleContributionHundredths
++ tierContributionHundredths
+```
+
+各寄与のfloor規則・入力validation（`learningProgressTenths`範囲外拒否）・golden 7320は10仕様を正本とする。
+
+```text
+PracticeTargetScoreHundredths
+= masteryNeedContributionHundredths
++ recentPracticeContributionHundredths
++ teacherPriorityContributionHundredths
++ practiceStyleContributionHundredths
+```
+
+golden 5050は10仕様を正本とする。
 
 ## 5. techniqueLearning
 
@@ -256,6 +329,44 @@ techniqueLearning
 ```
 
 `baseWeeklyProgressTenths=100` は表示進捗10.0に相当する。aptitudeは人物の対応系統適性、learningTrait／teachingAbility／compatibilityは09仕様の`TechniqueLearningContext`を使用する。各入力範囲は0..100、欠落時は中立50とし、上記式をそのまま使用する。Sprint 1では`teacherCanTeach=true`の技だけを習得候補とし、teacherTransmissionとcompatibilityを必ず適用する。`selfStudyFactor=0.40`はSprint 2以降の予約値で、Sprint 1の計算へ使用しない。
+
+整数積とRNG:
+
+```text
+WeeklyProgressTenths
+= multiplyBasisPointsFloor(
+    baseWeeklyProgressTenths,
+    [
+      aptitudeFactor,
+      requiredStatsFactor,
+      learningTraitFactor,
+      teacherTransmissionFactor,
+      compatibilityFactor,
+      discipleCountFactor,
+      fatigueFactor,
+      injuryFactor,
+      rngFactor
+    ]
+  )
+
+DedicatedPracticeGainHundredths
+= multiplyBasisPointsFloor(
+    masteryGainHundredths.dedicatedPractice,
+    [
+      masteryCurrentValueFactor,
+      masteryPracticeRngFactor
+    ]
+  )
+
+NormalTrainingMasteryGainHundredths
+= multiplyBasisPointsFloor(
+    masteryGainHundredths.normalTraining,
+    [masteryCurrentValueFactor]
+  )
+```
+
+- `multiplyBasisPointsFloor`／`drawInclusiveBasisPoints`は08仕様§5.3／§5.4を正本とし、09仕様が同契約を参照する
+- `rngFactorRange`／`masteryPracticeRngFactorRange`の既定0.90..1.10はnormalized 9000..11000から両端含みで取得する
 
 ## 6. techniqueBalance
 
@@ -599,7 +710,7 @@ postEffects
 - basicAttackProfilesはmentalCost=0、priority=0、speedModifier=0、rangeShiftAfterUse=none、injuryModifier=0、effectiveMastery=50、activationCheck=falseを必須とする
 - TechniqueDefinitionで整数指定された項目へ小数を許可しない
 - 0..100値は範囲外拒否
-- `injury.unableToContinueThreshold`は1..100
+- `injury.unableToContinueThreshold`は1..100。戦闘続行不能判定専用であり、週間Planner強制休養へは使用しない
 - `judgement.totalMinimum=0`、`totalMaximum=100`かつminimum < maximum
 - `defaultInitialRange`は4間合いのいずれか
 - maxTurns=20
@@ -623,8 +734,9 @@ postEffects
 - root configVersionとBattleState記録値の一致
 - ageFactorsByProfile／currentValueFactors／teacherFactors／discipleCountFactors／fatigueFactors／injuryFactorsの全列挙値が08仕様と完全一致
 - weeklyPlannerのaction別負担倍率とrest回復必要度により、高疲労・高負傷・精神不足でrestの相対scoreが増えること
-- WeeklyPlannerContext、LearningTargetScore、PracticeTargetScoreを10仕様どおり再計算できること
-- masteryPracticeRngFactorRangeの0.90／1.10境界と専用反復熟練度計算
+- WeeklyPlannerContext、LearningTargetScoreHundredths、PracticeTargetScoreHundredthsを10仕様どおり再計算できること（golden 7320／5050含む）
+- masteryPracticeRngFactorRangeの0.90／1.10境界（9000／11000）と`DedicatedPracticeGainHundredths`／`NormalTrainingMasteryGainHundredths`
+- `multiplyBasisPointsFloor`固定テスト（336）と`drawInclusiveBasisPoints`の`nextInt(min, max+1)`契約
 - 発動率・命中率・負傷率のbasis points計算、floor、clamp順
 - basicAttackProfilesの3系統完全列挙、固定field、range順序
 - Strategy score、referenceOffense、predictedSelfInjuryChanceを12仕様どおり再計算できること

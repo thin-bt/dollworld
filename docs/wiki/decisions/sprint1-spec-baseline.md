@@ -12,7 +12,8 @@ sources:
   - docs/specs/11-battle-state.md
   - docs/specs/12-battle-turn-resolution.md
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - commit:259a219d29b626c4678e5b248b8a8453861797f9
+last_verified: 2026-08-05
 related:
   - sprint1-identity-and-config.md
   - ../sprints/sprint1.md
@@ -22,19 +23,32 @@ related:
 
 ## 概要
 
-Sprint 1 仕様確定時点のベースライン記録。正本の変更履歴は [`docs/SPEC_CHANGELOG.md`](../../SPEC_CHANGELOG.md) を優先する。
+Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPEC_CHANGELOG.md`](../../SPEC_CHANGELOG.md) を優先する。
 
 ## 現在確定している内容
 
-- 正式版: `S1-SPEC-0.1.11`
+### 仕様版
+
+- 現行: `S1-SPEC-0.1.12`
 - 正本: `SPEC-0.1.2`
-- 仕様確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
-- 08〜14 は作成・受入監査済み
+- `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
+- `S1-SPEC-0.1.12` は 2026-08-05 の週間処理契約clarification（受入監査追補含む）。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.10-draft` は履歴であり現行版ではない
+
+### `S1-SPEC-0.1.11` 確定時点の履歴メモ
+
+当時（commit `2800d3b...`）の受入内容の要約:
+
 - BaseStat 旧名修正: `vitality` → `stamina`、Ability としての `technique` → `skill`
 - 系統名修正: `martial` → `unarmed`
 - `currentMental` の clamp 廃止（範囲外は開始前失敗）
-- **Sprint 1 実装はこの時点では未着手**
+- その時点では Sprint 1 実装は未着手だった
+
+### 現在の実装状態（別段落）
+
+- S01-001〜S01-003 は実装済み
+- 次の実装着手は S01-004
+- Sprint 1 全体は未完了
 
 ## 関連する正本
 
@@ -44,11 +58,15 @@ Sprint 1 仕様確定時点のベースライン記録。正本の変更履歴�
 
 ## 関連するコード
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1/`
+- `packages/simulation-core/src/sprint1/constants.ts`
 
 ## 関連するテスト
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1-foundation.test.ts`
+- `packages/simulation-core/src/sprint1-person-growth.test.ts`
+- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断
 

@@ -20,6 +20,19 @@ last_verified: 2026-08-05
 
 ## 履歴
 
+### 2026-08-05 — S1-SPEC-0.1.12 最終受入監査修正（整数score・RNG BP・一括floor・acquirable・累積）
+
+- LearningTarget／PracticeTargetの整数`scoreHundredths`、効果RNGの`drawInclusiveBasisPoints`、`multiplyBasisPointsFloor`、`acquirable`週間契約、RuntimeState累積、行動別イベントfixtureを正本へ追補
+- Wikiの「Sprint 1実装未着手」旧記述を削除。`2800d3b`は`S1-SPEC-0.1.11`確定commitと明記
+- **実装ではない**。仕様版は`S1-SPEC-0.1.12`のまま（0.1.13へ上げない）。次の実装着手はS01-004
+- 詳細は [`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md) の同日エントリを正とする
+
+### 2026-08-05 — S1-SPEC-0.1.12 週間処理仕様の未確定事項を明文化（clarification）
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.12`へ版上げ。週間Plannerの強制休養／rest fallback／scoreHundredths／RuntimeState／event責務順などを正本へ補完
+- **実装ではない**。S01-004の週間Processor実装は別タスク
+- 詳細は [`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md) の同日エントリを正とする
+
 ### 2026-08-05 — S01-003 最終受入監査修正2（provider境界／検証順）
 
 - `validateTechniqueCatalogAgainstIdentity` は expectedIdentity を先に検証し、不正時は SHA provider を呼ばない

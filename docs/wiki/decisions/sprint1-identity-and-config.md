@@ -32,7 +32,7 @@ Sprint 1 新規 run 向けの設定・identity・出力拡張の索引。正本�
 - `specVersions` の例:
   - main: `SPEC-0.1.2`
   - sprint0: `S0-SPEC-0.1.5`
-  - sprint1: `S1-SPEC-0.1.11`
+  - sprint1: `S1-SPEC-0.1.12`
 - Sprint 1 新規 run へ適用する
 - Sprint 0 既存 `simulationId` を再計算して置換しない
 - 基本攻撃設定も Sprint1Config hash 対象
@@ -49,11 +49,12 @@ Sprint 1 新規 run 向けの設定・identity・出力拡張の索引。正本�
 
 ## 関連するコード
 
-該当なし（Sprint 1 実装は未着手）。Sprint 0 の simulationId 生成は既存実装を参照。
+- `packages/simulation-core/src/sprint1/`（S01-001〜003）
+- Sprint 0 の simulationId 生成は既存実装を参照
 
 ## 関連するテスト
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1-foundation.test.ts`
 
 ## 関連する判断
 

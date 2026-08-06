@@ -64,11 +64,13 @@ unarmed | sword | magic
 
 ## 関連するコード
 
-該当なし（Sprint 1 実装は未着手）。Sprint 0 の公開型は `packages/simulation-core` の AbilityKey／AptitudeKey を参照。
+- `packages/simulation-core/src/sprint1/`（S01-001〜002）
+- Sprint 0 の公開型は `packages/simulation-core` の AbilityKey／AptitudeKey を参照
 
 ## 関連するテスト
 
-該当なし（Sprint 1 実装は未着手）。
+- `packages/simulation-core/src/sprint1-foundation.test.ts`
+- `packages/simulation-core/src/sprint1-person-growth.test.ts`
 
 ## 関連する判断
 

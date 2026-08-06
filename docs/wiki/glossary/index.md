@@ -6,7 +6,7 @@ scope: cross-sprint
 sources:
   - docs/specs/00-domain-glossary.md
   - docs/SPEC.md
-last_verified: 2026-08-01
+last_verified: 2026-08-05
 ---
 
 # 用語集索引
@@ -23,7 +23,7 @@ Sprint 0・Sprint 1を横断する用語索引。定義の正本はミニ仕様�
 - [シミュレーション識別（simulationId / eventId 等）](simulation-identity.md)
 - [ProcessorRuntimeState](processor-runtime-state.md)
 
-### Sprint 1（仕様確定済み・実装未着手）
+### Sprint 1（仕様確定済み、S01-001〜003実装済み）
 
 - [能力と適性（AbilityKey／AptitudeKey）](abilities-and-aptitudes.md)
 - [技と熟練度](techniques-and-mastery.md)
@@ -41,7 +41,9 @@ Sprint 0 用語に対応する実装:
 - `packages/simulation-core/src/world-date.ts`
 - `packages/simulation-core/src/ids.ts`
 
-Sprint 1 用語の実装コードは未着手。
+Sprint 1（S01-001〜003）:
+
+- `packages/simulation-core/src/sprint1/`
 
 ## 関連するテスト
 
@@ -50,7 +52,11 @@ Sprint 0 用語に対応するテスト:
 - `packages/simulation-core/src/domain.test.ts`
 - `packages/simulation-core/src/world-date.test.ts`
 
-Sprint 1 用語の実装テストは未着手。
+Sprint 1（S01-001〜003）:
+
+- `packages/simulation-core/src/sprint1-foundation.test.ts`
+- `packages/simulation-core/src/sprint1-person-growth.test.ts`
+- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
 
 ## 関連する判断
 

@@ -1,6 +1,6 @@
 # 08 人物能力・成長仕様
 
-- 仕様版: `S1-SPEC-0.1.11`
+- 仕様版: `S1-SPEC-0.1.12`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 人物能力、遺伝値、適性、週間成長、一時状態
 - 非対象: 出生時の遺伝生成、師匠選択、独自技、恒久的な加齢衰退、引退判断
@@ -144,7 +144,7 @@ StatGrowthRemainder
 
 | 係数 | 値 |
 |---|---|
-| 成長素質 | 0.65..1.35。50を1.00 |
+| 成長素質 | 0.65..1.35。50を1.00。整数式は§5.1.1 |
 | 現在値0〜39 | 1.15 |
 | 現在値40〜59 | 1.00 |
 | 現在値60〜74 | 0.75 |
@@ -173,17 +173,128 @@ StatGrowthRemainder
 | 意欲・調子 | 0.80..1.15 |
 | RNG | 0.90..1.10 |
 
+#### 5.1.1 成長素質係数（BasisPoints）
+
+```text
+growthPotentialFactorBasisPoints
+= potentialMinimumFactorBasisPoints
+  + floor(
+      growthPotential
+      * (
+          potentialMaximumFactorBasisPoints
+          - potentialMinimumFactorBasisPoints
+        )
+      / 100
+    )
+```
+
+境界:
+
+| growthPotential | growthPotentialFactorBasisPoints |
+|---:|---:|
+| 0 | 6500 |
+| 50 | 10000 |
+| 100 | 13500 |
+
+- `growthPotential`はinteger `0..100`
+- 範囲外・小数は拒否する
+- `potentialMinimumFactorBasisPoints`／`potentialMaximumFactorBasisPoints`は14仕様`growth.potentialMinimumFactor`／`potentialMaximumFactor`をnormalizedした値（既定6500／13500）
+
 ### 5.2 修行別基礎成長 `[Sprint 1暫定]`
 
 能力訓練1回の対象能力に対する基礎成長を `500 milliPoints` とする。
 
 - 1回で表面値0.5相当
-- 各係数適用後にmilliPointsへ丸める
+- 複数BasisPoints係数は§5.3の`multiplyBasisPointsFloor`で最終1回だけfloorする。factorごとのsequential floorは禁止
 - 0未満にしない
 - 100到達後は加算しない
 - 値は `growth.baseMilliPointsPerTraining` として設定化する
 
 関連能力へ副次成長を与える場合は別タスクとし、Sprint 1初期実装では対象能力1つだけを更新する。
+
+### 5.3 複数BasisPoints係数の積（共通数学契約）
+
+能力成長・技習得進捗・熟練度増分で共有する。09／14も同じ契約を参照する。
+
+```text
+multiplyBasisPointsFloor(baseInteger, factors)
+= floor(
+    baseInteger
+    * product(factors)
+    / 10000 ^ factors.length
+  )
+```
+
+- `baseInteger`はsafe integer 0以上
+- 全factorはsafe integer 0以上のBasisPoints
+- 全factorを掛けた正確な有理数へ最後に1回だけfloorする
+- factorごとのsequential floorは禁止
+- Numberのunsafe integerへ到達する単純乗算は禁止
+- 内部BigIntまたは同値の正確な整数演算を使用可能
+- BigIntをJSON、canonical値、public保存値へ出力しない
+- 最終結果がsafe integerを超える場合はfailure
+
+```text
+GrowthGainMilliPoints
+= multiplyBasisPointsFloor(
+    baseMilliPointsPerTraining,
+    [
+      growthPotentialFactor,
+      ageFactor,
+      currentValueFactor,
+      teacherFactor,
+      discipleCountFactor,
+      fatigueFactor,
+      injuryFactor,
+      motivationFactor,
+      rngFactor
+    ]
+  )
+```
+
+各factorはnormalized BasisPoints（例: 1.00 → 10000）。
+
+固定テスト:
+
+```text
+base=500
+factors=[6500, 9000, 11500]
+
+final-floor result = 336
+sequential-floor result = 335
+
+正式結果は336
+```
+
+### 5.4 効果RNG係数の生成（共通契約）
+
+能力成長のRNG係数は、normalized BasisPointsの整数範囲から一様に取得する。
+
+```text
+drawInclusiveBasisPoints(rng, minimumBp, maximumBp)
+= rng.nextInt(minimumBp, maximumBp + 1)
+```
+
+Sprint 1既定（`growth.rngMinimumFactor`／`rngMaximumFactor`をnormalized）:
+
+```text
+minimumBp = 9000
+maximumBp = 11000
+```
+
+したがって9000〜11000の2001整数値を両端含みで取得する。
+
+禁止:
+
+- `nextFloat`による補間
+- 11000へ到達しない半開区間
+- 90〜110の整数％だけを取得して100倍する方式
+- `Math.round`
+- modulo
+
+「RNGを1回消費する」は、公開RNG APIの`nextInt`を1回呼ぶことを意味する。`nextInt`内部のrejection samplingによる`nextUint32`消費数はRNG状態の正式結果として扱い、固定1回のuint32消費とは定義しない。
+
+技習得進捗・専用反復熟練度のRNG係数も同じ契約を使う（09仕様）。
 
 ## 6. 一時状態
 
@@ -246,8 +357,9 @@ learningFocusTechniqueId = null
 | inactive | 0 | 0 |
 
 - `inactive` は `deceased`、`waiting`、`stopped` を含み、疲労・負傷・調子・自信・現在精神力を一切更新しない
-- 重傷時は原則休養
-- 疲労81以上は強制休養候補
+- 重傷時は原則休養（10仕様の`WeeklyForcedRestReason.severe_injury`）
+- 疲労81以上は強制休養候補（10仕様の`WeeklyForcedRestReason.fatigue_threshold`。閾値は`temporaryCondition.forcedRestFatigueThreshold`）
+- `battle.injury.unableToContinueThreshold`は戦闘中の続行不能判定専用であり、週間強制休養へ使用しない
 - 週次増減は設定化する
 - 自信は戦闘結果・大会結果で更新し、通常訓練では変更しない
 - 休養時の現在精神力回復量は `temporaryCondition.restMentalRecovery=20` とする `[Sprint 1暫定]`
@@ -268,7 +380,7 @@ learningFocusTechniqueId = null
 - `Math.random()`は禁止
 - 人物処理順は `PersonId` 昇順
 - 同一人物内の能力候補順は基礎能力の固定順
-- RNG係数は訓練適用1件につき1回
+- RNG係数は訓練適用1件につき1回（§5.4の`drawInclusiveBasisPoints`）
 - 分岐で成長量が0となる場合も、対象訓練が確定済みならRNGを1回消費する
 - 同一入力・同一RNG状態で完全一致する
 
@@ -291,6 +403,14 @@ GrowthInput
 ```
 
 `trainingBaseMilliPoints` は入力へ重複保持しない。基礎成長値は常に `growthConfig.baseMilliPointsPerTraining` を参照する。同じ意味の値を人物別入力や呼出引数から上書きする実装は禁止する。
+
+`motivationFactor`（意欲・調子係数）:
+
+- 必須入力
+- normalized BasisPointsで`8000..11500`
+- 人物の`condition`／`confidence`からS01-004内部で導出しない
+- 欠落時に`10000`を補完しない
+- 導出adapterは別仕様が追加されるまでS01-004対象外
 
 ### 出力
 
@@ -332,7 +452,7 @@ GrowthResult
 
 - `training.stat_growth_applied`: targetStat、before、after、remainderBefore、remainderAfter、appliedMilliPoints、factorBreakdown
 - `training.condition_updated`: fatigue／injury／condition／confidence／currentMentalの各before・after・delta
-- `training.forced_rest_applied`: forcedReasonのみ。状態deltaは含めない
+- `training.forced_rest_applied`: forcedReasonのみ。型は10仕様の`WeeklyForcedRestReason`。状態deltaは含めない
 - `training.rest_applied`: fatigue／injury／condition／currentMentalの各before・after・delta
 
 休養イベントへtargetStatや成長端数を必須化しない。未使用キーをnullで大量に埋めず、event typeごとに固定payload schemaを持つ。
@@ -363,7 +483,8 @@ GrowthResult
 - 門下人数係数全境界
 - 疲労係数全境界
 - 負傷係数全段階
-- RNG係数0.90／1.10境界
+- RNG係数0.90／1.10境界（`drawInclusiveBasisPoints`で9000／11000両端）
+- `multiplyBasisPointsFloor`固定テスト（final-floor 336、sequential 335は正式結果にしない）
 - 端数持越し
 - 表面値100で成長停止
 - 0〜7歳の正式訓練除外

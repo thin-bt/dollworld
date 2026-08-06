@@ -2,7 +2,7 @@
 
 - バックログバージョン：`S1-BACKLOG-0.1.0`
 - 対象ゲーム仕様：`SPEC-0.1.2`
-- 対象Sprint 1ミニ仕様：`S1-SPEC-0.1.11`
+- 対象Sprint 1ミニ仕様：`S1-SPEC-0.1.12`
 - 仕様確定commit：`2800d3b959e575f57660c27b344507dd0e38ddb6`
 - 実装状態：**未着手**（本バックログは実装タスク定義のみ）
 
@@ -142,7 +142,7 @@ Sprint 1で必要な公開型、Sprint1Config、validation、canonical化、conf
 - `docs/specs/14-sprint1-config-schema.md`
 - Battle関連の共有IDなど、本タスクが公開する参照型に必要な定義（詳細生成・解決はS01-005以降）
 
-仕様版はすべて`S1-SPEC-0.1.11`。
+仕様版はすべて`S1-SPEC-0.1.12`。
 
 `PersonTechniqueState`の保存構造の所有は本タスク（S01-001）とする。09全体を本タスクで実装しない。
 
@@ -222,7 +222,7 @@ PersonTechniqueState
 - Sprint1Configの正常系・未知キー拒否・境界値
 - config canonical化がキー順・空白・改行に左右されないこと
 - 注入`Sha256Provider`によるconfig hash材料の一致
-- SimulationIdentity.specVersionsの必須値（`SPEC-0.1.2`／`S0-SPEC-0.1.5`／`S1-SPEC-0.1.11`）
+- SimulationIdentity.specVersionsの必須値（`SPEC-0.1.2`／`S0-SPEC-0.1.5`／`S1-SPEC-0.1.12`）
 - AbilityKey／AptitudeKeyがSprint 0公開型と一致すること（`martial`不使用）
 - `PersonTechniqueState`の保存構造が09仕様の全項目を持つこと
 - 整数／nullの型境界（各フィールド）
@@ -264,7 +264,7 @@ PersonTechniqueState
 - `docs/specs/00-domain-glossary.md`
 - `docs/specs/14-sprint1-config-schema.md`（growth／temporaryCondition）
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -369,7 +369,7 @@ PersonTechniqueState
 - `docs/specs/08-character-growth.md`（人物一時状態・`Sprint1PersonState`との接続。保存型の再定義はしない）
 - `docs/specs/14-sprint1-config-schema.md`（techniqueLearning／techniqueBalance／basicAttackProfiles）
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -471,7 +471,7 @@ S01-003は両者を接続して技状態の意味的validationを閉じる。保
 - `docs/specs/07-seeded-rng.md`
 - `docs/specs/14-sprint1-config-schema.md`（weeklyPlanner／techniqueLearning／growth／temporaryCondition）
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -563,7 +563,7 @@ S01-003は両者を接続して技状態の意味的validationを閉じる。保
 - `docs/specs/08-character-growth.md`
 - `docs/specs/14-sprint1-config-schema.md`（battle）
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -655,7 +655,7 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - `docs/specs/07-seeded-rng.md`
 - `docs/specs/14-sprint1-config-schema.md`（battle）
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -748,7 +748,7 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - `docs/specs/05-statistics-output.md`
 - `docs/specs/14-sprint1-config-schema.md`
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -845,7 +845,7 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - `docs/specs/14-sprint1-config-schema.md`
 - `docs/TECHNICAL_DECISIONS.md`（実行構成の固定事項）
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -946,7 +946,7 @@ Sprint 1全体の再現性・差分・RNG・canonical／hash／identity・週間
 - `docs/specs/07-seeded-rng.md`
 - Sprint 0回帰に必要な01／04等の既存契約
 
-仕様版は`S1-SPEC-0.1.11`。
+仕様版は`S1-SPEC-0.1.12`。
 
 ### 依存タスク
 
@@ -970,7 +970,7 @@ Sprint 1全体の再現性・差分・RNG・canonical／hash／identity・週間
 
 - 新機能の追加実装（欠陥修正に限る）
 - 大会・昇格・賞金・Web・MySQL
-- 仕様08〜14の内容変更や`S1-SPEC-0.1.11`の版上げ
+- 仕様08〜14の内容変更や`S1-SPEC-0.1.12`の版上げ
 
 ### 変更を想定する既存領域
 

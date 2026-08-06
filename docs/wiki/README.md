@@ -21,7 +21,7 @@ last_verified: 2026-08-01
 ## 現在確定している内容
 
 - Sprint 0（タグ `sprint0-complete`）の説明・索引ページが存在する
-- Sprint 1 仕様 `S1-SPEC-0.1.11` の説明・索引を収録する（実装は未着手）
+- Sprint 1 仕様 `S1-SPEC-0.1.12` の説明・索引を収録する（Sprint 1全体は未完了、次はS01-004）
 
 ## Sprint 1入口
 

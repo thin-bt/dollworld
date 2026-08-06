@@ -1,5 +1,27 @@
 # 変更履歴
 
+## 2026-08-05：S1-SPEC-0.1.12（週間Processor実装契約の明文化）
+
+週間Processor実装開始時に判明した未確定事項を補完した。既存balanceの意図変更ではなく、決定性に必要な実装契約の明文化である。
+
+- TrainingProcessorRuntimeState schema（`schemaVersion` `0.1.0`）
+- actionCounts（4行動キー・inactive除外・processedPersonCount集計）
+- forced／fallback reason（`WeeklyForcedRestReason`／`WeeklyRestFallbackReason`）
+- battle `unableToContinueThreshold`との責務分離（週間Planner非使用）
+- scoreHundredths整数式
+- StatTargetScore weights統合
+- growthPotential係数式
+- motivationFactor入力契約
+- mental exhaustion floor位置
+- event責務順
+- LearningTargetScore／PracticeTargetScoreの整数式（`LearningTargetScoreHundredths`／`PracticeTargetScoreHundredths`）
+- 効果RNG BasisPoints生成（`drawInclusiveBasisPoints`、両端含む9000..11000）
+- 複数係数の最終一括floor（`multiplyBasisPointsFloor`、sequential floor禁止）
+- `acquirable`技の週間処理契約（効果RNG 0・初期mastery加算）
+- RuntimeState累積契約（週ごと上書き禁止・`next = previous + currentWeek`）
+
+上記のうちLearningTarget／PracticeTarget整数式・効果RNG・一括floor・acquirable・RuntimeState累積は、S1-SPEC-0.1.12受入監査での追補であり、別仕様版（0.1.13）へ上げない。Sprint1Config構造・既定値・canonical SHAは不変。
+
 ## 2026-08-03：Sprint 1実装バックログ受入監査修正（管理資料）
 
 - `docs/SPRINT_1_BACKLOG.md`で`PersonTechniqueState`保存構造の所有をS01-001へ明示し、S01-002／S01-003の責務境界を明確化した。

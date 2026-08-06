@@ -1,6 +1,6 @@
 # 10 週間行動・訓練・習得処理仕様
 
-- 仕様版: `S1-SPEC-0.1.11`
+- 仕様版: `S1-SPEC-0.1.12`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 週次行動選択、能力訓練、技習得、休養、処理順
 - 非対象: 大会日程、師匠選択、恋愛、結婚、出産
@@ -54,11 +54,47 @@ WeeklyAction =
 | waiting | inactive |
 | stopped | inactive |
 
-次は原則として強制休養とする。
+### 3.1 強制休養
 
-- 重傷
-- 疲労81以上
-- 続行不能状態
+Sprint 1週間Plannerの強制休養は次の2条件だけとする。
+
+```text
+WeeklyForcedRestReason =
+  severe_injury
+  | fatigue_threshold
+```
+
+判定:
+
+- `severe_injury`: 負傷段階が`severe`（08仕様の`temporaryCondition.injuryBands`から導出）
+- `fatigue_threshold`: `fatigue >= temporaryCondition.forcedRestFatigueThreshold`
+
+複数該当時の優先順（記録する`forcedReason`もこの順）:
+
+1. `severe_injury`
+2. `fatigue_threshold`
+
+`battle.injury.unableToContinueThreshold`は戦闘中の続行不能判定専用であり、週間Plannerの強制休養判定へ使用しない。
+
+### 3.2 候補なしrest fallback
+
+訓練系3行動（`train_stat`／`learn_technique`／`practice_technique`）に有効対象がなく、`rest`だけが候補として残った場合の理由を次で表す。
+
+```text
+WeeklyRestFallbackReason =
+  no_trainable_stat
+  | no_learning_candidate
+  | no_practice_candidate
+```
+
+イベント候補の`fallbackReasons: WeeklyRestFallbackReason[]`は次を満たす。
+
+- dense配列（sparse禁止）
+- 重複なし
+- 固定順: `no_trainable_stat`、`no_learning_candidate`、`no_practice_candidate`
+- 強制休養時は空配列
+- 人物が自由意志で`rest`を選んだ場合も空配列
+- 訓練系3行動に有効対象がなく`rest`だけが残った場合に、該当する理由だけを上記固定順で記録する
 
 ## 4. 行動評価
 
@@ -123,57 +159,84 @@ WeeklyActionContextScore
 
 ## 5. 標準Planner `[Sprint 1暫定]`
 
-固定成功値ではなく、型付き設定によるスコア方式を使用する。
+固定成功値ではなく、型付き設定による整数`scoreHundredths`方式を使用する。表示用小数を状態へ保存しない。追加の浮動小数変換や`Math.round`は使用しない。負値の切り捨てはJavaScriptのtruncateではなく数学的floor（`mathematicalFloor`）を使う。
 
 ```text
-ContextScore
-= personality * weeklyPlanner.contextWeights.personality
-+ developmentNeed * weeklyPlanner.contextWeights.developmentNeed
-+ recentResult * weeklyPlanner.contextWeights.recentResult
-+ teacherAdvice * weeklyPlanner.contextWeights.teacherAdvice
-+ schedule * weeklyPlanner.contextWeights.schedule
+baseScoreHundredths = baseScore * 100
 
-TrainingActionScore(action)
-= baseScore(action)
-+ ContextScore(action)
-- baseFatiguePenalty * burdenPenaltyMultipliersByAction[action].fatigue
-- baseInjuryPenalty * burdenPenaltyMultipliersByAction[action].injury
-- baseMentalExhaustionPenalty * burdenPenaltyMultipliersByAction[action].mental
+contextNumerator
+= Σ(contextValue * contextWeightBasisPoints)
 
-RestActionScore
-= baseScore(rest)
-+ ContextScore(rest)
-+ fatigueRecoveryNeedBonus
-+ injuryRecoveryNeedBonus
-+ mentalRecoveryNeedBonus
-```
+contextScoreHundredths
+= mathematicalFloor(contextNumerator / 100)
 
-- `TrainingActionScore` は `train_stat`、`learn_technique`、`practice_technique` へ適用する
-- `rest` へ訓練行動と同じ減点を適用しない。疲労・負傷・精神消耗が高いほど、14仕様の回復必要度bonusにより休養を選びやすくする
-- base penalty、action別倍率、rest bonusは14仕様の固定構造を使用する
+baseFatiguePenalty
+= floor(fatigue / 5) * baseFatiguePenaltyPerFivePoints
 
-```text
-fatigueRecoveryNeedBonus
-= min(
-    weeklyPlanner.restNeedBonuses.fatigueMaximum,
-    floor(fatigue / 5) * weeklyPlanner.restNeedBonuses.fatiguePerFivePoints
-  )
+baseInjuryPenalty
+= floor(injury / 5) * baseInjuryPenaltyPerFivePoints
 
-injuryRecoveryNeedBonus
-= min(
-    weeklyPlanner.restNeedBonuses.injuryMaximum,
-    floor(injury / 5) * weeklyPlanner.restNeedBonuses.injuryPerFivePoints
-  )
-
-mentalRecoveryNeedBonus
+baseMentalExhaustionPenalty
 = floor(
-    (1 - currentMental / maxMental)
-    * weeklyPlanner.restNeedBonuses.mentalExhaustionMaximum
+    (maxMental - currentMental)
+    * baseMentalExhaustionPenaltyMaximum
+    / maxMental
   )
+
+penaltyHundredths
+= floor(
+    basePenalty
+    * burdenPenaltyMultiplierBasisPoints
+    / 100
+  )
+
+fatigueBonusHundredths
+= min(
+    fatigueMaximum * 100,
+    floor(
+      floor(fatigue / 5)
+      * fatiguePerFivePointsBasisPoints
+      / 100
+    )
+  )
+
+injuryBonusHundredths
+= min(
+    injuryMaximum * 100,
+    floor(
+      floor(injury / 5)
+      * injuryPerFivePointsBasisPoints
+      / 100
+    )
+  )
+
+mentalBonusHundredths
+= floor(
+    (maxMental - currentMental)
+    * mentalExhaustionMaximum
+    / maxMental
+  ) * 100
+
+TrainingActionScoreHundredths(action)
+= baseScoreHundredths(action)
++ contextScoreHundredths(action)
+- penaltyHundredths(fatigue)
+- penaltyHundredths(injury)
+- penaltyHundredths(mental)
+
+RestActionScoreHundredths
+= baseScoreHundredths(rest)
++ contextScoreHundredths(rest)
++ fatigueBonusHundredths
++ injuryBonusHundredths
++ mentalBonusHundredths
 ```
 
+- `TrainingActionScoreHundredths` は `train_stat`、`learn_technique`、`practice_technique` へ適用する
+- `rest` へ訓練行動と同じ負担減点を適用しない。疲労・負傷・精神消耗が高いほど、14仕様の回復必要度bonusにより休養を選びやすくする
+- context／burden／restNeedの各係数は14仕様のnormalized BasisPointsを使用する
 - `maxMental<=0`は人物状態不正としてPlannerを失敗させ、0除算を補正値で隠さない
-- Planner scoreは `scoreHundredths` の整数固定小数点で比較し、表示用小数を状態へ保存しない
+- ActionScoreHundredthsは上記整数値の加減のみで求め、比較にも同じ整数を使う
 
 ### 5.1 基礎スコア
 
@@ -203,15 +266,34 @@ mentalRecoveryNeedBonus
 - 師匠の得意分野
 - 直近敗戦の原因
 
-`[Sprint 1暫定]` スコア:
+`[Sprint 1暫定]` スコアは14仕様の`statTargetWeights`（normalized BasisPoints）を正とする。
 
 ```text
-StatTargetScore
-= (100 - currentValue)
-+ growthPotential
-+ relatedAptitude * 0.5
-+ teacherRecommendation
+StatTargetScoreHundredths
+= floor(
+    (
+      (100 - currentValue)
+        * statTargetWeights.remainingCapacity
+      + growthPotential
+        * statTargetWeights.growthPotential
+      + relatedAptitude
+        * statTargetWeights.relatedAptitude
+      + teacherRecommendation
+        * statTargetWeights.teacherRecommendation
+    ) / 100
+  )
 ```
+
+既定weights:
+
+```text
+remainingCapacity = 10000
+growthPotential = 10000
+relatedAptitude = 5000
+teacherRecommendation = 10000
+```
+
+これにより旧暫定浮動小数式と一致する。
 
 同値候補が複数の場合だけ、基礎能力の固定順へ正規化してseeded RNGを1回使用する。
 
@@ -225,38 +307,161 @@ StatTargetScore
 - 09仕様の`teacherCanTeach=true`。Sprint 1では独学候補を作成しない
 - 前提参照・dataVersionが有効
 - 09仕様の導出状態が`blocked_at_cap`ではない
-- 導出状態が`acquirable`の場合は追加進捗行動を作らず、同週の習得完了判定候補として扱う
+- 導出状態が`acquirable`の場合は追加進捗行動を作らず、同週の習得完了判定候補として扱う（§6.2.1）
 
 `[Sprint 1暫定]`:
 
 - `learningProgressRequired` は09仕様どおり1以上を必須とし、0以下は候補採点前に拒否する。ゼロ除算を補正値で隠さない。
-- `learningProgressTenths` は0..`learningProgressRequired * 10`へclamp済みであることを検証する。
+- 入力時は`learningProgressTenths`を`0..learningProgressRequired * 10`でvalidationし、範囲外を拒否する。不正入力をclampして成功させない。
+- 週間進捗の正常適用後だけ、`learningProgressRequired * 10`を上限として`min`する（09仕様）。
+
+整数`LearningTargetScoreHundredths`の入力:
 
 ```text
-progressRatio
-= clamp(0, 1, learningProgressTenths / (learningProgressRequired * 10))
-
-tierAccessibility
-= clamp(0, 1, 1 - learningProgressRequired / 500)
-
-LearningTargetScore
-= domainAptitude / 100 * weeklyPlanner.learningTargetWeights.aptitude
-+ requiredStatsFactor / 1.20 * weeklyPlanner.learningTargetWeights.requiredStats
-+ progressRatio * weeklyPlanner.learningTargetWeights.currentProgress
-+ (teacherCanTeach ? weeklyPlanner.learningTargetWeights.teacherAvailability : 0)
-+ styleMatch / 100 * weeklyPlanner.learningTargetWeights.styleMatch
-+ tierAccessibility * weeklyPlanner.learningTargetWeights.tierAccessibility
+domainAptitude: integer 0..100
+requiredStatsFactorBasisPoints: integer 7000..12000
+learningProgressTenths: integer
+learningProgressRequired: integer 1..10000
+teacherCanTeach: boolean
+styleMatch: integer 0..100
 ```
 
+- `requiredStatsFactorBasisPoints`は09仕様の`requiredStatsFactor`をnormalized BasisPoints化した値（範囲7000..12000）
+- `learningTargetWeights`は14仕様どおり合計100の整数weight（既定: aptitude=25、requiredStats=15、currentProgress=25、teacherAvailability=20、styleMatch=10、tierAccessibility=5）
+
+```text
+progressCapTenths
+= learningProgressRequired * 10
+```
+
+```text
+0 <= learningProgressTenths
+learningProgressTenths <= progressCapTenths
+```
+
+範囲外をclampして成功させない。
+
+```text
+aptitudeContributionHundredths
+= domainAptitude
+  * learningTargetWeights.aptitude
+
+requiredStatsContributionHundredths
+= floor(
+    requiredStatsFactorBasisPoints
+    * learningTargetWeights.requiredStats
+    * 100
+    / 12000
+  )
+
+progressContributionHundredths
+= floor(
+    learningProgressTenths
+    * learningTargetWeights.currentProgress
+    * 100
+    / progressCapTenths
+  )
+
+teacherContributionHundredths
+= teacherCanTeach
+  ? learningTargetWeights.teacherAvailability * 100
+  : 0
+
+styleContributionHundredths
+= styleMatch
+  * learningTargetWeights.styleMatch
+
+tierAccessibilityBasisPoints
+= clamp(
+    0,
+    10000,
+    mathematicalFloor(
+      (500 - learningProgressRequired)
+      * 10000
+      / 500
+    )
+  )
+
+tierContributionHundredths
+= floor(
+    tierAccessibilityBasisPoints
+    * learningTargetWeights.tierAccessibility
+    / 100
+  )
+
+LearningTargetScoreHundredths
+= aptitudeContributionHundredths
++ requiredStatsContributionHundredths
++ progressContributionHundredths
++ teacherContributionHundredths
++ styleContributionHundredths
++ tierContributionHundredths
+```
+
+- 各寄与を名前付き最終値としてfloorしてから合計する
+- すべてsafe integer。`Math.round`、epsilon、浮動小数score保存は禁止
 - `styleMatch`は既存の戦い方データを0..100へ正規化した入力。存在しない場合は50
 - `teacherCanTeach`は09仕様の式を`weekStartWorldSnapshot`へ適用して決め、推測しない
 - 進捗計算用の`TechniqueLearningContext`も同じweekStartWorldSnapshotから候補技・学習者・師匠の組ごとに固定し、同週のdraft値を参照しない
 - 必要進捗未満なら、条件未達でも師匠が教授可能な技を候補にできる。必要進捗上限へ到達して条件不足となった時点で`blocked_at_cap`としてactive候補から除外する
-- `blocked_at_cap`のfocusを解除する際、未達前提技が複数ある場合はTechniqueId昇順へ正規化して通常のLearningTargetScoreで選ぶ
+- `blocked_at_cap`のfocusを解除する際、未達前提技が複数ある場合はTechniqueId昇順へ正規化して通常の`LearningTargetScoreHundredths`で選ぶ
 - 必要能力不足だけの場合は、関連する不足能力へ`teacherRecommendation`またはPlannerの不足能力入力を反映し、同じblocked技を再選択しない
 - 必要適性不足だけの場合はSprint 1中の再選択候補から除外し、適性成長を推測しない
-- 全条件が満たされた上限到達技は追加RNGを消費せず習得完了する
 - 最高点同値だけTechniqueId順へ正規化してRNGを1回使用する
+
+golden例（既定weights）:
+
+```text
+domainAptitude=80
+requiredStatsFactorBasisPoints=10000
+learningProgressTenths=900
+progressCapTenths=1800
+teacherCanTeach=true
+styleMatch=50
+learningProgressRequired=180
+
+aptitudeContributionHundredths=2000
+requiredStatsContributionHundredths=1250
+progressContributionHundredths=1250
+teacherContributionHundredths=2000
+styleContributionHundredths=500
+tierContributionHundredths=320
+LearningTargetScoreHundredths=7320
+```
+
+### 6.2.1 `acquirable`技の週間処理
+
+`LearningTargetDerivedStatus=acquirable`の技は、追加進捗行動を作らず同週の習得完了判定候補として扱い、`learn_technique`の有効Planner対象として残す。
+
+選択された場合:
+
+```text
+WeeklyAction = learn_technique
+```
+
+- 行動同点解消RNGは通常規則
+- 対象同点解消RNGは通常規則
+- 効果RNGは0回
+- `learningProgressTenths`は変更しない
+- `technique.learning_progressed`は生成しない
+- `acquiredAbsoluteWeek`を現在週へ設定
+- tier別初期masteryを設定（09仕様`initialMasteryByTier`）
+- `learningFocusTechniqueId = null`
+- `technique.acquired`を生成
+- `learn_technique`の週間疲労deltaを適用
+- `training.condition_updated`を生成
+- `actionCounts.learn_technique`を1加算
+- `processedPersonCount`を1加算
+- `totalLearningProgressGainTenths`は+0
+- 初期mastery deltaを`totalMasteryGainHundredths`へ加算
+
+人物内イベント順:
+
+```text
+training.action_selected
+technique.acquired
+training.condition_updated
+```
 
 ### 6.3 習得済み技
 
@@ -270,18 +475,67 @@ recentPracticeNeed
     100,
     floor((currentAbsoluteWeek - lastPracticedAbsoluteWeek) * 100 / 12)
   )
-
-PracticeTargetScore
-= (1 - mastery / 100) * weeklyPlanner.practiceTargetWeights.masteryNeed
-+ recentPracticeNeed / 100 * weeklyPlanner.practiceTargetWeights.recentPracticeNeed
-+ teacherPriority / 100 * weeklyPlanner.practiceTargetWeights.teacherPriority
-+ styleMatch / 100 * weeklyPlanner.practiceTargetWeights.styleMatch
 ```
 
+整数`PracticeTargetScoreHundredths`の入力:
+
+```text
+masteryHundredths: integer 0..10000
+recentPracticeNeed: integer 0..100
+teacherPriority: integer 0..100
+styleMatch: integer 0..100
+```
+
+- `practiceTargetWeights`は14仕様どおり合計100の整数weight（既定: masteryNeed=50、recentPracticeNeed=20、teacherPriority=15、styleMatch=15）
+
+```text
+masteryNeedContributionHundredths
+= floor(
+    (10000 - masteryHundredths)
+    * practiceTargetWeights.masteryNeed
+    / 100
+  )
+
+recentPracticeContributionHundredths
+= recentPracticeNeed
+  * practiceTargetWeights.recentPracticeNeed
+
+teacherPriorityContributionHundredths
+= teacherPriority
+  * practiceTargetWeights.teacherPriority
+
+practiceStyleContributionHundredths
+= styleMatch
+  * practiceTargetWeights.styleMatch
+
+PracticeTargetScoreHundredths
+= masteryNeedContributionHundredths
++ recentPracticeContributionHundredths
++ teacherPriorityContributionHundredths
++ practiceStyleContributionHundredths
+```
+
+- 各寄与を名前付き最終値としてfloorしてから合計する（masteryNeed以外は整数積のため追加floor不要）
+- すべてsafe integer。`Math.round`、epsilon、浮動小数score保存は禁止
 - `teacherPriority`は実在する師匠入力を0..100へ正規化し、師匠なしは0
 - `styleMatch`は6.2と同じ入力。存在しない場合は50
 - currentAbsoluteWeekより未来のlastPracticedAbsoluteWeekは継続不能エラー
 - 最高点同値だけTechniqueId順へ正規化してRNGを1回使用する
+
+golden例（既定weights）:
+
+```text
+masteryHundredths=4000
+recentPracticeNeed=50
+teacherPriority=20
+styleMatch=50
+
+masteryNeedContributionHundredths=3000
+recentPracticeContributionHundredths=1000
+teacherPriorityContributionHundredths=300
+practiceStyleContributionHundredths=750
+PracticeTargetScoreHundredths=5050
+```
 
 ## 7. 週次処理順
 
@@ -313,9 +567,10 @@ WorldEngineの週トランザクションはWorldState、World RNG、ProcessorRu
 
 1. 行動種別の最高スコアが複数の場合だけ、同点解消RNGを1回
 2. 対象能力・対象技の最高スコアが複数の場合だけ、同点解消RNGを1回
-3. 実行行動に対応する主効果RNGを1回
+3. 実行行動に対応する主効果RNGを1回（例外あり）
    - `train_stat`: 08仕様の能力成長RNG。関連能力通常修行熟練度は同じ結果へ決定的に付随し、追加RNGなし
-   - `learn_technique`: 09仕様の習得進捗RNG
+   - `learn_technique`（`progressing`）: 09仕様の習得進捗RNG
+   - `learn_technique`（`acquirable`）: 効果RNGは0回（§6.2.1）
    - `practice_technique`: 09仕様の専用反復熟練度RNG
 4. 週末一時状態変動 `[Sprint 1暫定予約]` はSprint 1では0回
 
@@ -324,25 +579,56 @@ WorldEngineの週トランザクションはWorldState、World RNG、ProcessorRu
 - 候補ごとにRNGを加算してスコアを揺らさない
 - `inactive` 人物はRNGを消費しない
 - 強制休養と通常の `rest` は行動選択・対象選択・効果係数RNGを消費しない
-- 訓練・習得・熟練行動が確定した後は、最終効果が0でも効果係数RNGを1回消費する
+- `train_stat`、`progressing`の`learn_technique`、`practice_technique`が確定した後は、最終効果が0でも効果係数RNGを1回消費する
+- `acquirable`の`learn_technique`は効果係数RNGを消費しない
 - 候補配列はIDまたは固定enum順へ正規化する
 - 各分岐の消費回数をRuntimeState再開試験で固定する
+- 効果RNG係数の生成契約（`drawInclusiveBasisPoints`）は08／09／14仕様を正本とする
 
 ## 9. ProcessorRuntimeState
 
 ```text
 TrainingProcessorRuntimeState
-- schemaVersion
-- lastProcessedAbsoluteWeek
-- processedPersonCount
-- actionCounts
-- totalStatGainMilliPoints
-- totalLearningProgressGainTenths
-- totalMasteryGainHundredths
-- forcedRestCount
+- schemaVersion: "0.1.0"
+- lastProcessedAbsoluteWeek: integer >= 0 | null
+- processedPersonCount: safe integer >= 0
+- actionCounts:
+    train_stat: safe integer >= 0
+    learn_technique: safe integer >= 0
+    practice_technique: safe integer >= 0
+    rest: safe integer >= 0
+- totalStatGainMilliPoints: safe integer >= 0
+- totalLearningProgressGainTenths: safe integer >= 0
+- totalMasteryGainHundredths: safe integer >= 0
+- forcedRestCount: safe integer >= 0
 ```
 
+初期値:
+
+- `lastProcessedAbsoluteWeek = null`
+- 全count／total = 0
+
+規則:
+
+- canonical順は上記の記載順
+- 次のカウンタ／合計はProcessor開始以降の累積値であり、週ごとに上書きしない
+
+```text
+actionCounts
+processedPersonCount
+totalStatGainMilliPoints
+totalLearningProgressGainTenths
+totalMasteryGainHundredths
+forcedRestCount
+```
+
+- 週成功時: `nextValue = previousValue + currentWeekValue`
+- `processedPersonCount = actionCounts`の4項目（`train_stat`／`learn_technique`／`practice_technique`／`rest`）の累積合計
+- `forcedRestCount`は累積`rest`件数のうち`forced=true`だった件数
+- `inactive`は`actionCounts`へ含めない
+- `deceased`／`waiting`／`stopped`は`processedPersonCount`にも加算しない
 - 習得進捗はtenths、熟練度はhundredthsで集計する
+- `totalMasteryGainHundredths`には次を含む: 習得時の初期mastery、`practice_technique`による増分、`train_stat`付随熟練度増分。戦闘によるmastery増分は含めない
 - 人物ごとの状態を重複保存しない
 - 再開に必要な最小情報だけを持つ
 - 週番号逆行を許さない
@@ -367,24 +653,78 @@ TrainingProcessorRuntimeState
 - targetTechniqueId
 - candidateScores
 - forced
-- forcedReason
+- `forcedReason: WeeklyForcedRestReason | null`
+- `fallbackReasons: WeeklyRestFallbackReason[]`
 
 実際の効果は責務別イベントとして生成し、同じ更新を汎用イベントで二重記録しない。
 
 - 能力成長・一時状態・休養: 08仕様の `training.*`
 - 技習得・熟練度: 09仕様の `technique.*`
 
-`inactive` 人物は処理対象外のため行動選択イベントも生成しない。週間Processorが返すのはEventEnvelope候補であり、`eventId`、`simulationId`、`sequence`を持たない。共通append層がEventEnvelope 0.2.0へ包み、`entities.personIds`へ対象人物を設定する。
+### 11.1 人物内イベント責務順（行動別fixture）
+
+全イベントtypeを1本の配列へ並べて分岐順を推測しない。同一人物のイベント候補は次の行動別fixtureとする。同一責務内で複数`TechniqueId`があり得る場合は`TechniqueId`昇順。
+
+```text
+train_stat:
+  training.action_selected
+  training.stat_growth_applied
+  technique.mastery_increased（付随熟練度がある場合のみ）
+  training.condition_updated
+
+learn progress only:
+  training.action_selected
+  technique.learning_progressed
+  training.condition_updated
+
+learn progress + acquired:
+  training.action_selected
+  technique.learning_progressed
+  technique.acquired
+  training.condition_updated
+
+acquirable immediate:
+  training.action_selected
+  technique.acquired
+  training.condition_updated
+
+practice:
+  training.action_selected
+  technique.mastery_increased
+  training.condition_updated
+
+forced rest:
+  training.action_selected
+  training.forced_rest_applied
+  training.rest_applied
+
+normal rest:
+  training.action_selected
+  training.rest_applied
+
+inactive:
+  イベント0件
+```
+
+delta=0および生成条件:
+
+- `training.action_selected`はactive人物に必須
+- effect eventは責務側仕様（08／09）で必須とされた場合だけ生成する
+- 同じ状態deltaを複数eventへ重複記録しない
+- `inactive`人物は0件（行動選択イベントも生成しない）
+- `acquirable`では`technique.learning_progressed`を生成しない（§6.2.1）
+
+週間Processorが返すのはEventEnvelope候補であり、`eventId`、`simulationId`、`sequence`を持たない。共通append層がEventEnvelope 0.2.0へ包み、`entities.personIds`へ対象人物を設定する。
 
 ## 12. エラー処理
 
 ### 継続可能
 
-- 習得候補なし
-- 熟練候補なし
-- 成長余地なし
+- 習得候補なし（`no_learning_candidate`）
+- 熟練候補なし（`no_practice_candidate`）
+- 成長余地なし（`no_trainable_stat`）
 
-この場合はrestへ置換し、理由をイベントへ残す。
+この場合はrestへ置換し、`training.action_selected.fallbackReasons`へ§3.2の規則で理由を残す。強制休養や自由意志のrestでは空配列とする。
 
 ### 継続不能
 
@@ -422,15 +762,17 @@ TrainingProcessorRuntimeState
 - 候補数1件・同点なしで不要RNGを消費しないこと
 - WeeklyPlannerContext全要因と欠落要因0
 - 能力訓練と関連技1件の通常修行熟練度
-- LearningTargetScore全項目・重点技維持・同点seed
-- PracticeTargetScoreの12週境界・未来週拒否・同点seed
-- learning focusのblocked_at_cap解除、未達前提技への切替、条件充足後のRNGなし習得完了
+- LearningTargetScoreHundredths全項目・golden 7320・重点技維持・同点seed
+- PracticeTargetScoreHundredthsの12週境界・golden 5050・未来週拒否・同点seed
+- learningProgressTenths入力範囲外拒否（clampして成功させない）
+- learning focusのblocked_at_cap解除、未達前提技への切替、`acquirable`の効果RNG0・初期mastery加算
 - 技習得
 - 技熟練
 - 休養
 - 二重処理拒否
 - 途中エラーの全体rollback
-- RuntimeState再開一致
+- RuntimeState再開一致・週跨ぎ累積加算
+- 行動別イベント順fixture
 - 週間ProcessorがeventId／simulationId／sequenceを発行しないこと
 - WorldEngine共通append後の全Processor横断sequence連続
 - weekStartWorldSnapshotだけを他人物参照へ使用し、同週の先行draftを後続人物が参照しない
