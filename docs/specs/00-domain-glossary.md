@@ -60,23 +60,38 @@ SPEC-0.1.1|S0-SPEC-0.1.5|<configHash>|<seedの10進整数>|<nameDataHash>|xoshir
 
 このUTF-8文字列のSHA-256を小文字16進数化し、先頭16桁から`simulation_<16hex>`を生成する。区切り、順序、大小文字を変更しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
 
-Sprint 1以降に開始する新規runの`simulationId`は、02ミニ仕様の`SimulationIdentity`（schemaVersion `0.3.0`）から生成する。正本仕様版は`SPEC-0.1.2`、Sprint 1仕様版は`S1-SPEC-0.1.12`をidentityへ含める。詳細は`docs/specs/02-config-schema.md`および`docs/specs/14-sprint1-config-schema.md`を参照する。
+Sprint 1以降に開始する新規runの`simulationId`は、02ミニ仕様の`SimulationIdentity`（schemaVersion `0.3.0`）から生成する。正本仕様版は`SPEC-0.1.2`、Sprint 1仕様版は`S1-SPEC-0.1.13`をidentityへ含める。詳細は`docs/specs/02-config-schema.md`および`docs/specs/14-sprint1-config-schema.md`を参照する。
 
 ### MatchId（Sprint 1）
 
 - 戦闘1件の識別には`MatchId`を使用し、同義の`BattleId`を新設しない。
-- `MatchId`へ世界年、人物ID、配列位置、表示名などの意味を埋め込まない。
-- `MatchId`の一意性スコープは1つの`simulationId`内とする。異なるrun間で同じMatchId文字列が現れることを許容し、全体識別には`(simulationId, matchId)`を使用する。
-- 注入された決定的ID生成器から発行し、同一入力・同一seed・同一発行順で一致させる。
-- `MatchIdGeneratorState`は既存の決定的ID生成器が提供するclone可能・snapshot／restore可能な不透明状態とし、ゲーム側が内部カウンタや乱数列を再解釈しない。
-- fresh runの初期状態は`createInitialMatchIdGeneratorState({ seed, generatorVersion, namespace: "match" })`から必ず生成し、同じ入力で同じcanonical snapshotを返す。任意の外部カウンタ値や前runの状態を初期値として注入しない。
-- 初期状態をcanonical JSON化したSHA-256を`initialMatchIdGeneratorStateHash`としてSimulationIdentityとRunRuleSnapshotへ保存する。
+- Sprint 1の`match-id-generator-0.1.0`が生成するMatchId形式は次へ固定する。
+  - 形式: `match_<12桁の0埋め10進数>`
+  - 正規表現: `^match_[0-9]{12}$`
+  - 数値部分の有効範囲: `1..999999999999`（例: `match_000000000001`。`match_000000000000`は無効）
+  - `match_`は識別子種別の固定prefixであり、試合内容を表す意味情報ではない
+- `MatchId`へsimulationId、seed、世界年、世界週、人物ID、大会ID、配列位置、表示名、現実時刻、乱数値などの意味を埋め込まない。
+- 利用側はMatchIdを不透明なbranded IDとして扱う。suffixを大会順・世界日時・人物順の判断に使わず、文字列を解析してゲームルールを分岐せず、辞書順を試合時系列として使わない。
+- `MatchId`の一意性スコープは1つの`simulationId`内とする。異なるrun間で同じMatchId文字列が現れることを許容し、全体識別には`(simulationId, matchId)`を使用する。したがって、異なるseedのfresh runが最初に同じ`match_000000000001`を発行してよい。seedはMatchId文字列へ混ぜない。
+- 発行は決定的MatchId生成器から行い、同一入力・同一発行順で一致させる。MatchId生成時にWorld RNG／battle RNG／その他RNGを消費しない。
+- `MatchIdGeneratorState`（schemaVersion `0.1.0`）はclone可能・snapshot／restore可能な不透明状態とする。ゲーム側が内部sequenceを試合ルールへ再解釈しない。canonical field集合は次のみとする。
+  - `schemaVersion`: `"0.1.0"`
+  - `generatorVersion`: `"match-id-generator-0.1.0"`
+  - `namespace`: `"match"`
+  - `seed`: uint32
+  - `nextSequence`: safe integer `1..1000000000000`
+- `nextSequence=1000000000000`は有効な枯渇済みsentinel stateとする。このstateから新しいMatchIdは発行できない。
+- 禁止する追加field: `lastMatchId`／`issuedMatchIds`／`counter`／`ordinal`／`rngState`／`stateHash`／`createdAt`／`simulationId`
+- `seed`はfresh run初期状態のidentity binding、`initialMatchIdGeneratorStateHash`への反映、異なるrun／checkpoint状態の取り違え検出だけに使う。`match-id-generator-0.1.0`ではseedをMatchId文字列へ混ぜない。同じ`nextSequence`ならseedが異なってもMatchId文字列は同じだが、state本文とstate hashは異なる。
+- fresh runの初期状態は`createInitialMatchIdGeneratorState({ seed, generatorVersion, namespace: "match" })`から必ず生成し、`nextSequence=1`とする。任意の外部カウンタ値や前runの状態を初期値として注入しない。同じ入力で同じcanonical snapshotを返す。
+- 予約`reserveNextMatchId`は`nextSequence=N`（`1..999999999999`）から`match_`＋Nの0埋め12桁を発行し、next stateの`nextSequence`を`N+1`とする。枯渇sentinelではfailure（`match_id_sequence_exhausted`）とし、MatchId／next stateを返さない。入力stateは変更しない。
+- 初期状態をcanonical JSON化したSHA-256を`initialMatchIdGeneratorStateHash`としてSimulationIdentityとRunRuleSnapshotへ保存する。state自身にhash fieldを追加しない。
 - `MatchIdGeneratorState`はWorldState、World RNG、EventId生成器、Event sequenceと同じWorldEngineトランザクションへ含める。
 - 中断・再開を許す実行では既存の`WorldEngineRuntimeState`または同等checkpointへMatchIdGeneratorStateを保存し、再開時に完全復元する。保存先を追加ファイルとして増やさず、既存runtime state契約へ統合する。
-- 同一週の後続Processor、世界不変条件、イベント候補検証のいずれかが失敗した場合、`MatchIdGeneratorState`も週開始値へrollbackする。
+- 同一週の後続Processor、世界不変条件、イベント候補検証のいずれかが失敗した場合、`MatchIdGeneratorState`も週開始値へrollbackする。未commit予約だけが進んだ場合、再試行は同じMatchIdを再発行する。
 - 標準WorldEngineが公開する戦闘実行APIは12仕様の`runBattleToCompletion`とし、11仕様の`startBattleTransaction`、`createBattleState`、`beginBattle`は未commitの純粋stageとして扱う。MatchId予約、battleSeed用World RNG消費、人物効果、開始・終了イベント候補、BattleResultは12仕様の`RunBattleCommitPlan`だけで不可分にcommitし、中間結果を個別commitしてはならない。
 - pre-start failureではWorld RNGとMatchIdGeneratorStateの両方を入力値のまま返し、同じMatchIdを再試行可能とする。
-- `matchIdGeneratorVersion`をSimulationIdentityとRunRuleSnapshotへ保存し、同じ版文字列で発行規則を変更しない。
+- `matchIdGeneratorVersion`をSimulationIdentityとRunRuleSnapshotへ保存し、同じ版文字列で発行規則を変更しない。prefix・桁数・進数・開始値・上限・遷移・seedのID使用有無・namespace・算出式を変える場合は`matchIdGeneratorVersion`を上げる。state構造を変える場合は`MatchIdGeneratorState.schemaVersion`も上げる。
 - 大会との関連はSprint 2で`TournamentId`から`MatchId`を参照する。
 - 詳細ログを別エンティティとして永続化する将来段階では`BattleLogId`を使用できるが、`MatchId`と混同しない。
 

@@ -13,7 +13,8 @@ sources:
   - docs/specs/12-battle-turn-resolution.md
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:259a219d29b626c4678e5b248b8a8453861797f9
-last_verified: 2026-08-05
+  - commit:3b313a5ea690351d062e751bc724e5530b835872
+last_verified: 2026-08-07
 related:
   - sprint1-identity-and-config.md
   - ../sprints/sprint1.md
@@ -29,10 +30,11 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 ### 仕様版
 
-- 現行: `S1-SPEC-0.1.12`
+- 現行: `S1-SPEC-0.1.13`
 - 正本: `SPEC-0.1.2`
 - `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - `S1-SPEC-0.1.12` は 2026-08-05 の週間処理契約clarification（受入監査追補含む）。Sprint1Config balance／hashは不変
+- `S1-SPEC-0.1.13` は MatchId generator契約（`match-id-generator-0.1.0`）の明文化。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.10-draft` は履歴であり現行版ではない
 
 ### `S1-SPEC-0.1.11` 確定時点の履歴メモ
@@ -46,8 +48,8 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 ### 現在の実装状態（別段落）
 
-- S01-001〜S01-003 は実装済み
-- 次の実装着手は S01-004
+- S01-001〜S01-004 は実装済み
+- 次の実装着手は S01-005
 - Sprint 1 全体は未完了
 
 ## 関連する正本

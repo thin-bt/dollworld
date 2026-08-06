@@ -7,7 +7,8 @@ sources:
   - docs/AI_DEVELOPMENT_RULES.md
   - docs/SPRINT_0_BACKLOG.md
   - tasks/S00-010.md
-last_verified: 2026-08-01
+  - commit:3b313a5ea690351d062e751bc724e5530b835872
+last_verified: 2026-08-07
 ---
 
 # 不変条件索引
@@ -28,7 +29,7 @@ Sprint 0・Sprint 1を横断する不変条件索引。正本はミニ仕様で�
 
 AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、死亡者非処理、16歳未満ランクなし、42歳以上引退、参照整合、親子・師弟循環なし、同一シード一致。詳細は正本と検証器を確認すること。
 
-### Sprint 1（`S1-SPEC-0.1.12` で確定した実装前の仕様不変条件）
+### Sprint 1（`S1-SPEC-0.1.13` で確定した実装前の仕様不変条件）
 
 - [人物成長](character-growth.md)
 - [週間訓練・習得](weekly-training-and-learning.md)
@@ -36,7 +37,7 @@ AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、
 - [ターン解決](battle-turn-resolution.md)
 - [戦闘結果・ログ](battle-result-and-log.md)
 
-Sprint 1 不変条件を既存の Sprint 0 自動テストで検証済みとは扱わない。
+Sprint 1 不変条件を既存の Sprint 0 自動テストで検証済みとは扱わない。S01-001〜004は実装済み、次はS01-005。Sprint 1全体は未完了。
 
 ## 関連する正本
 
@@ -51,7 +52,7 @@ Sprint 0:
 - `apps/simulator/src/sprint0-verification/invariant-verification.ts`
 - `apps/simulator/src/output/world-integrity.ts`
 
-Sprint 1（S01-001〜003）:
+Sprint 1（S01-001〜004）:
 
 - `packages/simulation-core/src/sprint1/`
 
@@ -62,11 +63,12 @@ Sprint 0:
 - `apps/simulator/src/sprint0-verification/sprint0-verification.test.ts`
 - `packages/simulation-core` 各領域のテスト
 
-Sprint 1（S01-001〜003）:
+Sprint 1（S01-001〜004）:
 
 - `packages/simulation-core/src/sprint1-foundation.test.ts`
 - `packages/simulation-core/src/sprint1-person-growth.test.ts`
 - `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
+- `packages/simulation-core/src/sprint1-weekly-training.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断

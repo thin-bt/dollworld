@@ -1,6 +1,6 @@
 # 14 Sprint 1共通設定スキーマ付録
 
-- 仕様版: `S1-SPEC-0.1.12`
+- 仕様版: `S1-SPEC-0.1.13`
 - 状態: 08〜13が参照する型付き設定の固定構造
 - 対象: 成長、週間Planner、技習得、戦闘、戦闘後効果
 - 非対象: 初期世界生成設定、正式技一覧、大会設定
@@ -62,6 +62,7 @@ Sprint1ConfigIdentity
 | BattleRulesSnapshotRef.schemaVersion | `0.1.0` | 戦闘ルール参照hash入力構造 |
 | BattleActionSourceIdentity.schemaVersion | `0.1.0` | Strategy／scripted actionsの決定性identity |
 | StartBattleRuntimeTransition.schemaVersion | `0.1.0` | World RNG／MatchIdGeneratorStateの未commit遷移 |
+| MatchIdGeneratorState.schemaVersion | `0.1.0` | MatchId決定的生成器のopaque state（seed／nextSequence） |
 | RunBattleCommitPlan.schemaVersion | `0.2.0` | structural validationとcommit plan hash入力を分離した原子commit計画 |
 | BattleState.schemaVersion | `0.5.0` | terminalReasonと両ActionSourceIdentityを含む戦闘状態構造 |
 | BattleResult.schemaVersion | `0.5.0` | summaryLogHashと両ActionSourceIdentityを含む戦闘結果構造 |
@@ -76,6 +77,8 @@ Sprint1ConfigIdentity
 - 42歳到達時は年初処理で`retired`となるため、`age42plus`は必ず0であり、正式訓練・公式戦へ使用しない。
 - `battleProfileAdapterVersion` のSprint 1初期値は `battle-profile-adapter-0.1.0` とする。
 - `matchIdGeneratorVersion` のSprint 1初期値は `match-id-generator-0.1.0` とし、空文字・暗黙既定値を禁止する。
+- `MatchIdGeneratorState.schemaVersion` のSprint 1初期値は `0.1.0` とする。canonical fieldは schemaVersion／generatorVersion／namespace／seed／nextSequence のみ。
+- MatchId文字列形式は `match_<12桁の0埋め10進数>`。seedはID文字列へ混ぜず、state hash／SimulationIdentity bindingへだけ使用する。
 - `defaultBattleStrategyVersion` とDefaultBattleStrategyの初期`strategyVersion`は `default-battle-strategy-0.1.0` とする。
 - ScriptedActionSourceの初期`scriptFormatVersion`は `battle-action-script-0.1.0` とする。
 

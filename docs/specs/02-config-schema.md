@@ -143,7 +143,7 @@ manifest不整合時は生成中止。
 
 ## 12. Sprint 1 SimulationIdentity
 
-Sprint 1以降に開始する新規runでは、設定ハッシュ・seed・仕様版に加え、Sprint 1の決定的ルール入力を含む`SimulationIdentity`から`simulationId`を生成する。Sprint 1仕様版は`S1-SPEC-0.1.12`。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
+Sprint 1以降に開始する新規runでは、設定ハッシュ・seed・仕様版に加え、Sprint 1の決定的ルール入力を含む`SimulationIdentity`から`simulationId`を生成する。Sprint 1仕様版は`S1-SPEC-0.1.13`。旧`S1-SPEC-0.1.12`を新規runの現行Sprint 1 identityとして受理しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
 
 ```text
 SimulationIdentity
@@ -159,7 +159,7 @@ SimulationIdentity
 - specVersions:
     - { specSetId: "main", version: "SPEC-0.1.2" }
     - { specSetId: "sprint0", version: "S0-SPEC-0.1.5" }
-    - { specSetId: "sprint1", version: "S1-SPEC-0.1.12" }
+    - { specSetId: "sprint1", version: "S1-SPEC-0.1.13" }
 - rngAlgorithmVersion
 - canonicalJsonVersion
 - hashAlgorithm: "SHA-256"
@@ -169,13 +169,16 @@ SimulationIdentity
 - `seed`はrunへ渡された決定的seedそのものを使用し、派生seedやexecutionIdを使用しない。
 - `initialWorldConfigHash`、`sprint1ConfigHash`、`techniqueCatalogHash`は各完全内容のcanonical JSON SHA-256と一致必須。
 - `battleProfileAdapterVersion`は11仕様の人物正規化adapter版と一致必須。
-- `matchIdGeneratorVersion`は00ミニ仕様の決定的MatchId生成器版と一致必須。
-- `initialMatchIdGeneratorStateHash`はfresh runのseed・generatorVersion・固定namespaceから生成した初期MatchIdGeneratorStateのcanonical SHA-256と一致必須。任意状態から開始するresume runは保存済みruntime checkpointを使用し、新しいSimulationIdentityを作り直さない。
+- `matchIdGeneratorVersion`は00ミニ仕様の決定的MatchId生成器版（Sprint 1初期値`match-id-generator-0.1.0`）と一致必須。
+- `initialMatchIdGeneratorStateHash`はfresh runのseed・generatorVersion・固定namespace `"match"`から生成した初期`MatchIdGeneratorState`（schemaVersion `0.1.0`、`nextSequence=1`）のcanonical JSON SHA-256と一致必須。任意の現在nextSequenceや途中stateを初期値として注入しない。任意状態から開始するresume runは保存済みruntime checkpointを使用し、新しいSimulationIdentityを作り直さない。
 - `defaultBattleStrategyVersion`は12仕様の標準Strategy実装版と一致必須。標準runでscripted actionsを使用しない。
 - `rngAlgorithmVersion`は07仕様の実装版文字列と一致必須。
 - `canonicalJsonVersion`は実際にhash算出へ使用するcanonical JSON実装版と一致必須。
 - `hashAlgorithm`はSprint 1では`SHA-256`へ固定し、別名や暗黙既定値を許可しない。
 - 現実時刻、executionId、Git commit、OS、Node、パス、処理時間、メモリは含めない。
+- MatchId文字列そのもの、現在の`nextSequence`、途中のgenerator state hashをSimulationIdentity材料へ含めない。
+- seedが異なれば初期MatchIdGeneratorState本文・`initialMatchIdGeneratorStateHash`・SimulationIdentity hash・simulationIdが差分する。同じseedと各identity入力ならこれらは一致する。
+- 異なるrunでは同じMatchId文字列（例: `match_000000000001`）を許可する。seedはMatchId文字列へ混ぜない。
 
 生成順序:
 

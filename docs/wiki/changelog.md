@@ -20,6 +20,12 @@ last_verified: 2026-08-06
 
 ## 履歴
 
+### 2026-08-07 — S1-SPEC-0.1.13 MatchId決定的生成器契約の明文化
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.13`へ版上げ。MatchId形式・GeneratorState・予約遷移・seed役割・canonical hashを正本へ固定
+- Sprint1Config balance／SHAは不変。MatchId生成器／S01-005戦闘開始は未実装
+- 次はS01-005。Sprint 1全体は未完了
+
 ### 2026-08-07 — S01-004 最終イベント契約修正（technique unit）
 
 - `technique.learning_progressed`へ`unit: "tenths"`、`technique.mastery_increased`へ`unit: "hundredths"`を追加

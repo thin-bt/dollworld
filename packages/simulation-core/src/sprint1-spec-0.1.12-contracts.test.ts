@@ -115,15 +115,16 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
 }
 
 describe("S1-SPEC-0.1.12 SimulationIdentity / config hash", () => {
-  it("publishes S1-SPEC-0.1.12 as the Sprint 1 registry version", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.12");
+  it("publishes weekly-training clarification contracts under the current Sprint 1 registry", () => {
+    // Registry is S1-SPEC-0.1.13 after MatchId generator clarification; weekly formulas remain.
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.13");
   });
 
-  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.12", () => {
+  it("accepts a new Sprint 1 identity with the current registry version", () => {
     const result = validateSimulationIdentity(sampleIdentity());
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.12");
+    expect(result.value.specVersions[2]?.version).toBe(S1_SPEC_VERSION);
   });
 
   it("rejects S1-SPEC-0.1.11 as a new Sprint 1 identity version", () => {

@@ -9,8 +9,8 @@ sources:
   - docs/specs/13-battle-result-and-log.md
   - docs/specs/07-seeded-rng.md
   - docs/specs/14-sprint1-config-schema.md
-  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - commit:3b313a5ea690351d062e751bc724e5530b835872
+last_verified: 2026-08-07
 related:
   - sprint1-processing-flow.md
   - ../invariants/battle-start.md
@@ -25,6 +25,12 @@ related:
 1対1戦闘の開始から結果・ログまでの境界索引。正本は 11・12・13（および関連する 07・14）。
 
 ## 現在確定している内容
+
+### 実装状態（S1-SPEC-0.1.13時点）
+
+- MatchId決定的生成器の**契約**は正本へ固定済み（形式・state・予約・seed役割）
+- 開始stage（S01-005）・ターン以降は**未実装**
+- Sprint 1全体は未完了。次はS01-005
 
 ### 主な段階
 

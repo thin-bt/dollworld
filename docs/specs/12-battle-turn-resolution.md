@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.12`
+- 仕様版: `S1-SPEC-0.1.13`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -991,7 +991,7 @@ RunBattleToCompletionResult =
 - `RunBattleCommitPlanHashInput`へ`commitPlanHash`自身を含めない。`structuralValidation`にも`commitPlanHash`検証結果を含めないため、hash循環は発生しない。
 - commit時は、まず`structuralValidation`を現在状態に対して再実行し、その後に現在のplanから`RunBattleCommitPlanHashInput`を再構築してhashを再計算し、保存済み`commitPlanHash`と比較する。この2工程を混同しない。
 - completed／resolution_errorのplanはstartBattleTransactionのruntime transitionを変更せず保持し、戦闘内部ではWorld RNG／MatchIdGeneratorStateを進めない。
-- pre_start_failureでは開始計画全体を破棄し、commitPlan=nullとする。入力WorldState、World RNG、MatchIdGeneratorStateは未変更のまま維持する。
+- pre_start_failureでは開始計画全体を破棄し、commitPlan=nullとする。入力WorldState、World RNG、MatchIdGeneratorStateは未変更のまま維持する。未commitのMatchId予約は破棄され、再試行では同じMatchId（同じcommitted `nextSequence`）を再発行する。
 - `structuralValidation.overallPassed=true`のplanだけを返却・commit可能とする。completedではBattleResult.validation.overallPassed=trueを必須とする。resolution_errorではBattleResult.validation.overallPassed=falseを正規状態として許可するが、failed state、failure情報、空developmentEffects、started／finished候補の相互整合をstructuralValidationで検証する。
 - `commitRunBattlePlan`は同じWorldEngine週トランザクション内で、structuralValidation、現在runのsimulationIdとRunRuleSnapshot hash、現在WorldState hash、World RNG hash、MatchIdGeneratorState hash、再計算したcommitPlanHashを検証する。さらに現在WorldStateから両人物を同じadapterで再構築し、sourceSnapshotHashがplanのexpectedParticipantA／BSourceSnapshotHashと一致すること、transaction-localの同週確定試合数がpostProcessContextと一致することを確認してから、次を不可分に実行する。
   1. World RNGとMatchIdGeneratorStateをStartBattleRuntimeTransitionのnext stateへ置換

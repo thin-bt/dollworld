@@ -7,8 +7,9 @@ sources:
   - docs/specs/11-battle-state.md
   - docs/specs/08-character-growth.md
   - docs/specs/14-sprint1-config-schema.md
-  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - docs/specs/00-domain-glossary.md
+  - commit:3b313a5ea690351d062e751bc724e5530b835872
+last_verified: 2026-08-07
 related:
   - battle-turn-resolution.md
   - ../architecture/battle-lifecycle.md
@@ -22,6 +23,15 @@ related:
 11 を根拠とする戦闘開始前検証と初期リソースの索引。
 
 ## 現在確定している内容
+
+### MatchId（S1-SPEC-0.1.13）
+
+- 形式: `match_<12桁の0埋め10進数>`（`^match_[0-9]{12}$`、数値 `1..999999999999`）
+- `MatchIdGeneratorState.schemaVersion` `0.1.0`（schemaVersion／generatorVersion／namespace／seed／nextSequence）
+- fresh `nextSequence=1`、枯渇sentinel `1000000000000`
+- seedはstate hashへ使用し、MatchId文字列へは混ぜない
+- 一意性は `(simulationId, matchId)`。異なるrunで同じ文字列を許可
+- S01-005実装は未着手（契約テストのみ）
 
 ### 初期リソース
 
@@ -56,18 +66,20 @@ maxMental = 50 + spirit
 - [`docs/specs/11-battle-state.md`](../../specs/11-battle-state.md)
 - [`docs/specs/08-character-growth.md`](../../specs/08-character-growth.md)
 - [`docs/specs/14-sprint1-config-schema.md`](../../specs/14-sprint1-config-schema.md)
+- [`docs/specs/00-domain-glossary.md`](../../specs/00-domain-glossary.md)
 
 ## 関連するコード
 
-該当なし（戦闘開始Processorは未実装。S01-001〜003は実装済み）。
+該当なし（戦闘開始Processorは未実装。MatchId生成器production実装も未着手。S01-001〜004は実装済み）。
 
 ## 関連するテスト
 
-該当なし（戦闘開始Processorは未実装）。
+- `packages/simulation-core/src/sprint1-spec-0.1.13-match-id-generator-contracts.test.ts`（仕様契約のみ）
 
 ## 関連する判断
 
 - [../decisions/sprint1-spec-baseline.md](../decisions/sprint1-spec-baseline.md)
+- [../decisions/sprint1-identity-and-config.md](../decisions/sprint1-identity-and-config.md)
 
 ## 未解決事項
 
@@ -77,4 +89,4 @@ maxMental = 50 + spirit
 
 - [battle-turn-resolution.md](battle-turn-resolution.md)
 - [../architecture/battle-lifecycle.md](../architecture/battle-lifecycle.md)
-- [../sprints/sprint1.md](../sprints/sprint1.md)
+- [../glossary/abilities-and-aptitudes.md](../glossary/abilities-and-aptitudes.md)

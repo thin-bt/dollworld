@@ -1,6 +1,6 @@
 # 11 戦闘開始状態仕様
 
-- 仕様版: `S1-SPEC-0.1.12`
+- 仕様版: `S1-SPEC-0.1.13`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 1対1戦闘の入力、開始状態、参加者スナップショット、戦闘専用RNG
 - 非対象: 大会組合せ、昇格、戦績永続化、観戦画面
@@ -23,10 +23,14 @@
 
 戦闘1件の識別には、`00-domain-glossary.md`で共通ID体系へ追加する `MatchId` を使用する。独自の `BattleId` は追加しない。
 
+- Sprint 1の`match-id-generator-0.1.0`形式は `match_<12桁の0埋め10進数>`（正規表現 `^match_[0-9]{12}$`、数値範囲 `1..999999999999`）
 - `MatchId` は意味を埋め込まない不透明なbranded IDとする
-- `simulationId`、世界週、配列位置、表示名を文字列へ直接埋め込まない
-- 注入された決定的ID生成器から発行する
-- 同じ入力・同じseed・同じ発行順で同じIDになる
+- `simulationId`、seed、世界週、配列位置、表示名を文字列へ直接埋め込まない
+- 決定的MatchId生成器から発行する。同じ入力・同じ発行順で同じIDになる
+- seedはMatchId文字列へ混ぜない。異なるrunでは同じMatchId文字列を許可し、全体識別は`(simulationId, matchId)`
+- `MatchIdGeneratorState`（schemaVersion `0.1.0`）のcanonical fieldは schemaVersion／generatorVersion／namespace／seed／nextSequence のみ
+- fresh run初期状態は `nextSequence=1`。予約成功で `nextSequence` を +1。枯渇sentinelは `1000000000000`
+- pre-start failure／週rollbackではcommitted stateを進めず、同じMatchIdを再試行可能とする
 - 大会との関連はSprint 2で `TournamentId` と `MatchId` の参照として表す
 
 詳細ログを永続化する段階では既存予定の `BattleLogId` を別途使用し、`MatchId` と混同しない。

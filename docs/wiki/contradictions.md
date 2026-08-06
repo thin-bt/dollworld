@@ -13,7 +13,8 @@ sources:
   - commit:504fa3cc16346dd0c6480e8328e42518e68215d3
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:259a219d29b626c4678e5b248b8a8453861797f9
-last_verified: 2026-08-05
+  - commit:3b313a5ea690351d062e751bc724e5530b835872
+last_verified: 2026-08-07
 ---
 
 # 矛盾記録
@@ -28,8 +29,8 @@ Wiki作成・更新時に発見した、正本・コード・テスト間の矛�
 
 - Sprint 0 の確定実装・正本（`sprint0-complete`）
 - Sprint 1 の `S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`
-- Sprint 1 の現行仕様は `S1-SPEC-0.1.12`（2026-08-05 の週間処理契約clarification）。`2800d3b...` を 0.1.12 の内容 commit として扱わない
-- 実装状態: S01-001〜S01-003 実装済み、次は S01-004。Sprint 1 全体は未完了
+- Sprint 1 の現行仕様は `S1-SPEC-0.1.13`（MatchId generator契約明文化）。`S1-SPEC-0.1.12` は 2026-08-05 の週間処理契約clarificationとして履歴。`2800d3b...` を 0.1.12／0.1.13 の内容 commit として扱わない
+- 実装状態: S01-001〜S01-004 実装済み、次は S01-005。Sprint 1 全体は未完了
 
 未来の未作成 commit hash を捏造して sources へ書かない。
 
@@ -43,7 +44,7 @@ Wiki作成・更新時に発見した、正本・コード・テスト間の矛�
 
 ## 関連するコード
 
-- `packages/simulation-core/src/sprint1/`（S01-001〜003）
+- `packages/simulation-core/src/sprint1/`（S01-001〜004）
 
 ## 関連するテスト
 

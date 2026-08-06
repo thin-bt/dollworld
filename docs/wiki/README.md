@@ -9,7 +9,8 @@ sources:
   - docs/wiki/sprints/sprint1.md
   - tag:sprint0-complete
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+  - commit:3b313a5ea690351d062e751bc724e5530b835872
+last_verified: 2026-08-07
 ---
 
 # docs/wiki README
@@ -21,7 +22,7 @@ last_verified: 2026-08-01
 ## 現在確定している内容
 
 - Sprint 0（タグ `sprint0-complete`）の説明・索引ページが存在する
-- Sprint 1 仕様 `S1-SPEC-0.1.12` の説明・索引を収録する（Sprint 1全体は未完了、次はS01-004）
+- Sprint 1 仕様 `S1-SPEC-0.1.13` の説明・索引を収録する（Sprint 1全体は未完了、次はS01-005。S01-001〜004は実装済み）
 
 ## Sprint 1入口
 

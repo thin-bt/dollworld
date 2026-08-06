@@ -1,5 +1,22 @@
 # 変更履歴
 
+## 2026-08-07：S1-SPEC-0.1.13（MatchId決定的生成器契約の明文化）
+
+S01-005開始時に判明したMatchId決定的生成器の未確定契約を明文化した。既存balanceの意図変更ではなく、決定性・checkpoint・未commit遷移に必要な実装契約の明文化である。
+
+- MatchId形式 `match_<12桁の0埋め10進数>`（正規表現 `^match_[0-9]{12}$`）
+- 数値部分の有効範囲 `1..999999999999`（`match_000000000000`は無効）
+- `MatchIdGeneratorState.schemaVersion` `0.1.0`（field: schemaVersion／generatorVersion／namespace／seed／nextSequence）
+- fresh run初期状態は `nextSequence=1`
+- 枯渇sentinel `nextSequence=1000000000000`（新規発行不可）
+- 予約成功時は `nextSequence` を `N+1` へ進める
+- seedはstate hash／identity bindingに使用し、MatchId文字列へは混ぜない
+- 異なるrunでは同じMatchId文字列を許可する（一意性は `(simulationId, matchId)`）
+- pre-start failure／週rollback時は同一MatchIdを再試行可能
+- state canonical JSON SHA-256を`initialMatchIdGeneratorStateHash`へ保存
+- `matchIdGeneratorVersion`は`match-id-generator-0.1.0`のまま（発行規則変更時のみ版上げ）
+- Sprint1Config構造・既定値・canonical SHAは不変
+
 ## 2026-08-05：S1-SPEC-0.1.12（週間Processor実装契約の明文化）
 
 週間Processor実装開始時に判明した未確定事項を補完した。既存balanceの意図変更ではなく、決定性に必要な実装契約の明文化である。
