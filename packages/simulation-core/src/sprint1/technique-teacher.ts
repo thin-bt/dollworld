@@ -46,7 +46,7 @@ export type TeacherCanTeachContext = {
   activeMentorshipExists: boolean;
   masterLifeStatus: "living" | "deceased";
   masterParticipationStatus: "active" | "waiting" | "stopped";
-  masterCareerStatus: string;
+  masterCareerStatus: CareerStatus;
   masterTechniqueState: PersonTechniqueState | null;
 };
 
@@ -77,7 +77,13 @@ function requireStringEnumValue(
   return value;
 }
 
-function parseTeacherCanTeachContext(
+/**
+ * Shared TeacherCanTeachContext structural validator (09 §8.1).
+ * Used by `teacherCanTeach` and S01-004 TechniqueTargetContext validation so
+ * CareerStatus / life / participation enums cannot drift between call sites.
+ * Package-internal; not required on the package root export surface.
+ */
+export function validateTeacherCanTeachContext(
   contextInput: unknown,
 ): ValidationResult<TeacherCanTeachContext> {
   const issues: ValidationIssue[] = [];
@@ -164,7 +170,7 @@ function parseTeacherCanTeachContext(
     masterLifeStatus: masterLifeStatus as TeacherCanTeachContext["masterLifeStatus"],
     masterParticipationStatus:
       masterParticipationStatus as TeacherCanTeachContext["masterParticipationStatus"],
-    masterCareerStatus,
+    masterCareerStatus: masterCareerStatus as CareerStatus,
     masterTechniqueState,
   });
 }
@@ -188,7 +194,7 @@ export function teacherCanTeach(
   }
   const definition: TechniqueDefinition = definitionResult.value;
 
-  const contextResult = parseTeacherCanTeachContext(contextInput);
+  const contextResult = validateTeacherCanTeachContext(contextInput);
   if (!contextResult.ok) {
     return failure(contextResult.issues);
   }

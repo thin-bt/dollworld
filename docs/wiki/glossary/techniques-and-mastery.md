@@ -7,8 +7,8 @@ sources:
   - docs/specs/09-technique-system.md
   - docs/specs/10-training-and-learning.md
   - docs/specs/14-sprint1-config-schema.md
-  - commit:efd5ee1fcf1149d755778a031f08a9f7bba377d5
-last_verified: 2026-08-05
+  - commit:530e3f88d054eec11840e2e54743bf4c9a705654
+last_verified: 2026-08-06
 related:
   - abilities-and-aptitudes.md
   - ../invariants/weekly-training-and-learning.md
@@ -43,6 +43,14 @@ related:
 
 - `learnTechnique`／`practiceTechnique` は週間行動名（10・14）
 - AbilityKey の旧称としての `technique`（技量）とは別概念である。技量キーは `skill`
+- 実装上の週間行動識別子は `learn_technique`／`practice_technique`（10 の列挙）
+
+### 週間の進捗・熟練（S01-004実装済み）
+
+- 学習進捗は tenths 単位で加算し、上限は技定義の `learningProgressRequired`
+- 上限到達で習得へ移行する。習得条件を満たさない場合は `blocked_at_cap` となり進捗は上限で止まる
+- 練習の熟練加算は hundredths 単位。訓練に付随する熟練加算は 09 の関連技規則に従う
+- 学習focusは同一技を継続する間だけ維持し、習得・release時に `null` へ戻す
 
 数値・式・既定値は 09・10・14 に実在するものだけを正とし、このページへ再定義しない。
 
@@ -62,11 +70,15 @@ related:
 - `packages/simulation-core/src/sprint1/technique-teacher.ts`
 - `packages/simulation-core/src/sprint1/technique-basic-attack.ts`
 
-S01-003でカタログ／意味validation／習得条件／熟練度参照を実装済み。正式技一覧・週間更新は未着手。数値式の正本は 09・14。
+- `packages/simulation-core/src/sprint1/weekly-target-selection.ts`（S01-004）
+- `packages/simulation-core/src/sprint1/weekly-training-effects.ts`（S01-004）
+
+S01-003でカタログ／意味validation／習得条件／熟練度参照を実装済み。S01-004で週間の進捗・熟練更新を実装済み。正式技一覧は未着手。数値式の正本は 09・14。
 
 ## 関連するテスト
 
 - `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
+- `packages/simulation-core/src/sprint1-weekly-training.test.ts`
 
 ## 関連する判断
 
@@ -74,7 +86,7 @@ S01-003でカタログ／意味validation／習得条件／熟練度参照を実
 
 ## 未解決事項
 
-正式な production 技一覧は 09 後続事項。週間進捗・熟練加算は S01-004。RunRuleSnapshot 接続は S01-005。Sprint 1全体は未完了。
+正式な production 技一覧は 09 後続事項。RunRuleSnapshot 接続は S01-005。WorldEngine接続は S01-008。Sprint 1全体は未完了。
 
 ## 関連Wikiページ
 

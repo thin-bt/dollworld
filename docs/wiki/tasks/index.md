@@ -7,8 +7,8 @@ sources:
   - docs/SPRINT_0_BACKLOG.md
   - docs/SPRINT_1_BACKLOG.md
   - tag:sprint0-complete
-  - commit:efd5ee1fcf1149d755778a031f08a9f7bba377d5
-last_verified: 2026-08-05
+  - commit:530e3f88d054eec11840e2e54743bf4c9a705654
+last_verified: 2026-08-06
 ---
 
 # タスク索引
@@ -43,20 +43,21 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 - `TechniqueId`／`PersonTechniqueState`保存構造: S01-001（implemented）
 - `Sprint1PersonState`組立: S01-002（implemented）
 - TechniqueCatalogと技状態の意味的validation: S01-003（implemented）
+- 週間Planner／訓練・習得・練習・休養の適用: S01-004（implemented）
 
 | ID | Wiki | 状態 | 依存 |
 |---|---|---|---|
 | S01-001 | [S01-001.md](S01-001.md) | implemented | なし |
 | S01-002 | [S01-002.md](S01-002.md) | implemented | S01-001 |
 | S01-003 | [S01-003.md](S01-003.md) | implemented | S01-001、S01-002 |
-| S01-004 | [S01-004.md](S01-004.md) | pending | S01-002、S01-003 |
+| S01-004 | [S01-004.md](S01-004.md) | implemented | S01-002、S01-003 |
 | S01-005 | [S01-005.md](S01-005.md) | pending | S01-001、S01-002、S01-003 |
 | S01-006 | [S01-006.md](S01-006.md) | pending | S01-005 |
 | S01-007 | [S01-007.md](S01-007.md) | pending | S01-006 |
 | S01-008 | [S01-008.md](S01-008.md) | pending | S01-004、S01-007 |
 | S01-009 | [S01-009.md](S01-009.md) | pending | S01-008 |
 
-次の実装着手は S01-004。
+次の実装着手は S01-005。WorldEngineへの週間処理登録は S01-008。Sprint 1全体は未完了。
 
 ## 関連する正本
 
@@ -66,13 +67,15 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 ## 関連するコード
 
-- S01-001: `packages/simulation-core/src/sprint1/`（実装済み）
-- S01-002: `packages/simulation-core/src/sprint1/`（人物状態・adapter・selector。次はS01-003。Sprint 1全体は未完了）
-- S01-003以降: 未着手
+- S01-001: `packages/simulation-core/src/sprint1/`（ドメイン型・設定基盤）
+- S01-002: `packages/simulation-core/src/sprint1/`（人物状態・adapter・selector）
+- S01-003: `packages/simulation-core/src/sprint1/technique-*.ts`（カタログ・意味validation・習得条件）
+- S01-004: `packages/simulation-core/src/sprint1/weekly-*.ts`／`process-weekly-training-week.ts`
+- S01-005以降: 未着手
 
 ## 関連するテスト
 
-該当なし。
+- `packages/simulation-core/src/sprint1-weekly-training.test.ts`（S01-004）
 
 ## 関連する判断
 

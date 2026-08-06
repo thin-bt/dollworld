@@ -8,8 +8,8 @@ sources:
   - docs/SPRINT_1_BACKLOG.md
   - docs/SPEC_CHANGELOG.md
   - tag:sprint0-complete
-  - commit:efd5ee1fcf1149d755778a031f08a9f7bba377d5
-last_verified: 2026-08-05
+  - commit:530e3f88d054eec11840e2e54743bf4c9a705654
+last_verified: 2026-08-06
 ---
 
 # Wiki更新履歴
@@ -19,6 +19,33 @@ last_verified: 2026-08-05
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。
 
 ## 履歴
+
+### 2026-08-07 — S01-004 最終イベント契約修正（technique unit）
+
+- `technique.learning_progressed`へ`unit: "tenths"`、`technique.mastery_increased`へ`unit: "hundredths"`を追加
+- `technique.acquired`は既存payloadのまま（unit／before／afterなし）
+- 次はS01-005。Sprint 1全体は未完了
+
+### 2026-08-06 — S01-004 最終受入監査修正2（年齢境界／teacher CareerStatus／公開API）
+
+- 正式訓練対象を`isFormalTrainingEligible`（8..41）へ揃え、42歳以上はrest限定
+- teacher contextの`masterCareerStatus`をS01-003と同じCareerStatus列挙で完全検証
+- package rootから内部draft／effect／commit前validatorを除外
+- 次はS01-005。Sprint 1全体は未完了
+
+### 2026-08-06 — S01-004 受入監査修正（inactive state／focus／post-validation／Person境界／rng harden）
+
+- inactiveを含む全人物へ`Sprint1PersonState`を必須化。欠落は週全体failure
+- 週開始時の`normalizeWeeklyLearningFocus`、effect後の`validateProcessedWeeklyPersonRecord`、`Person`構造検証、`validateSeededRngState`を追加
+- 次はS01-005。Sprint 1全体は未完了
+
+### 2026-08-06 — S01-004 週間行動・訓練・技習得を実装
+
+- 週間行動列挙・強制休養／fallback理由・整数`scoreHundredths`・`multiplyBasisPointsFloor`・`drawInclusiveBasisPoints`・`TrainingProcessorRuntimeState`・`processWeeklyTrainingWeek` を追加
+- 週開始スナップショット凍結、週単位の原子性、同一週再処理／週番号逆行の拒否を実装
+- 正本10・14がルールを定義していない入力（planner context score、師匠推薦度、styleMatch、相性など）は sidecar 入力として受け取り、処理側で導出しない
+- イベントはcandidateのみ。EventEnvelope化とWorldEngine登録は S01-008
+- 次はS01-005。Sprint 1全体は未完了
 
 ### 2026-08-05 — S1-SPEC-0.1.12 最終受入監査修正（整数score・RNG BP・一括floor・acquirable・累積）
 

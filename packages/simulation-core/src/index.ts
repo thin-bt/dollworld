@@ -349,6 +349,119 @@ export {
   getBasicAttackProfile,
 } from "./sprint1/technique-basic-attack.js";
 
+// S01-004 weekly training / learning processor
+export {
+  WEEKLY_ACTIONS,
+  WEEKLY_FORCED_REST_REASONS,
+  WEEKLY_REST_FALLBACK_REASONS,
+  WEEKLY_SCORED_ACTIONS,
+  WEEKLY_TRAINING_ACTIONS,
+  isWeeklyAction,
+  weeklyActionOrderIndex,
+} from "./sprint1/weekly-actions.js";
+export type {
+  WeeklyAction,
+  WeeklyForcedRestReason,
+  WeeklyRestFallbackReason,
+  WeeklyScoredAction,
+  WeeklyTrainingAction,
+} from "./sprint1/weekly-actions.js";
+export {
+  drawInclusiveBasisPoints,
+  mathematicalFloor,
+  multiplyBasisPointsFloor,
+} from "./sprint1/multiply-basis-points.js";
+export {
+  WEEKLY_ACTION_CONTEXT_SCORE_KEYS,
+  WEEKLY_PLANNER_CONTEXT_KEYS,
+  cloneWeeklyPlannerContext,
+  freezeWeeklyPlannerContext,
+  validateWeeklyPlannerContext,
+} from "./sprint1/weekly-planner-context.js";
+export type {
+  WeeklyActionContextScore,
+  WeeklyPlannerContext,
+} from "./sprint1/weekly-planner-context.js";
+export {
+  TRAINING_PROCESSOR_ACTION_COUNT_KEYS,
+  TRAINING_PROCESSOR_RUNTIME_STATE_KEYS,
+  TRAINING_PROCESSOR_RUNTIME_STATE_SCHEMA_VERSION,
+  cloneTrainingProcessorRuntimeState,
+  createInitialTrainingProcessorRuntimeState,
+  freezeTrainingProcessorRuntimeState,
+  validateTrainingProcessorRuntimeState,
+} from "./sprint1/training-processor-runtime-state.js";
+export type {
+  TrainingProcessorActionCountKey,
+  TrainingProcessorActionCounts,
+  TrainingProcessorRuntimeState,
+} from "./sprint1/training-processor-runtime-state.js";
+export {
+  MOTIVATION_FACTOR_MAXIMUM_BASIS_POINTS,
+  MOTIVATION_FACTOR_MINIMUM_BASIS_POINTS,
+  NEUTRAL_NORMALIZED_INPUT,
+  validateTechniqueTargetContext,
+  validateTechniqueTargetContexts,
+  validateWeeklyStatTargetContext,
+  validateWeeklyTrainingPersonRecord,
+} from "./sprint1/weekly-training-types.js";
+export type {
+  StatTargetAbilityContext,
+  TechniqueTargetContext,
+  WeeklyStatTargetContext,
+  WeeklyTrainingEventCandidate,
+  WeeklyTrainingPersonRecord,
+  WeeklyTrainingPersonView,
+  WeeklyTrainingResult,
+} from "./sprint1/weekly-training-types.js";
+export {
+  computeActionScoreHundredths,
+  readWeeklyPlannerPersonState,
+  scoreWeeklyActions,
+  selectWeeklyAction,
+} from "./sprint1/weekly-action-scores.js";
+export type {
+  WeeklyActionCandidateAvailability,
+  WeeklyActionScoreEntry,
+  WeeklyActionSelection,
+  WeeklyPlannerPersonState,
+} from "./sprint1/weekly-action-scores.js";
+export {
+  buildLearningTechniqueCandidates,
+  buildPracticeTechniqueCandidates,
+  buildTrainingStatCandidates,
+  computeLearningTargetScoreHundredths,
+  computePracticeTargetScoreHundredths,
+  computeRecentPracticeNeed,
+  computeStatTargetScoreHundredths,
+  selectLearningTechniqueTarget,
+  selectNormalTrainingMasteryTarget,
+  selectPracticeTechniqueTarget,
+  selectTrainingStatTarget,
+} from "./sprint1/weekly-target-selection.js";
+export type {
+  LearningTargetCandidate,
+  LearningTargetSelection,
+  PracticeTargetCandidate,
+  PracticeTargetSelection,
+  StatTargetCandidate,
+  StatTargetSelection,
+  WeeklyLearningFocusNormalization,
+} from "./sprint1/weekly-target-selection.js";
+export { WEEKLY_TRAINING_EVENT_TYPES } from "./sprint1/weekly-training-effects.js";
+export { processWeeklyTrainingWeek } from "./sprint1/process-weekly-training-week.js";
+export type { WeeklyTrainingProcessorDependencies } from "./sprint1/process-weekly-training-week.js";
+export {
+  WEEKLY_PERSON_CORE_KEYS,
+  validateWeeklyTrainingPerson,
+} from "./sprint1/weekly-person-structure.js";
+export type { ParsedWeeklyTrainingPerson } from "./sprint1/weekly-person-structure.js";
+export {
+  SEEDED_RNG_STATE_KEYS,
+  SEEDED_RNG_WORD_MAXIMUM,
+  validateSeededRngState,
+} from "./sprint1/validate-seeded-rng-state.js";
+
 export type {
   NameCandidateCategory,
   NameCandidateFile,

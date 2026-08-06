@@ -7,8 +7,8 @@ sources:
   - docs/specs/08-character-growth.md
   - docs/specs/14-sprint1-config-schema.md
   - docs/specs/00-domain-glossary.md
-  - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-04
+  - commit:530e3f88d054eec11840e2e54743bf4c9a705654
+last_verified: 2026-08-06
 related:
   - weekly-training-and-learning.md
   - ../glossary/abilities-and-aptitudes.md
@@ -37,6 +37,14 @@ related:
 - `[Sprint 1暫定]` の調整可能値を正本ゲームルールへ昇格させない
 - Sprint 0 人物型との互換を維持し、既存公開型を独自別名へ差し替えない（08）
 
+### S01-004の週間成長適用で固定された内容
+
+- 訓練成長は milliPoints 単位で加算し、繰り上がった整数分だけ `surfaceValue` を増やす
+- `surfaceValue` の上限は 100。上限到達後の余剰 milliPoints は端数へ残さず切り捨てる
+- 潜在遺伝値・顕在遺伝値は週間訓練で変化しない
+- 成長端数は `StatGrowthRemainder.milliPoints` 0..999 のまま週をまたいで持ち越す
+- 疲労・負傷・調子・精神の増減は 08 の範囲へ clamp し、`confidence` は週間訓練で変化しない
+
 ## 関連する正本
 
 - [`docs/specs/08-character-growth.md`](../../specs/08-character-growth.md)
@@ -50,11 +58,13 @@ related:
 - `packages/simulation-core/src/sprint1/stat-growth-remainder.ts`
 - `packages/simulation-core/src/sprint1/growth-factor-selectors.ts`
 - `packages/simulation-core/src/sprint1/attach-sprint1-person-state.ts`
+- `packages/simulation-core/src/sprint1/weekly-training-effects.ts`（S01-004の週間適用）
 - `packages/simulation-core/src/domain.ts`（`Person.sprint1State?`）
 
 ## 関連するテスト
 
 - `packages/simulation-core/src/sprint1-person-growth.test.ts`
+- `packages/simulation-core/src/sprint1-weekly-training.test.ts`
 
 ## 関連する判断
 

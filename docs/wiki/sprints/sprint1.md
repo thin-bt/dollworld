@@ -19,7 +19,8 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:259a219d29b626c4678e5b248b8a8453861797f9
-last_verified: 2026-08-05
+  - commit:530e3f88d054eec11840e2e54743bf4c9a705654
+last_verified: 2026-08-06
 related:
   - ../glossary/abilities-and-aptitudes.md
   - ../glossary/techniques-and-mastery.md
@@ -61,7 +62,8 @@ Sprint 1 の仕様は `S1-SPEC-0.1.12` が現行である。正本版は `SPEC-0
 ### 実装状態
 
 - Sprint 1全体は**未完了**
-- S01-001〜S01-003は実装済み。次の実装着手はS01-004
+- S01-001〜S01-004は実装済み。次の実装着手はS01-005
+- 週間処理のWorldEngine登録はS01-008（S01-004では未実施）
 - 本Wikiの同期や `npm run check` の成功は、Sprint 1全体の実装完了を意味しない
 
 ### 実装タスク
@@ -82,7 +84,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.12` が現行である。正本版は `SPEC-0
 
 ## 関連するコード
 
-- `packages/simulation-core/src/sprint1/`（S01-001〜003の公開型・validation・カタログ／成長API）
+- `packages/simulation-core/src/sprint1/`（S01-001〜004の公開型・validation・カタログ／成長API・週間Processor）
 - `packages/simulation-core/src/sprint1/constants.ts`（`S1_SPEC_VERSION`）
 - `packages/simulation-core/src/index.ts`（package root export）
 
@@ -91,6 +93,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.12` が現行である。正本版は `SPEC-0
 - `packages/simulation-core/src/sprint1-foundation.test.ts`
 - `packages/simulation-core/src/sprint1-person-growth.test.ts`
 - `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
+- `packages/simulation-core/src/sprint1-weekly-training.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断
@@ -100,7 +103,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.12` が現行である。正本版は `SPEC-0
 
 ## 未解決事項
 
-- 次の実装着手は S01-004（週間Processor）。Sprint 1全体は未完了
+- 次の実装着手は S01-005（戦闘開始入力adapter）。週間ProcessorのWorldEngine登録は S01-008。Sprint 1全体は未完了
 
 ## 関連Wikiページ
 
