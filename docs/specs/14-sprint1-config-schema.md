@@ -1,6 +1,6 @@
 # 14 Sprint 1共通設定スキーマ付録
 
-- 仕様版: `S1-SPEC-0.1.14`
+- 仕様版: `S1-SPEC-0.1.15`
 - 状態: 08〜13が参照する型付き設定の固定構造
 - 対象: 成長、週間Planner、技習得、戦闘、戦闘後効果
 - 非対象: 初期世界生成設定、正式技一覧、大会設定
@@ -81,8 +81,9 @@ Sprint1ConfigIdentity
 - MatchId文字列形式は `match_<12桁の0埋め10進数>`。seedはID文字列へ混ぜず、state hash／SimulationIdentity bindingへだけ使用する。
 - `defaultBattleStrategyVersion` とDefaultBattleStrategyの初期`strategyVersion`は `default-battle-strategy-0.1.0` とする。
 - ScriptedActionSourceの初期`scriptFormatVersion`は `battle-action-script-0.1.0` とする。完全JSON構造・turns規則・canonicalScript／actionScriptHash・両side bindingは12仕様§2.1を正本とする。`scriptFormatVersion`文字列自体は本版でも変更しない。
-- Sprint 1仕様版（SimulationIdentity.specVersions.sprint1）の現行値は `S1-SPEC-0.1.14` とする。旧`S1-SPEC-0.1.13`を新規runの現行Sprint 1 identityとして受理しない。
-- Sprint1Configの構造・既定値・canonical SHAは本版でも不変とする。
+- Sprint 1仕様版（SimulationIdentity.specVersions.sprint1）の現行値は `S1-SPEC-0.1.15` とする。旧`S1-SPEC-0.1.14`を新規runの現行Sprint 1 identityとして受理しない。
+- 移動の`moverStateModifier`／`opponentStateModifier`は`battle.actionOrder.conditionPerPoint`／`fatiguePenaltyPerPoint`／`injuryPenaltyPerPoint`を共用する。移動専用の状態補正キーを`battle.movement`へ新設しない。
+- Sprint1Configの構造・schemaVersion／configVersion・既定値・canonical SHAは本版でも不変とする。
 
 ## 2. growth
 

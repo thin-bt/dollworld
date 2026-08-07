@@ -21,6 +21,12 @@ last_verified: 2026-08-08
 
 ## 履歴
 
+### 2026-08-08 — S1-SPEC-0.1.15 移動状態補正の明文化
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.15`へ版上げ。`moverStateModifier`／`opponentStateModifier`の明示式（`battle.actionOrder`係数共用）を正本へ固定
+- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
+- 次はS01-006。Sprint 1全体は未完了
+
 ### 2026-08-08 — S1-SPEC-0.1.14 戦闘ターン入力契約の明文化
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.14`へ版上げ。`BattleActionReplacementReason`完全enum、`battle-action-script-0.1.0`完全構造、技使用回数（attempted／successful）契約を正本へ固定

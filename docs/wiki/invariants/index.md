@@ -29,15 +29,15 @@ Sprint 0・Sprint 1を横断する不変条件索引。正本はミニ仕様で�
 
 AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、死亡者非処理、16歳未満ランクなし、42歳以上引退、参照整合、親子・師弟循環なし、同一シード一致。詳細は正本と検証器を確認すること。
 
-### Sprint 1（`S1-SPEC-0.1.14` で確定した仕様不変条件。ターン解決Processorは未実装）
+### Sprint 1（`S1-SPEC-0.1.15` で確定した仕様不変条件。ターン解決Processorは未実装）
 
 - [人物成長](character-growth.md)
 - [週間訓練・習得](weekly-training-and-learning.md)
 - [戦闘開始](battle-start.md)
-- [ターン解決](battle-turn-resolution.md)（0.1.14のreplacementReason／script／use-count契約を含む）
+- [ターン解決](battle-turn-resolution.md)（0.1.14のreplacementReason／script／use-count契約、0.1.15の移動状態補正契約を含む）
 - [戦闘結果・ログ](battle-result-and-log.md)
 
-Sprint 1 不変条件を既存の Sprint 0 自動テストで検証済みとは扱わない。S01-001〜005は実装済み、次はS01-006。Sprint 1全体は未完了。
+Sprint 1 不変条件を既存の Sprint 0 自動テストで検証済みとは扱わない。S01-001〜005は実装済み、次はS01-006。Sprint 1全体は未完了。S01-006は未着手。
 
 ## 関連する正本
 

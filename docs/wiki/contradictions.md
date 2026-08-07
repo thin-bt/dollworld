@@ -29,9 +29,9 @@ Wiki作成・更新時に発見した、正本・コード・テスト間の矛�
 
 - Sprint 0 の確定実装・正本（`sprint0-complete`）
 - Sprint 1 の `S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`
-- Sprint 1 の現行仕様は `S1-SPEC-0.1.14`（ターン入力契約明文化）。`S1-SPEC-0.1.13` は MatchId generator契約明文化、`S1-SPEC-0.1.12` は週間処理契約clarificationとして履歴。`2800d3b...` を 0.1.12／0.1.13／0.1.14 の内容 commit として扱わない
+- Sprint 1 の現行仕様は `S1-SPEC-0.1.15`（移動状態補正明文化）。`S1-SPEC-0.1.14` はターン入力契約明文化、`S1-SPEC-0.1.13` は MatchId generator契約明文化、`S1-SPEC-0.1.12` は週間処理契約clarificationとして履歴。`2800d3b...` を 0.1.12／0.1.13／0.1.14／0.1.15 の内容 commit として扱わない
 - 実装状態: S01-001〜S01-005 実装済み、次は S01-006。Sprint 1 全体は未完了。S01-006 productionターンResolverは未実装
-- コード側 `S1_SPEC_VERSION`／SimulationIdentity レジストリの現行値は `S1-SPEC-0.1.14`。旧`S1-SPEC-0.1.13`は新規 identity として受理しない
+- コード側 `S1_SPEC_VERSION`／SimulationIdentity レジストリの現行値は `S1-SPEC-0.1.15`。旧`S1-SPEC-0.1.14`は新規 identity として受理しない
 
 未来の未作成 commit hash を捏造して sources へ書かない。
 

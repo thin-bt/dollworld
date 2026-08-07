@@ -23,7 +23,7 @@ related:
 
 12・14（および関連する 09・11）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
 
-S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.14` で明文化された入力契約の索引である。
+S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.15` で明文化された移動状態補正、および `S1-SPEC-0.1.14` で明文化された入力契約の索引である。次はS01-006。Sprint 1全体は未完了。
 
 ## 現在確定している内容
 
@@ -37,6 +37,28 @@ S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0
 - 間合い・行動優先・命中・ダメージ・精神消費・耐久減少・継続判定の順序は 12 に従う
 - floor／round／clamp 等の順序を変更しない
 - 1 ターン途中失敗時の部分更新禁止条件がある場合は、12 の該当節を正とする
+
+### S1-SPEC-0.1.15 移動状態補正契約
+
+```text
+moverStateModifier
+= mover.condition * battle.actionOrder.conditionPerPoint
+- mover.fatigue * battle.actionOrder.fatiguePenaltyPerPoint
+- mover.injury * battle.actionOrder.injuryPenaltyPerPoint
+
+opponentStateModifier
+= opponent.condition * battle.actionOrder.conditionPerPoint
+- opponent.fatigue * battle.actionOrder.fatiguePenaltyPerPoint
+- opponent.injury * battle.actionOrder.injuryPenaltyPerPoint
+```
+
+- 移動専用の状態補正configキーは新設しない（`battle.actionOrder`係数を共用）
+- state modifierへ`consumptionPerformanceFactor`を掛けない
+- `nextHitModifier`／`nextActivationModifier`は移動に影響せず、移動では消費しない
+- 移動は解決時点の最新battle-local condition／fatigue／injuryを使う（ターン開始スナップショットではない）
+- 対比: `ActionOrderScore`はターン開始値を使用する
+- golden cases: `0/0/0→0`、`20/0/0→+5`、`-20/100/100→-30`、mover／opponent独立
+- RNG消費順・回数は不変。詳細は 12 §13
 
 ### S1-SPEC-0.1.14 ターン入力契約
 
@@ -94,7 +116,7 @@ unknown_technique | unlearned_technique | requirements_not_met
 
 ## 未解決事項
 
-該当なし。次は S01-006 実装。Sprint 1全体は未完了。
+該当なし。次は S01-006 実装。Sprint 1全体は未完了。S01-006は未着手。
 
 ## 関連Wikiページ
 

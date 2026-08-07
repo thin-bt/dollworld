@@ -201,6 +201,17 @@ export {
   START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION,
 } from "./sprint1/constants.js";
 export {
+  FORBIDDEN_MOVEMENT_STATE_MODIFIER_KEYS,
+  MOVEMENT_STATE_MODIFIER_ACTION_ORDER_PATHS,
+  computeMovementStateModifier,
+  computeMoverStateModifier,
+  computeOpponentStateModifier,
+} from "./sprint1/movement-state-modifier.js";
+export type {
+  MovementParticipantStateSnapshot,
+  MovementStateModifierActionOrderCoeffs,
+} from "./sprint1/movement-state-modifier.js";
+export {
   PERSON_TECHNIQUE_STATE_KEYS,
   appendSuccessfulUseCountInvariantIssue,
   clonePersonTechniqueState,

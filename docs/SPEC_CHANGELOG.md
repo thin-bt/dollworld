@@ -1,5 +1,19 @@
 # 変更履歴
 
+## 2026-08-08：S1-SPEC-0.1.15（移動状態補正の明文化）
+
+S01-006実装開始前に判明した、移動式の`moverStateModifier`／`opponentStateModifier`未定義を明文化した。既存balanceの意図変更ではなく、決定性に必要な実装契約の明文化である。
+
+- `moverStateModifier`／`opponentStateModifier`の明示式（`battle.actionOrder.conditionPerPoint`／`fatiguePenaltyPerPoint`／`injuryPenaltyPerPoint`を共用）
+- 移動専用の状態補正configキーを新設しない
+- state modifierへ`consumptionPerformanceFactor`を掛けない
+- `nextHitModifier`／`nextActivationModifier`は移動に影響せず、移動では消費しない
+- 移動は解決時点の最新battle-local `condition`／`fatigue`／`injury`を使用（ターン開始スナップショットではない）。先手でinjuryが上昇した場合、後続移動は更新後のinjuryを使う
+- 対比: `ActionOrderScore`はターン開始値を使用する
+- golden cases: `0/0/0→0`、`20/0/0→+5`、`-20/100/100→-30`、mover／opponent独立
+- RNG消費順・回数は不変
+- Sprint1Config構造・既定値・canonical SHAは不変
+
 ## 2026-08-08：S1-SPEC-0.1.14（戦闘ターン入力契約の明文化）
 
 S01-006実装開始時に判明した未確定ターン入力契約を明文化した。既存balanceの意図変更ではなく、決定性・replay・ログ互換性に必要な実装契約の明文化である。

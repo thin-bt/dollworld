@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.14`
+- 仕様版: `S1-SPEC-0.1.15`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -696,6 +696,16 @@ OpponentBaseScore
 
 moveRoll = integerRandom(-10, 10)
 moveSucceeded = MoverBaseScore + moveRoll >= OpponentBaseScore
+
+moverStateModifier
+= mover.condition * battle.actionOrder.conditionPerPoint
+- mover.fatigue * battle.actionOrder.fatiguePenaltyPerPoint
+- mover.injury * battle.actionOrder.injuryPenaltyPerPoint
+
+opponentStateModifier
+= opponent.condition * battle.actionOrder.conditionPerPoint
+- opponent.fatigue * battle.actionOrder.fatiguePenaltyPerPoint
+- opponent.injury * battle.actionOrder.injuryPenaltyPerPoint
 ```
 
 - `battle.movement.actionBonus=5`
@@ -706,6 +716,17 @@ moveSucceeded = MoverBaseScore + moveRoll >= OpponentBaseScore
 - 該当しない補正は0。技データから未定義の移動補正を読み取らない
 - 未定義のmovementAptitudeを新設しない
 - 移動判定1回につき、比較用RNGを1回だけ消費する
+- 移動専用の状態補正configキーを新設しない。`moverStateModifier`／`opponentStateModifier`は`battle.actionOrder.conditionPerPoint`／`fatiguePenaltyPerPoint`／`injuryPenaltyPerPoint`を共用する
+- `moverStateModifier`／`opponentStateModifier`へ`consumptionPerformanceFactor`を掛けない（speed／skill側のperformanceFactorとは別）
+- `nextHitModifier`／`nextActivationModifier`は移動に影響せず、移動では消費しない
+- 移動は当該移動actionが解決される時点の最新battle-local `condition`／`fatigue`／`injury`を使う。ターン開始スナップショットではない。先手行動などでinjuryが上昇した場合、後続の移動は更新後のinjuryを使う
+- 対比: `ActionOrderScore`の`conditionFatigueInjuryModifier`はターン開始時点の値で確定し、先手行動後に再計算しない（§5／§18）
+- 状態補正golden cases（condition／fatigue／injury → stateModifier。係数は`conditionPerPoint=0.25`／`fatiguePenaltyPerPoint=0.10`／`injuryPenaltyPerPoint=0.15`）:
+  - `0 / 0 / 0` → `0`
+  - `20 / 0 / 0` → `+5`
+  - `-20 / 100 / 100` → `-30`
+  - moverとopponentは独立に計算する
+- 本節の明文化はRNG消費順・回数を変えない
 
 ## 14. 精神を整える
 

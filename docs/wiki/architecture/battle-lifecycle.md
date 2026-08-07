@@ -27,13 +27,14 @@ related:
 
 ## 現在確定している内容
 
-### 実装状態（S1-SPEC-0.1.14時点）
+### 実装状態（S1-SPEC-0.1.15時点）
 
 - MatchId決定的生成器はproduction実装済み（S01-005）
 - 開始stage（入力検証・MatchId予約・battleSeed・BattleState生成・`beginBattle`）は**実装済み**（S01-005）
 - ターン入力契約（replacementReason／battle-action-script-0.1.0／技使用回数）は `S1-SPEC-0.1.14` で明文化済み
+- 移動状態補正（`moverStateModifier`／`opponentStateModifier`）は `S1-SPEC-0.1.15` で明文化済み
 - ターン解決以降（12・13）のproduction実装は**未着手**（S01-006／S01-007）
-- Sprint 1全体は未完了。次はS01-006
+- Sprint 1全体は未完了。次はS01-006。S01-006は未着手
 
 ### 主な段階
 
