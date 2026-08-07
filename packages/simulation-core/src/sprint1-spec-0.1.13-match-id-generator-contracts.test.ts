@@ -118,23 +118,33 @@ function identityWithStateHash(stateHash: string): SimulationIdentity {
   };
 }
 
-describe("S1-SPEC-0.1.13 version registry", () => {
-  it("publishes S1-SPEC-0.1.13 and related MatchId generator constants", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.13");
+describe("S1-SPEC-0.1.13 version registry (superseded current = 0.1.14)", () => {
+  it("publishes current S1-SPEC-0.1.14 while MatchId generator constants remain fixed", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.14");
     expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
     expect(MATCH_ID_GENERATOR_VERSION).toBe("match-id-generator-0.1.0");
     expect(MATCH_ID_GENERATOR_STATE_SCHEMA_VERSION).toBe("0.1.0");
     expect(MATCH_ID_NAMESPACE).toBe("match");
   });
 
-  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.13 and rejects 0.1.12", () => {
+  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.14 and rejects 0.1.13", () => {
     const ok = validateSimulationIdentity(identityWithStateHash("d".repeat(64)));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
-      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.13");
+      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.14");
     }
 
-    const rejected = validateSimulationIdentity({
+    const rejected013 = validateSimulationIdentity({
+      ...identityWithStateHash("d".repeat(64)),
+      specVersions: [
+        { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint1", version: "S1-SPEC-0.1.13" },
+      ],
+    });
+    expect(rejected013.ok).toBe(false);
+
+    const rejected012 = validateSimulationIdentity({
       ...identityWithStateHash("d".repeat(64)),
       specVersions: [
         { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
@@ -142,7 +152,7 @@ describe("S1-SPEC-0.1.13 version registry", () => {
         { specSetId: "sprint1", version: "S1-SPEC-0.1.12" },
       ],
     });
-    expect(rejected.ok).toBe(false);
+    expect(rejected012.ok).toBe(false);
   });
 
   it("keeps the Sprint1Config balance SHA unchanged", () => {

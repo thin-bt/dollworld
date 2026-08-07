@@ -143,7 +143,7 @@ manifest不整合時は生成中止。
 
 ## 12. Sprint 1 SimulationIdentity
 
-Sprint 1以降に開始する新規runでは、設定ハッシュ・seed・仕様版に加え、Sprint 1の決定的ルール入力を含む`SimulationIdentity`から`simulationId`を生成する。Sprint 1仕様版は`S1-SPEC-0.1.13`。旧`S1-SPEC-0.1.12`を新規runの現行Sprint 1 identityとして受理しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
+Sprint 1以降に開始する新規runでは、設定ハッシュ・seed・仕様版に加え、Sprint 1の決定的ルール入力を含む`SimulationIdentity`から`simulationId`を生成する。Sprint 1仕様版は`S1-SPEC-0.1.14`。旧`S1-SPEC-0.1.13`を新規runの現行Sprint 1 identityとして受理しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
 
 ```text
 SimulationIdentity
@@ -159,7 +159,7 @@ SimulationIdentity
 - specVersions:
     - { specSetId: "main", version: "SPEC-0.1.2" }
     - { specSetId: "sprint0", version: "S0-SPEC-0.1.5" }
-    - { specSetId: "sprint1", version: "S1-SPEC-0.1.13" }
+    - { specSetId: "sprint1", version: "S1-SPEC-0.1.14" }
 - rngAlgorithmVersion
 - canonicalJsonVersion
 - hashAlgorithm: "SHA-256"

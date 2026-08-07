@@ -9,7 +9,7 @@ sources:
   - docs/specs/03-event-envelope.md
   - docs/specs/05-statistics-output.md
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+last_verified: 2026-08-08
 related:
   - battle-turn-resolution.md
   - ../architecture/battle-lifecycle.md
@@ -44,11 +44,11 @@ related:
 
 ## 関連するコード
 
-該当なし（戦闘結果・ログは未実装。S01-001〜003は実装済み）。
+該当なし（BattleResult productionは未実装。S01-006ターンResolverも未実装。`S1-SPEC-0.1.14`のターン入力契約は12正本／`battle-turn-resolution`索引を参照）。
 
 ## 関連するテスト
 
-該当なし（戦闘結果・ログは未実装）。
+該当なし（戦闘結果・ログは未実装）。`S1-SPEC-0.1.14`のターン入力契約テストは`sprint1-spec-0.1.14-turn-contracts.test.ts`（Resolver未実装）。
 
 ## 関連する判断
 

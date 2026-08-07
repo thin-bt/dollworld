@@ -202,6 +202,7 @@ export {
 } from "./sprint1/constants.js";
 export {
   PERSON_TECHNIQUE_STATE_KEYS,
+  appendSuccessfulUseCountInvariantIssue,
   clonePersonTechniqueState,
   freezePersonTechniqueState,
   validatePersonTechniqueState,
@@ -539,6 +540,40 @@ export type {
   BattleActionSourceIdentity,
   BattleActionSourceKind,
 } from "./sprint1/battle-action-source-identity.js";
+export {
+  BATTLE_ACTION_KINDS,
+  BATTLE_ACTION_REPLACEMENT_REASONS,
+  BASIC_ATTACK_PROFILES,
+  EVADE_DIRECTIONS,
+  INVALID_ACTION_COUNT_REPLACEMENT_REASONS,
+  invalidActionCountDeltaForReplacementReason,
+  isBattleActionReplacementReason,
+  validateBattleAction,
+  validateBattleActionReplacementReason,
+  validateResolvedBattleAction,
+} from "./sprint1/battle-action.js";
+export type {
+  BattleAction,
+  BattleActionKind,
+  BattleActionReplacementReason,
+  BattleBasicAttackProfile,
+  EvadeDirection,
+  ResolvedBattleAction,
+} from "./sprint1/battle-action.js";
+export {
+  BATTLE_ACTION_SCRIPT_KEYS,
+  BATTLE_ACTION_SCRIPT_TURN_KEYS,
+  FIXED_BASIC_DEFENSE_ACTION_SCRIPT_BYTE_LENGTH,
+  FIXED_BASIC_DEFENSE_ACTION_SCRIPT_SHA256,
+  battleActionScriptToCanonicalScript,
+  buildFixedBasicDefenseBattleActionScript,
+  computeActionScriptHash,
+  getBattleActionFromScript,
+  validateBattleActionScript,
+  validateCanonicalBattleActionScriptString,
+} from "./sprint1/battle-action-script.js";
+export type { BattleActionScript, BattleActionScriptTurn } from "./sprint1/battle-action-script.js";
+export { validateScriptedBothSideBinding } from "./sprint1/battle-action-script-binding.js";
 export {
   RUN_RULE_SNAPSHOT_KEYS,
   cloneRunRuleSnapshot,

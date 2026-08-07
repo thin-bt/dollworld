@@ -7,21 +7,27 @@ sources:
   - docs/specs/12-battle-turn-resolution.md
   - docs/specs/14-sprint1-config-schema.md
   - docs/specs/09-technique-system.md
+  - docs/specs/11-battle-state.md
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
-last_verified: 2026-08-01
+last_verified: 2026-08-08
 related:
   - battle-start.md
   - battle-result-and-log.md
   - ../architecture/battle-lifecycle.md
+  - ../tasks/S01-006.md
 ---
 
 # ターン解決の不変条件
 
 ## 概要
 
-12・14（および関連する 09）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
+12・14（および関連する 09・11）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
+
+S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.14` で明文化された入力契約の索引である。
 
 ## 現在確定している内容
+
+### 既存の計算契約
 
 - TechniqueCategory／basic_attack profile は `unarmed | sword | magic`
 - Ability 参照名は `stamina` と `skill`（旧 `vitality`／Ability としての `technique` は使わない）
@@ -32,15 +38,51 @@ related:
 - floor／round／clamp 等の順序を変更しない
 - 1 ターン途中失敗時の部分更新禁止条件がある場合は、12 の該当節を正とする
 
+### S1-SPEC-0.1.14 ターン入力契約
+
+#### BattleActionReplacementReason
+
+完全enum（これ以外を使わない）:
+
+```text
+unknown_technique | unlearned_technique | requirements_not_met
+| insufficient_mental | unusable_range | unable_to_act | opponent_ended_battle
+```
+
+- 置換なしは `replacementReason = null`（空文字禁止）
+- `invalidActionCountDelta = 1`（上記6理由のうち opponent_ended_battle 以外）
+- `opponent_ended_battle` は `invalidActionCountDelta = 0`
+- `actor.canAct=false` は即 `unable_to_act`。それ以外は unknown → unlearned → requirements → mental → range の優先順
+- 詳細は 12 §7
+
+#### battle-action-script-0.1.0
+
+- 1試合全体・全turn・両sideの BattleAction を保持
+- root: `scriptFormatVersion`／`turns`、turn: `turnNumber`／`sideA`／`sideB`
+- `turns.length = maxTurns`（Sprint 1現行20）、turnNumber は 1..maxTurns 完全連番（枯渇禁止）
+- `canonicalScript` は validated script の `toCanonicalJson` 文字列。再canonical一致必須
+- `actionScriptHash` = SHA-256(UTF-8 bytes of canonicalScript)
+- Resolve時 scripted mode は両side同一 script／hash／format 必須。混在は未commit failure
+- 詳細は 12 §2.1
+
+#### 技使用回数
+
+- `attemptedUseCount`: 技実行開始時（置換完了後・精神消費前）に +1
+- `successfulUseCount`: activation 成功で +1（命中は問わない）
+- 常に `successfulUseCount <= attemptedUseCount`
+- S01-006 は battle-local 更新のみ。persistent 反映は S01-007
+- 詳細は 09・12 §8.1
+
 ## 関連する正本
 
 - [`docs/specs/12-battle-turn-resolution.md`](../../specs/12-battle-turn-resolution.md)
 - [`docs/specs/14-sprint1-config-schema.md`](../../specs/14-sprint1-config-schema.md)
 - [`docs/specs/09-technique-system.md`](../../specs/09-technique-system.md)
+- [`docs/specs/11-battle-state.md`](../../specs/11-battle-state.md)
 
 ## 関連するコード
 
-該当なし（ターン解決Processorは未実装。S01-001〜003は実装済み）。
+該当なし（ターン解決Processorは未実装。S01-001〜005は実装済み）。
 
 ## 関連するテスト
 
@@ -52,10 +94,12 @@ related:
 
 ## 未解決事項
 
-該当なし。
+該当なし。次は S01-006 実装。Sprint 1全体は未完了。
 
 ## 関連Wikiページ
 
 - [battle-start.md](battle-start.md)
 - [battle-result-and-log.md](battle-result-and-log.md)
 - [../glossary/abilities-and-aptitudes.md](../glossary/abilities-and-aptitudes.md)
+- [../glossary/techniques-and-mastery.md](../glossary/techniques-and-mastery.md)
+- [../tasks/S01-006.md](../tasks/S01-006.md)

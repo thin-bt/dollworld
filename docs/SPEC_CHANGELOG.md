@@ -1,5 +1,21 @@
 # 変更履歴
 
+## 2026-08-08：S1-SPEC-0.1.14（戦闘ターン入力契約の明文化）
+
+S01-006実装開始時に判明した未確定ターン入力契約を明文化した。既存balanceの意図変更ではなく、決定性・replay・ログ互換性に必要な実装契約の明文化である。
+
+- `BattleActionReplacementReason`完全enum（`unknown_technique`／`unlearned_technique`／`requirements_not_met`／`insufficient_mental`／`unusable_range`／`unable_to_act`／`opponent_ended_battle`）
+- 置換優先順位と`invalidActionCountDelta`規則（`opponent_ended_battle`は0、他6理由は1）
+- BattleAction canonical object形状（requested 8 variants、`no_action`はResolved専用）
+- `battle-action-script-0.1.0`完全JSON構造（`scriptFormatVersion`／`turns`、各turnは`turnNumber`／`sideA`／`sideB`）
+- scriptは1戦全体・全turn・両sideを保持。`turns.length = maxTurns`の完全連番としscript枯渇を禁止
+- `canonicalScript`文字列（validated scriptの`toCanonicalJson`）と`actionScriptHash`（UTF-8 bytesのSHA-256）
+- scripted modeでは両side同一script／同一hash／同一format versionを必須
+- `attemptedUseCount`は技実行開始時（置換完了後・精神消費前）に+1
+- `successfulUseCount`はactivation成功（命中結果は問わない）で+1
+- `successfulUseCount <= attemptedUseCount`不変条件
+- Sprint1Config構造・既定値・canonical SHAは不変
+
 ## 2026-08-07：S1-SPEC-0.1.13（MatchId決定的生成器契約の明文化）
 
 S01-005開始時に判明したMatchId決定的生成器の未確定契約を明文化した。既存balanceの意図変更ではなく、決定性・checkpoint・未commit遷移に必要な実装契約の明文化である。

@@ -60,7 +60,7 @@ SPEC-0.1.1|S0-SPEC-0.1.5|<configHash>|<seedの10進整数>|<nameDataHash>|xoshir
 
 このUTF-8文字列のSHA-256を小文字16進数化し、先頭16桁から`simulation_<16hex>`を生成する。区切り、順序、大小文字を変更しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
 
-Sprint 1以降に開始する新規runの`simulationId`は、02ミニ仕様の`SimulationIdentity`（schemaVersion `0.3.0`）から生成する。正本仕様版は`SPEC-0.1.2`、Sprint 1仕様版は`S1-SPEC-0.1.13`をidentityへ含める。詳細は`docs/specs/02-config-schema.md`および`docs/specs/14-sprint1-config-schema.md`を参照する。
+Sprint 1以降に開始する新規runの`simulationId`は、02ミニ仕様の`SimulationIdentity`（schemaVersion `0.3.0`）から生成する。正本仕様版は`SPEC-0.1.2`、Sprint 1仕様版は`S1-SPEC-0.1.14`をidentityへ含める。詳細は`docs/specs/02-config-schema.md`および`docs/specs/14-sprint1-config-schema.md`を参照する。
 
 ### MatchId（Sprint 1）
 
@@ -94,6 +94,21 @@ Sprint 1以降に開始する新規runの`simulationId`は、02ミニ仕様の`S
 - `matchIdGeneratorVersion`をSimulationIdentityとRunRuleSnapshotへ保存し、同じ版文字列で発行規則を変更しない。prefix・桁数・進数・開始値・上限・遷移・seedのID使用有無・namespace・算出式を変える場合は`matchIdGeneratorVersion`を上げる。state構造を変える場合は`MatchIdGeneratorState.schemaVersion`も上げる。
 - 大会との関連はSprint 2で`TournamentId`から`MatchId`を参照する。
 - 詳細ログを別エンティティとして永続化する将来段階では`BattleLogId`を使用できるが、`MatchId`と混同しない。
+
+### BattleActionReplacementReason（Sprint 1）
+
+戦闘ターン解決でrequestedActionを置換した理由、または先手終了による後手中止理由。完全enumは次だけとする（12仕様§7）。
+
+```text
+unknown_technique | unlearned_technique | requirements_not_met
+| insufficient_mental | unusable_range | unable_to_act | opponent_ended_battle
+```
+
+置換なしは`null`。空文字は禁止。
+
+### battle-action-script-0.1.0（Sprint 1）
+
+単体テスト／fixture replay／監査用のscripted actions形式。1試合全体の全turn・両sideのBattleActionを保持するcanonical script。構造・取得・hash・両side bindingは12仕様§2.1を正本とする。
 
 ## 4. 人物の基本型
 

@@ -1,6 +1,6 @@
 # 09 技データ・習得仕様
 
-- 仕様版: `S1-SPEC-0.1.13`
+- 仕様版: `S1-SPEC-0.1.14`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 技定義、技分類、習得進捗、熟練度、使用条件
 - 非対象: 師匠が教える技の自律判断、独自技生成、派生、失伝
@@ -275,9 +275,13 @@ PersonTechniqueState
 |---|---|
 | learningProgressTenths | 0..`learningProgressRequired * 10`の整数。表示値の10倍で保持 |
 | masteryHundredths | 0..10000の整数。表示熟練度の100倍で保持 |
-| successfulUseCount | 0以上の整数 |
-| attemptedUseCount | 0以上の整数 |
+| successfulUseCount | 0以上の整数。戦闘内ではactivation成功（命中は問わない）で+1。詳細は12仕様§8.1 |
+| attemptedUseCount | 0以上の整数。戦闘内では技実行開始時（精神消費前）に+1。詳細は12仕様§8.1 |
 | acquiredAbsoluteWeek | 未習得はnull、習得時に1回だけ設定 |
+
+常に`successfulUseCount <= attemptedUseCount`を要求する。既存snapshotで`successfulUseCount > attemptedUseCount`なら継続不能validation failure。safe integer必須。
+
+S01-006はBattleState participant内のbattle-local countだけを更新し、persistent Personへは反映しない。戦闘後の差分反映はS01-007。
 
 人物が保持する`PersonTechniqueState[]`はTechniqueId昇順へ正規化し、TechniqueId重複を禁止する。
 

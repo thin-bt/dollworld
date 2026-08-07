@@ -9,7 +9,7 @@ sources:
   - tag:sprint0-complete
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:3b313a5ea690351d062e751bc724e5530b835872
-last_verified: 2026-08-07
+last_verified: 2026-08-08
 related:
   - sprint0.md
   - sprint1.md
@@ -24,7 +24,7 @@ Sprint 0 と Sprint 1 を横断する Sprint 単位の索引。
 ## 現在確定している内容
 
 - [Sprint 0](sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprint1.md) — 仕様 `S1-SPEC-0.1.13`（全体実装は未完了、次はS01-005）
+- [Sprint 1](sprint1.md) — 仕様 `S1-SPEC-0.1.14`（全体実装は未完了、次はS01-006）
 
 ## 関連する正本
 

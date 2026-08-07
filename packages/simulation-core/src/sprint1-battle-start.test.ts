@@ -69,6 +69,7 @@ import {
   toCanonicalJson,
   validateBattleActionSourceIdentity,
   validateBattleParticipant,
+  validateBattleParticipantSnapshot,
   validateBattleRulesSnapshotRef,
   validateBattleState,
   validateMatchId,
@@ -429,7 +430,7 @@ function startInput(overrides: Record<string, unknown> = {}) {
 
 describe("S01-005 version registry", () => {
   it("publishes the S01-005 schema versions and fixed strategy identifiers", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.13");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.14");
     expect(RUN_RULE_SNAPSHOT_SCHEMA_VERSION).toBe("0.4.0");
     expect(BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION).toBe("0.1.0");
     expect(BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION).toBe("0.1.0");
@@ -923,6 +924,43 @@ describe("battle participant derivation (11 §5 / §6 / §7)", () => {
     );
     expect(knownButUnacquired.techniques).toHaveLength(1);
     expect(knownButUnacquired.techniques[0]?.acquiredAbsoluteWeek).toBeNull();
+  });
+
+  it("rejects successfulUseCount > attemptedUseCount on battle participant techniques (S1-SPEC-0.1.14)", () => {
+    const invertedTechnique = {
+      ...techniqueState(TECHNIQUE_ALPHA, 10),
+      successfulUseCount: 2,
+      attemptedUseCount: 1,
+    };
+    expect(
+      validateBattleParticipant(
+        participantInput({
+          sprint1State: {
+            sprint1StateSchemaVersion: "0.1.0",
+            currentMental: 100,
+            techniqueStates: [invertedTechnique],
+            learningFocusTechniqueId: null,
+          },
+        }),
+        context,
+        sha256Provider,
+      ).ok,
+    ).toBe(false);
+
+    const snapshot = expectOk(
+      validateBattleParticipant(participantInput(), context, sha256Provider),
+    );
+    const badSnapshot = {
+      ...snapshot,
+      techniques: [
+        {
+          ...snapshot.techniques[0]!,
+          successfulUseCount: 2,
+          attemptedUseCount: 1,
+        },
+      ],
+    };
+    expect(validateBattleParticipantSnapshot(badSnapshot, "sideA", sha256Provider).ok).toBe(false);
   });
 
   it("covers birthYear, ageAtBattle and sprint1StateSchemaVersion in sourceSnapshotHash", () => {

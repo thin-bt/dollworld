@@ -22,7 +22,7 @@ sources:
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-07
+last_verified: 2026-08-08
 related:
   - ../glossary/abilities-and-aptitudes.md
   - ../glossary/techniques-and-mastery.md
@@ -37,7 +37,7 @@ related:
 
 ## 概要
 
-Sprint 1 の仕様は `S1-SPEC-0.1.13` が現行である。正本版は `SPEC-0.1.2`。`S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`。`0.1.12` は週間処理契約のclarificationであり、Sprint1Config balance／hashは不変。`0.1.13` は MatchId generator契約の明文化である。
+Sprint 1 の仕様は `S1-SPEC-0.1.14` が現行である。正本版は `SPEC-0.1.2`。`S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`。`0.1.12` は週間処理契約のclarificationであり、Sprint1Config balance／hashは不変。`0.1.13` は MatchId generator契約の明文化である。`0.1.14` は戦闘ターン入力契約（replacementReason／battle-action-script／技使用回数）の明文化である。
 
 本ページは説明・索引である。実装や仕様判断の根拠には使わない。正本と矛盾する場合は正本を優先する。
 
@@ -45,7 +45,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.13` が現行である。正本版は `SPEC-0
 
 ### 仕様状態
 
-- ミニ仕様版: `S1-SPEC-0.1.13`
+- ミニ仕様版: `S1-SPEC-0.1.14`
 - 正本版: `SPEC-0.1.2`
 - `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - 08〜14 は作成・受入監査済み（[`docs/SPEC_PREPARATION_PLAN.md`](../../SPEC_PREPARATION_PLAN.md)）

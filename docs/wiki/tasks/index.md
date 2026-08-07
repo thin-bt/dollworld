@@ -10,7 +10,7 @@ sources:
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-07
+last_verified: 2026-08-08
 ---
 
 # タスク索引
@@ -38,7 +38,7 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 ### Sprint 1（部分実装中・全体は未完了）
 
-正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.13`。Sprint 1全体は未完了。S01-001〜005 implemented、次はS01-006。
+正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.14`。Sprint 1全体は未完了。S01-001〜005 implemented、次はS01-006。
 
 共有型所有の要約（詳細は正本）:
 

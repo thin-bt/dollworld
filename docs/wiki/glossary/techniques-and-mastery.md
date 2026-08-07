@@ -8,7 +8,7 @@ sources:
   - docs/specs/10-training-and-learning.md
   - docs/specs/14-sprint1-config-schema.md
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
-last_verified: 2026-08-06
+last_verified: 2026-08-08
 related:
   - abilities-and-aptitudes.md
   - ../invariants/weekly-training-and-learning.md
@@ -52,6 +52,14 @@ related:
 - 練習の熟練加算は hundredths 単位。訓練に付随する熟練加算は 09 の関連技規則に従う
 - 学習focusは同一技を継続する間だけ維持し、習得・release時に `null` へ戻す
 
+### 戦闘内使用回数（S1-SPEC-0.1.14）
+
+- `attemptedUseCount`: 技実行開始時（置換完了後・精神消費前）に +1
+- `successfulUseCount`: activation 成功で +1（命中は問わない）
+- 常に `successfulUseCount <= attemptedUseCount`
+- S01-006 は battle-local 更新のみ。persistent Person への差分反映は S01-007
+- 詳細は 09・12 §8.1。本ページへ式を再定義しない
+
 数値・式・既定値は 09・10・14 に実在するものだけを正とし、このページへ再定義しない。
 
 ## 関連する正本
@@ -86,7 +94,7 @@ S01-003でカタログ／意味validation／習得条件／熟練度参照を実
 
 ## 未解決事項
 
-正式な production 技一覧は 09 後続事項。RunRuleSnapshot 接続は S01-005。WorldEngine接続は S01-008。Sprint 1全体は未完了。
+正式な production 技一覧は 09 後続事項。RunRuleSnapshot 接続は S01-005（実装済み）。ターン解決での使用回数更新は S01-006（未実装）。WorldEngine接続は S01-008。Sprint 1全体は未完了。
 
 ## 関連Wikiページ
 

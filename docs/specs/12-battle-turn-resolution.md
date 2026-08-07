@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.13`
+- 仕様版: `S1-SPEC-0.1.14`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -80,6 +80,128 @@ ResolveBattleTurnResult =
 - DefaultBattleStrategyは`strategyId=default-battle-strategy`、`strategyVersion=RunRuleSnapshot.defaultBattleStrategyVersion`、`strategyConfigHash=RunRuleSnapshot.sprint1ConfigHash`を申告する。scripted actionsはcanonical action script全文hashを申告する
 - failure結果では次BattleState・ActionLog・TurnOrderLog・イベント候補を返さず、入力state・入力rngStateをそのまま維持する
 
+### 2.1 ScriptedActionSourceとbattle-action-script-0.1.0
+
+`ScriptedActionSource`は次の2 fieldだけを持つ。
+
+```text
+ScriptedActionSource
+- identity: BattleActionSourceIdentity(scripted_actions)
+- canonicalScript: string
+```
+
+`canonicalScript`はvalidated `BattleActionScript`を`toCanonicalJson`したUTF-8 JSON文字列そのものとする。
+
+#### BattleActionScript構造
+
+```text
+BattleActionScript
+- scriptFormatVersion
+- turns
+```
+
+```text
+BattleActionScriptTurn
+- turnNumber
+- sideA
+- sideB
+```
+
+完全形の例:
+
+```json
+{
+  "scriptFormatVersion": "battle-action-script-0.1.0",
+  "turns": [
+    {
+      "turnNumber": 1,
+      "sideA": { "kind": "basic_defense" },
+      "sideB": { "kind": "basic_defense" }
+    }
+  ]
+}
+```
+
+- root exact 2 keys: `scriptFormatVersion`／`turns`
+- 各turn exact 3 keys: `turnNumber`／`sideA`／`sideB`
+- 各`sideA`／`sideB`は3.1節のBattleAction canonical object
+- `scriptFormatVersion`は`"battle-action-script-0.1.0"`へ固定
+
+#### turns規則
+
+特定の戦闘へscriptをbindする際、`expectedMaxTurns = RunRuleSnapshot.sprint1Config.battle.maxTurns`とする。Sprint 1現行は20。
+
+必須:
+
+```text
+turns.length = expectedMaxTurns
+turnNumber = 1, 2, 3, ... expectedMaxTurns（完全連番）
+```
+
+禁止: 0開始、欠番、重複、順序違い、maxTurns未満／超過、sparse array、array extra property。
+
+有効にbind済みのscriptでは「script枯渇」は発生しない。戦闘が途中終了した場合、未使用の後続turn entryは無視する。再hashや切り詰めはしない。
+
+#### turn／sideからの行動取得
+
+prepared turn番号を`t`とする。
+
+```text
+entry = script.turns[t - 1]
+```
+
+必ず`entry.turnNumber = t`を確認する。`actorSide`が`sideA`なら`entry.sideA`、`sideB`なら`entry.sideB`をrequestedActionとして返す。別turnを検索してfallbackしない。該当turnまたはside branchが存在しない場合は未commit failureとし、`basic_defense`／`no_action`／DefaultBattleStrategy／前後turnへfallbackしない。有効bind済みscriptではこのfailureは発生しないことが不変条件。
+
+#### canonicalScript検証
+
+runtimeでは次を必須とする。
+
+1. `canonicalScript`が非空stringか確認
+2. `JSON.parse`をtry/catch
+3. parsed valueを`BattleActionScript`としてdescriptor-independentに検証
+4. `toCanonicalJson(validated script)`で再canonical化
+5. 再canonical文字列が入力`canonicalScript`と完全一致することを必須確認
+
+一致しない場合は拒否する（空白差、改行、非canonical key順、duplicate JSON key、余分／欠落field、不正actionを含む）。
+
+#### actionScriptHash
+
+```text
+actionScriptHash = SHA-256(UTF-8 bytes of canonicalScript)
+```
+
+JSON objectをもう一度別形式でhashしない。小文字16進64文字。実行時は次の三者一致を必須とする。
+
+```text
+source.identity.actionScriptHash
+= BattleState上の該当participant ActionSourceIdentity.actionScriptHash
+= computeHash(canonicalScript)
+```
+
+`scriptFormatVersion`も三者一致。
+
+#### 両side scripted binding
+
+`battle-action-script-0.1.0`は両sideを含む1試合全体のscriptである。`ResolveBattleTurn`でscripted modeを使う場合、両participantのaction source kindが`scripted_actions`であり、かつ次が一致必須とする。
+
+```text
+A.actionScriptHash = B.actionScriptHash
+A.scriptFormatVersion = B.scriptFormatVersion
+A.canonicalScript = B.canonicalScript
+```
+
+片側`default_strategy`・片側`scripted_actions`の混在は未commit failure。両側`default_strategy`は従来どおり正常。S01-005でmixed identityのBattleState作成自体を拒否する必要はない。実行時未commit turn failureでもよい。
+
+#### 固定script canonical fixture
+
+Sprint 1 `maxTurns=20`のfixtureとして、全turnで双方`basic_defense`を選ぶscriptを固定する。既存`canonical-json-v1`によるUTF-8 byte lengthは`1733`、SHA-256は次へ固定する。
+
+```text
+67abb9d717f4ae6a21650d16e9b7da3e166fdfc1d89616f6342e258595e7cf6f
+```
+
+実装から期待hashを自己生成してassertしない。実測が一致しない場合は作業を停止し報告する。
+
 ## 3. 行動
 
 ```text
@@ -97,6 +219,83 @@ ResolvedBattleAction = BattleAction | no_action
 ```
 
 正本にある「精神を整える」「降参する」を正式行動として含める。
+
+script、hash、ログ、fixtureで同じcanonical object形式を使う。未知key拒否、欠落key拒否、null補完禁止、別variantのfield混入禁止。getter等を実行しない。`no_action`は`ResolvedBattleAction`専用であり、requested `BattleAction`およびscript本文へ記載できない。
+
+### 3.1 BattleAction canonical object
+
+#### use_technique
+
+```json
+{
+  "kind": "use_technique",
+  "techniqueId": "..."
+}
+```
+
+exact 2 keys。
+
+#### basic_attack
+
+```json
+{
+  "kind": "basic_attack",
+  "profile": "unarmed"
+}
+```
+
+`profile`は`unarmed | sword | magic`。exact 2 keys。
+
+#### basic_defense
+
+```json
+{
+  "kind": "basic_defense"
+}
+```
+
+#### evade
+
+```json
+{
+  "kind": "evade",
+  "direction": "hold"
+}
+```
+
+`direction`は`hold | approach_one | retreat_one`。
+
+#### approach
+
+```json
+{
+  "kind": "approach"
+}
+```
+
+#### retreat
+
+```json
+{
+  "kind": "retreat"
+}
+```
+
+#### focus_mind
+
+```json
+{
+  "kind": "focus_mind"
+}
+```
+
+#### surrender
+
+```json
+{
+  "kind": "surrender"
+}
+```
 
 ## 4. 優先度
 
@@ -180,20 +379,64 @@ Sprint 1では09仕様の予約actionTraitsを実行しない。`simultaneous`�
 
 ## 7. 不正行動の置換
 
-| 理由 | 置換 |
-|---|---|
-| 完全カタログに存在しないTechniqueId | basic_defense（replacementReason=`unknown_technique`） |
-| 完全カタログには存在するが人物が未習得 | basic_defense（replacementReason=`unlearned_technique`） |
-| 必要適性・必要能力・前提技熟練度不足 | basic_defense |
-| `effectiveMentalCost`に対する精神不足 | basic_defense |
-| 使用不可間合い | 最寄りの使用可能間合いへapproachまたはretreat。移動不能ならbasic_defense |
-| 行動不能 | no_action |
+正式な完全enumは次だけとする。これ以外の文字列をSprint 1で使用しない。
 
-- requestedActionとresolvedActionを両方ログへ残し、置換時は固定enumのreplacementReasonを必須とする
+```text
+BattleActionReplacementReason =
+  unknown_technique
+  | unlearned_technique
+  | requirements_not_met
+  | insufficient_mental
+  | unusable_range
+  | unable_to_act
+  | opponent_ended_battle
+```
+
+| 理由 | 置換 | replacementReason |
+|---|---|---|
+| 完全カタログに存在しないTechniqueId | basic_defense | `unknown_technique` |
+| 完全カタログには存在するが人物が未習得 | basic_defense | `unlearned_technique` |
+| requiredAptitude不足、requiredStats不足、prerequisiteTechniqueIds未充足、prerequisiteTechniqueMastery不足、その他TechniqueDefinitionの使用条件不足 | basic_defense | `requirements_not_met` |
+| `effectiveMentalCost`に対する精神不足 | basic_defense | `insufficient_mental` |
+| 現在rangeがusableRanges外 | 最寄りの使用可能間合いへapproachまたはretreat | `unusable_range` |
+| 現在rangeがusableRanges外で、必要方向へこれ以上移動できず代替移動不能 | basic_defense | `unusable_range` |
+| `actor.canAct=false` | no_action | `unable_to_act` |
+| 先手によって戦闘が終了し後手を中止 | no_action | `opponent_ended_battle` |
+
+- requestedActionとresolvedActionを両方ログへ残す
+- 置換時は上記固定enumの`replacementReason`を必須とする
+- requestedActionとresolvedActionが同一で置換がない場合、`replacementReason = null`を必須とする。空文字は禁止
 - TechniqueIdの存在判定と定義参照は入力RunRuleSnapshotの完全カタログ、習得判定は人物snapshotのtechniquesを使用する
 - surrenderは有効入力なら置換しない
 - 使用不可間合いの移動方向は、現在間合いとの差が最小の `usableRanges` を選ぶ。差が同じ場合は `preferredRanges`、さらに同じなら `contact < close < middle < long` の固定順で決める
-- 不正入力を置換した場合は `invalidActionCount` を1増加する
+- 同一actionについて複数理由が同時成立しても`replacementReason`は1件だけ
+
+判定優先順位（行動可能なactorについて）:
+
+```text
+1 unknown_technique
+2 unlearned_technique
+3 requirements_not_met
+4 insufficient_mental
+5 unusable_range
+```
+
+ただし`actor.canAct=false`の場合はTechnique等を参照せず即`unable_to_act`とする。したがって実処理上の最優先は`unable_to_act`であり、その後に上記1〜5を評価する。`opponent_ended_battle`は行動前validationではなく先手解決後だけ使用する。
+
+### 7.1 invalidActionCountDelta
+
+次の6理由はrequested actionの置換なので`invalidActionCountDelta = 1`とする。
+
+```text
+unknown_technique
+unlearned_technique
+requirements_not_met
+insufficient_mental
+unusable_range
+unable_to_act
+```
+
+`opponent_ended_battle`はrequested action自体の不正ではなくResolver内部中止なので`invalidActionCountDelta = 0`とする。
 
 ## 8. 発動安定性 `[Sprint 1暫定]`
 
@@ -220,6 +463,50 @@ ActivationChancePercent
 - 不発時は命中、ダメージ、負傷、使用後間合い変化へ進まず、対応RNGも消費しない
 - `nextActivationModifier` は判定後に0へ戻す
 - 暴発、自傷、対象変更はSprint 1では実装しない
+
+### 8.1 attemptedUseCount／successfulUseCount（戦闘内）
+
+戦闘内`use_technique`について、battle-localな`PersonTechniqueState`の使用回数を次へ固定する。
+
+`attemptedUseCount += 1`のタイミング:
+
+```text
+requested／置換処理完了
+↓
+resolvedAction = use_technique
+↓
+使用条件・range・effectiveMentalCost充足済み
+↓
+技実行を開始する
+↓
+attemptedUseCount += 1
+↓
+effectiveMentalCost消費
+↓
+activation判定
+```
+
+したがって次では増えない: `unknown_technique`／`unlearned_technique`／`requirements_not_met`／`insufficient_mental`／`unusable_range`による置換／`unable_to_act`／`opponent_ended_battle`／`basic_attack`／その他基本行動。発動失敗でも`attemptedUseCount += 1`を維持する。safe integer overflowは継続不能failure。
+
+Sprint 1での「技の使用成功」:
+
+```text
+successful use = use_techniqueのactivation判定に成功し、命中判定へ進んだこと
+```
+
+したがって`activationSucceeded = true`のとき`successfulUseCount += 1`。命中結果は問わない。
+
+| 結果 | attempted | successful |
+|---|---:|---:|
+| activation failure | +1 | +0 |
+| activation success + miss | +1 | +1 |
+| activation success + hit + damage | +1 | +1 |
+
+damage値、負傷発生、rangeShift成功は`successfulUseCount`へ影響しない。命中成功は`BattleActionLog.hit`／`successfulHits`で別に保持する。`basic_attack`は`PersonTechniqueState`を持たないため両countへ加算しない。
+
+S01-006はBattleState participantのtechniques内countだけをbattle-localに更新し、persistent Personを変更しない。戦闘開始snapshotとの差分反映はS01-007。S01-006では`masteryHundredths`／`lastPracticedAbsoluteWeek`／`acquiredAbsoluteWeek`／`learningProgressTenths`を戦闘使用回数だけを理由に変更しない。
+
+常に`0 <= successfulUseCount`、`0 <= attemptedUseCount`、`successfulUseCount <= attemptedUseCount`を要求する。既存snapshotで`successfulUseCount > attemptedUseCount`なら継続不能validation failure。safe integer必須。
 
 ## 9. 命中率
 

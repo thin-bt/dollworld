@@ -45,6 +45,7 @@ import {
 import { safeHashUtf8 } from "./safe-sha256.js";
 import { SPRINT1_PERSON_STATE_SCHEMA_VERSION } from "./sprint1-person-state.js";
 import type { Sprint1PersonState } from "./sprint1-person-state.js";
+import { appendSuccessfulUseCountInvariantIssue } from "./person-technique-state.js";
 import type { PersonTechniqueState, Sprint1Config } from "./types.js";
 import {
   parseStatValueTripleMap,
@@ -1132,6 +1133,13 @@ function parseTechniqueStates(
       lastPracticedAbsoluteWeek === undefined ||
       acquiredAbsoluteWeek === undefined
     ) {
+      ok = false;
+      continue;
+    }
+    // S1-SPEC-0.1.14 / 11: successfulUseCount <= attemptedUseCount (no repair).
+    const beforeInvariant = issues.length;
+    appendSuccessfulUseCountInvariantIssue(path, successfulUseCount, attemptedUseCount, issues);
+    if (issues.length > beforeInvariant) {
       ok = false;
       continue;
     }

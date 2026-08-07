@@ -98,6 +98,10 @@ export function validatePersonTechniqueState(
     return failure(issues);
   }
 
+  // S1-SPEC-0.1.14: both counts individually validated (>= 0) before the cross-field
+  // invariant. Never swap, clamp, or pad attemptedUseCount.
+  appendSuccessfulUseCountInvariantIssue("", successfulUseCount, attemptedUseCount, issues);
+
   if (issues.length > 0) {
     return failure(issues);
   }
@@ -113,6 +117,26 @@ export function validatePersonTechniqueState(
   };
 
   return success(deepFreezePlainJson(value));
+}
+
+/**
+ * Shared `successfulUseCount <= attemptedUseCount` check (09 / 11 / 12 / S1-SPEC-0.1.14).
+ * Call only after both counts have individually validated. Does not mutate or repair values.
+ */
+export function appendSuccessfulUseCountInvariantIssue(
+  pathPrefix: string,
+  successfulUseCount: number,
+  attemptedUseCount: number,
+  issues: ValidationIssue[],
+): void {
+  if (successfulUseCount > attemptedUseCount) {
+    issues.push({
+      path: `${pathPrefix}/successfulUseCount`,
+      message: "successfulUseCount must be <= attemptedUseCount",
+      actual: { successfulUseCount, attemptedUseCount },
+      expected: "successfulUseCount <= attemptedUseCount",
+    });
+  }
 }
 
 /**

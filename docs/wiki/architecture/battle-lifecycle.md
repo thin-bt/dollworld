@@ -11,7 +11,7 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-07
+last_verified: 2026-08-08
 related:
   - sprint1-processing-flow.md
   - ../invariants/battle-start.md
@@ -27,11 +27,12 @@ related:
 
 ## 現在確定している内容
 
-### 実装状態（S1-SPEC-0.1.13時点）
+### 実装状態（S1-SPEC-0.1.14時点）
 
 - MatchId決定的生成器はproduction実装済み（S01-005）
 - 開始stage（入力検証・MatchId予約・battleSeed・BattleState生成・`beginBattle`）は**実装済み**（S01-005）
-- ターン解決以降（12・13）は**未実装**
+- ターン入力契約（replacementReason／battle-action-script-0.1.0／技使用回数）は `S1-SPEC-0.1.14` で明文化済み
+- ターン解決以降（12・13）のproduction実装は**未着手**（S01-006／S01-007）
 - Sprint 1全体は未完了。次はS01-006
 
 ### 主な段階

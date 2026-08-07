@@ -6,7 +6,7 @@ scope: cross-sprint
 sources:
   - docs/specs/00-domain-glossary.md
   - docs/SPEC.md
-last_verified: 2026-08-05
+last_verified: 2026-08-08
 ---
 
 # 用語集索引
@@ -23,10 +23,11 @@ Sprint 0・Sprint 1を横断する用語索引。定義の正本はミニ仕様�
 - [シミュレーション識別（simulationId / eventId 等）](simulation-identity.md)
 - [ProcessorRuntimeState](processor-runtime-state.md)
 
-### Sprint 1（仕様確定済み、S01-001〜003実装済み）
+### Sprint 1（仕様確定済み、S01-001〜005実装済み）
 
 - [能力と適性（AbilityKey／AptitudeKey）](abilities-and-aptitudes.md)
-- [技と熟練度](techniques-and-mastery.md)
+- [技と熟練度](techniques-and-mastery.md)（0.1.14の使用回数契約を含む）
+- `BattleActionReplacementReason`／`battle-action-script-0.1.0` の用語は [`docs/specs/00-domain-glossary.md`](../../specs/00-domain-glossary.md) および [ターン解決不変条件](../invariants/battle-turn-resolution.md) を参照
 
 ## 関連する正本
 

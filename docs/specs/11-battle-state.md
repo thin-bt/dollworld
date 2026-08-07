@@ -1,6 +1,6 @@
 # 11 戦闘開始状態仕様
 
-- 仕様版: `S1-SPEC-0.1.13`
+- 仕様版: `S1-SPEC-0.1.14`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 1対1戦闘の入力、開始状態、参加者スナップショット、戦闘専用RNG
 - 非対象: 大会組合せ、昇格、戦績永続化、観戦画面
@@ -93,7 +93,10 @@ BattleActionSourceIdentity =
 
 - DefaultBattleStrategyの`strategyVersion`は実装版を固定し、同じ版で採点式・候補列挙・tie-break規則を変更しない。
 - DefaultBattleStrategyの`strategyConfigHash`は`RunRuleSnapshot.sprint1ConfigHash`と完全一致させる。Strategyは期待発動・命中・ダメージ・負傷・間合い・降参の各式を参照するため、設定の部分hashを独自に作らない。
-- scripted actionsは`scriptFormatVersion=battle-action-script-0.1.0`へ固定し、全ターン・両分岐を含むcanonical action script全文から`actionScriptHash`を算出する。hashは小文字16進64文字のSHA-256とし、空scriptまたは未定義分岐を拒否する。
+- scripted actionsは`scriptFormatVersion=battle-action-script-0.1.0`へ固定し、全ターン・両sideを含むcanonical action script全文から`actionScriptHash`を算出する。hashは小文字16進64文字のSHA-256とし、空scriptまたは未定義分岐を拒否する。
+- `battle-action-script-0.1.0`の完全JSONは12仕様§2.1を正本とする。rootは`scriptFormatVersion`／`turns`のexact 2 keys、各turnは`turnNumber`／`sideA`／`sideB`のexact 3 keys。`turns.length`は`RunRuleSnapshot.sprint1Config.battle.maxTurns`（Sprint 1現行20）と一致し、`turnNumber`は1..maxTurnsの完全連番とする。
+- `ScriptedActionSource.canonicalScript`はvalidated scriptの`toCanonicalJson`文字列そのものとし、再canonical化結果と原文の完全一致を必須とする。`actionScriptHash`はUTF-8 bytes of canonicalScriptのSHA-256とする。
+- Resolve時にscripted modeを使う場合、両sideとも`scripted_actions`であり、かつ`actionScriptHash`／`scriptFormatVersion`／`canonicalScript`が双方一致必須とする。混在は未commit turn failureとしてよい。S01-005開始時にmixed identityのBattleState作成自体を拒否する必要はない。
 - 実行時ActionsSourceが申告identityと一致しない場合、戦闘開始前失敗または未commitターン失敗として拒否する。
 - 標準WorldEngine runでは両sideとも`default_strategy`だけを使用し、`strategyVersion`はRunRuleSnapshot.defaultBattleStrategyVersion、`strategyConfigHash`はRunRuleSnapshot.sprint1ConfigHashと一致必須とする。participantA／B入力は同じ週トランザクションの現在WorldStateからPersonIdで取得し、4.5節adapterで内部生成する。外部から完成済み人物snapshotを差し込まない。
 - `scripted_actions`は単体戦闘テスト、fixture replay、監査用APIだけで許可し、標準WorldEngineの公式・模擬戦生成へ混入させない。script interpreterはcanonical script以外の外部状態・現実時刻・乱数を参照しない。
@@ -592,6 +595,8 @@ BattleState生成だけではイベントを出さない。全ターン詳細は
 - participant snapshotのlifeStatus／participationStatus／careerStatus／birthYear／ageAtBattleは開始入力と一致し戦闘中不変
 - ageAtBattleは正本の4月第1週一斉加齢規則に従い、worldDateとbirthYearから再計算した値と一致
 - initialRangeは4段階のいずれかで戦闘中不変
+- participant.techniques内の各`PersonTechniqueState`は常に`0 <= successfulUseCount`、`0 <= attemptedUseCount`、`successfulUseCount <= attemptedUseCount`（safe integer）。既存snapshotで違反なら継続不能validation failure
+- Resolve時scripted modeでは両sideの`scripted_actions` identityと`canonicalScript`が一致し、片側混在は未commit failureとする（12仕様§2.1）
 - currentDurabilityは0..maxDurability
 - currentMentalは0..maxMental
 - inBattleConsumptionは0..100

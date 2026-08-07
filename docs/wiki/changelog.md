@@ -10,7 +10,7 @@ sources:
   - tag:sprint0-complete
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-07
+last_verified: 2026-08-08
 ---
 
 # Wiki更新履歴
@@ -20,6 +20,12 @@ last_verified: 2026-08-07
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。
 
 ## 履歴
+
+### 2026-08-08 — S1-SPEC-0.1.14 戦闘ターン入力契約の明文化
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.14`へ版上げ。`BattleActionReplacementReason`完全enum、`battle-action-script-0.1.0`完全構造、技使用回数（attempted／successful）契約を正本へ固定
+- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
+- 次はS01-006。Sprint 1全体は未完了
 
 ### 2026-08-07 — S01-005 戦闘開始・BattleState生成を実装
 
