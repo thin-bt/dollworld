@@ -9,6 +9,7 @@ sources:
   - tag:sprint0-complete
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:3b313a5ea690351d062e751bc724e5530b835872
+  - commit:60d5b6b821983b047debd51bccc43389d363f953
 last_verified: 2026-08-07
 ---
 
@@ -37,7 +38,7 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 ### Sprint 1（部分実装中・全体は未完了）
 
-正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.13`。Sprint 1全体は未完了。S01-001〜004 implemented、次はS01-005。
+正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.13`。Sprint 1全体は未完了。S01-001〜005 implemented、次はS01-006。
 
 共有型所有の要約（詳細は正本）:
 
@@ -45,6 +46,7 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 - `Sprint1PersonState`組立: S01-002（implemented）
 - TechniqueCatalogと技状態の意味的validation: S01-003（implemented）
 - 週間Planner／訓練・習得・練習・休養の適用: S01-004（implemented）
+- MatchId生成器／`RunRuleSnapshot`／`BattleState`開始生成: S01-005（implemented）
 
 | ID | Wiki | 状態 | 依存 |
 |---|---|---|---|
@@ -52,13 +54,13 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 | S01-002 | [S01-002.md](S01-002.md) | implemented | S01-001 |
 | S01-003 | [S01-003.md](S01-003.md) | implemented | S01-001、S01-002 |
 | S01-004 | [S01-004.md](S01-004.md) | implemented | S01-002、S01-003 |
-| S01-005 | [S01-005.md](S01-005.md) | pending | S01-001、S01-002、S01-003 |
+| S01-005 | [S01-005.md](S01-005.md) | implemented | S01-001、S01-002、S01-003 |
 | S01-006 | [S01-006.md](S01-006.md) | pending | S01-005 |
 | S01-007 | [S01-007.md](S01-007.md) | pending | S01-006 |
 | S01-008 | [S01-008.md](S01-008.md) | pending | S01-004、S01-007 |
 | S01-009 | [S01-009.md](S01-009.md) | pending | S01-008 |
 
-次の実装着手は S01-005。WorldEngineへの週間処理登録は S01-008。Sprint 1全体は未完了。
+次の実装着手は S01-006。WorldEngineへの週間処理登録は S01-008。Sprint 1全体は未完了。
 
 ## 関連する正本
 
@@ -72,11 +74,13 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 - S01-002: `packages/simulation-core/src/sprint1/`（人物状態・adapter・selector）
 - S01-003: `packages/simulation-core/src/sprint1/technique-*.ts`（カタログ・意味validation・習得条件）
 - S01-004: `packages/simulation-core/src/sprint1/weekly-*.ts`／`process-weekly-training-week.ts`
-- S01-005以降: 未着手
+- S01-005: `packages/simulation-core/src/sprint1/match-id-generator.ts`／`battle-*.ts`／`run-rule-snapshot.ts`／`create-battle-state.ts`／`begin-battle.ts`／`start-battle-transaction.ts`
+- S01-006以降: 未着手
 
 ## 関連するテスト
 
 - `packages/simulation-core/src/sprint1-weekly-training.test.ts`（S01-004）
+- `packages/simulation-core/src/sprint1-battle-start.test.ts`（S01-005）
 
 ## 関連する判断
 

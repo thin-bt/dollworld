@@ -22,6 +22,7 @@ import {
   snapshotDenseArrayOrFail,
   snapshotPlainObjectOrFail,
 } from "./plain-data.js";
+import { safeHashUtf8 } from "./safe-sha256.js";
 import { validateTechniqueDefinition } from "./technique-definition.js";
 import type { TechniqueDefinition } from "./technique-definition.js";
 
@@ -140,8 +141,8 @@ function parseSortedDefinitions(
 function hashSortedDefinitions(
   definitions: readonly TechniqueDefinition[],
   provider: Sha256Provider,
-): string {
-  return provider.hashUtf8(toCanonicalJson(definitions));
+): ValidationResult<string> {
+  return safeHashUtf8(provider, toCanonicalJson(definitions), "/identity/catalogHash");
 }
 
 /**
@@ -158,7 +159,7 @@ export function computeTechniqueCatalogHash(
   if (sorted === undefined) {
     return failure(issues);
   }
-  return success(hashSortedDefinitions(sorted, provider));
+  return hashSortedDefinitions(sorted, provider);
 }
 
 /**
@@ -240,18 +241,12 @@ function checkReferenceGraph(
 }
 
 /**
- * Full TechniqueCatalog validation (09 §4.1, §13): structural shape, per-definition
- * validation, dataVersion consistency, catalogHash verification, and cross-definition
- * reference existence + cycle checks for both prerequisiteTechniqueIds and
- * sourceTechniqueIds (separate graphs). `prerequisiteTechniqueMastery.techniqueId`
- * existence follows transitively: it is already a subset of `prerequisiteTechniqueIds`
- * (enforced per-definition), whose existence is checked here. An empty
- * `definitions` array is a valid catalog. Any failure returns only issues — never
- * a partial catalog. Invalid structural input never calls `provider`.
+ * Structural TechniqueCatalog validation without catalogHash recomputation
+ * (S01-005 Phase 1 preflight). Declared catalogHash is accepted as format-valid
+ * only; authenticity is checked by `validateTechniqueCatalog`.
  */
-export function validateTechniqueCatalog(
+export function validateTechniqueCatalogStructure(
   input: unknown,
-  provider: Sha256Provider,
 ): ValidationResult<TechniqueCatalog> {
   const issues: ValidationIssue[] = [];
 
@@ -299,20 +294,45 @@ export function validateTechniqueCatalog(
     return failure(issues);
   }
 
-  const computedHash = hashSortedDefinitions(definitions, provider);
-  if (computedHash !== identity.catalogHash) {
+  const value: TechniqueCatalog = { identity, definitions };
+  return success(deepFreezePlainJson(value));
+}
+
+/**
+ * Full TechniqueCatalog validation (09 §4.1, §13): structural shape, per-definition
+ * validation, dataVersion consistency, catalogHash verification, and cross-definition
+ * reference existence + cycle checks for both prerequisiteTechniqueIds and
+ * sourceTechniqueIds (separate graphs). `prerequisiteTechniqueMastery.techniqueId`
+ * existence follows transitively: it is already a subset of `prerequisiteTechniqueIds`
+ * (enforced per-definition), whose existence is checked here. An empty
+ * `definitions` array is a valid catalog. Any failure returns only issues — never
+ * a partial catalog. Invalid structural input never calls `provider`.
+ */
+export function validateTechniqueCatalog(
+  input: unknown,
+  provider: Sha256Provider,
+): ValidationResult<TechniqueCatalog> {
+  const structure = validateTechniqueCatalogStructure(input);
+  if (!structure.ok) {
+    return failure(structure.issues);
+  }
+
+  const computedHash = hashSortedDefinitions(structure.value.definitions, provider);
+  if (!computedHash.ok) {
+    return failure(computedHash.issues);
+  }
+  if (computedHash.value !== structure.value.identity.catalogHash) {
     return failure([
       {
         path: "/identity/catalogHash",
         message: "catalogHash does not match the SHA-256 of the canonical sorted definitions",
-        actual: identity.catalogHash,
-        expected: computedHash,
+        actual: structure.value.identity.catalogHash,
+        expected: computedHash.value,
       },
     ]);
   }
 
-  const value: TechniqueCatalog = { identity, definitions };
-  return success(deepFreezePlainJson(value));
+  return success(structure.value);
 }
 
 /**

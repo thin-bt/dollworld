@@ -216,7 +216,7 @@ function requireRank(
  * with an integer `surfaceValue` in 0..100. Genetic values are copied unchanged and
  * are never used as a growth input (08 §2.3).
  */
-function parseStatValueTripleMap<K extends string>(
+export function parseStatValueTripleMap<K extends string>(
   value: unknown,
   keys: readonly K[],
   path: string,

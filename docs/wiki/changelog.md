@@ -9,7 +9,8 @@ sources:
   - docs/SPEC_CHANGELOG.md
   - tag:sprint0-complete
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
-last_verified: 2026-08-06
+  - commit:60d5b6b821983b047debd51bccc43389d363f953
+last_verified: 2026-08-07
 ---
 
 # Wiki更新履歴
@@ -19,6 +20,16 @@ last_verified: 2026-08-06
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。
 
 ## 履歴
+
+### 2026-08-07 — S01-005 戦闘開始・BattleState生成を実装
+
+- `match-id-generator-0.1.0` のproduction実装（形式・state 5キー・予約遷移・canonical state hash・枯渇sentinel）。MatchId操作でRNGを消費しない
+- `RunRuleSnapshot` `0.4.0`／`BattleRulesSnapshotRef` `0.1.0`／`BattleActionSourceIdentity` `0.1.0`／`BattleState` `0.5.0`／`StartBattleRuntimeTransition` `0.1.0` を追加
+- 参加資格・年齢整合・負傷続行不能閾値・`currentMental`非clamp・開始耐久の基準点整数計算を実装
+- `startBattleTransaction` は未commit計画のみを返す内部純粋関数。成功時だけWorld RNGを1回進め、両next stateを1つのruntime transitionへ封入する
+- `reserveNextMatchId`／`createBattleState`／`beginBattle`／`startBattleTransaction`／runtime transition適用APIはpackage rootへ公開しない
+- ターン解決・BattleResult・WorldEngine登録は対象外
+- 次はS01-006。Sprint 1全体は未完了
 
 ### 2026-08-07 — S1-SPEC-0.1.13 MatchId決定的生成器契約の明文化
 

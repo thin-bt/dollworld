@@ -31,6 +31,7 @@ import {
   snapshotDenseArrayOrFail,
   snapshotPlainObjectOrFail,
 } from "./plain-data.js";
+import { safeHashUtf8 } from "./safe-sha256.js";
 import type { SimulationIdentity, SpecVersionEntry } from "./types.js";
 
 const UINT32_MAX = 4294967295;
@@ -332,7 +333,7 @@ export function computeSimulationIdentityHash(
   if (!validated.ok) {
     return failure(validated.issues);
   }
-  return success(provider.hashUtf8(toCanonicalJson(validated.value)));
+  return safeHashUtf8(provider, toCanonicalJson(validated.value), "");
 }
 
 /**

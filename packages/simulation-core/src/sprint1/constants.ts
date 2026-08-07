@@ -26,6 +26,15 @@ export const MATCH_ID_GENERATOR_STATE_SCHEMA_VERSION = "0.1.0" as const;
 export const MATCH_ID_NAMESPACE = "match" as const;
 export const DEFAULT_BATTLE_STRATEGY_VERSION = "default-battle-strategy-0.1.0" as const;
 
+/** 11 mini-spec §4.2 / §8 / §9 / §10 fixed schemaVersion registry (S01-005). */
+export const DEFAULT_BATTLE_STRATEGY_ID = "default-battle-strategy" as const;
+export const BATTLE_ACTION_SCRIPT_FORMAT_VERSION = "battle-action-script-0.1.0" as const;
+export const BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION = "0.1.0" as const;
+export const RUN_RULE_SNAPSHOT_SCHEMA_VERSION = "0.4.0" as const;
+export const BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION = "0.1.0" as const;
+export const START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION = "0.1.0" as const;
+export const BATTLE_STATE_SCHEMA_VERSION = "0.5.0" as const;
+
 /** specSetId-ascending order per 02 mini-spec §12: main, sprint0, sprint1. */
 export const EXPECTED_SPEC_VERSIONS: readonly SpecVersionEntry[] = [
   { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },

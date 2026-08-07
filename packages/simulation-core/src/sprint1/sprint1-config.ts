@@ -9,6 +9,7 @@ import type { ValidationResult } from "../validation.js";
 import { createDefaultSprint1ConfigInput } from "./sprint1-config-defaults.js";
 import type { Sprint1Config } from "./types.js";
 import { cloneValidatedPlainJson, deepFreezePlainJson } from "./plain-data.js";
+import { safeHashUtf8 } from "./safe-sha256.js";
 import {
   validateNormalizedSprint1Config,
   validateSprint1Config,
@@ -79,5 +80,5 @@ export function computeSprint1ConfigHash(
   if (!validated.ok) {
     return failure(validated.issues);
   }
-  return success(provider.hashUtf8(toCanonicalJson(validated.value)));
+  return safeHashUtf8(provider, toCanonicalJson(validated.value), "/configHash");
 }

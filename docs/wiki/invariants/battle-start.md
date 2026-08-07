@@ -9,6 +9,7 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - docs/specs/00-domain-glossary.md
   - commit:3b313a5ea690351d062e751bc724e5530b835872
+  - commit:60d5b6b821983b047debd51bccc43389d363f953
 last_verified: 2026-08-07
 related:
   - battle-turn-resolution.md
@@ -31,14 +32,18 @@ related:
 - fresh `nextSequence=1`、枯渇sentinel `1000000000000`
 - seedはstate hashへ使用し、MatchId文字列へは混ぜない
 - 一意性は `(simulationId, matchId)`。異なるrunで同じ文字列を許可
-- S01-005実装は未着手（契約テストのみ）
+- MatchId操作でRNGを消費しない。構造不正なstateではSha256Providerを1回も呼ばない
+- S01-005でproduction実装済み。`reserveNextMatchId` はpackage rootへ公開しない
 
 ### 初期リソース
 
 ```text
 baseMaxDurability = 100 + stamina
-maxMental = 50 + spirit
+maxDurability     = baseMaxDurability
+maxMental         = 50 + spirit
 ```
+
+開始耐久補正は基準点整数で計算し、`startDurabilityPercentBasisPoints`（percent × 10000）として保持する。`currentDurability` は下限1で切り捨てる。
 
 ### currentMental
 
@@ -61,6 +66,16 @@ maxMental = 50 + spirit
 
 列挙の完全な正本は 11 の入力検証節である。
 
+負傷の続行不能判定は `config.battle.injury.unableToContinueThreshold` を使用する。週次強制休養の閾値とは別物であり、混同しない。
+
+### 未commit開始計画
+
+- 成功時のみ World RNG を `battleSeed` 取得の1回だけ進める
+- 進行後の World RNG 状態と MatchIdGeneratorState は1つの `StartBattleRuntimeTransition`（schemaVersion `0.1.0`）に封入する
+- `transitionHash` は自身を除く全項目のcanonical JSON SHA-256
+- expected state hash 不一致、片方だけのcommit、二重適用は拒否する
+- 失敗時は `battleState`／`runtimeTransition`／イベント候補をすべて `null` とし、両runtime状態を入力と完全一致させる
+
 ## 関連する正本
 
 - [`docs/specs/11-battle-state.md`](../../specs/11-battle-state.md)
@@ -70,11 +85,16 @@ maxMental = 50 + spirit
 
 ## 関連するコード
 
-該当なし（戦闘開始Processorは未実装。MatchId生成器production実装も未着手。S01-001〜004は実装済み）。
+- `packages/simulation-core/src/sprint1/match-id-generator.ts`
+- `packages/simulation-core/src/sprint1/battle-participant.ts`
+- `packages/simulation-core/src/sprint1/battle-state.ts`
+- `packages/simulation-core/src/sprint1/start-battle-runtime-transition.ts`
+- `packages/simulation-core/src/sprint1/start-battle-transaction.ts`（内部）
 
 ## 関連するテスト
 
-- `packages/simulation-core/src/sprint1-spec-0.1.13-match-id-generator-contracts.test.ts`（仕様契約のみ）
+- `packages/simulation-core/src/sprint1-battle-start.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.13-match-id-generator-contracts.test.ts`（仕様契約）
 
 ## 関連する判断
 
@@ -83,7 +103,7 @@ maxMental = 50 + spirit
 
 ## 未解決事項
 
-該当なし。
+`BattleFailureInfo.severity` と `code` の語彙は11仕様が固定していない。実装は非空文字列として受理する。
 
 ## 関連Wikiページ
 

@@ -85,10 +85,9 @@ describe("S01-001 public API surface", () => {
     expect(typeof api.validateSimulationIdentity).toBe("function");
     expect(typeof api.validateTechniqueCatalog).toBe("function");
     expect(typeof api.computeTechniqueCatalogHash).toBe("function");
+    // `BattleState` joined the public surface with S01-005.
     expect(
-      Object.keys(api).filter((key) =>
-        /learnTechnique|BattleState|BattleResult|weeklyPlannerApi/.test(key),
-      ),
+      Object.keys(api).filter((key) => /learnTechnique|BattleResult|weeklyPlannerApi/.test(key)),
     ).toEqual([]);
   });
 });

@@ -12,7 +12,8 @@ sources:
   - docs/specs/13-battle-result-and-log.md
   - docs/specs/14-sprint1-config-schema.md
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
-last_verified: 2026-08-06
+  - commit:60d5b6b821983b047debd51bccc43389d363f953
+last_verified: 2026-08-07
 related:
   - battle-lifecycle.md
   - ../sprints/sprint1.md
@@ -79,15 +80,35 @@ RuntimeState累積・出力凍結
 
 `rngState`はdescriptor-safeな`validateSeededRngState`通過後にだけimportする。正本10・14がルールを定義していない入力値（planner context score、師匠推薦度、styleMatch、相性など）は sidecar として adapter から受け取り、処理側で導出しない。
 
+### 戦闘開始の入出力境界（S01-005実装済み）
+
+戦闘開始も WorldEngine から独立した純粋関数であり、未commitの開始計画だけを返す。
+
+```text
+入力（検証前）
+  CreateBattleRequest / World RNG状態 / MatchIdGeneratorState
+  ↓ 全入力検証（RunRuleSnapshot・両参加者・両ActionSourceIdentityを含む）
+MatchIdGeneratorStateのcloneからMatchIdを1件予約
+  ↓ 全入力成功後にだけWorld RNGから1回だけuint32を取得（battleSeed）
+内部createBattleState → ready BattleState
+  ↓ 内部beginBattle
+in_progress BattleState + battle.started候補（EventId／sequence未割当）
+  ↓
+出力: BattleState / StartBattleRuntimeTransition / イベント候補（すべて未commit）
+```
+
+`RunRuleSnapshot` は run 単位で1件だけ保持し、各戦闘は `BattleRulesSnapshotRef` で hash 参照する。失敗時は3つとも `null` を返し、World RNG と MatchIdGeneratorState を進めない。
+
 ## 関連する正本
 
 - [`docs/specs/08-character-growth.md`](../../specs/08-character-growth.md) 〜 [`14-sprint1-config-schema.md`](../../specs/14-sprint1-config-schema.md)
 
 ## 関連するコード
 
-- `packages/simulation-core/src/sprint1/`（S01-001〜004）
+- `packages/simulation-core/src/sprint1/`（S01-001〜005）
 - `packages/simulation-core/src/sprint1/process-weekly-training-week.ts`（週間Processor入口）
-- 戦闘入力adapter（S01-005）以降は未実装
+- `packages/simulation-core/src/sprint1/start-battle-transaction.ts`（戦闘開始入口、内部）
+- ターン解決（S01-006）以降は未実装
 
 ## 関連するテスト
 
@@ -95,6 +116,7 @@ RuntimeState累積・出力凍結
 - `packages/simulation-core/src/sprint1-person-growth.test.ts`
 - `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
 - `packages/simulation-core/src/sprint1-weekly-training.test.ts`
+- `packages/simulation-core/src/sprint1-battle-start.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断

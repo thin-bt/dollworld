@@ -178,8 +178,13 @@ export type { BasisPoints } from "./sprint1/basis-points.js";
 export { BASIS_POINTS_SCALE, normalizeBasisPoints } from "./sprint1/basis-points.js";
 export {
   ABILITY_CANONICAL_ORDER,
+  BATTLE_ACTION_SCRIPT_FORMAT_VERSION,
+  BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION,
   BATTLE_PROFILE_ADAPTER_VERSION,
+  BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION,
+  BATTLE_STATE_SCHEMA_VERSION,
   CANONICAL_JSON_VERSION,
+  DEFAULT_BATTLE_STRATEGY_ID,
   DEFAULT_BATTLE_STRATEGY_VERSION,
   EXPECTED_SPEC_VERSIONS,
   HASH_ALGORITHM,
@@ -187,11 +192,13 @@ export {
   MATCH_ID_GENERATOR_STATE_SCHEMA_VERSION,
   MATCH_ID_GENERATOR_VERSION,
   MATCH_ID_NAMESPACE,
+  RUN_RULE_SNAPSHOT_SCHEMA_VERSION,
   S0_SPEC_VERSION_FOR_IDENTITY,
   S1_SPEC_VERSION,
   SIMULATION_IDENTITY_SCHEMA_VERSION,
   SPRINT1_CONFIG_SCHEMA_VERSION,
   SPRINT1_CONFIG_VERSION_DEFAULT,
+  START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION,
 } from "./sprint1/constants.js";
 export {
   PERSON_TECHNIQUE_STATE_KEYS,
@@ -463,6 +470,146 @@ export {
   SEEDED_RNG_WORD_MAXIMUM,
   validateSeededRngState,
 } from "./sprint1/validate-seeded-rng-state.js";
+
+// S01-005 battle start / BattleState generation.
+// `reserveNextMatchId`, `createBattleState`, `beginBattle` and
+// `startBattleTransaction` stay internal on purpose (11 §10): the only public
+// battle entry point is 12 mini-spec `runBattleToCompletion`.
+export {
+  CREATE_INITIAL_MATCH_ID_GENERATOR_STATE_KEYS,
+  MATCH_ID_FORMAT_PATTERN,
+  MATCH_ID_GENERATOR_STATE_INVALID_CODE,
+  MATCH_ID_GENERATOR_STATE_KEYS,
+  MATCH_ID_SEED_MAXIMUM,
+  MATCH_ID_SEED_MINIMUM,
+  MATCH_ID_SEQUENCE_DIGITS,
+  MATCH_ID_SEQUENCE_EXHAUSTED_CODE,
+  MATCH_ID_SEQUENCE_EXHAUSTED_SENTINEL,
+  MATCH_ID_SEQUENCE_MAXIMUM,
+  MATCH_ID_SEQUENCE_MINIMUM,
+  cloneMatchIdGeneratorState,
+  computeMatchIdGeneratorStateHash,
+  createInitialMatchIdGeneratorState,
+  formatMatchIdFromSequence,
+  freezeMatchIdGeneratorState,
+  isMatchIdText,
+  validateMatchId,
+  validateMatchIdGeneratorState,
+} from "./sprint1/match-id-generator.js";
+export type {
+  CreateInitialMatchIdGeneratorStateInput,
+  MatchIdGeneratorState,
+  ReserveNextMatchIdResult as MatchIdReservationResult,
+} from "./sprint1/match-id-generator.js";
+export {
+  BATTLE_KINDS,
+  BATTLE_SIDES,
+  BATTLE_STATUSES,
+  BATTLE_TERMINAL_REASONS,
+  isBattleKind,
+  isBattleSide,
+  isBattleStatus,
+  isBattleTerminalReason,
+} from "./sprint1/battle-enums.js";
+export type {
+  BattleKind,
+  BattleSide,
+  BattleStatus,
+  BattleTerminalReason,
+} from "./sprint1/battle-enums.js";
+export {
+  BATTLE_DECISION_PROFILE_KEYS,
+  BATTLE_PROFILE_NEUTRAL_VALUE,
+  adaptBattleProfile,
+  createNeutralBattleDecisionProfile,
+  validateBattleDecisionProfile,
+} from "./sprint1/battle-decision-profile.js";
+export type {
+  AdaptedBattleProfile,
+  BattleDecisionProfile,
+} from "./sprint1/battle-decision-profile.js";
+export {
+  BATTLE_ACTION_SOURCE_IDENTITY_KEYS,
+  BATTLE_ACTION_SOURCE_KINDS,
+  createDefaultStrategyActionSourceIdentity,
+  createScriptedActionsSourceIdentity,
+  validateBattleActionSourceIdentity,
+} from "./sprint1/battle-action-source-identity.js";
+export type {
+  BattleActionSourceIdentity,
+  BattleActionSourceKind,
+} from "./sprint1/battle-action-source-identity.js";
+export {
+  RUN_RULE_SNAPSHOT_KEYS,
+  cloneRunRuleSnapshot,
+  createRunRuleSnapshot,
+  freezeRunRuleSnapshot,
+  validateRunRuleSnapshot,
+  validateRunRuleSnapshotAgainstIdentity,
+} from "./sprint1/run-rule-snapshot.js";
+export type { CreateRunRuleSnapshotInput, RunRuleSnapshot } from "./sprint1/run-rule-snapshot.js";
+export {
+  BATTLE_RULES_SNAPSHOT_REF_KEYS,
+  cloneBattleRulesSnapshotRef,
+  createBattleRulesSnapshotRef,
+  freezeBattleRulesSnapshotRef,
+  validateBattleRulesSnapshotRef,
+} from "./sprint1/battle-rules-snapshot-ref.js";
+export type { BattleRulesSnapshotRef } from "./sprint1/battle-rules-snapshot-ref.js";
+export {
+  BASE_MAX_DURABILITY_OFFSET,
+  BATTLE_PARTICIPANT_SNAPSHOT_KEYS,
+  BATTLE_PARTICIPANT_SOURCE_KEYS,
+  MOCK_BATTLE_TRAINEE_MAXIMUM_AGE,
+  MOCK_BATTLE_TRAINEE_MINIMUM_AGE,
+  OFFICIAL_BATTLE_MAXIMUM_AGE,
+  OFFICIAL_BATTLE_MINIMUM_AGE,
+  START_DURABILITY_FULL_PERCENT_BASIS_POINTS,
+  deriveBaseMaxDurability,
+  deriveStartCurrentDurability,
+  deriveStartDurabilityPercentBasisPoints,
+  isEligibleForBattleKind,
+  validateBattleParticipant,
+  validateBattleParticipantSnapshot,
+  validateBattleParticipantSource,
+} from "./sprint1/battle-participant.js";
+export type {
+  BattleParticipantContext,
+  BattleParticipantSnapshot,
+  BattleParticipantSource,
+} from "./sprint1/battle-participant.js";
+export {
+  BATTLE_DETAILED_LOG_KEYS,
+  BATTLE_FAILURE_INFO_KEYS,
+  BATTLE_STATE_KEYS,
+  cloneBattleState,
+  createEmptyBattleDetailedLog,
+  freezeBattleState,
+  validateBattleDetailedLog,
+  validateBattleFailureInfo,
+  validateBattleState,
+} from "./sprint1/battle-state.js";
+export type { BattleDetailedLog, BattleFailureInfo, BattleState } from "./sprint1/battle-state.js";
+export {
+  START_BATTLE_RUNTIME_TRANSITION_KEYS,
+  cloneStartBattleRuntimeTransition,
+  freezeStartBattleRuntimeTransition,
+  validateStartBattleRuntimeTransition,
+  validateStartBattleRuntimeTransitionAgainst,
+} from "./sprint1/start-battle-runtime-transition.js";
+export type { StartBattleRuntimeTransition } from "./sprint1/start-battle-runtime-transition.js";
+export {
+  BATTLE_SIMULATION_SOURCE_PROCESSOR,
+  BATTLE_STARTED_EVENT_TYPE,
+} from "./sprint1/battle-started-event.js";
+export type {
+  BattleStartedEventCandidate,
+  BattleStartedEventPayload,
+} from "./sprint1/battle-started-event.js";
+export { CREATE_BATTLE_REQUEST_KEYS } from "./sprint1/create-battle-state.js";
+export type { CreateBattleRequest } from "./sprint1/create-battle-state.js";
+export type { BattleStartValidation } from "./sprint1/begin-battle.js";
+export type { StartBattleInput, StartBattleResult } from "./sprint1/start-battle-transaction.js";
 
 export type {
   NameCandidateCategory,

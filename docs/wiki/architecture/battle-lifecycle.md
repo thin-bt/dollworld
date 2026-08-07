@@ -10,6 +10,7 @@ sources:
   - docs/specs/07-seeded-rng.md
   - docs/specs/14-sprint1-config-schema.md
   - commit:3b313a5ea690351d062e751bc724e5530b835872
+  - commit:60d5b6b821983b047debd51bccc43389d363f953
 last_verified: 2026-08-07
 related:
   - sprint1-processing-flow.md
@@ -28,15 +29,16 @@ related:
 
 ### 実装状態（S1-SPEC-0.1.13時点）
 
-- MatchId決定的生成器の**契約**は正本へ固定済み（形式・state・予約・seed役割）
-- 開始stage（S01-005）・ターン以降は**未実装**
-- Sprint 1全体は未完了。次はS01-005
+- MatchId決定的生成器はproduction実装済み（S01-005）
+- 開始stage（入力検証・MatchId予約・battleSeed・BattleState生成・`beginBattle`）は**実装済み**（S01-005）
+- ターン解決以降（12・13）は**未実装**
+- Sprint 1全体は未完了。次はS01-006
 
 ### 主な段階
 
-- 開始前入力検証（11）
-- MatchId 予約と戦闘専用 RNG（battleSeed）（11・07）
-- BattleState 生成（11）
+- 開始前入力検証（11）— 実装済み
+- MatchId 予約と戦闘専用 RNG（battleSeed）（11・07）— 実装済み
+- BattleState 生成と ready → in_progress 遷移（11・12）— 実装済み
 - ターン単位の行動決定・間合い・技使用・命中・ダメージ・精神・耐久（12）
 - 決着判定（戦闘不能、続行不能、降参、規定ターン到達時の判定勝ち等。詳細は 12・13）
 - BattleResult（13）
@@ -49,6 +51,10 @@ RNG 消費順、丸め順、canonical 順などは正本の記述をそのまま
 
 識別子は `MatchId` を使用し、`BattleId` を新設しない（00・11）。
 
+### 未commit開始計画
+
+`startBattleTransaction` は未commitの開始計画を返す純粋関数であり、package rootへ公開しない。進行後のWorld RNG状態とMatchIdGeneratorStateは1つの `StartBattleRuntimeTransition` に封入し、実際の置換は12仕様の `commitRunBattlePlan` でのみ行う。runtime transitionだけを適用する公開APIは設けない。
+
 ## 関連する正本
 
 - [`docs/specs/11-battle-state.md`](../../specs/11-battle-state.md)
@@ -59,11 +65,14 @@ RNG 消費順、丸め順、canonical 順などは正本の記述をそのまま
 
 ## 関連するコード
 
-該当なし（戦闘Processorは未実装。S01-001〜003は実装済み）。
+- `packages/simulation-core/src/sprint1/start-battle-transaction.ts`（開始トランザクション、内部）
+- `packages/simulation-core/src/sprint1/create-battle-state.ts`／`begin-battle.ts`（内部stage）
+- `packages/simulation-core/src/sprint1/battle-state.ts`／`battle-participant.ts`／`battle-started-event.ts`
+- ターン解決以降は未実装。
 
 ## 関連するテスト
 
-該当なし（戦闘Processorは未実装）。
+- `packages/simulation-core/src/sprint1-battle-start.test.ts`（開始stageのみ）
 
 ## 関連する判断
 
