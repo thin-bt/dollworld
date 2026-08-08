@@ -23,7 +23,7 @@ related:
 
 12・14（および関連する 09・11）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
 
-S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.15` で明文化された移動状態補正、および `S1-SPEC-0.1.14` で明文化された入力契約の索引である。次はS01-006。Sprint 1全体は未完了。
+S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.16` で明文化された`movementChance`、`S1-SPEC-0.1.15` で明文化された移動状態補正、および `S1-SPEC-0.1.14` で明文化された入力契約の索引である。次はS01-006。Sprint 1全体は未完了。
 
 ## 現在確定している内容
 
@@ -37,6 +37,13 @@ S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0
 - 間合い・行動優先・命中・ダメージ・精神消費・耐久減少・継続判定の順序は 12 に従う
 - floor／round／clamp 等の順序を変更しない
 - 1 ターン途中失敗時の部分更新禁止条件がある場合は、12 の該当節を正とする
+
+### S1-SPEC-0.1.16 movementChance契約
+
+- approach／retreat比較判定時は`movementChance`と`movementRoll`が双方non-null、非movement時は双方null
+- `movementChance`はfloor整数パーセント（0..100）。算出はRNG消費0
+- 移動のRNG消費数・判定式自体は変更なし
+- 詳細は 12 §13
 
 ### S1-SPEC-0.1.15 移動状態補正契約
 

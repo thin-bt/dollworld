@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.15`
+- 仕様版: `S1-SPEC-0.1.16`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -614,6 +614,22 @@ Damage
 
 命中・ダメージ・負傷判定を終えた後、成功した技の `rangeShiftAfterUse` を処理する。
 
+処理順（既存契約。変更しない）:
+
+```text
+hit
+↓
+damage
+↓
+injury
+↓
+major injury if required
+↓
+rangeShiftAfterUse
+↓
+guard rangeShift block if required
+```
+
 - `none`: 変化なし
 - `approach_one`: contact方向へ1段階
 - `retreat_one`: long方向へ1段階
@@ -694,9 +710,45 @@ OpponentBaseScore
 + opposingMovementBonus
 + guardingRangeControlBonus
 
-moveRoll = integerRandom(-10, 10)
-moveSucceeded = MoverBaseScore + moveRoll >= OpponentBaseScore
+moveRoll = integerRandom(battle.movement.randomMinimum, battle.movement.randomMaximum)
+movementRoll = moveRoll
+moveSucceeded = MoverBaseScore + movementRoll >= OpponentBaseScore
+```
 
+ActionLog用の事前成功確率 `movementChance`（RNG消費0）:
+
+```text
+requiredMoveRoll
+= OpponentBaseScore - MoverBaseScore
+
+possibleRollCount
+= battle.movement.randomMaximum
+- battle.movement.randomMinimum
++ 1
+
+successfulRollCount
+= inclusive integer range
+  [battle.movement.randomMinimum, battle.movement.randomMaximum]
+  のうち、
+  MoverBaseScore + roll >= OpponentBaseScore
+  を満たす整数rollの個数
+
+movementChance
+= floor(successfulRollCount * 100 / possibleRollCount)
+```
+
+- `movementChance`はsafe integer `0..100`
+- approach／retreatの比較判定を実行した場合、`movementChance`と`movementRoll`は双方non-null
+- 比較判定を実行しない場合、双方null（片方だけnon-nullは禁止）
+- `movementChance`算出はRNGを消費しない。判定用`movementRoll`は従来どおり1回消費する
+- 既定の`randomMinimum=-10`／`randomMaximum=10`におけるgolden cases:
+  - 常時成功（`requiredMoveRoll <= randomMinimum`）→ `movementChance=100`
+  - 必要roll 0 → successful=`0..10`（11／21）→ `floor(1100/21)=52`
+  - 必要roll 10 → successful=`10`（1／21）→ `4`
+  - 不可能（`requiredMoveRoll > randomMaximum`）→ `0`
+- 境界は`battle.movement.randomMinimum`／`randomMaximum`から計算する。`-10`／`10`をproduction literalとして固定しない
+
+```text
 moverStateModifier
 = mover.condition * battle.actionOrder.conditionPerPoint
 - mover.fatigue * battle.actionOrder.fatiguePenaltyPerPoint
@@ -1061,7 +1113,9 @@ BattleActionLog
 - 先頭ActionLogの`rngStateAfter`は先手行動効果をすべて消費した後の状態
 - 後手ActionLogの`rngStateBefore`は先頭ActionLogの`rngStateAfter`と一致し、`rngStateAfter`は後手行動後の状態
 - unableToContinue成立時は成立させた攻撃側ログのtarget差分と、中止された側のno_actionログから再生可能にする
-- `movementChance`／`movementRoll` はapproach・retreatの比較判定を実行した場合だけ値を持つ
+- `movementChance`／`movementRoll` はapproach・retreatの比較判定を実行した場合だけ双方non-nullの値を持つ（片方だけnon-nullは禁止）
+- `movementChance`は`MoverBaseScore`／`OpponentBaseScore`と`battle.movement.randomMinimum`／`randomMaximum`から算出するfloor整数パーセント（0..100）。算出自体はRNGを消費しない
+- 比較判定実行時に`movementChance=null`は禁止
 - `majorInjuryChance`／`majorInjuryRoll` は通常負傷が成立し、重大負傷判定を実行した場合だけ値を持つ
 - TurnOrderLog、rangeShift阻止、移動、通常負傷、重大負傷の各rollから、詳細ログだけでRNG消費順と状態遷移を再生できなければならない
 

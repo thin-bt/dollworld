@@ -21,6 +21,13 @@ last_verified: 2026-08-08
 
 ## 履歴
 
+### 2026-08-08 — S1-SPEC-0.1.16 BattleActionLog.movementChanceの明確化
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.16`へ版上げ。対抗式の離散一様`movementRoll`から事前成功率`movementChance`（floor整数パーセント0..100、RNG非消費）を正本へ固定
+- 判定時は双方non-null、非movement時は双方null。移動RNG数・判定式は変更なし
+- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
+- 次はS01-006。Sprint 1全体は未完了
+
 ### 2026-08-08 — S1-SPEC-0.1.15 移動状態補正の明文化
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.15`へ版上げ。`moverStateModifier`／`opponentStateModifier`の明示式（`battle.actionOrder`係数共用）を正本へ固定

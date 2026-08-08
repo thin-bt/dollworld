@@ -118,20 +118,20 @@ function identityWithStateHash(stateHash: string): SimulationIdentity {
   };
 }
 
-describe("S1-SPEC-0.1.13 version registry (superseded current = 0.1.15)", () => {
-  it("publishes current S1-SPEC-0.1.15 while MatchId generator constants remain fixed", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.15");
+describe("S1-SPEC-0.1.13 version registry (superseded current = 0.1.16)", () => {
+  it("publishes current S1-SPEC-0.1.16 while MatchId generator constants remain fixed", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.16");
     expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
     expect(MATCH_ID_GENERATOR_VERSION).toBe("match-id-generator-0.1.0");
     expect(MATCH_ID_GENERATOR_STATE_SCHEMA_VERSION).toBe("0.1.0");
     expect(MATCH_ID_NAMESPACE).toBe("match");
   });
 
-  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.15 and rejects 0.1.14／0.1.13", () => {
+  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.16 and rejects 0.1.14／0.1.13", () => {
     const ok = validateSimulationIdentity(identityWithStateHash("d".repeat(64)));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
-      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.15");
+      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.16");
     }
 
     const rejected014 = validateSimulationIdentity({

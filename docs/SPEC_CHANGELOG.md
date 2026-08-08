@@ -1,5 +1,16 @@
 # 変更履歴
 
+## 2026-08-08：S1-SPEC-0.1.16（BattleActionLog.movementChanceの明確化）
+
+S01-006実装開始前に判明した、`BattleActionLog.movementChance`の未定義を明文化した。既存balanceの意図変更ではなく、ログ再生契約の未定義解消である。
+
+- 対抗式の離散一様`movementRoll`から事前成功率`movementChance`を算出する契約を固定
+- `movementChance`はfloor整数パーセント（0..100）
+- approach／retreatの比較判定時は`movementChance`と`movementRoll`が双方non-null、非movement時は双方null
+- `movementChance`算出はRNGを消費しない
+- 移動のRNG消費数・判定式自体は変更なし
+- Sprint1Config構造・既定値・canonical SHAは不変
+
 ## 2026-08-08：S1-SPEC-0.1.15（移動状態補正の明文化）
 
 S01-006実装開始前に判明した、移動式の`moverStateModifier`／`opponentStateModifier`未定義を明文化した。既存balanceの意図変更ではなく、決定性に必要な実装契約の明文化である。

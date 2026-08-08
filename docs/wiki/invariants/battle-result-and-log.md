@@ -44,7 +44,7 @@ related:
 
 ## 関連するコード
 
-該当なし（BattleResult productionは未実装。S01-006ターンResolverも未実装。`S1-SPEC-0.1.14`のターン入力契約と`S1-SPEC-0.1.15`の移動状態補正は12正本／`battle-turn-resolution`索引を参照）。
+該当なし（BattleResult productionは未実装。S01-006ターンResolverも未実装。`S1-SPEC-0.1.14`のターン入力契約、`S1-SPEC-0.1.15`の移動状態補正、`S1-SPEC-0.1.16`のmovementChanceは12正本／`battle-turn-resolution`索引を参照）。
 
 ## 関連するテスト
 

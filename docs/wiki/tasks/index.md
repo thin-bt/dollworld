@@ -38,7 +38,7 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 ### Sprint 1（部分実装中・全体は未完了）
 
-正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.15`。Sprint 1全体は未完了。S01-001〜005 implemented、次はS01-006。S01-006は未着手。
+正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.16`。Sprint 1全体は未完了。S01-001〜005 implemented、次はS01-006。S01-006は未着手。
 
 共有型所有の要約（詳細は正本）:
 

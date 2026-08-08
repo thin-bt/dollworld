@@ -60,7 +60,7 @@ SPEC-0.1.1|S0-SPEC-0.1.5|<configHash>|<seedの10進整数>|<nameDataHash>|xoshir
 
 このUTF-8文字列のSHA-256を小文字16進数化し、先頭16桁から`simulation_<16hex>`を生成する。区切り、順序、大小文字を変更しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
 
-Sprint 1以降に開始する新規runの`simulationId`は、02ミニ仕様の`SimulationIdentity`（schemaVersion `0.3.0`）から生成する。正本仕様版は`SPEC-0.1.2`、Sprint 1仕様版は`S1-SPEC-0.1.15`をidentityへ含める。詳細は`docs/specs/02-config-schema.md`および`docs/specs/14-sprint1-config-schema.md`を参照する。
+Sprint 1以降に開始する新規runの`simulationId`は、02ミニ仕様の`SimulationIdentity`（schemaVersion `0.3.0`）から生成する。正本仕様版は`SPEC-0.1.2`、Sprint 1仕様版は`S1-SPEC-0.1.16`をidentityへ含める。詳細は`docs/specs/02-config-schema.md`および`docs/specs/14-sprint1-config-schema.md`を参照する。
 
 ### MatchId（Sprint 1）
 

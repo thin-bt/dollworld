@@ -212,6 +212,13 @@ export type {
   MovementStateModifierActionOrderCoeffs,
 } from "./sprint1/movement-state-modifier.js";
 export {
+  computeMovementChance,
+  computePossibleRollCount,
+  computeRequiredMoveRoll,
+  computeSuccessfulRollCount,
+} from "./sprint1/movement-chance.js";
+export type { MovementChanceBounds, MovementChanceInput } from "./sprint1/movement-chance.js";
+export {
   PERSON_TECHNIQUE_STATE_KEYS,
   appendSuccessfulUseCountInvariantIssue,
   clonePersonTechniqueState,

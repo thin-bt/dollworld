@@ -1,6 +1,6 @@
 # 13 戦闘終了・判定・ログ仕様
 
-- 仕様版: `S1-SPEC-0.1.15`
+- 仕様版: `S1-SPEC-0.1.16`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 戦闘終了、判定勝ち、BattleResult、疲労・負傷効果、概要・詳細ログ
 - 非対象: 大会順位、昇格、賞金、長期ログ削除、観戦UI
@@ -358,6 +358,7 @@ BattleSummaryLog
 - 行動順、approach／retreat、rangeShiftBlock、injury、majorInjuryの全RNG使用箇所を追跡可能
 - 耐久・精神・間合い・疲労・負傷・優勢度推移を再計算可能
 - canonical JSON化可能
+- `movementChance`／`movementRoll`は12仕様§13に従う（approach／retreat比較判定時は双方non-null、それ以外は双方null。`movementChance`はfloor整数パーセント0..100。算出のRNG消費は0）
 
 ## 11. 監査・scripted replay bundle
 
@@ -522,6 +523,7 @@ BattleResultValidation
 - actionLogsのactionSequence連続
 - TurnOrderLogとActionLogのRNG境界一致
 - actionOrder／tieBreak／activation／hit／damage／movement／rangeShiftBlock／injury／majorInjuryの各判定について、実行時roll必須・未実行時nullが一致
+- `movementChance`／`movementRoll`は12仕様§13に従い、approach／retreat比較判定時は双方non-null、それ以外は双方null。`movementChance`はfloor整数パーセント0..100で、算出自体のRNG消費は0
 - RNG消費順とRNG終端状態一致
 - requested／applied condition・confidence deltaとclamp後値の再計算一致
 - resolution_errorではterminalBattleState.status=failed、failure必須、developmentEffectsが空で、開始時postProcessContextとhashを保持
