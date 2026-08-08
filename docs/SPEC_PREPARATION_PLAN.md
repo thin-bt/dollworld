@@ -38,9 +38,10 @@
 | S01-003 技カタログ・熟練度・習得状態 | **実装完了**（master統合済み） |
 | S01-004 週間行動・訓練・技習得 | **実装完了**（週間Processor。WorldEngine登録はS01-008） |
 | S01-005 戦闘開始・BattleState生成 | **実装完了**（MatchId生成器・RunRuleSnapshot・開始トランザクション。WorldEngine登録はS01-008） |
-| Sprint 1全体 | **未完了**（S01-006〜S01-009は未着手） |
+| S01-006 戦闘ターン解決 | **実装完了**（productionターンResolver・`movementChance` production・ActionLog完全検証。BattleResult完成はS01-007、WorldEngine登録はS01-008） |
+| Sprint 1全体 | **未完了**（S01-007〜S01-009は未着手） |
 
-次の実装着手タスクは **S01-006**（ターン解決）。S01-001〜S01-005は実装済み。戦闘開始`sourceSnapshot` baselineは `S1-SPEC-0.1.17` で明文化済み。`BattleActionLog.movementChance`は `S1-SPEC-0.1.16` で明文化済み。移動状態補正（`moverStateModifier`／`opponentStateModifier`）は `S1-SPEC-0.1.15` で明文化済み。ターン入力契約（`replacementReason`／`battle-action-script-0.1.0`／技使用回数）は `S1-SPEC-0.1.14` で明文化済み。MatchId generator契約は `S1-SPEC-0.1.13` で明文化済みで、production実装はS01-005で完了した。S01-004の週間ProcessorとS01-005の戦闘開始はいずれも純粋関数として実装済みであり、WorldEngineへの登録は **S01-008** で行う。S01-006 productionターンResolverは未実装。
+次の実装着手タスクは **S01-007**（戦闘終了・結果・ログ・戦闘後効果）。S01-001〜S01-006は実装済み。戦闘開始`sourceSnapshot` baselineは `S1-SPEC-0.1.17` で明文化済み。`BattleActionLog.movementChance`は `S1-SPEC-0.1.16` で明文化済みで、production実装はS01-006で完了した。移動状態補正（`moverStateModifier`／`opponentStateModifier`）は `S1-SPEC-0.1.15` で明文化済み。ターン入力契約（`replacementReason`／`battle-action-script-0.1.0`／技使用回数）は `S1-SPEC-0.1.14` で明文化済み。MatchId generator契約は `S1-SPEC-0.1.13` で明文化済みで、production実装はS01-005で完了した。S01-004の週間Processor、S01-005の戦闘開始、S01-006のターンResolverはいずれも純粋関数として実装済みであり、WorldEngineへの登録は **S01-008** で行う。BattleResult完成とWorldEngine接続は未実装。
 
 Sprint 1実装時は、正本`SPEC-0.1.2`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述を参照する。
 

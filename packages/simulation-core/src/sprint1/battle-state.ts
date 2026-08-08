@@ -1,10 +1,9 @@
 /**
  * `BattleState`, `BattleDetailedLog`, `BattleFailureInfo` and the `battleInputHash`
- * contract (11 mini-spec §9 / §13 / §16, 12 §20 / S01-005).
+ * contract (11 mini-spec §9 / §13 / §16, 12 §20 / S01-005 / S01-006).
  *
- * S01-005 only produces `ready` and `in_progress` states, so the detailed log is
- * always empty here; the per-turn log entry schemas arrive with turn resolution
- * (12 §20 / S01-006).
+ * ready / begin states keep an empty detailed log; in_progress / completed states
+ * may append TurnOrderLog / ActionLog entries produced by turn resolution.
  */
 import { toCanonicalJson } from "../canonical-json.js";
 import { asMatchId, asSimulationId } from "../ids.js";
@@ -17,6 +16,7 @@ import { validateWorldDate } from "../world-date.js";
 import type { WorldDate } from "../world-date.js";
 import type { BattleActionSourceIdentity } from "./battle-action-source-identity.js";
 import { validateBattleActionSourceIdentity } from "./battle-action-source-identity.js";
+import type { BattleKind, BattleSide, BattleStatus, BattleTerminalReason } from "./battle-enums.js";
 import {
   BATTLE_STATUSES,
   BATTLE_TERMINAL_REASONS,
@@ -24,7 +24,6 @@ import {
   isBattleStatus,
   isBattleTerminalReason,
 } from "./battle-enums.js";
-import type { BattleKind, BattleStatus, BattleTerminalReason } from "./battle-enums.js";
 import {
   preflightBattleParticipantSnapshotStructure,
   verifyBattleParticipantSnapshotHash,
@@ -40,7 +39,6 @@ import { BATTLE_STATE_SCHEMA_VERSION } from "./constants.js";
 import {
   SHA256_HEX_PATTERN,
   assertNoAccessors,
-  childPath,
   cloneValidatedPlainJson,
   deepFreezePlainJson,
   hasOwn,
@@ -54,16 +52,18 @@ import {
 } from "./plain-data.js";
 import { BATTLE_RANGES } from "./types.js";
 import type { BattleRange } from "./types.js";
-import { validateSeededRngState } from "./validate-seeded-rng-state.js";
+import { seededRngStatesEqual, validateSeededRngState } from "./validate-seeded-rng-state.js";
+import { validateBattleActionLog, validateBattleTurnOrderLog } from "./battle-turn-logs.js";
+import type { BattleActionLog, BattleTurnOrderLog } from "./battle-turn-logs.js";
 
 export const UINT32_MAXIMUM = 4294967295;
 
-/** 12 §20. Empty in every state S01-005 can build. */
+/** 12 §20. */
 export const BATTLE_DETAILED_LOG_KEYS = ["turnOrderLogs", "actionLogs"] as const;
 
 export type BattleDetailedLog = {
-  turnOrderLogs: readonly unknown[];
-  actionLogs: readonly unknown[];
+  turnOrderLogs: readonly BattleTurnOrderLog[];
+  actionLogs: readonly BattleActionLog[];
 };
 
 export function createEmptyBattleDetailedLog(): BattleDetailedLog {
@@ -90,26 +90,185 @@ export function validateBattleDetailedLog(input: unknown): ValidationResult<Batt
   assertNoAccessors(object, "", issues);
   rejectUnknownKeys(object, BATTLE_DETAILED_LOG_KEYS, "", issues);
 
-  for (const key of BATTLE_DETAILED_LOG_KEYS) {
-    const path = childPath("", key);
-    const items = snapshotDenseArrayOrFail(object[key], path, issues);
-    if (items === undefined) {
+  const turnOrderRaw = snapshotDenseArrayOrFail(object["turnOrderLogs"], "/turnOrderLogs", issues);
+  const actionRaw = snapshotDenseArrayOrFail(object["actionLogs"], "/actionLogs", issues);
+  if (turnOrderRaw === undefined || actionRaw === undefined || issues.length > 0) {
+    return failure(issues);
+  }
+
+  const turnOrderLogs: BattleTurnOrderLog[] = [];
+  for (let index = 0; index < turnOrderRaw.length; index += 1) {
+    const entry = validateBattleTurnOrderLog(turnOrderRaw[index]);
+    if (!entry.ok) {
+      issues.push(
+        ...entry.issues.map((issue) => ({
+          ...issue,
+          path: `/turnOrderLogs/${String(index)}${issue.path}`,
+        })),
+      );
       continue;
     }
-    if (items.length !== 0) {
+    turnOrderLogs.push(entry.value);
+  }
+
+  const actionLogs: BattleActionLog[] = [];
+  for (let index = 0; index < actionRaw.length; index += 1) {
+    const entry = validateBattleActionLog(actionRaw[index]);
+    if (!entry.ok) {
+      issues.push(
+        ...entry.issues.map((issue) => ({
+          ...issue,
+          path: `/actionLogs/${String(index)}${issue.path}`,
+        })),
+      );
+      continue;
+    }
+    actionLogs.push(entry.value);
+  }
+
+  if (issues.length > 0) {
+    return failure(issues);
+  }
+
+  // Canonical history continuity (13 §10 / S1-SPEC-0.1.16)
+  for (let index = 0; index < turnOrderLogs.length; index += 1) {
+    const expectedTurn = index + 1;
+    if (turnOrderLogs[index]!.turnNumber !== expectedTurn) {
       issues.push({
-        path,
-        message: "S01-005 only builds ready / in_progress states, whose detailed log is empty",
-        actual: items.length,
-        expected: "0",
+        path: `/turnOrderLogs/${String(index)}/turnNumber`,
+        message: "turnOrderLogs must be continuous from turnNumber 1",
+        actual: turnOrderLogs[index]!.turnNumber,
+        expected: String(expectedTurn),
       });
+    }
+  }
+
+  if (actionLogs.length !== turnOrderLogs.length * 2) {
+    issues.push({
+      path: "/actionLogs",
+      message: "actionLogs.length must equal turnOrderLogs.length * 2",
+      actual: actionLogs.length,
+      expected: String(turnOrderLogs.length * 2),
+    });
+  }
+
+  for (let index = 0; index < actionLogs.length; index += 1) {
+    if (actionLogs[index]!.actionSequence !== index) {
+      issues.push({
+        path: `/actionLogs/${String(index)}/actionSequence`,
+        message: "actionLogs.actionSequence must equal array index (0-based continuous)",
+        actual: actionLogs[index]!.actionSequence,
+        expected: String(index),
+      });
+    }
+  }
+
+  const turnCount = Math.min(turnOrderLogs.length, Math.floor(actionLogs.length / 2));
+  for (let turnIndex = 0; turnIndex < turnCount; turnIndex += 1) {
+    const order = turnOrderLogs[turnIndex]!;
+    const first = actionLogs[turnIndex * 2]!;
+    const second = actionLogs[turnIndex * 2 + 1]!;
+    if (first.turnNumber !== order.turnNumber || second.turnNumber !== order.turnNumber) {
+      issues.push({
+        path: `/actionLogs/${String(turnIndex * 2)}/turnNumber`,
+        message: "both ActionLogs in a turn must share TurnOrderLog.turnNumber",
+        actual: { first: first.turnNumber, second: second.turnNumber, order: order.turnNumber },
+      });
+    }
+    if (first.actorSide !== order.resolvedFirstSide) {
+      issues.push({
+        path: `/actionLogs/${String(turnIndex * 2)}/actorSide`,
+        message: "first ActionLog.actorSide must equal resolvedFirstSide",
+        actual: first.actorSide,
+        expected: order.resolvedFirstSide,
+      });
+    }
+    const expectedSecond: BattleSide = order.resolvedFirstSide === "sideA" ? "sideB" : "sideA";
+    if (second.actorSide !== expectedSecond) {
+      issues.push({
+        path: `/actionLogs/${String(turnIndex * 2 + 1)}/actorSide`,
+        message: "second ActionLog.actorSide must be the opposite of resolvedFirstSide",
+        actual: second.actorSide,
+        expected: expectedSecond,
+      });
+    }
+
+    // TurnOrderLog ↔ ActionLog priority / actionOrderScore bind (S01-006 fix4).
+    for (const [log, indexOffset] of [
+      [first, 0],
+      [second, 1],
+    ] as const) {
+      const expectedPriority =
+        log.actorSide === "sideA" ? order.sideAPriority : order.sideBPriority;
+      const expectedScore =
+        log.actorSide === "sideA" ? order.sideAActionOrderScore : order.sideBActionOrderScore;
+      const logIndex = turnIndex * 2 + indexOffset;
+      if (log.priority !== expectedPriority) {
+        issues.push({
+          path: `/actionLogs/${String(logIndex)}/priority`,
+          message: "ActionLog.priority must equal TurnOrderLog priority for actorSide",
+          actual: log.priority,
+          expected: String(expectedPriority),
+        });
+      }
+      if (log.actionOrderScore !== expectedScore) {
+        issues.push({
+          path: `/actionLogs/${String(logIndex)}/actionOrderScore`,
+          message: "ActionLog.actionOrderScore must equal TurnOrderLog score for actorSide",
+          actual: log.actionOrderScore,
+          expected: expectedScore === null ? "null" : String(expectedScore),
+        });
+      }
+    }
+
+    if (first.rangeAfter !== second.rangeBefore) {
+      issues.push({
+        path: `/actionLogs/${String(turnIndex * 2 + 1)}/rangeBefore`,
+        message: "second ActionLog.rangeBefore must equal first ActionLog.rangeAfter",
+        actual: second.rangeBefore,
+        expected: first.rangeAfter,
+      });
+    }
+    if (turnIndex + 1 < turnOrderLogs.length) {
+      const nextFirst = actionLogs[(turnIndex + 1) * 2];
+      if (nextFirst !== undefined && second.rangeAfter !== nextFirst.rangeBefore) {
+        issues.push({
+          path: `/actionLogs/${String((turnIndex + 1) * 2)}/rangeBefore`,
+          message: "next turn first ActionLog.rangeBefore must equal previous second.rangeAfter",
+          actual: nextFirst.rangeBefore,
+          expected: second.rangeAfter,
+        });
+      }
+    }
+
+    if (!seededRngStatesEqual(order.rngStateAfterOrder, first.rngStateBefore)) {
+      issues.push({
+        path: `/actionLogs/${String(turnIndex * 2)}/rngStateBefore`,
+        message: "first ActionLog.rngStateBefore must equal TurnOrderLog.rngStateAfterOrder",
+      });
+    }
+    if (!seededRngStatesEqual(first.rngStateAfter, second.rngStateBefore)) {
+      issues.push({
+        path: `/actionLogs/${String(turnIndex * 2 + 1)}/rngStateBefore`,
+        message: "second ActionLog.rngStateBefore must equal first ActionLog.rngStateAfter",
+      });
+    }
+    if (turnIndex + 1 < turnOrderLogs.length) {
+      const nextOrder = turnOrderLogs[turnIndex + 1]!;
+      if (!seededRngStatesEqual(second.rngStateAfter, nextOrder.rngStateBeforeOrder)) {
+        issues.push({
+          path: `/turnOrderLogs/${String(turnIndex + 1)}/rngStateBeforeOrder`,
+          message:
+            "next TurnOrderLog.rngStateBeforeOrder must equal previous second ActionLog.rngStateAfter",
+        });
+      }
     }
   }
 
   if (issues.length > 0) {
     return failure(issues);
   }
-  return success(createEmptyBattleDetailedLog());
+  return success(deepFreezePlainJson({ turnOrderLogs, actionLogs }));
 }
 
 export const BATTLE_FAILURE_INFO_KEYS = [
@@ -419,10 +578,46 @@ export function validateBattleState(
 }
 
 /**
+ * PreparedTurn.stateView only: allows turnNumber === turnOrderLogs.length + 1.
+ * Must not be used for committed BattleState validation.
+ */
+export function preflightPreparedBattleStateViewStructure(
+  input: unknown,
+): ValidationResult<BattleState> {
+  return preflightBattleStateStructureImpl(input, { allowPreparedTurnAdvance: true });
+}
+
+/**
+ * Hash-verified PreparedTurn.stateView (turnNumber may be length+1).
+ */
+export function validatePreparedBattleStateView(
+  input: unknown,
+  provider: Sha256Provider,
+): ValidationResult<BattleState> {
+  const preflight = preflightPreparedBattleStateViewStructure(input);
+  if (!preflight.ok) {
+    return failure(preflight.issues);
+  }
+  return verifyBattleStateHashes(preflight.value, provider);
+}
+
+/**
  * Structure / status invariants only — nested digests are format-checked, never
  * recomputed (S01-005 Phase 1).
+ * Public / default: committed BattleState only (turnNumber === log length).
  */
 export function preflightBattleStateStructure(input: unknown): ValidationResult<BattleState> {
+  return preflightBattleStateStructureImpl(input, { allowPreparedTurnAdvance: false });
+}
+
+type BattleStateStructureOptions = {
+  allowPreparedTurnAdvance: boolean;
+};
+
+function preflightBattleStateStructureImpl(
+  input: unknown,
+  options: BattleStateStructureOptions,
+): ValidationResult<BattleState> {
   const issues: ValidationIssue[] = [];
   const object = snapshotPlainObjectOrFail(input, "", issues);
   if (object === undefined) {
@@ -654,6 +849,82 @@ export function preflightBattleStateStructure(input: unknown): ValidationResult<
     });
   }
 
+  // Bind BattleState counters / identity to DetailedLog history (13 / S01-006 fix4).
+  // Committed (public default): turnNumber === turnOrderLogs.length only.
+  // PreparedTurn.stateView: allowPreparedTurnAdvance permits length + 1.
+  if (
+    turnNumber !== undefined &&
+    actionSequence !== undefined &&
+    rngState !== undefined &&
+    range !== undefined &&
+    initialRange !== undefined &&
+    detailedLog !== undefined &&
+    participantA !== undefined &&
+    participantB !== undefined
+  ) {
+    const completedTurns = detailedLog.turnOrderLogs.length;
+    const turnOk = options.allowPreparedTurnAdvance
+      ? turnNumber === completedTurns || turnNumber === completedTurns + 1
+      : turnNumber === completedTurns;
+    if (!turnOk) {
+      issues.push({
+        path: "/turnNumber",
+        message: options.allowPreparedTurnAdvance
+          ? "PreparedTurn.stateView turnNumber must equal detailedLog.turnOrderLogs.length or length+1"
+          : "turnNumber must equal detailedLog.turnOrderLogs.length",
+        actual: turnNumber,
+        expected: options.allowPreparedTurnAdvance
+          ? `${String(completedTurns)} | ${String(completedTurns + 1)}`
+          : String(completedTurns),
+      });
+    }
+    if (actionSequence !== detailedLog.actionLogs.length) {
+      issues.push({
+        path: "/actionSequence",
+        message: "actionSequence must equal detailedLog.actionLogs.length",
+        actual: actionSequence,
+        expected: String(detailedLog.actionLogs.length),
+      });
+    }
+    if (detailedLog.actionLogs.length > 0) {
+      const last = detailedLog.actionLogs[detailedLog.actionLogs.length - 1]!;
+      if (!seededRngStatesEqual(rngState, last.rngStateAfter)) {
+        issues.push({
+          path: "/rngState",
+          message: "rngState must equal the last ActionLog.rngStateAfter",
+        });
+      }
+      if (range !== last.rangeAfter) {
+        issues.push({
+          path: "/range",
+          message: "range must equal the last ActionLog.rangeAfter",
+          actual: range,
+          expected: last.rangeAfter,
+        });
+      }
+    } else if (range !== initialRange) {
+      issues.push({
+        path: "/range",
+        message: "range must equal initialRange when detailedLog.actionLogs is empty",
+        actual: range,
+        expected: initialRange,
+      });
+    }
+    for (let index = 0; index < detailedLog.actionLogs.length; index += 1) {
+      const log = detailedLog.actionLogs[index]!;
+      const expectedPersonId =
+        log.actorSide === "sideA" ? participantA.personId : participantB.personId;
+      if (log.actorPersonId !== expectedPersonId) {
+        issues.push({
+          path: `/detailedLog/actionLogs/${String(index)}/actorPersonId`,
+          message: "ActionLog.actorPersonId must match the BattleState participant for actorSide",
+          actual: log.actorPersonId,
+          expected: expectedPersonId,
+        });
+      }
+    }
+  }
+
   if (battleRulesRefHash !== battleRulesSnapshotRef.battleRulesRefHash) {
     issues.push({
       path: "/battleRulesRefHash",
@@ -788,14 +1059,20 @@ export function verifyBattleStateHashes(
     return failure(prefix(battleRulesSnapshotRef.issues, "/battleRulesSnapshotRef"));
   }
 
-  const participantA = verifyBattleParticipantSnapshotHash(state.participantA, provider);
-  if (!participantA.ok) {
-    return failure(prefix(participantA.issues, "/participantA"));
+  // sourceSnapshotHash fingerprints the battle-start source identity (11 §12 /
+  // S1-SPEC-0.1.17). Always re-verify hash(sourceSnapshot) === sourceSnapshotHash
+  // for every BattleState (including mid-battle). Battle-local current fields may
+  // diverge; they are not mixed back into the hash material.
+  const verifiedA = verifyBattleParticipantSnapshotHash(state.participantA, provider);
+  if (!verifiedA.ok) {
+    return failure(prefix(verifiedA.issues, "/participantA"));
   }
-  const participantB = verifyBattleParticipantSnapshotHash(state.participantB, provider);
-  if (!participantB.ok) {
-    return failure(prefix(participantB.issues, "/participantB"));
+  const verifiedB = verifyBattleParticipantSnapshotHash(state.participantB, provider);
+  if (!verifiedB.ok) {
+    return failure(prefix(verifiedB.issues, "/participantB"));
   }
+  const participantA = verifiedA.value;
+  const participantB = verifiedB.value;
 
   const expectedBattleInputHash = computeBattleInputHash(
     {
@@ -804,8 +1081,8 @@ export function verifyBattleStateHashes(
       worldDate: state.worldDate,
       battleKind: state.battleKind,
       initialRange: state.initialRange,
-      participantASourceSnapshotHash: participantA.value.sourceSnapshotHash,
-      participantBSourceSnapshotHash: participantB.value.sourceSnapshotHash,
+      participantASourceSnapshotHash: participantA.sourceSnapshotHash,
+      participantBSourceSnapshotHash: participantB.sourceSnapshotHash,
       battleRulesRefHash: state.battleRulesRefHash,
       runRuleSnapshotHash: state.runRuleSnapshotHash,
       participantAActionSourceIdentity: state.participantAActionSourceIdentity,

@@ -643,6 +643,8 @@ export {
   validateBattleDetailedLog,
   validateBattleFailureInfo,
   validateBattleState,
+  preflightPreparedBattleStateViewStructure,
+  validatePreparedBattleStateView,
 } from "./sprint1/battle-state.js";
 export type { BattleDetailedLog, BattleFailureInfo, BattleState } from "./sprint1/battle-state.js";
 export {
@@ -665,6 +667,148 @@ export { CREATE_BATTLE_REQUEST_KEYS } from "./sprint1/create-battle-state.js";
 export type { CreateBattleRequest } from "./sprint1/create-battle-state.js";
 export type { BattleStartValidation } from "./sprint1/begin-battle.js";
 export type { StartBattleInput, StartBattleResult } from "./sprint1/start-battle-transaction.js";
+
+// S01-006 battle turn resolution (prepare / strategy / resolve).
+export {
+  computeBattleStateCanonicalHash,
+  prepareBattleTurn,
+  validatePreparedBattleTurn,
+  preflightPreparedBattleTurnStructure,
+  bindPreparedBattleTurnToBattleState,
+  buildPreparedStateView,
+  PREPARE_BATTLE_TURN_INPUT_KEYS,
+  PREPARED_BATTLE_TURN_KEYS,
+} from "./sprint1/prepare-battle-turn.js";
+export type {
+  PreparedBattleTurn,
+  PrepareBattleTurnResult,
+  PrepareBattleTurnValidation,
+} from "./sprint1/prepare-battle-turn.js";
+export {
+  validateBattleActionsSource,
+  validateDefaultBattleStrategySource,
+  validateScriptedActionSource,
+  DEFAULT_BATTLE_STRATEGY_SOURCE_KEYS,
+  SCRIPTED_ACTION_SOURCE_KEYS,
+} from "./sprint1/battle-actions-source.js";
+export type {
+  BattleActionsSource,
+  DefaultBattleStrategySource,
+  ScriptedActionSource,
+} from "./sprint1/battle-actions-source.js";
+export {
+  BATTLE_ACTION_LOG_KEYS,
+  BATTLE_TURN_ORDER_LOG_KEYS,
+  createEmptyBattleActionLogShell,
+  validateBattleActionLog,
+  validateBattleTurnOrderLog,
+} from "./sprint1/battle-turn-logs.js";
+export type {
+  BattleActionLog,
+  BattleTurnOrderLog,
+  StrategyCandidateScoreEntry,
+} from "./sprint1/battle-turn-logs.js";
+export {
+  DefaultBattleStrategy,
+  runDefaultBattleStrategy,
+  scoreStrategyAction,
+} from "./sprint1/default-battle-strategy.js";
+export type {
+  BattleStrategyInput,
+  BattleStrategyResult,
+  StrategyScoreComponents,
+} from "./sprint1/default-battle-strategy.js";
+export {
+  buildStrategyScoreComponents,
+  compareBattleActionsCanonical,
+  computePredictedMajorInjuryChance,
+  computePredictedSelfInjuryChance,
+  sortBattleActionsCanonical,
+  strategyActionKey,
+} from "./sprint1/battle-strategy-scoring.js";
+export type {
+  StrategyScoreBuildInput,
+  StrategyScoreBuildResult,
+} from "./sprint1/battle-strategy-scoring.js";
+export {
+  priorityForResolvedAction,
+  computeActionOrderScoreWithoutRandom,
+  resolveActionOrder,
+} from "./sprint1/battle-action-order.js";
+export type { Priority, ResolveActionOrderResult } from "./sprint1/battle-action-order.js";
+export { enumerateLegalBattleActions } from "./sprint1/battle-legal-actions.js";
+export {
+  replaceIllegalBattleAction,
+  cancelSecondActionAsOpponentEnded,
+} from "./sprint1/battle-action-replacement.js";
+export type { ActionReplacementResult } from "./sprint1/battle-action-replacement.js";
+export {
+  resolveBattleTurn,
+  RESOLVE_BATTLE_TURN_INPUT_KEYS,
+} from "./sprint1/resolve-battle-turn.js";
+export type {
+  ResolveBattleTurnResult,
+  ResolveBattleTurnValidation,
+} from "./sprint1/resolve-battle-turn.js";
+export {
+  createBattleParticipantReplayBaseline,
+  validateBattleDetailedLogReplay,
+  validateBattleStateReplayConsistency,
+  assertEmptyLogMatchesBaseline,
+} from "./sprint1/battle-detailed-log-replay.js";
+export type { BattleParticipantReplayRuntime } from "./sprint1/battle-detailed-log-replay.js";
+export {
+  applyTerminalIfNeeded,
+  isBattleTerminal,
+  selectTerminalReason,
+} from "./sprint1/battle-terminal.js";
+export {
+  computeSurrenderScore,
+  includeSurrenderCandidate,
+  surrenderActionScore,
+} from "./sprint1/battle-surrender.js";
+export {
+  consumptionPerformanceFactor,
+  applyConsumptionDelta,
+  baseConsumptionForResolvedAction,
+  isHighConsumptionBand,
+} from "./sprint1/battle-consumption.js";
+export { computeEffectiveMentalCost } from "./sprint1/battle-mental-cost.js";
+export { computeActivationChancePercent, rollActivation } from "./sprint1/battle-activation.js";
+export {
+  computeHitChancePercent,
+  computeHitChancePercentWithoutEvade,
+  computeRangeHitModifier,
+  rollHit,
+} from "./sprint1/battle-hit.js";
+export {
+  averagePrimaryStatSurface,
+  computeRawDamage,
+  rollDamageWithVariance,
+} from "./sprint1/battle-damage.js";
+export {
+  applyGuardedDamage,
+  rangeShiftBlockChance,
+  rollRangeShiftBlock,
+} from "./sprint1/battle-defense.js";
+export { computeMovementScores, rollMovement } from "./sprint1/battle-movement.js";
+export {
+  computeFocusBaseRecovery,
+  resolveFocusMindAtTurnEnd,
+  applyMentalRecovery,
+} from "./sprint1/battle-focus-mind.js";
+export {
+  computeFinalInjuryChancePercent,
+  rollInjury,
+  applyInjuryDelta,
+  baseInjuryChanceFromDamageRatio,
+} from "./sprint1/battle-injury.js";
+export type { InjuryResult } from "./sprint1/battle-injury.js";
+export {
+  accumulateTurnDamageTotals,
+  isPassiveResolvedAction,
+  selectAdvantageSide,
+} from "./sprint1/battle-turn-aggregate.js";
 
 export type {
   NameCandidateCategory,

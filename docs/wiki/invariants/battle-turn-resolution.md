@@ -23,7 +23,7 @@ related:
 
 12・14（および関連する 09・11）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
 
-S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.17` の`sourceSnapshot` baseline、`S1-SPEC-0.1.16` で明文化された`movementChance`、`S1-SPEC-0.1.15` で明文化された移動状態補正、および `S1-SPEC-0.1.14` で明文化された入力契約の索引である。次はS01-006。Sprint 1全体は未完了。
+S01-006 productionターンResolverは**実装済み**。`S1-SPEC-0.1.16` の`movementChance`はproduction実装済み。`S1-SPEC-0.1.17` の`sourceSnapshotHash`常時検証と`sourceSnapshot`＋`BattleDetailedLog` replay validator（**意味再計算済み**／`battleSeed`連続RNG）も実装済み。本ページはそれらの索引である。次はS01-007。Sprint 1全体は未完了。BattleResultは未実装。
 
 ## 現在確定している内容
 
@@ -43,7 +43,7 @@ S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0
 - 戦闘開始`sourceSnapshot`を保持し、常に`hash(sourceSnapshot)===sourceSnapshotHash`を検証する（turnNumber=0限定省略の廃止）
 - 不変currentフィールドはsourceSnapshotと完全一致。techniquesは学習／熟練／習得が一致し、use countのみ差分許可
 - 可変: `currentMental`／`injury`／use counts／既存battle-local runtime。これらはhashへ再入場しない
-- 最終battle-local状態検証のcanonical baselineはsourceSnapshot＋BattleDetailedLog（具体validatorはS01-006。ログフィールド新設なし）
+- 最終battle-local状態検証のcanonical baselineはsourceSnapshot＋BattleDetailedLog（具体validatorはS01-006で**意味再計算済み**。ログフィールド新設なし）
 - 詳細は 11 §7／§12、12・13の目的節
 
 ### S1-SPEC-0.1.16 movementChance契約
@@ -52,6 +52,19 @@ S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0
 - `movementChance`はfloor整数パーセント（0..100）。算出はRNG消費0
 - 移動のRNG消費数・判定式自体は変更なし
 - 詳細は 12 §13
+
+### 詳細ログ契約（13 §10／S01-006）
+
+- `actionLogs.actionSequence`は0から連続（`actionLogs[i].actionSequence === i`）
+- `turnOrderLogs`はturnNumber 1から連続、各ターン1件
+- 成功ターンは必ず2 ActionLog（後手`opponent_ended_battle`の`no_action`も1件としてsequenceを消費）
+- TurnOrder→first→second→次TurnOrderのRNG chainはvalidated SeededRngStateの完全一致
+- BattleStateはcommittedで`turnNumber`／`actionSequence`／最終`rngState`／`actorPersonId`／`range`をDetailedLogへbind
+- PreparedTurn.stateViewの`turnNumber===logs.length+1`はPreparedTurn専用validatorのみ許可（通常`validateBattleState`は拒否）
+- 同一turnのActionLogはTurnOrderLogのpriority／actionOrderScoreとexact一致
+- ActionLog間の`rangeAfter`→`rangeBefore` chain（次turn含む）を必須
+- TurnOrderLogのpriorityは`2|1|0|-1`のみ。priority差／同値時のscore・roll・tieBreak相関を検証
+- StrategyCandidateScoresはBattleActionのみ（`no_action`禁止）、重複禁止、canonical順はDefaultBattleStrategyと共有
 
 ### S1-SPEC-0.1.15 移動状態補正契約
 
@@ -119,11 +132,17 @@ unknown_technique | unlearned_technique | requirements_not_met
 
 ## 関連するコード
 
-該当なし（ターン解決Processorは未実装。S01-001〜005は実装済み）。
+- `packages/simulation-core/src/sprint1/prepare-battle-turn.ts`
+- `packages/simulation-core/src/sprint1/resolve-battle-turn.ts`
+- `packages/simulation-core/src/sprint1/default-battle-strategy.ts`
+- `packages/simulation-core/src/sprint1/battle-turn-logs.ts`
+- `packages/simulation-core/src/sprint1/movement-chance.ts`
+- `packages/simulation-core/src/sprint1/battle-movement.ts`
+- `packages/simulation-core/src/sprint1/movement-state-modifier.ts`
 
 ## 関連するテスト
 
-該当なし（ターン解決Processorは未実装）。
+- `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`
 
 ## 関連する判断
 
@@ -131,7 +150,7 @@ unknown_technique | unlearned_technique | requirements_not_met
 
 ## 未解決事項
 
-該当なし。次は S01-006 実装。Sprint 1全体は未完了。S01-006は未着手。
+該当なし。次は S01-007（BattleResult）。Sprint 1全体は未完了。
 
 ## 関連Wikiページ
 

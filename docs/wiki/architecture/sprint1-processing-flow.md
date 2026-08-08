@@ -13,11 +13,12 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-07
+last_verified: 2026-08-08
 related:
   - battle-lifecycle.md
   - ../sprints/sprint1.md
   - ../invariants/weekly-training-and-learning.md
+  - ../invariants/battle-turn-resolution.md
 ---
 
 # Sprint 1処理の流れ
@@ -99,16 +100,32 @@ in_progress BattleState + battle.started候補（EventId／sequence未割当）
 
 `RunRuleSnapshot` は run 単位で1件だけ保持し、各戦闘は `BattleRulesSnapshotRef` で hash 参照する。失敗時は3つとも `null` を返し、World RNG と MatchIdGeneratorState を進めない。
 
+### ターン解決の入出力境界（S01-006実装済み）
+
+ターン解決も WorldEngine から独立した純粋関数である。最終BattleResult完成は S01-007。
+
+```text
+入力（検証前）
+  BattleState / BattleActionsSource（default_strategy または scripted）/ RunRuleSnapshot 参照 / RNG状態 等
+  ↓ prepareBattleTurn
+PreparedBattleTurn（ターン開始スナップショット／canonical hash）
+  ↓ resolveBattleTurn（行動決定・置換・優先・移動・命中・ダメージ・精神・耐久・消耗・決着候補）
+出力: 更新済みBattleState / ターンログ材料 / RNG状態（失敗時は部分更新なし）
+```
+
+移動状態補正は `S1-SPEC-0.1.15` の `moverStateModifier`／`opponentStateModifier`（`battle.actionOrder`係数共用）を使う。`BattleActionLog.movementChance`（floor整数パーセント0..100、RNG非消費）は `S1-SPEC-0.1.16` のproduction実装。`DefaultBattleStrategy` は default_strategy 源の行動決定に用いる。BattleResult／WorldEngineは未実装。
+
 ## 関連する正本
 
 - [`docs/specs/08-character-growth.md`](../../specs/08-character-growth.md) 〜 [`14-sprint1-config-schema.md`](../../specs/14-sprint1-config-schema.md)
 
 ## 関連するコード
 
-- `packages/simulation-core/src/sprint1/`（S01-001〜005）
+- `packages/simulation-core/src/sprint1/`（S01-001〜006）
 - `packages/simulation-core/src/sprint1/process-weekly-training-week.ts`（週間Processor入口）
 - `packages/simulation-core/src/sprint1/start-battle-transaction.ts`（戦闘開始入口、内部）
-- ターン解決（S01-006）以降は未実装
+- `packages/simulation-core/src/sprint1/prepare-battle-turn.ts`／`resolve-battle-turn.ts`／`default-battle-strategy.ts`
+- BattleResult（S01-007）／WorldEngine登録（S01-008）は未実装
 
 ## 関連するテスト
 
@@ -117,6 +134,7 @@ in_progress BattleState + battle.started候補（EventId／sequence未割当）
 - `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
 - `packages/simulation-core/src/sprint1-weekly-training.test.ts`
 - `packages/simulation-core/src/sprint1-battle-start.test.ts`
+- `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 
 ## 関連する判断

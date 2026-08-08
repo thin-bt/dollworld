@@ -4,7 +4,7 @@
 - 対象ゲーム仕様：`SPEC-0.1.2`
 - 対象Sprint 1ミニ仕様：`S1-SPEC-0.1.17`
 - 仕様確定commit：`2800d3b959e575f57660c27b344507dd0e38ddb6`
-- 実装状態：S01-001〜S01-005 **実装済み**、S01-006〜S01-009 **pending**（次の実装着手は S01-006）
+- 実装状態：S01-001〜S01-006 **実装済み**、S01-007〜S01-009 **pending**（次の実装着手は S01-007）
 - `S1-SPEC-0.1.17`は戦闘開始`sourceSnapshot` baselineの明文化（常時`sourceSnapshotHash`検証・BattleState schema `0.6.0`）。先行clarificationとして`S1-SPEC-0.1.16`の`movementChance`、`S1-SPEC-0.1.15`の移動状態補正契約がある
 
 ## 目的

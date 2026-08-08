@@ -44,11 +44,15 @@ related:
 
 ## 関連するコード
 
-該当なし（BattleResult productionは未実装。S01-006ターンResolverも未実装。`S1-SPEC-0.1.14`のターン入力契約、`S1-SPEC-0.1.15`の移動状態補正、`S1-SPEC-0.1.16`のmovementChance、`S1-SPEC-0.1.17`のsourceSnapshot baselineは12／11正本／`battle-turn-resolution`索引を参照）。
+- BattleResult productionは未実装（S01-007）
+- S01-006ターンResolver／DetailedLog履歴検証（actionSequence 0始まり、RNG chain、BattleState bind）は実装済み。索引は [battle-turn-resolution.md](battle-turn-resolution.md)
+- `S1-SPEC-0.1.14`のターン入力契約、`S1-SPEC-0.1.15`の移動状態補正、`S1-SPEC-0.1.16`のmovementChance、`S1-SPEC-0.1.17`のsourceSnapshot baselineは12／11正本／上記索引を参照
 
 ## 関連するテスト
 
-該当なし（戦闘結果・ログは未実装）。`S1-SPEC-0.1.14`のターン入力契約テストは`sprint1-spec-0.1.14-turn-contracts.test.ts`（Resolver未実装）。
+- ターン詳細ログ検証: `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`
+- BattleResult完成テストは未実装（S01-007）
+- `S1-SPEC-0.1.14`のターン入力契約テストは`sprint1-spec-0.1.14-turn-contracts.test.ts`
 
 ## 関連する判断
 

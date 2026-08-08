@@ -64,9 +64,10 @@ Sprint 1 の仕様は `S1-SPEC-0.1.17` が現行である。正本版は `SPEC-0
 ### 実装状態
 
 - Sprint 1全体は**未完了**
-- S01-001〜S01-005は実装済み。次の実装着手はS01-006
-- 戦闘開始（11）は実装済み。ターン解決（12）・BattleResult（13）は未実装
-- 週間処理と戦闘のWorldEngine登録はS01-008（S01-004／S01-005では未実施）
+- S01-001〜S01-006は実装済み。次の実装着手はS01-007
+- 戦闘開始（11）とターン解決（12）は実装済み。BattleResult（13）は未実装
+- `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`
+- 週間処理と戦闘のWorldEngine登録はS01-008（S01-004／S01-005／S01-006では未実施）
 - 本Wikiの同期や `npm run check` の成功は、Sprint 1全体の実装完了を意味しない
 
 ### 実装タスク
@@ -87,7 +88,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.17` が現行である。正本版は `SPEC-0
 
 ## 関連するコード
 
-- `packages/simulation-core/src/sprint1/`（S01-001〜005の公開型・validation・カタログ／成長API・週間Processor・戦闘開始）
+- `packages/simulation-core/src/sprint1/`（S01-001〜006の公開型・validation・カタログ／成長API・週間Processor・戦闘開始・ターン解決）
 - `packages/simulation-core/src/sprint1/constants.ts`（`S1_SPEC_VERSION`）
 - `packages/simulation-core/src/index.ts`（package root export）
 
@@ -98,6 +99,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.17` が現行である。正本版は `SPEC-0
 - `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
 - `packages/simulation-core/src/sprint1-weekly-training.test.ts`
 - `packages/simulation-core/src/sprint1-battle-start.test.ts`
+- `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.13-match-id-generator-contracts.test.ts`
 
@@ -108,7 +110,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.17` が現行である。正本版は `SPEC-0
 
 ## 未解決事項
 
-- 次の実装着手は S01-006（ターン解決）。週間Processorと戦闘のWorldEngine登録は S01-008。Sprint 1全体は未完了
+- 次の実装着手は S01-007（戦闘終了・結果・ログ・戦闘後効果）。BattleResultは未実装。週間Processorと戦闘のWorldEngine登録は S01-008。Sprint 1全体は未完了
 
 ## 関連Wikiページ
 

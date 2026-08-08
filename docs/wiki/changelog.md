@@ -21,31 +21,84 @@ last_verified: 2026-08-08
 
 ## 履歴
 
+### 2026-08-09 — S01-006 受入監査修正5-4（custom injury実delta／guard reducedBy受入テスト）
+
+- custom minor／major injury受入を、ログ自己生成cursorではなく実際のparticipantB.injury前後差（7／19）で検証
+- guard reductionを、公開純関数で再計算したguard適用前normalDamageから`applyGuardedDamage`のreducedBy／guardedDamageを独立確認
+- 不要になった`injuryCursorAfterLogs` helperを削除
+- BattleResult／WorldEngineは未実装。S01-007はpending／未着手のまま
+
+### 2026-08-09 — S01-006 受入監査修正5-3（受入テスト意味成立／成果物一時領域整理）
+
+- default strategy coordinated tamperを、canonical candidateScores維持＋別basic_attack profileのunique最高scoreへ相互整合する構造へ修正（validateBattleActionLog成功後にprovenance再導出で拒否）
+- custom injury境界をminor／major／unableToContinueThresholdの3必須ケースへ分離
+- evade／guard境界に原因条件（withoutEvade counterfactual／reducedBy経路）を明示assert
+- packaging scratchはOS一時領域のみ（worktree直下のartifact scratchを残さない）
+- BattleResult／WorldEngineは未実装。次はS01-007
+
+### 2026-08-09 — S01-006 受入監査修正5-2（requestedAction制約／strategy provenance／tamper強化）
+
+- `BattleActionLog.requestedAction`をBattleAction限定。`no_action`はresolvedAction専用（validate／replay／replacementで拒否）
+- strategy metadataのログ自己正当化を廃止。scriptedはnull三項目、defaultはDefaultBattleStrategy再導出（`derive-battle-action-request.ts`共用）
+- coordinated tamper（消費2ターン／priority構造整合／別battleSeed完全chain／final bind technique use counts）と正常境界replayを強化
+- BattleResult／WorldEngineは未実装。次はS01-007
+
+### 2026-08-09 — S01-006 受入監査修正5-1（replay意味再計算／battleSeed連続RNG）
+
+- ActionLog after／delta／判定結果を状態遷移入力にせず、sourceSnapshot baseline＋RunRuleSnapshot＋catalog＋共有`resolveOneAction`から期待結果を導出して比較
+- RNGを`createSeededRng(battleSeed)`へ根付け、全turn／actionで連続消費。ログ記載beforeから個別再開しない
+- successfulEvasions／successfulDefenses／advantageをResolverと一致する意味導出へ修正
+- BattleResult／WorldEngineは未実装。次はS01-007
+
+### 2026-08-08 — S01-006 受入監査修正5（sourceSnapshotHash常時検証＋DetailedLog replay）
+
+- mid-battleでも`hash(sourceSnapshot)===sourceSnapshotHash`を常時検証（turnNumber=0限定省略を廃止）
+- `sourceSnapshot`＋`BattleDetailedLog`（＋検証済みRunRuleSnapshot）からbattle-local最終状態を再生照合するreplay validatorを実装（その後fix5-1で意味再計算済み）
+- `resolveBattleTurn`は実行前／成功前にreplay検証。BattleResult／WorldEngineは未実装。次はS01-007
+
 ### 2026-08-08 — S1-SPEC-0.1.17 戦闘開始sourceSnapshot baselineの明確化
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.17`へ版上げ。`BattleParticipantSnapshot.sourceSnapshot`（戦闘開始baseline）を正本へ固定し、戦闘中も`sourceSnapshotHash`を常時検証可能とする
 - 不変currentフィールド／techniques不変部の一致、可変（`currentMental`／`injury`／use counts／battle-local runtime）を分離。BattleState schema `0.5.0`→`0.6.0`
-- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
-- 次はS01-006。Sprint 1全体は未完了
+- Sprint1Config balance／SHAは不変
+- Sprint 1全体は未完了。次はS01-007（S01-006 productionターンResolverは別エントリどおり実装済み）
+
+### 2026-08-08 — S01-006 受入監査修正4（committed／PreparedTurn分離とログbind）
+
+- committed BattleStateは`turnNumber===logs.length`のみ。PreparedTurn.stateViewは専用経路でlength+1を許可
+- TurnOrder↔ActionLogのpriority／score bind、range履歴chainを追加
+- BattleResult／WorldEngineは未実装。次はS01-007
+
+### 2026-08-08 — S01-006 受入監査修正3（ログ契約）
+
+- `actionSequence`を0始まりへ修正。DetailedLog履歴検証（連続性・RNG chain・BattleState bind）を完成
+- TurnOrderLog／StrategyCandidateScores／ActionLog意味相関を厳密化。Resolver経路のmovementChance goldensを追加
+- BattleResult／WorldEngineは未実装。次はS01-007。Sprint 1全体は未完了（S01-001〜006 implemented）
+
+### 2026-08-08 — S01-006 戦闘ターン解決を実装（fix2）
+
+- productionターンResolver（`prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy`）を実装
+- 負傷判定→`rangeShift`の適用順、`BattleActionLog.movementChance`のproduction実装（`S1-SPEC-0.1.16`）、ActionLog完全検証を反映
+- BattleResult／WorldEngineは未実装。次はS01-007。Sprint 1全体は未完了（S01-001〜006 implemented、S01-007〜009 pending）
 
 ### 2026-08-08 — S1-SPEC-0.1.16 BattleActionLog.movementChanceの明確化
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.16`へ版上げ。対抗式の離散一様`movementRoll`から事前成功率`movementChance`（floor整数パーセント0..100、RNG非消費）を正本へ固定
 - 判定時は双方non-null、非movement時は双方null。移動RNG数・判定式は変更なし
-- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
-- 次はS01-006。Sprint 1全体は未完了
+- Sprint1Config balance／SHAは不変。当時はS01-006 productionターンResolverは未実装だった（その後S01-006で実装）
+- 当時の次着手はS01-006。Sprint 1全体は未完了
 
 ### 2026-08-08 — S1-SPEC-0.1.15 移動状態補正の明文化
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.15`へ版上げ。`moverStateModifier`／`opponentStateModifier`の明示式（`battle.actionOrder`係数共用）を正本へ固定
-- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
-- 次はS01-006。Sprint 1全体は未完了
+- Sprint1Config balance／SHAは不変。当時はS01-006 productionターンResolverは未実装だった（その後S01-006で実装）
+- 当時の次着手はS01-006。Sprint 1全体は未完了
 
 ### 2026-08-08 — S1-SPEC-0.1.14 戦闘ターン入力契約の明文化
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.14`へ版上げ。`BattleActionReplacementReason`完全enum、`battle-action-script-0.1.0`完全構造、技使用回数（attempted／successful）契約を正本へ固定
-- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
-- 次はS01-006。Sprint 1全体は未完了
+- Sprint1Config balance／SHAは不変。当時はS01-006 productionターンResolverは未実装だった（その後S01-006で実装）
+- 当時の次着手はS01-006。Sprint 1全体は未完了
 
 ### 2026-08-07 — S01-005 戦闘開始・BattleState生成を実装
 

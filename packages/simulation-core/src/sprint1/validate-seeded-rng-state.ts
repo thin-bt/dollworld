@@ -28,6 +28,16 @@ const SEEDED_RNG_WORD_KEYS = ["s0", "s1", "s2", "s3"] as const;
 /** Inclusive uint32 bound shared with `importSeededRng` (07 mini-spec). */
 export const SEEDED_RNG_WORD_MAXIMUM = 4294967295;
 
+export function seededRngStatesEqual(a: SeededRngState, b: SeededRngState): boolean {
+  return (
+    a.algorithmVersion === b.algorithmVersion &&
+    a.s0 === b.s0 &&
+    a.s1 === b.s1 &&
+    a.s2 === b.s2 &&
+    a.s3 === b.s3
+  );
+}
+
 export function validateSeededRngState(input: unknown): ValidationResult<SeededRngState> {
   const issues: ValidationIssue[] = [];
   const object = snapshotPlainObjectOrFail(input, "", issues);
