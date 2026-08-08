@@ -1,6 +1,6 @@
 # 13 戦闘終了・判定・ログ仕様
 
-- 仕様版: `S1-SPEC-0.1.17`
+- 仕様版: `S1-SPEC-0.1.18`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 戦闘終了、判定勝ち、BattleResult、疲労・負傷効果、概要・詳細ログ
 - 非対象: 大会順位、昇格、賞金、長期ログ削除、観戦UI
@@ -126,16 +126,88 @@ totalScore
 
 ## 5. 同点処理
 
-得点同点時は次の順に比較する。
+`totalScore`が同点の場合だけ、次を順番に比較する。先に差が付いた段階で勝者を確定し、以降の比較とRNGを行わない。
 
-1. 有効ダメージ割合
-2. 攻撃成功回数
-3. 残存耐久割合
-4. 残存精神力
-5. 試合内消耗の少なさ
-6. seeded RNG
+### 5.1 有効ダメージ割合
 
-PersonId順で勝者を決めない。
+§4 `damageScore`で用いる`damageDealt`と同一の実ダメージaggregateを使う。各sideの相手最大耐久は`opponentMaxDurability`（相手participantの`maxDurability`）とする。
+
+```text
+A.opponentMaxDurability = B.maxDurability
+B.opponentMaxDurability = A.maxDurability
+```
+
+勝敗比較ではfloor済み比率を使わない。次の比の大小を精度損失なく比較するため、BigInt交差積を用いる（本clarificationで固定する比較契約）。
+
+```text
+left  = A.damageDealt * B.maxDurability
+right = B.damageDealt * A.maxDurability
+```
+
+- `left > right` → participantA勝利
+- `left < right` → participantB勝利
+- `left === right` → 次へ
+
+### 5.2 攻撃成功回数
+
+`successfulHits`を比較する。大きい方が勝ち。同値なら次へ。
+
+### 5.3 残存耐久割合
+
+最終`currentDurability / maxDurability`を比較する。表示用basis pointsへfloorした値は使わない。BigInt交差積で比較する。
+
+```text
+left  = A.currentDurability * B.maxDurability
+right = B.currentDurability * A.maxDurability
+```
+
+- `left > right` → participantA勝利
+- `left < right` → participantB勝利
+- `left === right` → 次へ
+
+### 5.4 残存精神力
+
+最終BattleStateの`currentMental`を直接比較する。大きい方が勝ち。`maxMental`割合へ正規化しない。同値なら次へ。
+
+### 5.5 試合内消耗の少なさ
+
+最終BattleStateの`inBattleConsumption`を直接比較する。**小さい方が勝ち**。割合化・正規化しない。同値ならseeded RNGへ。
+
+### 5.6 最終seeded RNG
+
+1〜5がすべて同値の場合だけ使用する。
+
+terminal BattleStateの正規battle RNG stateから既存`SeededRng`を復元し、次を**正確に1回だけ**呼ぶ。
+
+```text
+roll = nextInt(0, 2)
+```
+
+既存07仕様のRNG契約どおり、`min` inclusive・`max` exclusiveとする。
+
+- `0` → participantA勝利
+- `1` → participantB勝利
+
+この1回以外のRNGを判定tie-breakのために消費しない。1〜5で決着した場合の消費回数は0とする。
+
+RNGを使用した場合:
+
+- `BattleJudgeSummary.seededRngRoll`へ`0`または`1`を保存する
+- `finalRngState`はこの1回消費後のstateとする
+- validatorはtie-break前のrngStateから同じ1回を再生し、winnerと`finalRngState`を検証する
+
+finalization時に`Math.random()`、新seed、PersonIdを勝敗決定に使用しない。`resolution_error`ではjudge tie-break RNGを追加消費しない。
+
+### 5.7 禁止するtie-break
+
+次を勝敗tie-breakへ使用しない。
+
+- PersonId順
+- ActionSourceIdentity順
+- object key順
+- 配列順
+- 名前順
+- canonical文字列順
 
 ## 6. BattleResult
 
@@ -240,7 +312,7 @@ BattlePostProcessContext
 - confidenceAfter
 - currentMentalAfter
 - techniqueStateDeltas
-- battleExperienceSummary
+- battleExperienceSummary: BattleExperienceSummary
 
 ### 8.1 継続疲労
 
@@ -261,14 +333,53 @@ persistentFatigueDelta
 
 ### 8.2 技熟練度
 
-正本の値を09仕様の固定小数点へ変換して使用する。
+戦闘使用による熟練度上昇は09仕様を正とする。基本上昇量はhardcodeせず`techniqueLearning.masteryGainHundredths`を使う。
 
-- 公式戦で使用成功: `masteryHundredths +20`（表示+0.2）
-- 公式戦で使用失敗: `masteryHundredths +10`（表示+0.1）
-- 80以降は09仕様の現在値係数を掛ける
-- `basic_attack` は熟練度上昇対象外
+```text
+official / activation success → officialSuccess
+official / activation failure → officialFailure
+mock     / activation success → mockSuccess
+mock     / activation failure → mockFailure
+```
 
-`battleKind=mock` の上昇量は `[Sprint 1暫定]` とし、公式戦の50％を設定値とする。模擬戦50％では成功+10（表示+0.10）、失敗+5（表示+0.05）とし、浮動小数点で保存しない。
+現行default（balance不変）: officialSuccess=20、officialFailure=10、mockSuccess=10、mockFailure=5。浮動小数点で保存しない。
+
+- `basic_attack`は熟練度上昇対象外
+- 命中／damage／injuryの有無は「技使用成功」の判定に使わない
+- S01-006契約どおり、activation failureは`attempted+1`／`successful+0`、activation successは`attempted+1`／`successful+1`
+
+#### 現在値係数
+
+「80以降だけ係数を掛ける」ではない。全熟練度帯で`techniqueLearning.masteryCurrentValueFactors`を使う（09§9）。80以降は特に大きく鈍化する、という説明である。
+
+#### 適用順
+
+各人物・各TechniqueIdについて、DetailedLogの`actionSequence`昇順でその技の各attemptを1件ずつ処理する。`workingMastery`を戦闘開始時`PersonTechniqueState.masteryHundredths`で初期化する。
+
+各attemptごとに:
+
+1. `workingMastery`で`selectMasteryCurrentValueFactor`相当の現在値係数を選択する
+2. activation success/failureと`battleKind`から`baseGainHundredths`を選ぶ
+3. 既存`multiplyBasisPointsFloor`と同じ規則で`appliedGain = floor(baseGainHundredths * masteryCurrentValueFactor / 10000)`を計算する
+4. `workingMastery = min(10000, workingMastery + appliedGain)`
+5. 次のattemptは更新後`workingMastery`で係数を選ぶ
+
+同一戦闘中に熟練度帯を跨いだ場合、次の使用から新しい現在値係数になる。全attempt処理後:
+
+```text
+masteryHundredthsDelta = workingMastery - sourceMasteryHundredths
+```
+
+成功回数と失敗回数をまとめて一括`floor`してはならない。attemptごとにfloorする。
+
+#### 使用回数との整合
+
+```text
+attemptedUseCountDelta = finalBattleAttemptedUseCount - sourceAttemptedUseCount
+successfulUseCountDelta = finalBattleSuccessfulUseCount - sourceSuccessfulUseCount
+```
+
+DetailedLogから再集計したattempt/success件数と上記battle-local deltaが一致しなければresult生成失敗。masteryのattempt列も同じDetailedLogを材料とする。
 
 `techniqueStateDeltas` は技ごとに次を持つ。
 
@@ -317,6 +428,33 @@ confidenceAppliedDelta = confidenceAfter - sourceConfidence
 
 両参加者へ同じendReason追加値を一律適用しない。最終値は-20..20へclampする。
 
+### 8.6 battleExperienceSummary
+
+`battleExperienceSummary`は独立したbattle XPや能力値成長を表さない。Sprint 1では戦闘後処理を監査・人物履歴へ変換するための決定的な戦闘経験サマリーとする。
+
+```text
+BattleExperienceSummary
+- outcome: win | loss
+- endReason
+- turnsExecuted
+- damageDealt
+- damageReceived
+- successfulHits
+- successfulDefenses
+- successfulEvasions
+- successfulCounters
+- attemptedTechniqueUseCount
+- successfulTechniqueUseCount
+```
+
+各値はBattleState／DetailedLog／battle-local technique count差分から導出する。
+
+- `attemptedTechniqueUseCount`: 全非basic techniqueの`attemptedUseCount` battle-local delta合計
+- `successfulTechniqueUseCount`: 全非basic techniqueの`successfulUseCount` battle-local delta合計
+- `basic_attack`は両方へ含めない
+
+`battleExperienceSummary`自体によって能力値／aptitude／learningProgress／fatigue／condition／confidence等を追加変更しない。それらは既存の個別`developmentEffects`だけを正とする。`resolution_error`では`developmentEffects`自体が空なので`battleExperienceSummary`も生成・適用しない。
+
 ## 9. 概要ログ
 
 構造化データとして保持する。
@@ -333,12 +471,12 @@ BattleSummaryLog
 - loserPersonId: PersonId | null
 - endReason
 - turnsExecuted
-- phaseSummaries
-- keyMoments
-- finalDurabilityRatios
-- finalMentalValues
-- judgeSummary
-- injurySummary
+- phaseSummaries: BattlePhaseSummary[]
+- keyMoments: BattleKeyMoment[]
+- finalDurabilityRatios: BattleSideRatioSummary
+- finalMentalValues: BattleSideValueSummary
+- judgeSummary: BattleJudgeSummary | null
+- injurySummary: BattleInjurySummary
 ```
 
 - 完成文章ではなく、後から文章生成できる構造を優先
@@ -347,6 +485,126 @@ BattleSummaryLog
 - `summaryLog`はfinalState、judgeScore、detailedLog、developmentEffectsから決定的に再構築できる内容だけを持つ
 - `summaryLogHash = SHA-256(canonicalJson(summaryLog))`をBattleResultへ保存する
 - validatorはsummaryLogを元データから再計算し、全文一致とsummaryLogHash一致を両方検証する
+- 配列順: `phaseSummaries`はopening→middle→closing、`keyMoments`は`actionSequence`昇順
+- 同じ入力・同じterminal RNG stateならsummaryLog全文・judge結果・mastery delta・finalRngStateが完全一致する
+- 判定比較用ratioの勝敗判定にはfloor値を使わない。表示／summary用ratioだけbasis pointsへfloorする
+
+### 9.1 BattlePhaseSummary
+
+```text
+BattlePhaseSummary
+- phase: opening | middle | closing
+- startTurn
+- endTurn
+- participantADamageDealt
+- participantBDamageDealt
+- participantASuccessfulHits
+- participantBSuccessfulHits
+```
+
+phaseは実行済みturnを最大3区分へ決定的に分割する。`turnsExecuted = T`（T>0）とし、各`turnNumber` n のphaseIndexは:
+
+```text
+phaseIndex = min(2, floor((n - 1) * 3 / T))
+```
+
+- 0 = opening
+- 1 = middle
+- 2 = closing
+
+該当turnが0件のphaseは配列へ出さない。
+
+例: T=1→openingのみ、T=2→opening+middle、T=3→opening+middle+closing。
+
+各damage/hit値は、そのphaseに属するBattleActionLogから集計する。`resolution_error`等で`turnsExecuted=0`なら`phaseSummaries = []`。
+
+### 9.2 BattleKeyMoment
+
+```text
+BattleKeyMoment
+- actionSequence
+- turnNumber
+- actorPersonId
+- targetPersonId: PersonId | null
+- resolvedActionKind
+- damage: number | null
+- injuryResult: none | minor | major | null
+```
+
+keyMomentsへ含めるActionLogは次のいずれかを満たすものに限る。
+
+1. `damage != null` かつ `damage > 0`
+2. `injuryResult = minor` または `major`
+3. `resolvedAction.kind = surrender`
+
+同じActionLogは1件だけ出す。並び順は`actionSequence`昇順。文章生成・主観的選別・重要度スコアリングは行わない。`judge_decision`のみを理由にsynthetic keyMomentを追加しない。
+
+### 9.3 finalDurabilityRatios
+
+```text
+BattleSideRatioSummary
+- participantA
+- participantB
+```
+
+単位はbasis points 0..10000。各side:
+
+```text
+floor(currentDurability * 10000 / maxDurability)
+```
+
+中間浮動小数点を作らず整数演算を使う。
+
+### 9.4 finalMentalValues
+
+```text
+BattleSideValueSummary
+- participantA
+- participantB
+```
+
+値は最終BattleStateの各participant.`currentMental`。戦闘終了時回復は行わない。
+
+### 9.5 BattleJudgeSummary
+
+```text
+BattleJudgeSummary
+- participantA: JudgeScoreBreakdown
+- participantB: JudgeScoreBreakdown
+- decisiveCriterion:
+    total_score
+  | effective_damage_ratio
+  | successful_hits
+  | remaining_durability_ratio
+  | remaining_mental
+  | lower_in_battle_consumption
+  | seeded_rng
+- seededRngRoll: 0 | 1 | null
+```
+
+judge計算を行わない結果では`judgeSummary = null`。judge計算を行った場合:
+
+- participantA/Bは`BattleResult.judgeScore`と全文一致
+- `decisiveCriterion`は実際に勝敗を初めて分けた比較段階
+- RNGまで到達しなければ`seededRngRoll=null`
+- RNGで決めた場合だけ`0`または`1`
+
+### 9.6 BattleInjurySummary
+
+```text
+BattleInjuryParticipantSummary
+- sourceInjury
+- finalInjury
+- injuryDelta
+- minorInjuryCount
+- majorInjuryCount
+
+BattleInjurySummary
+- participantA: BattleInjuryParticipantSummary
+- participantB: BattleInjuryParticipantSummary
+```
+
+`injuryDelta = finalInjury - sourceInjury`。`minorInjuryCount`／`majorInjuryCount`はDetailedLogの実成立`injuryResult`をtarget participantごとに数える。初期負傷を再加算しない。
 
 ## 10. 詳細ログ
 
@@ -574,9 +832,12 @@ BattleResultValidation
 - unable_to_continue閾値とknockout優先、双方続行不能時のjudgeScore必須
 - 20ターン判定とterminalReason=max_turns_reachedからjudge_decisionへの変換
 - 6評価区分の点数と0..100 total clamp
-- 同点比較1〜5
-- 最終seeded RNG決着がResolverのfinalRngStateを正確に1回進めること
-- PersonId順を使わないこと
+- 同点比較1〜5（交差積／currentMental直接比較／inBattleConsumption小さい方が勝ち）
+- 最終seeded RNG決着が`nextInt(0, 2)`を正確に1回だけ消費し、0→A／1→Bであること
+- PersonId順・名前順・canonical順を使わないこと
+- BattleSummaryLog下位構造（phase分割T=0/1/2/3/20、keyMoments採用条件、ratio floor、judgeSummary）
+- battleExperienceSummary（win/loss・集計・basic_attack除外・resolution_error非生成）
+- 戦闘masteryのattemptごとfloor・全帯現在値係数・band跨ぎ・activation success+missもsuccess gain
 - inBattleConsumption 0..100境界
 - 継続疲労25％とダメージ疲労の非二重加算
 - 現在精神力の持越し

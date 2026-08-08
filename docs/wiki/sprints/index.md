@@ -24,7 +24,7 @@ Sprint 0 と Sprint 1 を横断する Sprint 単位の索引。
 ## 現在確定している内容
 
 - [Sprint 0](sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprint1.md) — 仕様 `S1-SPEC-0.1.17`（全体実装は未完了、次はS01-007）
+- [Sprint 1](sprint1.md) — 仕様 `S1-SPEC-0.1.18`（全体実装は未完了、次はS01-007）
 
 ## 関連する正本
 

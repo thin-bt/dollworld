@@ -347,9 +347,9 @@ function expectValidationPathFailure(
   expect(result.issues.map((issue) => issue.path)).toContain(expectedPath);
 }
 
-describe("S1-SPEC-0.1.17 version registry", () => {
-  it("publishes S1-SPEC-0.1.17 / BattleState 0.6.0 and keeps Sprint1Config SHA", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.17");
+describe("S1-SPEC-0.1.18 version registry", () => {
+  it("publishes S1-SPEC-0.1.18 / BattleState 0.6.0 and keeps Sprint1Config SHA", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.18");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
     expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
     expect(SPRINT1_CONFIG_SCHEMA_VERSION).toBe("0.2.0");
@@ -360,13 +360,13 @@ describe("S1-SPEC-0.1.17 version registry", () => {
     );
   });
 
-  it("accepts S1-SPEC-0.1.17 identity and rejects 0.1.16", () => {
-    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.17"));
+  it("accepts S1-SPEC-0.1.18 identity and rejects 0.1.17", () => {
+    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.18"));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
       expect(createSimulationIdFromIdentity(ok.value, sha256Provider).ok).toBe(true);
     }
-    expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.16")).ok).toBe(false);
+    expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.17")).ok).toBe(false);
   });
 
   it("accepts BattleState schema 0.6.0 and rejects 0.5.0 for new state", () => {

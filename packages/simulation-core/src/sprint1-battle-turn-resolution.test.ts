@@ -1797,8 +1797,8 @@ describe("S01-006 performance band edges", () => {
 });
 
 describe("S01-006 schema version lock", () => {
-  it("publishes S1-SPEC-0.1.17 and BattleState schema 0.6.0", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.17");
+  it("publishes S1-SPEC-0.1.18 and BattleState schema 0.6.0", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.18");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
     expect(baseInProgress.schemaVersion).toBe(BATTLE_STATE_SCHEMA_VERSION);
   });

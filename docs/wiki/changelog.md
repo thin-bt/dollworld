@@ -21,6 +21,12 @@ last_verified: 2026-08-08
 
 ## 履歴
 
+### 2026-08-09 — S1-SPEC-0.1.18 BattleResult決定的契約clarification
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.18`へ版上げ。BattleSummaryLog下位型、battleExperienceSummary、判定同点比較式、seeded RNG tie-break、戦闘mastery適用順を正本へ固定
+- Sprint1Config balance／SHAは不変。S01-007 production実装は未着手（pending）
+- BattleResult／WorldEngineは未実装。次はS01-007
+
 ### 2026-08-09 — S01-006 受入監査修正5-4（custom injury実delta／guard reducedBy受入テスト）
 
 - custom minor／major injury受入を、ログ自己生成cursorではなく実際のparticipantB.injury前後差（7／19）で検証

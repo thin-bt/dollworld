@@ -810,6 +810,34 @@ export {
   selectAdvantageSide,
 } from "./sprint1/battle-turn-aggregate.js";
 
+// S1-SPEC-0.1.18 BattleResult deterministic contract helpers (not finalizeBattleResult)
+export {
+  BATTLE_PHASES,
+  JUDGE_DECISIVE_CRITERIA,
+  applyBattleTechniqueMasteryAttempts,
+  battlePhaseFromIndex,
+  compareEffectiveDamageRatio,
+  compareLowerInBattleConsumption,
+  compareRemainingDurabilityRatio,
+  compareRemainingMental,
+  compareSuccessfulHits,
+  computeBattlePhaseIndex,
+  computeFinalDurabilityRatioBasisPoints,
+  decideJudgeWinner,
+  isBattleKeyMomentLog,
+  listBattlePhasesForTurnsExecuted,
+} from "./sprint1/battle-result-contracts.js";
+export type {
+  BattleMasteryAttempt,
+  BattlePhase,
+  CrossProductComparison,
+  JudgeDecisiveCriterion,
+  JudgeTieBreakInput,
+  JudgeTieBreakResult,
+  JudgeTieBreakSide,
+  KeyMomentCandidateLog,
+} from "./sprint1/battle-result-contracts.js";
+
 export type {
   NameCandidateCategory,
   NameCandidateFile,

@@ -342,8 +342,8 @@ function withLogs(state: BattleState, actionLogs: BattleState["detailedLog"]["ac
 }
 
 describe("S01-006 fix5 always-on sourceSnapshotHash", () => {
-  it("publishes S1-SPEC-0.1.17 / BattleState 0.6.0", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.17");
+  it("publishes S1-SPEC-0.1.18 / BattleState 0.6.0", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.18");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
   });
 

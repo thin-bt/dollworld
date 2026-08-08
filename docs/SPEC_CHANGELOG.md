@@ -1,5 +1,16 @@
 # 変更履歴
 
+## 2026-08-09：S1-SPEC-0.1.18（BattleResult決定的契約clarification）
+
+S01-007実装開始前に判明した、BattleResult周辺の未定義を明文化した。既存balanceの意図変更ではなく、決定性に必要な実装契約の明文化である。
+
+- BattleSummaryLog下位構造（phaseSummaries／keyMoments／finalDurabilityRatios／finalMentalValues／judgeSummary／injurySummary）を固定
+- battleExperienceSummaryを戦闘経験サマリー（非XP）として型固定。resolution_errorでは非生成
+- 判定同点比較1〜5をBigInt交差積／直接比較で厳密化。PersonId順等を禁止
+- 最終seeded RNG tie-breakを`nextInt(0, 2)`・0→A／1→B・正確に1回だけ消費と固定
+- 戦闘使用masteryは全熟練度帯で現在値係数を適用し、attemptごとにfloor（一括floor禁止）
+- Sprint1Config構造・既定値・canonical SHAは不変。S01-006 RNG順・行動解決は不変
+
 ## 2026-08-08：S1-SPEC-0.1.17（戦闘開始sourceSnapshot baselineの明確化）
 
 S01-006実装開始前に判明した、戦闘中の`sourceSnapshotHash`検証とbattle-local可変フィールドの両立を明文化した。既存balanceの意図変更ではなく、参加者baseline契約の未定義解消である。

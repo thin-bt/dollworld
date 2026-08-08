@@ -59,9 +59,9 @@ function identityWithSprint1(version: string): SimulationIdentity {
   };
 }
 
-describe("S1-SPEC-0.1.17 version registry", () => {
-  it("publishes S1-SPEC-0.1.17 and keeps main SPEC / Sprint1Config SHA unchanged", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.17");
+describe("S1-SPEC-0.1.18 version registry", () => {
+  it("publishes S1-SPEC-0.1.18 and keeps main SPEC / Sprint1Config SHA unchanged", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.18");
     expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
     expect(SPRINT1_CONFIG_SCHEMA_VERSION).toBe("0.2.0");
     expect(SPRINT1_CONFIG_VERSION_DEFAULT).toBe("sprint1-balance-0.2.0");
@@ -74,15 +74,15 @@ describe("S1-SPEC-0.1.17 version registry", () => {
     );
   });
 
-  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.17 and rejects 0.1.16", () => {
-    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.17"));
+  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.18 and rejects 0.1.17", () => {
+    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.18"));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
-      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.17");
+      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.18");
       expect(createSimulationIdFromIdentity(ok.value, sha256Provider).ok).toBe(true);
     }
+    expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.17")).ok).toBe(false);
     expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.16")).ok).toBe(false);
-    expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.15")).ok).toBe(false);
   });
 });
 

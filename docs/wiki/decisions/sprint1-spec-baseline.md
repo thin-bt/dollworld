@@ -30,7 +30,7 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 ### 仕様版
 
-- 現行: `S1-SPEC-0.1.17`
+- 現行: `S1-SPEC-0.1.18`
 - 正本: `SPEC-0.1.2`
 - `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - `S1-SPEC-0.1.12` は 2026-08-05 の週間処理契約clarification（受入監査追補含む）。Sprint1Config balance／hashは不変
@@ -39,6 +39,7 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 - `S1-SPEC-0.1.15` は移動状態補正（`moverStateModifier`／`opponentStateModifier`）の明文化。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.16` は`BattleActionLog.movementChance`の明文化。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.17` は戦闘開始`sourceSnapshot` baselineの明文化（常時hash検証・BattleState schema `0.6.0`）。Sprint1Config balance／hashは不変
+- `S1-SPEC-0.1.18` はBattleResult決定的契約clarification（summary下位型／experienceSummary／同点比較／RNG tie-break／戦闘mastery適用順）。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.10-draft` は履歴であり現行版ではない
 
 ### `S1-SPEC-0.1.11` 確定時点の履歴メモ
@@ -52,8 +53,8 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 ### 現在の実装状態（別段落）
 
-- S01-001〜S01-005 は実装済み
-- 次の実装着手は S01-006
+- S01-001〜S01-006 は実装済み
+- 次の実装着手は S01-007（BattleResult productionは未実装）
 - Sprint 1 全体は未完了
 
 ## 関連する正本

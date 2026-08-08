@@ -23,7 +23,7 @@ related:
 
 12・14（および関連する 09・11）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
 
-S01-006 productionターンResolverは**実装済み**。`S1-SPEC-0.1.16` の`movementChance`はproduction実装済み。`S1-SPEC-0.1.17` の`sourceSnapshotHash`常時検証と`sourceSnapshot`＋`BattleDetailedLog` replay validator（**意味再計算済み**／`battleSeed`連続RNG）も実装済み。本ページはそれらの索引である。次はS01-007。Sprint 1全体は未完了。BattleResultは未実装。
+S01-006 productionターンResolverは**実装済み**。`S1-SPEC-0.1.16` の`movementChance`はproduction実装済み。`S1-SPEC-0.1.17` の`sourceSnapshotHash`常時検証と`sourceSnapshot`＋`BattleDetailedLog` replay validator（**意味再計算済み**／`battleSeed`連続RNG）も実装済み。`S1-SPEC-0.1.18`はBattleResult決定的契約clarification（S01-007実装前）。本ページはそれらの索引である。次はS01-007。Sprint 1全体は未完了。BattleResultは未実装。
 
 ## 現在確定している内容
 
