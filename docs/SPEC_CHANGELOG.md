@@ -1,5 +1,18 @@
 # 変更履歴
 
+## 2026-08-08：S1-SPEC-0.1.17（戦闘開始sourceSnapshot baselineの明確化）
+
+S01-006実装開始前に判明した、戦闘中の`sourceSnapshotHash`検証とbattle-local可変フィールドの両立を明文化した。既存balanceの意図変更ではなく、参加者baseline契約の未定義解消である。
+
+- `BattleParticipantSnapshot.sourceSnapshot`（`BattleParticipantSourceSnapshot`）を追加。戦闘開始時点の値をdeep-clone／freezeして保持する
+- `sourceSnapshotHash = SHA-256(UTF-8 canonicalJson(sourceSnapshot))`。hash材料の意味・アルゴリズム・canonical内容は変更しない
+- 戦闘中は常に`hash(sourceSnapshot)===sourceSnapshotHash`を検証する（`turnNumber=0`限定の省略を廃止）
+- 不変currentフィールドはsourceSnapshotと完全一致。techniquesはTechniqueIdと学習／熟練／習得フィールドが一致し、use countのみ差分許可
+- 可変を許可: `currentMental`／`injury`／technique use counts、および既存battle-local runtimeフィールド。これらは`sourceSnapshotHash`へ再入場しない
+- `BattleState.schemaVersion` Sprint 1現行値を`0.6.0`へ上げ、新規`0.5.0`を拒否
+- 最終battle-local状態検証のcanonical baselineは戦闘開始`sourceSnapshot`＋`BattleDetailedLog`。具体的replay validatorはS01-006（本clarificationではログフィールドを新設しない）
+- Sprint1Config構造・既定値・canonical SHAは不変
+
 ## 2026-08-08：S1-SPEC-0.1.16（BattleActionLog.movementChanceの明確化）
 
 S01-006実装開始前に判明した、`BattleActionLog.movementChance`の未定義を明文化した。既存balanceの意図変更ではなく、ログ再生契約の未定義解消である。

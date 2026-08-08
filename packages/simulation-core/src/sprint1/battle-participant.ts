@@ -7,7 +7,7 @@
  * participant source, the world date, and the Sprint 1 config.
  */
 import { ABILITY_KEYS, APTITUDE_KEYS } from "../abilities.js";
-import type { AbilityScores, AptitudeScores } from "../abilities.js";
+import type { AbilityScores, AptitudeScores, StatValueTriple } from "../abilities.js";
 import { computeCurrentAge } from "../age-status.js";
 import { compareUnicodeCodePoints, toCanonicalJson } from "../canonical-json.js";
 import type { CareerStatus, LifeStatus, ParticipationStatus } from "../enums.js";
@@ -84,6 +84,50 @@ export type BattleParticipantSource = {
   temporaryCondition: PersonTemporaryCondition;
 };
 
+export const BATTLE_PARTICIPANT_SOURCE_SNAPSHOT_KEYS = [
+  "personId",
+  "lifeStatus",
+  "participationStatus",
+  "careerStatus",
+  "birthYear",
+  "ageAtBattle",
+  "stats",
+  "aptitudes",
+  "techniques",
+  "fatigue",
+  "injury",
+  "condition",
+  "confidence",
+  "battleDecisionProfile",
+  "injuryProneness",
+  "sprint1StateSchemaVersion",
+  "currentMental",
+] as const;
+
+/**
+ * Battle-start-only source material (11 §7 / §12 / S1-SPEC-0.1.17).
+ * Frozen at create; never updated mid-battle. Hash input for sourceSnapshotHash.
+ */
+export type BattleParticipantSourceSnapshot = {
+  personId: PersonId;
+  lifeStatus: LifeStatus;
+  participationStatus: ParticipationStatus;
+  careerStatus: CareerStatus;
+  birthYear: number;
+  ageAtBattle: number;
+  stats: AbilityScores;
+  aptitudes: AptitudeScores;
+  techniques: readonly PersonTechniqueState[];
+  fatigue: number;
+  injury: number;
+  condition: number;
+  confidence: number;
+  battleDecisionProfile: BattleDecisionProfile;
+  injuryProneness: number;
+  sprint1StateSchemaVersion: Sprint1PersonState["sprint1StateSchemaVersion"];
+  currentMental: number;
+};
+
 export const BATTLE_PARTICIPANT_SNAPSHOT_KEYS = [
   "side",
   "personId",
@@ -92,6 +136,7 @@ export const BATTLE_PARTICIPANT_SNAPSHOT_KEYS = [
   "careerStatus",
   "birthYear",
   "ageAtBattle",
+  "sourceSnapshot",
   "sourceSnapshotHash",
   "sprint1StateSchemaVersion",
   "stats",
@@ -137,6 +182,7 @@ export type BattleParticipantSnapshot = {
   careerStatus: CareerStatus;
   birthYear: number;
   ageAtBattle: number;
+  sourceSnapshot: BattleParticipantSourceSnapshot;
   sourceSnapshotHash: string;
   sprint1StateSchemaVersion: Sprint1PersonState["sprint1StateSchemaVersion"];
   stats: AbilityScores;
@@ -365,29 +411,11 @@ export function isEligibleForBattleKind(
 }
 
 /**
- * 11 §12: `sourceSnapshotHash` covers only the participant source material —
- * never derived battle counters and never the hash itself.
+ * 11 §12 / S1-SPEC-0.1.17: `sourceSnapshotHash` covers only the frozen
+ * battle-start `sourceSnapshot` — never battle-local mutable current fields.
  */
 export function computeBattleParticipantSourceSnapshotHash(
-  source: {
-    personId: PersonId;
-    lifeStatus: LifeStatus;
-    participationStatus: ParticipationStatus;
-    careerStatus: CareerStatus;
-    birthYear: number;
-    ageAtBattle: number;
-    stats: AbilityScores;
-    aptitudes: AptitudeScores;
-    techniques: readonly PersonTechniqueState[];
-    fatigue: number;
-    injury: number;
-    condition: number;
-    confidence: number;
-    battleDecisionProfile: BattleDecisionProfile;
-    injuryProneness: number;
-    sprint1StateSchemaVersion: Sprint1PersonState["sprint1StateSchemaVersion"];
-    currentMental: number;
-  },
+  source: BattleParticipantSourceSnapshot,
   provider: Sha256Provider,
 ): ValidationResult<string> {
   return safeHashUtf8(
@@ -416,12 +444,71 @@ export function computeBattleParticipantSourceSnapshotHash(
 }
 
 /**
- * Structure / eligibility / derived battle counters without sourceSnapshotHash
- * (S01-005 Phase 1). Never calls Sha256Provider.
+ * Capture battle-start source material as a deep-frozen snapshot (no shared refs).
+ */
+export function captureBattleParticipantSourceSnapshot(source: {
+  personId: PersonId;
+  lifeStatus: LifeStatus;
+  participationStatus: ParticipationStatus;
+  careerStatus: CareerStatus;
+  birthYear: number;
+  ageAtBattle: number;
+  stats: AbilityScores;
+  aptitudes: AptitudeScores;
+  techniques: readonly PersonTechniqueState[];
+  fatigue: number;
+  injury: number;
+  condition: number;
+  confidence: number;
+  battleDecisionProfile: BattleDecisionProfile;
+  injuryProneness: number;
+  sprint1StateSchemaVersion: Sprint1PersonState["sprint1StateSchemaVersion"];
+  currentMental: number;
+}): BattleParticipantSourceSnapshot {
+  return deepFreezePlainJson({
+    personId: source.personId,
+    lifeStatus: source.lifeStatus,
+    participationStatus: source.participationStatus,
+    careerStatus: source.careerStatus,
+    birthYear: source.birthYear,
+    ageAtBattle: source.ageAtBattle,
+    stats: cloneAbilityScores(source.stats),
+    aptitudes: cloneAptitudeScores(source.aptitudes),
+    techniques: source.techniques.map((technique) => ({ ...technique })),
+    fatigue: source.fatigue,
+    injury: source.injury,
+    condition: source.condition,
+    confidence: source.confidence,
+    battleDecisionProfile: { ...source.battleDecisionProfile },
+    injuryProneness: source.injuryProneness,
+    sprint1StateSchemaVersion: source.sprint1StateSchemaVersion,
+    currentMental: source.currentMental,
+  });
+}
+
+function cloneAbilityScores(stats: AbilityScores): AbilityScores {
+  const result = {} as Record<(typeof ABILITY_KEYS)[number], StatValueTriple>;
+  for (const key of ABILITY_KEYS) {
+    result[key] = { ...stats[key] };
+  }
+  return result as AbilityScores;
+}
+
+function cloneAptitudeScores(aptitudes: AptitudeScores): AptitudeScores {
+  const result = {} as Record<(typeof APTITUDE_KEYS)[number], StatValueTriple>;
+  for (const key of APTITUDE_KEYS) {
+    result[key] = { ...aptitudes[key] };
+  }
+  return result as AptitudeScores;
+}
+
+/**
+ * Structure / eligibility / derived battle counters without sourceSnapshot /
+ * sourceSnapshotHash (S01-005 Phase 1). Never calls Sha256Provider.
  */
 export type PreflightBattleParticipantSnapshot = Omit<
   BattleParticipantSnapshot,
-  "sourceSnapshotHash"
+  "sourceSnapshot" | "sourceSnapshotHash"
 >;
 
 export function preflightBattleParticipant(
@@ -652,32 +739,34 @@ export function preflightBattleParticipant(
 }
 
 /**
- * Attach sourceSnapshotHash after Phase 1 succeeded (S01-005 Phase 2).
+ * Attach frozen sourceSnapshot + sourceSnapshotHash after Phase 1 succeeded
+ * (S01-005 Phase 2 / S1-SPEC-0.1.17).
  */
 export function sealBattleParticipantWithSourceHash(
   preflight: PreflightBattleParticipantSnapshot,
   provider: Sha256Provider,
 ): ValidationResult<BattleParticipantSnapshot> {
+  const sourceSnapshot = captureBattleParticipantSourceSnapshot({
+    personId: preflight.personId,
+    lifeStatus: preflight.lifeStatus,
+    participationStatus: preflight.participationStatus,
+    careerStatus: preflight.careerStatus,
+    birthYear: preflight.birthYear,
+    ageAtBattle: preflight.ageAtBattle,
+    stats: preflight.stats,
+    aptitudes: preflight.aptitudes,
+    techniques: preflight.techniques,
+    fatigue: preflight.fatigue,
+    injury: preflight.injury,
+    condition: preflight.condition,
+    confidence: preflight.confidence,
+    battleDecisionProfile: preflight.battleDecisionProfile,
+    injuryProneness: preflight.injuryProneness,
+    sprint1StateSchemaVersion: preflight.sprint1StateSchemaVersion,
+    currentMental: preflight.currentMental,
+  });
   const sourceSnapshotHashResult = computeBattleParticipantSourceSnapshotHash(
-    {
-      personId: preflight.personId,
-      lifeStatus: preflight.lifeStatus,
-      participationStatus: preflight.participationStatus,
-      careerStatus: preflight.careerStatus,
-      birthYear: preflight.birthYear,
-      ageAtBattle: preflight.ageAtBattle,
-      stats: preflight.stats,
-      aptitudes: preflight.aptitudes,
-      techniques: preflight.techniques,
-      fatigue: preflight.fatigue,
-      injury: preflight.injury,
-      condition: preflight.condition,
-      confidence: preflight.confidence,
-      battleDecisionProfile: preflight.battleDecisionProfile,
-      injuryProneness: preflight.injuryProneness,
-      sprint1StateSchemaVersion: preflight.sprint1StateSchemaVersion,
-      currentMental: preflight.currentMental,
-    },
+    sourceSnapshot,
     provider,
   );
   if (!sourceSnapshotHashResult.ok) {
@@ -686,6 +775,7 @@ export function sealBattleParticipantWithSourceHash(
 
   const snapshot: BattleParticipantSnapshot = {
     ...preflight,
+    sourceSnapshot,
     sourceSnapshotHash: sourceSnapshotHashResult.value,
   };
   return success(deepFreezePlainJson(snapshot));
@@ -800,6 +890,7 @@ export function preflightBattleParticipantSnapshotStructure(
   );
   const birthYear = requireSafeIntegerAtLeast(object, "birthYear", "", 1, issues);
   const ageAtBattle = requireIntegerInRange(object, "ageAtBattle", "", 0, 200, issues);
+  const sourceSnapshot = parseBattleParticipantSourceSnapshot(object["sourceSnapshot"], issues);
   const sourceSnapshotHash = requireNonEmptyTrimmedString(object, "sourceSnapshotHash", "", issues);
   if (sourceSnapshotHash !== undefined && !SHA256_HEX_PATTERN.test(sourceSnapshotHash)) {
     issues.push({
@@ -910,6 +1001,7 @@ export function preflightBattleParticipantSnapshotStructure(
     careerStatus === undefined ||
     birthYear === undefined ||
     ageAtBattle === undefined ||
+    sourceSnapshot === undefined ||
     sourceSnapshotHash === undefined ||
     sprint1StateSchemaVersion === undefined ||
     stats === undefined ||
@@ -936,6 +1028,28 @@ export function preflightBattleParticipantSnapshotStructure(
   ) {
     return failure(issues);
   }
+
+  bindImmutableParticipantFieldsToSourceSnapshot(
+    {
+      personId: asPersonId(personIdText),
+      lifeStatus,
+      participationStatus,
+      careerStatus,
+      birthYear,
+      ageAtBattle,
+      stats,
+      aptitudes,
+      techniques,
+      fatigue,
+      condition,
+      confidence,
+      battleDecisionProfile,
+      injuryProneness,
+      sprint1StateSchemaVersion,
+    },
+    sourceSnapshot,
+    issues,
+  );
 
   if (baseMaxDurability !== BASE_MAX_DURABILITY_OFFSET + stats.stamina.surfaceValue) {
     issues.push({
@@ -966,6 +1080,7 @@ export function preflightBattleParticipantSnapshotStructure(
       careerStatus,
       birthYear,
       ageAtBattle,
+      sourceSnapshot,
       sourceSnapshotHash,
       sprint1StateSchemaVersion,
       stats,
@@ -1005,31 +1120,13 @@ export function preflightBattleParticipantSnapshotStructure(
   );
 }
 
-/** Recompute and verify `sourceSnapshotHash` after structure preflight succeeded. */
+/** Recompute and verify `sourceSnapshotHash` from frozen sourceSnapshot only. */
 export function verifyBattleParticipantSnapshotHash(
   snapshot: BattleParticipantSnapshot,
   provider: Sha256Provider,
 ): ValidationResult<BattleParticipantSnapshot> {
   const recomputedHash = computeBattleParticipantSourceSnapshotHash(
-    {
-      personId: snapshot.personId,
-      lifeStatus: snapshot.lifeStatus,
-      participationStatus: snapshot.participationStatus,
-      careerStatus: snapshot.careerStatus,
-      birthYear: snapshot.birthYear,
-      ageAtBattle: snapshot.ageAtBattle,
-      stats: snapshot.stats,
-      aptitudes: snapshot.aptitudes,
-      techniques: snapshot.techniques,
-      fatigue: snapshot.fatigue,
-      injury: snapshot.injury,
-      condition: snapshot.condition,
-      confidence: snapshot.confidence,
-      battleDecisionProfile: snapshot.battleDecisionProfile,
-      injuryProneness: snapshot.injuryProneness,
-      sprint1StateSchemaVersion: snapshot.sprint1StateSchemaVersion,
-      currentMental: snapshot.currentMental,
-    },
+    snapshot.sourceSnapshot,
     provider,
   );
   if (!recomputedHash.ok) {
@@ -1039,13 +1136,282 @@ export function verifyBattleParticipantSnapshotHash(
     return failure([
       {
         path: "/sourceSnapshotHash",
-        message: "sourceSnapshotHash must equal SHA-256 of the canonical source hash input",
+        message: "sourceSnapshotHash must equal SHA-256 of the canonical sourceSnapshot",
         actual: snapshot.sourceSnapshotHash,
         expected: recomputedHash.value,
       },
     ]);
   }
   return success(snapshot);
+}
+
+const TECHNIQUE_IMMUTABLE_COMPARE_KEYS = [
+  "techniqueId",
+  "learningProgressTenths",
+  "masteryHundredths",
+  "lastPracticedAbsoluteWeek",
+  "acquiredAbsoluteWeek",
+] as const;
+
+function parseBattleParticipantSourceSnapshot(
+  value: unknown,
+  issues: ValidationIssue[],
+): BattleParticipantSourceSnapshot | undefined {
+  const object = snapshotPlainObjectOrFail(value, "/sourceSnapshot", issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  assertNoAccessors(object, "/sourceSnapshot", issues);
+  rejectUnknownKeys(object, BATTLE_PARTICIPANT_SOURCE_SNAPSHOT_KEYS, "/sourceSnapshot", issues);
+
+  const personIdText = requireNonEmptyTrimmedString(object, "personId", "/sourceSnapshot", issues);
+  const lifeStatus = requireEnumValue<LifeStatus>(
+    object,
+    "lifeStatus",
+    "/sourceSnapshot",
+    ["living", "deceased"] as const,
+    issues,
+  );
+  const participationStatus = requireEnumValue<ParticipationStatus>(
+    object,
+    "participationStatus",
+    "/sourceSnapshot",
+    ["active", "waiting", "stopped"] as const,
+    issues,
+  );
+  const careerStatus = requireEnumValue<CareerStatus>(
+    object,
+    "careerStatus",
+    "/sourceSnapshot",
+    CAREER_STATUS_VALUES,
+    issues,
+  );
+  const birthYear = requireSafeIntegerAtLeast(object, "birthYear", "/sourceSnapshot", 1, issues);
+  const ageAtBattle = requireIntegerInRange(
+    object,
+    "ageAtBattle",
+    "/sourceSnapshot",
+    0,
+    200,
+    issues,
+  );
+  // Accept any non-empty version string here; bind to current (literal 0.1.0)
+  // enforces the battle-start schema version without collapsing to a parse-only
+  // path that would make bind-mismatch tests impossible.
+  const sprint1StateSchemaVersionRaw = requireNonEmptyTrimmedString(
+    object,
+    "sprint1StateSchemaVersion",
+    "/sourceSnapshot",
+    issues,
+  );
+  const stats = parseStatValueTripleMap(
+    object["stats"],
+    ABILITY_KEYS,
+    "/sourceSnapshot/stats",
+    issues,
+  );
+  const aptitudes = parseStatValueTripleMap(
+    object["aptitudes"],
+    APTITUDE_KEYS,
+    "/sourceSnapshot/aptitudes",
+    issues,
+  );
+  const techniquesRaw = object["techniques"];
+  const techniqueIssues: ValidationIssue[] = [];
+  const techniques = parseTechniqueStates(techniquesRaw, techniqueIssues);
+  for (const issue of techniqueIssues) {
+    issues.push({
+      ...issue,
+      path: `/sourceSnapshot${issue.path}`,
+    });
+  }
+  const fatigue = requireIntegerInRange(object, "fatigue", "/sourceSnapshot", 0, 100, issues);
+  const injury = requireIntegerInRange(object, "injury", "/sourceSnapshot", 0, 100, issues);
+  const condition = requireIntegerInRange(object, "condition", "/sourceSnapshot", -20, 20, issues);
+  const confidence = requireIntegerInRange(
+    object,
+    "confidence",
+    "/sourceSnapshot",
+    -20,
+    20,
+    issues,
+  );
+  const injuryProneness = requireIntegerInRange(
+    object,
+    "injuryProneness",
+    "/sourceSnapshot",
+    0,
+    100,
+    issues,
+  );
+  // 11 §6.1 / §12: currentMental is 0..maxMental from sourceSnapshot.stats.spirit
+  // (not a blanket 0..150). Clamp/repair are forbidden.
+  let currentMental: number | undefined;
+  if (stats !== undefined) {
+    const maxMentalResult = deriveMaxMental(stats.spirit.surfaceValue);
+    if (!maxMentalResult.ok) {
+      issues.push({
+        path: "/sourceSnapshot/currentMental",
+        message:
+          "currentMental must be an integer in 0..maxMental derived from sourceSnapshot.stats",
+        actual: object["currentMental"],
+        expected: "integer 0..maxMental (50 + stats.spirit.surfaceValue)",
+      });
+    } else {
+      currentMental = requireIntegerInRange(
+        object,
+        "currentMental",
+        "/sourceSnapshot",
+        0,
+        maxMentalResult.value,
+        issues,
+      );
+    }
+  }
+  let battleDecisionProfile: BattleDecisionProfile | undefined;
+  const profileResult = validateBattleDecisionProfile(object["battleDecisionProfile"]);
+  if (profileResult.ok) {
+    battleDecisionProfile = profileResult.value;
+  } else {
+    issues.push(...prefixIssues(profileResult.issues, "/sourceSnapshot/battleDecisionProfile"));
+  }
+
+  if (
+    personIdText === undefined ||
+    lifeStatus === undefined ||
+    participationStatus === undefined ||
+    careerStatus === undefined ||
+    birthYear === undefined ||
+    ageAtBattle === undefined ||
+    sprint1StateSchemaVersionRaw === undefined ||
+    stats === undefined ||
+    aptitudes === undefined ||
+    techniques === undefined ||
+    fatigue === undefined ||
+    injury === undefined ||
+    condition === undefined ||
+    confidence === undefined ||
+    injuryProneness === undefined ||
+    currentMental === undefined ||
+    battleDecisionProfile === undefined
+  ) {
+    return undefined;
+  }
+
+  return deepFreezePlainJson({
+    personId: asPersonId(personIdText),
+    lifeStatus,
+    participationStatus,
+    careerStatus,
+    birthYear,
+    ageAtBattle,
+    stats,
+    aptitudes,
+    techniques,
+    fatigue,
+    injury,
+    condition,
+    confidence,
+    battleDecisionProfile,
+    injuryProneness,
+    sprint1StateSchemaVersion:
+      sprint1StateSchemaVersionRaw as Sprint1PersonState["sprint1StateSchemaVersion"],
+    currentMental,
+  });
+}
+
+function bindImmutableParticipantFieldsToSourceSnapshot(
+  current: {
+    personId: PersonId;
+    lifeStatus: LifeStatus;
+    participationStatus: ParticipationStatus;
+    careerStatus: CareerStatus;
+    birthYear: number;
+    ageAtBattle: number;
+    stats: AbilityScores;
+    aptitudes: AptitudeScores;
+    techniques: readonly PersonTechniqueState[];
+    fatigue: number;
+    condition: number;
+    confidence: number;
+    battleDecisionProfile: BattleDecisionProfile;
+    injuryProneness: number;
+    sprint1StateSchemaVersion: Sprint1PersonState["sprint1StateSchemaVersion"];
+  },
+  source: BattleParticipantSourceSnapshot,
+  issues: ValidationIssue[],
+): void {
+  const scalarChecks: Array<[string, unknown, unknown]> = [
+    ["personId", current.personId, source.personId],
+    ["lifeStatus", current.lifeStatus, source.lifeStatus],
+    ["participationStatus", current.participationStatus, source.participationStatus],
+    ["careerStatus", current.careerStatus, source.careerStatus],
+    ["birthYear", current.birthYear, source.birthYear],
+    ["ageAtBattle", current.ageAtBattle, source.ageAtBattle],
+    ["fatigue", current.fatigue, source.fatigue],
+    ["condition", current.condition, source.condition],
+    ["confidence", current.confidence, source.confidence],
+    ["injuryProneness", current.injuryProneness, source.injuryProneness],
+    [
+      "sprint1StateSchemaVersion",
+      current.sprint1StateSchemaVersion,
+      source.sprint1StateSchemaVersion,
+    ],
+  ];
+  for (const [key, actual, expected] of scalarChecks) {
+    if (actual !== expected) {
+      issues.push({
+        path: `/${key}`,
+        message: `${key} must equal sourceSnapshot.${key}`,
+        actual,
+        expected: String(expected),
+      });
+    }
+  }
+  if (toCanonicalJson(current.stats) !== toCanonicalJson(source.stats)) {
+    issues.push({
+      path: "/stats",
+      message: "stats must equal sourceSnapshot.stats",
+    });
+  }
+  if (toCanonicalJson(current.aptitudes) !== toCanonicalJson(source.aptitudes)) {
+    issues.push({
+      path: "/aptitudes",
+      message: "aptitudes must equal sourceSnapshot.aptitudes",
+    });
+  }
+  if (
+    toCanonicalJson(current.battleDecisionProfile) !== toCanonicalJson(source.battleDecisionProfile)
+  ) {
+    issues.push({
+      path: "/battleDecisionProfile",
+      message: "battleDecisionProfile must equal sourceSnapshot.battleDecisionProfile",
+    });
+  }
+
+  if (current.techniques.length !== source.techniques.length) {
+    issues.push({
+      path: "/techniques",
+      message: "techniques length must equal sourceSnapshot.techniques length",
+      actual: current.techniques.length,
+      expected: String(source.techniques.length),
+    });
+    return;
+  }
+  for (let index = 0; index < current.techniques.length; index += 1) {
+    const cur = current.techniques[index]!;
+    const src = source.techniques[index]!;
+    for (const key of TECHNIQUE_IMMUTABLE_COMPARE_KEYS) {
+      if (cur[key] !== src[key]) {
+        issues.push({
+          path: `/techniques/${String(index)}/${key}`,
+          message: `technique ${key} must equal sourceSnapshot (battle-start immutable)`,
+          actual: cur[key],
+          expected: String(src[key]),
+        });
+      }
+    }
+  }
 }
 
 const PERSON_TECHNIQUE_STATE_KEYS = [

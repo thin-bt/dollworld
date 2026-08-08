@@ -27,7 +27,7 @@ related:
 このWikiは、確定した仕様・設計判断・不変条件・タスク履歴を横断参照するための**説明・索引**です。正本ではありません。実装や仕様判断の根拠には使わないでください。
 
 Sprint 0 基点: タグ `sprint0-complete`（commit `504fa3cc16346dd0c6480e8328e42518e68215d3`）。  
-Sprint 1 仕様現行版: `S1-SPEC-0.1.16`（`0.1.11` 確定 commit `2800d3b959e575f57660c27b344507dd0e38ddb6`、`0.1.12` は週間処理契約clarification、`0.1.13` は MatchId generator契約明文化、`0.1.14` はターン入力契約明文化、`0.1.15` は移動状態補正明文化、`0.1.16` は`BattleActionLog.movementChance`明文化）。Sprint 1全体の実装は未完了（S01-001〜005は実装済み、次はS01-006。S01-006は未着手）。
+Sprint 1 仕様現行版: `S1-SPEC-0.1.17`（`0.1.11` 確定 commit `2800d3b959e575f57660c27b344507dd0e38ddb6`、`0.1.12` は週間処理契約clarification、`0.1.13` は MatchId generator契約明文化、`0.1.14` はターン入力契約明文化、`0.1.15` は移動状態補正明文化、`0.1.16` は`BattleActionLog.movementChance`明文化、`0.1.17` は戦闘開始`sourceSnapshot` baseline明文化）。Sprint 1全体の実装は未完了（S01-001〜005は実装済み、次はS01-006。S01-006は未着手）。
 
 ## 正本の優先順位
 
@@ -75,7 +75,7 @@ Sprint 1 仕様現行版: `S1-SPEC-0.1.16`（`0.1.11` 確定 commit `2800d3b959e
 ## Sprint別リンク
 
 - [Sprint 0](sprints/sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprints/sprint1.md) — 仕様 `S1-SPEC-0.1.16`（全体未完了、次はS01-006）
+- [Sprint 1](sprints/sprint1.md) — 仕様 `S1-SPEC-0.1.17`（全体未完了、次はS01-006）
 
 ## その他
 

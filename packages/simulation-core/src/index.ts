@@ -613,6 +613,7 @@ export {
   BASE_MAX_DURABILITY_OFFSET,
   BATTLE_PARTICIPANT_SNAPSHOT_KEYS,
   BATTLE_PARTICIPANT_SOURCE_KEYS,
+  BATTLE_PARTICIPANT_SOURCE_SNAPSHOT_KEYS,
   MOCK_BATTLE_TRAINEE_MAXIMUM_AGE,
   MOCK_BATTLE_TRAINEE_MINIMUM_AGE,
   OFFICIAL_BATTLE_MAXIMUM_AGE,
@@ -630,6 +631,7 @@ export type {
   BattleParticipantContext,
   BattleParticipantSnapshot,
   BattleParticipantSource,
+  BattleParticipantSourceSnapshot,
 } from "./sprint1/battle-participant.js";
 export {
   BATTLE_DETAILED_LOG_KEYS,

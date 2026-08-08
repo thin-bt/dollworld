@@ -23,7 +23,7 @@ related:
 
 12・14（および関連する 09・11）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
 
-S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.16` で明文化された`movementChance`、`S1-SPEC-0.1.15` で明文化された移動状態補正、および `S1-SPEC-0.1.14` で明文化された入力契約の索引である。次はS01-006。Sprint 1全体は未完了。
+S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0.1.17` の`sourceSnapshot` baseline、`S1-SPEC-0.1.16` で明文化された`movementChance`、`S1-SPEC-0.1.15` で明文化された移動状態補正、および `S1-SPEC-0.1.14` で明文化された入力契約の索引である。次はS01-006。Sprint 1全体は未完了。
 
 ## 現在確定している内容
 
@@ -37,6 +37,14 @@ S01-006 productionターンResolverは**未実装**。本ページは `S1-SPEC-0
 - 間合い・行動優先・命中・ダメージ・精神消費・耐久減少・継続判定の順序は 12 に従う
 - floor／round／clamp 等の順序を変更しない
 - 1 ターン途中失敗時の部分更新禁止条件がある場合は、12 の該当節を正とする
+
+### S1-SPEC-0.1.17 sourceSnapshot baseline契約
+
+- 戦闘開始`sourceSnapshot`を保持し、常に`hash(sourceSnapshot)===sourceSnapshotHash`を検証する（turnNumber=0限定省略の廃止）
+- 不変currentフィールドはsourceSnapshotと完全一致。techniquesは学習／熟練／習得が一致し、use countのみ差分許可
+- 可変: `currentMental`／`injury`／use counts／既存battle-local runtime。これらはhashへ再入場しない
+- 最終battle-local状態検証のcanonical baselineはsourceSnapshot＋BattleDetailedLog（具体validatorはS01-006。ログフィールド新設なし）
+- 詳細は 11 §7／§12、12・13の目的節
 
 ### S1-SPEC-0.1.16 movementChance契約
 

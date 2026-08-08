@@ -21,6 +21,13 @@ last_verified: 2026-08-08
 
 ## 履歴
 
+### 2026-08-08 — S1-SPEC-0.1.17 戦闘開始sourceSnapshot baselineの明確化
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.17`へ版上げ。`BattleParticipantSnapshot.sourceSnapshot`（戦闘開始baseline）を正本へ固定し、戦闘中も`sourceSnapshotHash`を常時検証可能とする
+- 不変currentフィールド／techniques不変部の一致、可変（`currentMental`／`injury`／use counts／battle-local runtime）を分離。BattleState schema `0.5.0`→`0.6.0`
+- Sprint1Config balance／SHAは不変。S01-006 productionターンResolverは未実装
+- 次はS01-006。Sprint 1全体は未完了
+
 ### 2026-08-08 — S1-SPEC-0.1.16 BattleActionLog.movementChanceの明確化
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.16`へ版上げ。対抗式の離散一様`movementRoll`から事前成功率`movementChance`（floor整数パーセント0..100、RNG非消費）を正本へ固定

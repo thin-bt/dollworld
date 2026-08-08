@@ -54,6 +54,14 @@ maxMental         = 50 + spirit
 - clamp による補正は禁止
 - failure 時に World RNG と MatchIdGeneratorState を消費しない
 
+### sourceSnapshot baseline（S1-SPEC-0.1.17）
+
+- `BattleParticipantSnapshot.sourceSnapshot` は戦闘開始時点値のdeep-clone／freeze
+- `sourceSnapshotHash = SHA-256(UTF-8 canonicalJson(sourceSnapshot))`（材料意味は既存どおり）
+- 戦闘中は常にhash検証。`turnNumber=0`限定の省略は廃止
+- BattleState schema現行は `0.6.0`（新規`0.5.0`拒否）
+- 詳細は 11 §7／§12
+
 ### その他の開始不可・拒否例（11）
 
 - deceased／waiting／stopped 等

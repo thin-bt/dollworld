@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.16`
+- 仕様版: `S1-SPEC-0.1.17`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -10,6 +10,8 @@
 BattleStateと双方の行動から、正本の処理順に従って1ターンを純粋かつ決定的に解決する。
 
 本書が参照する設定キーの型・範囲・既定値は `14-sprint1-config-schema.md` を正本とする。
+
+戦闘終了時点の参加者battle-local状態を検証するcanonical baselineは、戦闘開始時の`BattleParticipantSnapshot.sourceSnapshot`（11仕様）と`BattleDetailedLog`の組み合わせとする。具体的なreplay validatorの実装はS01-006の受入範囲であり、本clarificationでは未実装ログフィールドを新設しない。
 
 ## 2. 開始・Resolver入力契約
 

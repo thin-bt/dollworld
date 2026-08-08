@@ -54,7 +54,7 @@ BattleResult・ログ
 |---|---|
 | World人物状態 | 08 の人物一時状態・能力など |
 | 戦闘入力 | 11 の入力人物・RunRuleSnapshot 等 |
-| BattleParticipantSnapshot | 11 の戦闘用スナップショット |
+| BattleParticipantSnapshot | 11 の戦闘用スナップショット（`sourceSnapshot` baseline含む） |
 | BattleState | 11・12 の試合中状態 |
 | BattleResult | 13 の試合結果 |
 | 戦闘後効果 | 13 の World へ反映する効果（疲労・負傷等） |

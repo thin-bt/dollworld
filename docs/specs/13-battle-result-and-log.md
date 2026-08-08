@@ -1,6 +1,6 @@
 # 13 戦闘終了・判定・ログ仕様
 
-- 仕様版: `S1-SPEC-0.1.16`
+- 仕様版: `S1-SPEC-0.1.17`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 戦闘終了、判定勝ち、BattleResult、疲労・負傷効果、概要・詳細ログ
 - 非対象: 大会順位、昇格、賞金、長期ログ削除、観戦UI
@@ -10,6 +10,8 @@
 BattleStateを正本の終了条件と判定基準で確定し、勝者・敗者・終了理由・人物への後処理効果・再現可能なログを生成する。
 
 本書が参照する設定キーの型・範囲・既定値は `14-sprint1-config-schema.md` を正本とする。
+
+最終の参加者battle-local状態を検証するcanonical baselineは、戦闘開始時の`BattleParticipantSnapshot.sourceSnapshot`（11仕様）と`BattleDetailedLog`の組み合わせとする。具体的なreplay validatorの実装はS01-006の受入範囲であり、本clarificationでは未実装ログフィールドを新設しない。
 
 ## 2. 終了条件
 

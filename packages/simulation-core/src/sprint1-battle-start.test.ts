@@ -430,12 +430,12 @@ function startInput(overrides: Record<string, unknown> = {}) {
 
 describe("S01-005 version registry", () => {
   it("publishes the S01-005 schema versions and fixed strategy identifiers", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.16");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.17");
     expect(RUN_RULE_SNAPSHOT_SCHEMA_VERSION).toBe("0.4.0");
     expect(BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION).toBe("0.1.0");
     expect(BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION).toBe("0.1.0");
     expect(START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION).toBe("0.1.0");
-    expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.5.0");
+    expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
     expect(DEFAULT_BATTLE_STRATEGY_ID).toBe("default-battle-strategy");
     expect(DEFAULT_BATTLE_STRATEGY_VERSION).toBe("default-battle-strategy-0.1.0");
     expect(BATTLE_ACTION_SCRIPT_FORMAT_VERSION).toBe("battle-action-script-0.1.0");
@@ -989,6 +989,10 @@ describe("battle participant derivation (11 §5 / §6 / §7)", () => {
     expect(expectOk(computeBattleParticipantSourceSnapshotHash(material, sha256Provider))).toBe(
       snapshot.sourceSnapshotHash,
     );
+    expect(
+      expectOk(computeBattleParticipantSourceSnapshotHash(snapshot.sourceSnapshot, sha256Provider)),
+    ).toBe(snapshot.sourceSnapshotHash);
+    expect(toCanonicalJson(snapshot.sourceSnapshot)).toBe(toCanonicalJson(material));
 
     const olderContext = {
       ...context,
@@ -2045,7 +2049,7 @@ describe("S01-005 acceptance audit fixes", () => {
     }
   });
 
-  it("rejects a stale sourceSnapshotHash after source-field tampering", () => {
+  it("rejects mid-battle immutable source-field tampering while keeping sourceSnapshotHash", () => {
     const plan = startBattleTransaction(startInput(), sha256Provider);
     expect(plan.kind).toBe("success");
     if (plan.kind !== "success") return;
@@ -2053,10 +2057,44 @@ describe("S01-005 acceptance audit fixes", () => {
       ...plan.battleState,
       participantA: {
         ...plan.battleState.participantA,
-        currentMental: Math.max(0, plan.battleState.participantA.currentMental - 1),
+        stats: {
+          ...plan.battleState.participantA.stats,
+          skill: {
+            ...plan.battleState.participantA.stats.skill,
+            surfaceValue: plan.battleState.participantA.stats.skill.surfaceValue + 1,
+          },
+        },
       },
     };
     expect(validateBattleState(tampered, sha256Provider).ok).toBe(false);
+  });
+
+  it("allows currentMental divergence from sourceSnapshot without hash failure", () => {
+    const plan = startBattleTransaction(startInput(), sha256Provider);
+    expect(plan.kind).toBe("success");
+    if (plan.kind !== "success") return;
+    const nextMental = Math.max(0, plan.battleState.participantA.currentMental - 1);
+    if (nextMental === plan.battleState.participantA.currentMental) {
+      // fixture already at floor — bump instead
+    }
+    const adjusted =
+      nextMental === plan.battleState.participantA.currentMental
+        ? Math.min(
+            plan.battleState.participantA.maxMental,
+            plan.battleState.participantA.currentMental + 1,
+          )
+        : nextMental;
+    const mutated = {
+      ...plan.battleState,
+      participantA: {
+        ...plan.battleState.participantA,
+        currentMental: adjusted,
+      },
+    };
+    expect(mutated.participantA.currentMental).not.toBe(
+      mutated.participantA.sourceSnapshot.currentMental,
+    );
+    expect(validateBattleState(mutated, sha256Provider).ok).toBe(true);
   });
 });
 

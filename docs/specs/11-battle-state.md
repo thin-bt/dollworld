@@ -1,6 +1,6 @@
 # 11 戦闘開始状態仕様
 
-- 仕様版: `S1-SPEC-0.1.16`
+- 仕様版: `S1-SPEC-0.1.17`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 1対1戦闘の入力、開始状態、参加者スナップショット、戦闘専用RNG
 - 非対象: 大会組合せ、昇格、戦績永続化、観戦画面
@@ -225,6 +225,7 @@ BattleParticipantSnapshot
 - careerStatus
 - birthYear
 - ageAtBattle
+- sourceSnapshot
 - sourceSnapshotHash
 - sprint1StateSchemaVersion
 - stats
@@ -262,6 +263,9 @@ BattleParticipantSnapshot
 - inBattleConsumption
 ```
 
+- `sourceSnapshot` は `BattleParticipantSourceSnapshot`（§12）であり、戦闘開始時点のbaselineを保持する
+- `sourceSnapshotHash` は §12 のとおり `sourceSnapshot` から算出する
+
 初期値:
 
 - sprint1StateSchemaVersion = 入力人物の`0.1.0`
@@ -276,6 +280,7 @@ BattleParticipantSnapshot
 - surrendered = false
 - unableToContinue = false
 - `injury` は入力人物の永続負傷度を初期値とする戦闘内コピーであり、12仕様の負傷成立時だけ新BattleState側で増加する。元人物は変更しない
+- `sourceSnapshot` は開始時点のhash材料フィールドをdeep-clone／freezeした値とする（§12）
 - 集計値 = 0
 
 ## 8. run単位ルールsnapshotと戦闘参照
@@ -387,7 +392,7 @@ BattleFailureInfo
 - canContinue
 ```
 
-- `BattleState.schemaVersion` のSprint 1初期値は `0.5.0`
+- `BattleState.schemaVersion` のSprint 1現行値は `0.6.0`。新規BattleStateは`0.5.0`を拒否する
 - 作成直後はready、terminalReason=null、failure=null
 - initialRangeは入力値またはdefaultInitialRangeを解決した固定値で、戦闘中に変更しない
 - 12仕様の`beginBattle`成功時にin_progressへ遷移する
@@ -464,9 +469,39 @@ InternalCreateBattleStateInput
 - BattleStateの`rngState`はbattleSeed由来の戦闘専用状態であり、runtimeTransition.nextWorldRngStateと混同しない。
 - success結果は未commit計画である。12仕様の`RunBattleCommitPlan`へ含めずに保存しない。runtime state、開始BattleState、開始イベント候補の部分保存、expected hash不一致、transitionHash不一致、二重適用を拒否する。
 
-## 12. sourceSnapshotHash
+## 12. BattleParticipantSourceSnapshot と sourceSnapshotHash
 
-以下の決定的部分をcanonical JSON化してSHA-256を算出する。
+戦闘開始時点の参加者baselineを構造化し、戦闘中もhash検証可能にする。
+
+```text
+BattleParticipantSourceSnapshot
+- personId
+- lifeStatus
+- participationStatus
+- careerStatus
+- birthYear
+- ageAtBattle
+- stats
+- aptitudes
+- techniques
+- fatigue
+- injury
+- condition
+- confidence
+- battleDecisionProfile
+- injuryProneness
+- sprint1StateSchemaVersion
+- currentMental
+```
+
+- すべての値は**戦闘開始時点**の値とする。deep-clone／freezeし、外部オブジェクトとの共有参照を持たない
+- `BattleParticipantSnapshot.sourceSnapshot` に保持する
+- `sourceSnapshotHash = SHA-256(UTF-8 canonicalJson(sourceSnapshot))`。hash材料の意味・アルゴリズム・canonical内容は既存どおり変更しない（上記フィールド集合そのもの。techniquesはTechniqueId昇順）
+- 戦闘中は常に `hash(sourceSnapshot) === sourceSnapshotHash` を検証する。`turnNumber=0`のときだけ検証を省略する例外は廃止する
+
+### 12.1 不変フィールド（current と sourceSnapshot の完全一致）
+
+次のcurrentフィールドは、戦闘中も `sourceSnapshot` の対応値と完全一致しなければならない。
 
 - personId
 - lifeStatus
@@ -476,17 +511,28 @@ InternalCreateBattleStateInput
 - ageAtBattle
 - stats
 - aptitudes
-- technique states（TechniqueId昇順）
 - fatigue
-- injury
 - condition
 - confidence
 - battleDecisionProfile
 - injuryProneness
 - sprint1StateSchemaVersion
-- currentMental
 
-除外:
+### 12.2 techniques
+
+- TechniqueId、および学習／熟練／習得に関する不変フィールド（`learningProgressTenths`／`masteryHundredths`／`lastPracticedAbsoluteWeek`／`acquiredAbsoluteWeek`）は `sourceSnapshot.techniques` と完全一致しなければならない
+- 戦闘中に差分を許可するのは `attemptedUseCount`／`successfulUseCount` のみとする
+
+### 12.3 可変フィールド（sourceSnapshotの戦闘開始値との差分を許可）
+
+次は戦闘ローカルで変化してよい。これらは `sourceSnapshotHash` へ再入場しない。
+
+- `currentMental`
+- `injury`
+- techniqueの `attemptedUseCount`／`successfulUseCount`
+- 既存の戦闘ローカルruntimeフィールド（`currentDurability`／`guarding`／`evading`／`canAct`／`surrendered`／`unableToContinue`／集計値／modifier等）
+
+canonical JSON化の除外:
 
 - 表示名
 - 現実日時
@@ -635,7 +681,10 @@ BattleState生成だけではイベントを出さない。全ターン詳細は
 - StartBattleResultのsuccess／failure union
 - 成功時だけbattleSeed用にWorld RNGを1回進め、両next stateを1つの未commit StartBattleRuntimeTransitionとして返す
 - 入力失敗時のWorld RNG・MatchIdGeneratorState非消費
-- birthYear／ageAtBattle／sprint1StateSchemaVersionを含むsourceSnapshotHash
+- birthYear／ageAtBattle／sprint1StateSchemaVersionを含むsourceSnapshot／sourceSnapshotHash
+- 戦闘中も`hash(sourceSnapshot)===sourceSnapshotHash`を検証すること（turnNumber=0限定の省略禁止）
+- 不変currentフィールドとsourceSnapshotの完全一致、techniquesの不変フィールド一致とuse count差分許可
+- BattleState.schemaVersion `0.6.0`受理と`0.5.0`新規拒否
 - ageAtBattleとworldDate・birthYearの境界（4月第1週を含む）
 - RunRuleSnapshotのsimulationIdentityHash、config／catalog全文、identity、runRuleSnapshotHashの再計算一致
 - BattleRulesSnapshotRefのself-excluding hash入力、relevantTechniqueIds／battleRulesRefHashの再計算一致

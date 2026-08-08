@@ -1,5 +1,5 @@
 /**
- * Contract tests for S1-SPEC-0.1.16 movementChance clarification.
+ * Contract tests for S1-SPEC-0.1.17 movementChance clarification.
  * Locks version registry, golden chances, config-bound (non-literal) bounds,
  * and RNG-free computation. Does not implement the production turn Resolver.
  */
@@ -59,9 +59,9 @@ function identityWithSprint1(version: string): SimulationIdentity {
   };
 }
 
-describe("S1-SPEC-0.1.16 version registry", () => {
-  it("publishes S1-SPEC-0.1.16 and keeps main SPEC / Sprint1Config SHA unchanged", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.16");
+describe("S1-SPEC-0.1.17 version registry", () => {
+  it("publishes S1-SPEC-0.1.17 and keeps main SPEC / Sprint1Config SHA unchanged", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.17");
     expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
     expect(SPRINT1_CONFIG_SCHEMA_VERSION).toBe("0.2.0");
     expect(SPRINT1_CONFIG_VERSION_DEFAULT).toBe("sprint1-balance-0.2.0");
@@ -74,15 +74,15 @@ describe("S1-SPEC-0.1.16 version registry", () => {
     );
   });
 
-  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.16 and rejects 0.1.15", () => {
-    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.16"));
+  it("accepts a new Sprint 1 identity with S1-SPEC-0.1.17 and rejects 0.1.16", () => {
+    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.17"));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
-      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.16");
+      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.17");
       expect(createSimulationIdFromIdentity(ok.value, sha256Provider).ok).toBe(true);
     }
+    expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.16")).ok).toBe(false);
     expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.15")).ok).toBe(false);
-    expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.14")).ok).toBe(false);
   });
 });
 

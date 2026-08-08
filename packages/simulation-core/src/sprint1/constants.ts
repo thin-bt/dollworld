@@ -14,7 +14,7 @@ export { BATTLE_RANGES, TECHNIQUE_CATEGORIES };
 export const SPRINT1_CONFIG_SCHEMA_VERSION = "0.2.0" as const;
 export const SPRINT1_CONFIG_VERSION_DEFAULT = "sprint1-balance-0.2.0" as const;
 export const SIMULATION_IDENTITY_SCHEMA_VERSION = "0.3.0" as const;
-export const S1_SPEC_VERSION = "S1-SPEC-0.1.16" as const;
+export const S1_SPEC_VERSION = "S1-SPEC-0.1.17" as const;
 export const MAIN_SPEC_VERSION_FOR_IDENTITY = "SPEC-0.1.2" as const;
 /** Must equal the Sprint 0 S0_SPEC_VERSION registry entry (00/02/14 mini-specs). */
 export const S0_SPEC_VERSION_FOR_IDENTITY: typeof S0_SPEC_VERSION = S0_SPEC_VERSION;
@@ -33,7 +33,7 @@ export const BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION = "0.1.0" as const;
 export const RUN_RULE_SNAPSHOT_SCHEMA_VERSION = "0.4.0" as const;
 export const BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION = "0.1.0" as const;
 export const START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION = "0.1.0" as const;
-export const BATTLE_STATE_SCHEMA_VERSION = "0.5.0" as const;
+export const BATTLE_STATE_SCHEMA_VERSION = "0.6.0" as const;
 
 /** specSetId-ascending order per 02 mini-spec §12: main, sprint0, sprint1. */
 export const EXPECTED_SPEC_VERSIONS: readonly SpecVersionEntry[] = [
