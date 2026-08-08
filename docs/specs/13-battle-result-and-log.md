@@ -1,6 +1,6 @@
 # 13 戦闘終了・判定・ログ仕様
 
-- 仕様版: `S1-SPEC-0.1.18`
+- 仕様版: `S1-SPEC-0.1.19`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 戦闘終了、判定勝ち、BattleResult、疲労・負傷効果、概要・詳細ログ
 - 非対象: 大会順位、昇格、賞金、長期ログ削除、観戦UI
@@ -811,6 +811,16 @@ BattleResultValidation
 - validation.overallPassed=false
 - 原因・対象ID・severity・canContinueを保持
 - 部分的な人物効果を適用しない
+- `startBattleTransaction`成功後のシミュレーション上の解決失敗であり、かつ正常な必須dependencyのもとで正規failed BattleResultと`RunBattleCommitPlan`を完全構築できる場合に限る
+- Sha256Provider throw／failure／不正digest、またはmark／finalize／commitPlan構築不能な内部不変条件違反は`resolution_error`ではない（12仕様 23.2.4 のexecution abort）
+
+### post-start execution abort（非BattleResult）
+
+- BattleResultの`resultKind`／`endReason`を拡張しない
+- `RunBattleToCompletionResult`の第4kindを追加しない
+- 12仕様の`BattleExecutionAbortError`としてthrowする
+- abort時はBattleResult／`battle.finished`／`RunBattleCommitPlan`を生成・返却・commitしない
+- abort時にdevelopmentEffectsの部分適用を行わない
 
 ## 17. 決定性
 

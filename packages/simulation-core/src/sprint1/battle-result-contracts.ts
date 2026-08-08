@@ -1,5 +1,5 @@
 /**
- * Pure deterministic contracts for S1-SPEC-0.1.18 BattleResult clarification.
+ * Pure deterministic contracts for S1-SPEC-0.1.19 BattleResult clarification.
  * Does not implement finalizeBattleResult / runBattleToCompletion / WorldEngine.
  */
 import type { SeededRng } from "../rng.js";

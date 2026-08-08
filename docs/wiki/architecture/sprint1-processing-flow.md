@@ -115,6 +115,8 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 
 移動状態補正は `S1-SPEC-0.1.15` の `moverStateModifier`／`opponentStateModifier`（`battle.actionOrder`係数共用）を使う。`BattleActionLog.movementChance`（floor整数パーセント0..100、RNG非消費）は `S1-SPEC-0.1.16` のproduction実装。`DefaultBattleStrategy` は default_strategy 源の行動決定に用いる。BattleResult／WorldEngineは未実装。
 
+`runBattleToCompletion`（S01-007）の結果は `completed`／`resolution_error`／`pre_start_failure` の3種のみ。start成功後に正規commitPlanを構築不能なdependency／invariant failureは `BattleExecutionAbortError` としてthrowし、startRuntimeTransition／started／finishedをcommitしない（`S1-SPEC-0.1.19`）。
+
 ## 関連する正本
 
 - [`docs/specs/08-character-growth.md`](../../specs/08-character-growth.md) 〜 [`14-sprint1-config-schema.md`](../../specs/14-sprint1-config-schema.md)

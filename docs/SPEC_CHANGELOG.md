@@ -1,5 +1,22 @@
 # 変更履歴
 
+## 2026-08-09：S1-SPEC-0.1.19（post-start execution abort 契約clarification）
+
+S01-007受入監査で判明した、`startBattleTransaction`成功後のdependency／infrastructure failure契約を明文化した。既存balanceの意図変更ではなく、結果型境界の未定義解消である。
+
+- `RunBattleToCompletionResult`のpublic discriminantは`completed`／`resolution_error`／`pre_start_failure`の3種類のまま（第4kind追加なし）
+- `runBattleToCompletion`はすべての障害をresult型へ変換する関数ではない
+- start後に正規`RunBattleCommitPlan`を構築不能な場合は`BattleExecutionAbortError`をthrowする
+- `failureKind`: `dependency_failure`｜`internal_invariant_violation`
+- `stage`: `prepare_turn`／`resolve_turn`／`mark_failed_state`／`finalize_battle_result`／`build_commit_plan`
+- start前のdependency／hash failureは従来どおり`pre_start_failure`
+- start後の正規battle semantic／resolution failureでfailed plan完全構築可能な場合だけ`resolution_error`
+- execution abort時はstartRuntimeTransition／started／finished／BattleResultを返却・commitしない（原子的破棄）
+- dependency failure後の仮hash／空BattleResult／validation=false commit等のfallback禁止
+- domain failure後のplan生成中dependency failureは`dependency_failure` abortへ昇格
+- S01-008は`completed`／`resolution_error`のplanだけcommit可能。abort時はWorld RNG／events／participant sourceを変更しない
+- Sprint1Config構造・既定値・canonical SHAは不変。S01-006 RNG順・行動解決は不変。BattleResult `resultKind`／`BattleEndReason`は不変
+
 ## 2026-08-09：S1-SPEC-0.1.18（BattleResult決定的契約clarification）
 
 S01-007実装開始前に判明した、BattleResult周辺の未定義を明文化した。既存balanceの意図変更ではなく、決定性に必要な実装契約の明文化である。

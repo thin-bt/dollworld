@@ -117,7 +117,7 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
 describe("S1-SPEC-0.1.12 SimulationIdentity / config hash", () => {
   it("publishes weekly-training clarification contracts under the current Sprint 1 registry", () => {
     // Registry is S1-SPEC-0.1.17 after movementChance clarification; weekly formulas remain.
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.18");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
   });
 
   it("accepts a new Sprint 1 identity with the current registry version", () => {

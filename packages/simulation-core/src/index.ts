@@ -838,6 +838,25 @@ export type {
   KeyMomentCandidateLog,
 } from "./sprint1/battle-result-contracts.js";
 
+// S1-SPEC-0.1.19 post-start execution abort contracts (not runBattleToCompletion)
+export {
+  BATTLE_EXECUTION_ABORT_FAILURE_KINDS,
+  BATTLE_EXECUTION_ABORT_STAGES,
+  BattleExecutionAbortError,
+  RUN_BATTLE_TO_COMPLETION_RESULT_KINDS,
+  classifyRunBattleToCompletionOutcome,
+  isBattleExecutionAbortError,
+  isValidSha256HexDigest,
+} from "./sprint1/battle-execution-abort.js";
+export type {
+  BattleExecutionAbortErrorInput,
+  BattleExecutionAbortFailureKind,
+  BattleExecutionAbortStage,
+  ClassifyRunBattleToCompletionOutcomeInput,
+  RunBattleToCompletionOutcomeClassification,
+  RunBattleToCompletionResultKind,
+} from "./sprint1/battle-execution-abort.js";
+
 export type {
   NameCandidateCategory,
   NameCandidateFile,

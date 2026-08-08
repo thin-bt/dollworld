@@ -1,6 +1,6 @@
 # 14 Sprint 1共通設定スキーマ付録
 
-- 仕様版: `S1-SPEC-0.1.18`
+- 仕様版: `S1-SPEC-0.1.19`
 - 状態: 08〜13が参照する型付き設定の固定構造
 - 対象: 成長、週間Planner、技習得、戦闘、戦闘後効果
 - 非対象: 初期世界生成設定、正式技一覧、大会設定
@@ -81,7 +81,7 @@ Sprint1ConfigIdentity
 - MatchId文字列形式は `match_<12桁の0埋め10進数>`。seedはID文字列へ混ぜず、state hash／SimulationIdentity bindingへだけ使用する。
 - `defaultBattleStrategyVersion` とDefaultBattleStrategyの初期`strategyVersion`は `default-battle-strategy-0.1.0` とする。
 - ScriptedActionSourceの初期`scriptFormatVersion`は `battle-action-script-0.1.0` とする。完全JSON構造・turns規則・canonicalScript／actionScriptHash・両side bindingは12仕様§2.1を正本とする。`scriptFormatVersion`文字列自体は本版でも変更しない。
-- Sprint 1仕様版（SimulationIdentity.specVersions.sprint1）の現行値は `S1-SPEC-0.1.18` とする。旧`S1-SPEC-0.1.17`を新規runの現行Sprint 1 identityとして受理しない。
+- Sprint 1仕様版（SimulationIdentity.specVersions.sprint1）の現行値は `S1-SPEC-0.1.19` とする。旧`S1-SPEC-0.1.17`を新規runの現行Sprint 1 identityとして受理しない。
 - 移動の`moverStateModifier`／`opponentStateModifier`は`battle.actionOrder.conditionPerPoint`／`fatiguePenaltyPerPoint`／`injuryPenaltyPerPoint`を共用する。移動専用の状態補正キーを`battle.movement`へ新設しない。
 - `BattleActionLog.movementChance`は既存の`battle.movement.randomMinimum`／`randomMaximum`を参照する。configスキーマ・既定値・canonical SHAの変更はない。
 - `BattleParticipantSnapshot.sourceSnapshot`（戦闘開始baseline）により、戦闘中も`sourceSnapshotHash`検証を常時可能とする。BattleState.schemaVersionのSprint 1現行値は`0.6.0`（新規`0.5.0`は拒否）。

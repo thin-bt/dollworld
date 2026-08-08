@@ -27,7 +27,7 @@ related:
 
 ## 現在確定している内容
 
-### 実装状態（S1-SPEC-0.1.18時点）
+### 実装状態（S1-SPEC-0.1.19時点）
 
 - MatchId決定的生成器はproduction実装済み（S01-005）
 - 開始stage（入力検証・MatchId予約・battleSeed・BattleState生成・`beginBattle`）は**実装済み**（S01-005）
@@ -36,6 +36,7 @@ related:
 - `BattleActionLog.movementChance`は `S1-SPEC-0.1.16` で明文化済み（S01-006で**production**実装）
 - 戦闘開始`sourceSnapshot` baseline（常時hash検証・BattleState schema `0.6.0`）は `S1-SPEC-0.1.17` で明文化済み
 - BattleResult決定的契約（summary下位型／同点比較／RNG／mastery）は `S1-SPEC-0.1.18` で明文化済み（productionはS01-007）
+- post-start execution abort（3 result kind維持／`BattleExecutionAbortError`／原子的abort／S01-008 commit禁止）は `S1-SPEC-0.1.19` で明文化済み
 - ターン解決（12）のproduction実装は**実装済み**（S01-006）
 - BattleResult（13）のproduction実装は**未着手**（S01-007）
 - Sprint 1全体は未完了。次はS01-007。BattleResultは未実装

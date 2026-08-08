@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.18`
+- 仕様版: `S1-SPEC-0.1.19`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -1346,6 +1346,122 @@ RunBattleToCompletionResult =
   | { kind: pre_start_failure, commitPlan: null, validation }
 ```
 
+- `RunBattleToCompletionResult`のpublic discriminantは上記3種類だけとする。第4 kindを追加しない。
+- `runBattleToCompletion`は「すべての実行障害を`RunBattleToCompletionResult`へ変換する関数」ではない。必須dependencyまたは内部不変条件が壊れ、正しい`RunBattleCommitPlan`を構築できない場合は、result型の外側へexecution abortとしてthrowする。
+
+#### 23.2.1 結果分類表
+
+| # | 条件 | 結果 |
+|---|---|---|
+| 1 | start前 semantic／input failure | `pre_start_failure` |
+| 2 | start前 dependency／hash failure | `pre_start_failure` |
+| 3 | start後 battle semantic／resolution failure かつ failed plan完全構築可能 | `resolution_error` |
+| 4 | start後 dependency／hash failure | throw `BattleExecutionAbortError`（`failureKind=dependency_failure`） |
+| 5 | start後 production invariant violation | throw `BattleExecutionAbortError`（`failureKind=internal_invariant_violation`） |
+| 6 | normal completion | `completed` |
+
+#### 23.2.2 pre_start_failure
+
+`startBattleTransaction`が成功する前のfailure。
+
+含む:
+
+- 入力validation failure
+- battle start eligibility failure
+- start計画生成failure
+- start成功前のSha256Provider failure
+- start成功前のhash validation failure
+
+結果:
+
+- `kind = pre_start_failure`
+- commitPlanなし
+- `battle.started`候補なし
+- `battle.finished`候補なし
+- Worldへ適用するtransitionなし
+
+#### 23.2.3 resolution_error
+
+`startBattleTransaction`成功後に発生した「シミュレーション上の解決失敗」であり、かつ正常な必須dependencyのもとで正規failed BattleResultと`RunBattleCommitPlan`を完全構築できる場合だけ使用する。
+
+例:
+
+- `prepareBattleTurn`の正規semantic failure
+- strategy／action request failure
+- `resolveBattleTurn`の正規resolution failure
+- その他、本仕様で`BattleFailureInfo`として定義済みの戦闘処理failure
+
+結果:
+
+- `kind = resolution_error`
+- `resultKind = failed`
+- `endReason = resolution_error`
+- `winnerPersonId = null`／`loserPersonId = null`
+- `developmentEffects = []`
+- `finalState.status = failed`かつ`failure`必須
+- 最後のbattle-local commit済みstate／log／rngを維持
+- `startRuntimeTransition`保持
+- `eventCandidates = [battle.started, battle.finished]`
+- 正規`commitPlanHash`あり
+
+「failed BattleResultを完全に作れるfailure」だけが`resolution_error`である。
+
+#### 23.2.4 post-start execution abort
+
+`startBattleTransaction`が成功した後に、正規BattleResult／event candidates／commitPlanを信頼できる形で構築不能になった場合。これはBattleResultではない。`RunBattleToCompletionResult`の第4kindにも追加しない。throwによるexecution abortとする。
+
+正規公開型: `BattleExecutionAbortError`
+
+最低限保持:
+
+- `failureKind`: `dependency_failure`｜`internal_invariant_violation`
+- `stage`: `prepare_turn`｜`resolve_turn`｜`mark_failed_state`｜`finalize_battle_result`｜`build_commit_plan`
+- `issues`: `readonly ValidationIssue[]`
+- Error messageは診断用。simulation canonical dataやhash材料には含めない。現実日時、OS path、stack trace等をsimulation結果へ保存しない。
+
+**dependency_failure**（プログラムロジックではなく必須dependencyが契約どおり動作しなかった場合）:
+
+- Sha256Providerがthrowする
+- Sha256Providerがfailureを返す
+- Sha256Providerが不正digestを返す
+- hash計算結果がprovider契約を満たさない
+
+start成功後なら`throw BattleExecutionAbortError { failureKind: "dependency_failure", stage, issues }`とする。
+
+重要: prepare／resolve中に発生したhash provider failureも`resolution_error`へ変換しない。「prepareが失敗した」という表面だけで分類しない。failure原因がdependency failureならexecution abort。
+
+**internal_invariant_violation**（正常providerかつ同一pipelineが生成したvalidated materialであるにもかかわらず mark／finalize／buildCommitPlan structural validation等が拒否した場合）:
+
+- 通常のユーザー入力failureではない
+- production codeの不変条件違反
+- 結果型へ偽装しない
+- `throw BattleExecutionAbortError { failureKind: "internal_invariant_violation", stage, issues }`
+
+#### 23.2.5 原子性・fallback禁止・昇格
+
+execution abort時は`runBattleToCompletion`から`RunBattleCommitPlan`を返さない。返さない／commitしない:
+
+- `StartBattleRuntimeTransition`
+- `battle.started`／`battle.finished`
+- BattleResult／developmentEffects／World effect candidates
+- World RNG update／participant source update
+
+`startBattleTransaction`がbattle-localで成功していても、S01-007時点ではWorldへcommitされていない。execution abort時は`startRuntimeTransition`を破棄する。Worldから見れば「このbattle transactionはcommitされなかった」状態にする。`battle.started`だけを単独commitしてはいけない。`battle.finished`だけを生成してはいけない。
+
+execution abortまでにbattle-local RNGが内部で進んでいても、そのstateをWorldへcommitしない。World側RNGについても`RunBattleCommitPlan`が存在しないため`startRuntimeTransition`を適用しない。S01-008ではexecution abort時にWorld RNG／participant source／eventsを変更しない。execution abort用に新しいRNGを消費しない。
+
+dependency failure発生後のfallbackは禁止する（別provider／hash省略／仮hash／空BattleResult／validationをfalseにしてcommitする等）。壊れたdependencyを使って`resolution_error`を無理に合成しない。
+
+domain failureの後にplan生成中dependency failureが起きた場合（例: resolverが正規`BattleFailureInfo`を返した後、failed state作成中にSha256Providerがfailure）は、最終結果を`resolution_error`にせずexecution abort（`dependency_failure`）へ昇格する。途中まで作ったfailed state／result／event候補は破棄する。
+
+#### 23.2.6 S01-008への契約
+
+S01-008のWorldEngine commit層は、`runBattleToCompletion`が`completed`／`resolution_error`を返した場合だけ`RunBattleCommitPlan`をcommit可能とする。
+
+- `pre_start_failure`: commitなし
+- `BattleExecutionAbortError`: commitなし。catchした場合も`startRuntimeTransition`／started／finished／developmentEffectsをcommitせず、World RNGを進めず、participant source snapshotを変更しない
+- Sprint 1 battle EventEnvelopeへ新しいイベントは追加しない
+
 - `structuralValidation`はbusiness／構造整合だけを検証し、`commitPlanHash`の存在・値・一致を検証対象に含めてはならない。
 - plan生成順序を次へ固定する。
   1. BattleResult、StartBattleRuntimeTransition、イベント候補、期待hash群を確定する
@@ -1431,3 +1547,12 @@ RunBattleToCompletionResult =
 - resolution_errorでも開始時postProcessContextを変更せず結果へ保存すること
 - strategy RNGがResolver／World RNGを進めないこと
 - 入力不変
+- start前provider／hash failureは`pre_start_failure`（plan／candidatesなし）
+- start直後／prepare／resolve中のprovider failureは`BattleExecutionAbortError(dependency_failure)`であり`resolution_error`ではない
+- domain resolution failure後のmark／finalize中provider failureは`dependency_failure` abortへ昇格し、`resolution_error` planを返さない
+- commitPlanHash計算時provider failureは`dependency_failure` abort
+- providerがthrowせず不正digestを返す場合も`dependency_failure` abort
+- healthy provider＋正規domain resolution failureは`resolution_error`
+- healthy provider＋normal completionは`completed`
+- execution abortは入力RuntimeState／participant source等をmutationせず、追加RNGを消費しない
+- execution abort時は`RunBattleCommitPlan`を返さず、startRuntimeTransition／started／finishedをcommitしない

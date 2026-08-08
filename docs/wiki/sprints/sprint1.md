@@ -37,7 +37,7 @@ related:
 
 ## 概要
 
-Sprint 1 の仕様は `S1-SPEC-0.1.18` が現行である。正本版は `SPEC-0.1.2`。`S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`。`0.1.12` は週間処理契約のclarificationであり、Sprint1Config balance／hashは不変。`0.1.13` は MatchId generator契約の明文化である。`0.1.14` は戦闘ターン入力契約（replacementReason／battle-action-script／技使用回数）の明文化である。`0.1.15` は移動状態補正（`moverStateModifier`／`opponentStateModifier`）の明文化である。`0.1.16` は`BattleActionLog.movementChance`の明文化である。`0.1.17` は戦闘開始`sourceSnapshot` baselineの明文化である（BattleState schema `0.6.0`）。`0.1.18` はBattleResult決定的契約clarificationである。
+Sprint 1 の仕様は `S1-SPEC-0.1.19` が現行である。正本版は `SPEC-0.1.2`。`S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`。`0.1.12` は週間処理契約のclarificationであり、Sprint1Config balance／hashは不変。`0.1.13` は MatchId generator契約の明文化である。`0.1.14` は戦闘ターン入力契約（replacementReason／battle-action-script／技使用回数）の明文化である。`0.1.15` は移動状態補正（`moverStateModifier`／`opponentStateModifier`）の明文化である。`0.1.16` は`BattleActionLog.movementChance`の明文化である。`0.1.17` は戦闘開始`sourceSnapshot` baselineの明文化である（BattleState schema `0.6.0`）。`0.1.18` はBattleResult決定的契約clarificationである。`0.1.19` はpost-start execution abort契約clarificationである。
 
 本ページは説明・索引である。実装や仕様判断の根拠には使わない。正本と矛盾する場合は正本を優先する。
 
@@ -45,7 +45,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.18` が現行である。正本版は `SPEC-0
 
 ### 仕様状態
 
-- ミニ仕様版: `S1-SPEC-0.1.18`
+- ミニ仕様版: `S1-SPEC-0.1.19`
 - 正本版: `SPEC-0.1.2`
 - `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - 08〜14 は作成・受入監査済み（[`docs/SPEC_PREPARATION_PLAN.md`](../../SPEC_PREPARATION_PLAN.md)）
@@ -66,7 +66,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.18` が現行である。正本版は `SPEC-0
 - Sprint 1全体は**未完了**
 - S01-001〜S01-006は実装済み。次の実装着手はS01-007
 - 戦闘開始（11）とターン解決（12）は実装済み。BattleResult（13）は未実装
-- `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`
+- `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`。BattleResult決定契約は `S1-SPEC-0.1.18`。post-start execution abort契約は `S1-SPEC-0.1.19`
 - 週間処理と戦闘のWorldEngine登録はS01-008（S01-004／S01-005／S01-006では未実施）
 - 本Wikiの同期や `npm run check` の成功は、Sprint 1全体の実装完了を意味しない
 

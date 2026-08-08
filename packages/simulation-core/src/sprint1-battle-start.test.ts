@@ -430,7 +430,7 @@ function startInput(overrides: Record<string, unknown> = {}) {
 
 describe("S01-005 version registry", () => {
   it("publishes the S01-005 schema versions and fixed strategy identifiers", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.18");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
     expect(RUN_RULE_SNAPSHOT_SCHEMA_VERSION).toBe("0.4.0");
     expect(BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION).toBe("0.1.0");
     expect(BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION).toBe("0.1.0");
