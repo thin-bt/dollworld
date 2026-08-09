@@ -60,6 +60,33 @@ export function isValidSha256HexDigest(value: unknown): boolean {
 }
 
 /**
+ * Detect Sha256Provider / digest contract failures in ValidationIssue lists
+ * (safeHashUtf8 catch, invalid digest, provider error messages).
+ */
+export function issuesIndicateDependencyFailure(issues: readonly ValidationIssue[]): boolean {
+  for (const issue of issues) {
+    if (issue.expected === "successful SHA-256 digest") {
+      return true;
+    }
+    if (
+      typeof issue.message === "string" &&
+      /Sha256Provider|hashUtf8|injected (provider )?fail/i.test(issue.message)
+    ) {
+      return true;
+    }
+    if (
+      typeof issue.actual === "string" &&
+      issue.actual.length > 0 &&
+      !isValidSha256HexDigest(issue.actual) &&
+      /hash|digest/i.test(issue.path)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Classifies an observed runBattleToCompletion failure/success context into the
  * 0.1.19 outcome table. Pure: does not run battles or consume RNG.
  */

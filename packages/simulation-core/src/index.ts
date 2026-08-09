@@ -492,8 +492,8 @@ export {
 
 // S01-005 battle start / BattleState generation.
 // `reserveNextMatchId`, `createBattleState`, `beginBattle` and
-// `startBattleTransaction` stay internal on purpose (11 §10): the only public
-// battle entry point is 12 mini-spec `runBattleToCompletion`.
+// `startBattleTransaction` stay internal on purpose (11 §10): the public
+// battle entry point is 12 mini-spec `runBattleToCompletion` (S01-007).
 export {
   CREATE_INITIAL_MATCH_ID_GENERATOR_STATE_KEYS,
   MATCH_ID_FORMAT_PATTERN,
@@ -810,7 +810,7 @@ export {
   selectAdvantageSide,
 } from "./sprint1/battle-turn-aggregate.js";
 
-// S1-SPEC-0.1.18 BattleResult deterministic contract helpers (not finalizeBattleResult)
+// S1-SPEC-0.1.18 BattleResult deterministic contract helpers
 export {
   BATTLE_PHASES,
   JUDGE_DECISIVE_CRITERIA,
@@ -838,7 +838,7 @@ export type {
   KeyMomentCandidateLog,
 } from "./sprint1/battle-result-contracts.js";
 
-// S1-SPEC-0.1.19 post-start execution abort contracts (not runBattleToCompletion)
+// S1-SPEC-0.1.19 post-start execution abort contracts
 export {
   BATTLE_EXECUTION_ABORT_FAILURE_KINDS,
   BATTLE_EXECUTION_ABORT_STAGES,
@@ -847,6 +847,7 @@ export {
   classifyRunBattleToCompletionOutcome,
   isBattleExecutionAbortError,
   isValidSha256HexDigest,
+  issuesIndicateDependencyFailure,
 } from "./sprint1/battle-execution-abort.js";
 export type {
   BattleExecutionAbortErrorInput,
@@ -856,6 +857,101 @@ export type {
   RunBattleToCompletionOutcomeClassification,
   RunBattleToCompletionResultKind,
 } from "./sprint1/battle-execution-abort.js";
+
+// S01-007 BattleResult / post-effects / runBattleToCompletion
+export {
+  BATTLE_RESULT_SCHEMA_VERSION,
+  RUN_BATTLE_COMMIT_PLAN_SCHEMA_VERSION,
+  BATTLE_REPLAY_BUNDLE_SCHEMA_VERSION,
+  BATTLE_RESULT_KINDS,
+  BATTLE_END_REASONS,
+  BATTLE_EXPERIENCE_OUTCOMES,
+} from "./sprint1/battle-result-types.js";
+export type {
+  BattleResultKind,
+  BattleEndReason,
+  BattleExperienceOutcome,
+  BattlePostProcessParticipantContext,
+  BattlePostProcessContext,
+  BattleFinalSnapshot,
+  JudgeScoreBreakdown,
+  JudgeScoreByParticipant,
+  BattleTechniqueStateDelta,
+  BattleExperienceSummary,
+  BattleParticipantDevelopmentEffects,
+  BattleDevelopmentEffects,
+  BattlePhaseSummary,
+  BattleKeyMoment,
+  BattleSideRatioSummary,
+  BattleSideValueSummary,
+  BattleJudgeSummary,
+  BattleInjuryParticipantSummary,
+  BattleInjurySummary,
+  BattleSummaryLog,
+  BattleResultViolation,
+  BattleResultValidation,
+  BattleResult,
+  FinalizeBattleResultInput,
+} from "./sprint1/battle-result-types.js";
+export {
+  BATTLE_POST_PROCESS_CONTEXT_KEYS,
+  consecutiveMatchKeyFromCount,
+  validateBattlePostProcessContext,
+  computePostProcessContextHash,
+} from "./sprint1/battle-post-process-context.js";
+export type { ConsecutiveMatchKey } from "./sprint1/battle-post-process-context.js";
+export {
+  markBattleFailedState,
+  assertFailedStatePreservesCommittedBody,
+} from "./sprint1/mark-battle-failed.js";
+export {
+  computeJudgeScoreBreakdown,
+  buildJudgeScores,
+  computeTechniqueScoreFromLogs,
+} from "./sprint1/battle-judge-score.js";
+export {
+  buildDevelopmentEffects,
+  countInjurySummaryForSide,
+} from "./sprint1/battle-development-effects.js";
+export { buildBattleSummaryLog, computeSummaryLogHash } from "./sprint1/battle-summary-log.js";
+export {
+  finalizeBattleResult,
+  computeFinalStateHash,
+  FINALIZE_BATTLE_RESULT_INPUT_KEYS,
+} from "./sprint1/finalize-battle-result.js";
+export {
+  validateBattleResult,
+  evaluateBattleResultValidation,
+  BATTLE_RESULT_KEYS,
+} from "./sprint1/validate-battle-result.js";
+export {
+  BATTLE_FINISHED_EVENT_TYPE,
+  createBattleFinishedEventCandidate,
+} from "./sprint1/battle-finished-event.js";
+export type {
+  BattleFinishedEventCandidate,
+  BattleFinishedEventPayload,
+  BattleFinishedSummary,
+} from "./sprint1/battle-finished-event.js";
+export {
+  RUN_BATTLE_TO_COMPLETION_INPUT_KEYS,
+  RUN_BATTLE_COMMIT_PLAN_STRUCTURE_INPUT_KEYS,
+  computeRunBattleCommitPlanHash,
+  runBattleToCompletion,
+  validateRunBattleCommitPlanStructure,
+} from "./sprint1/run-battle-to-completion.js";
+export type {
+  RunBattleToCompletionInput,
+  RunBattleToCompletionResult,
+  RunBattleCommitPlan,
+  RunBattleCommitPlanStructuralValidation,
+} from "./sprint1/run-battle-to-completion.js";
+export { convertBattleResultToWorldEffectCandidates } from "./sprint1/battle-result-world-effects.js";
+export type {
+  BattleResultWorldEffectCandidates,
+  WorldPersonBattleEffectCandidate,
+  WorldPersonTechniqueEffectCandidate,
+} from "./sprint1/battle-result-world-effects.js";
 
 export type {
   NameCandidateCategory,

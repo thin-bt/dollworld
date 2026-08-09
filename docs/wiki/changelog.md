@@ -21,11 +21,24 @@ last_verified: 2026-08-08
 
 ## 履歴
 
+### 2026-08-09 — S01-007 受入監査修正2進行（0.1.19 abort配線／validator bind）
+
+- S01-007 production WIPを`S1-SPEC-0.1.19`上へ復元。受入監査中・未commit
+- `BattleExecutionAbortError` production配線、BattleResult top-level↔finalState bind、structuralValidation全field bindを実施中
+- 次はS01-008（WorldEngine commit）
+
 ### 2026-08-09 — S1-SPEC-0.1.19 post-start execution abort 契約clarification
 
 - Sprint 1ミニ仕様を`S1-SPEC-0.1.19`へ版上げ。`runBattleToCompletion`の3 result kindを維持し、start後のdependency／invariant failureを`BattleExecutionAbortError` throwとして明文化
 - `dependency_failure`／`internal_invariant_violation`、原子的abort、S01-008でのcommit禁止を固定
-- Sprint1Config balance／SHAは不変。S01-007 production実装は未着手（pending）。次はS01-007（0.1.19契約に従って実装）
+- Sprint1Config balance／SHAは不変
+
+### 2026-08-09 — S01-007 受入監査修正1（BattleResult validator／post-start分類／structuralValidation）
+
+- `validateBattleResult`を元データ独立再計算で実装し、`finalizeBattleResult`から接続
+- start成功後のprepare／resolver failureを`pre_start_failure`へ落とさず`resolution_error` commitPlanへ分類
+- `RunBattleCommitPlan.structuralValidation`をbusiness／構造整合まで完成（`commitPlanHash`循環なし）
+- `battle.finished` failed summaryは`finalState.failure`正本（`validation.violations[0]`不使用）
 
 ### 2026-08-09 — S1-SPEC-0.1.18 BattleResult決定的契約clarification
 

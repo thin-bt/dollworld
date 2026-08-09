@@ -203,11 +203,9 @@ describe("S01-002 public API / types", () => {
     const api = await import("./index.js");
     expect(typeof api.attachSprint1PersonStateToInitialWorld).toBe("function");
     expect("countNumericLeaves" in api).toBe(false);
-    // `BattleState` joined the public surface with S01-005.
+    // `BattleState` joined with S01-005; `BattleResult` with S01-007.
     expect(
-      Object.keys(api).filter((key) =>
-        /weeklyPlanner|BattleResult|learnTechniqueMutation/.test(key),
-      ),
+      Object.keys(api).filter((key) => /weeklyPlanner|learnTechniqueMutation/.test(key)),
     ).toEqual([]);
   });
 });

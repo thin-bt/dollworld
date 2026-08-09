@@ -4,7 +4,7 @@
 - 対象ゲーム仕様：`SPEC-0.1.2`
 - 対象Sprint 1ミニ仕様：`S1-SPEC-0.1.19`
 - 仕様確定commit：`2800d3b959e575f57660c27b344507dd0e38ddb6`
-- 実装状態：S01-001〜S01-006 **実装済み**、S01-007〜S01-009 **pending**（次の実装着手は S01-007）
+- 実装状態：S01-001〜S01-007 **実装済み**（S01-007は受入監査中・未commit）、S01-008〜S01-009 **pending**（次の実装着手は S01-008）
 - `S1-SPEC-0.1.19`はpost-start execution abort契約clarification（`RunBattleToCompletionResult` 3 kind維持／`BattleExecutionAbortError`／dependency_failure／internal_invariant_violation／原子的abort／S01-008 commit禁止）。BattleState schema `0.6.0`。先行clarificationとして`S1-SPEC-0.1.18` BattleResult決定契約、`S1-SPEC-0.1.17` sourceSnapshot baselineがある
 
 ## 目的

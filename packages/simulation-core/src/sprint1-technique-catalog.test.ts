@@ -243,12 +243,10 @@ describe("S01-003 public API surface", () => {
     expect(typeof api.deriveRequiredStatsFactor).toBe("function");
     expect(typeof api.teacherCanTeach).toBe("function");
     expect(typeof api.getBasicAttackProfile).toBe("function");
-    // `BattleState` joined the public surface with S01-005; turn resolution and
-    // technique mutation APIs are still out of scope.
+    // `BattleState`／`BattleResult` joined with S01-005／S01-007; technique
+    // mutation APIs remain out of scope here.
     expect(
-      Object.keys(api).filter((key) =>
-        /BattleResult|learnTechniqueMutation|useTechnique/.test(key),
-      ),
+      Object.keys(api).filter((key) => /learnTechniqueMutation|useTechnique/.test(key)),
     ).toEqual([]);
   });
 });

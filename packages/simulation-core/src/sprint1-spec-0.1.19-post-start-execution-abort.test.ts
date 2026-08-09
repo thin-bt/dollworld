@@ -1,7 +1,7 @@
 /**
  * Contract tests for S1-SPEC-0.1.19 post-start execution abort clarification.
- * Locks classification / abort error shape without implementing
- * runBattleToCompletion / finalizeBattleResult / WorldEngine.
+ * Locks classification / abort error shape. Production wiring through
+ * runBattleToCompletion is covered in sprint1-battle-result.test.ts.
  */
 import { describe, expect, it } from "vitest";
 import {
