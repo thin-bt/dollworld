@@ -6,8 +6,8 @@ import {
   computeConfigHash,
   computeNameDataHash,
   cloneWorldEngineState,
-  createSeededRng,
   createWorldEngineState,
+  createSeededRng,
   deriveSeed,
   fromAbsoluteWeek,
   generateInitialWorld,
@@ -21,6 +21,9 @@ import {
   validateInitialWorldConfig,
   validateWorldEngineState,
   WorldEngineError,
+  cloneRuntimeState,
+  exportRuntimeState,
+  validateAndCloneProcessorRuntimeState,
   type Person,
   type ProcessorRuntimeState,
   type WorldEngineState,
@@ -2676,4 +2679,253 @@ describe("world-engine final acceptance audit", () => {
     expect(() => validateWorldEngineState(after101.state)).not.toThrow();
     expect(() => JSON.parse(toCanonicalJson(after101.state))).not.toThrow();
   }, 60_000);
+});
+
+describe("processorSpecificStates deep clone hardening", () => {
+  function sampleRngState() {
+    return createSeededRng(1).exportState();
+  }
+
+  function runtimeWithSpecific(specificState: unknown): ProcessorRuntimeState {
+    return {
+      processorOrder: ["weekly-training"],
+      rngStates: [{ processorId: "weekly-training", state: sampleRngState() }],
+      processorSpecificStates: [{ processorId: "weekly-training", specificState }],
+    };
+  }
+
+  it("deep-clones nested specificState without aliasing source", () => {
+    const source = runtimeWithSpecific({
+      schemaVersion: "0.1.0",
+      actionCounts: { train_stat: 1, rest: 2 },
+    });
+    const cloned = validateAndCloneProcessorRuntimeState(source, ["weekly-training"]);
+    const sourceSpecific = source.processorSpecificStates![0]!.specificState as {
+      actionCounts: Record<string, number>;
+    };
+    const clonedSpecific = cloned.processorSpecificStates![0]!.specificState as {
+      actionCounts: Record<string, number>;
+    };
+    expect(clonedSpecific).not.toBe(sourceSpecific);
+    expect(clonedSpecific.actionCounts).not.toBe(sourceSpecific.actionCounts);
+    expect(clonedSpecific).toEqual(sourceSpecific);
+  });
+
+  it("keeps clone immutable when source nested values mutate", () => {
+    const source = runtimeWithSpecific({
+      schemaVersion: "0.1.0",
+      actionCounts: { train_stat: 1 },
+    });
+    const cloned = cloneRuntimeState(source);
+    const sourceSpecific = source.processorSpecificStates![0]!.specificState as {
+      actionCounts: Record<string, number>;
+    };
+    sourceSpecific.actionCounts.train_stat = 99;
+    const clonedSpecific = cloned.processorSpecificStates![0]!.specificState as {
+      actionCounts: Record<string, number>;
+    };
+    expect(clonedSpecific.actionCounts.train_stat).toBe(1);
+  });
+
+  it("keeps source immutable when clone nested values mutate", () => {
+    const source = runtimeWithSpecific({
+      schemaVersion: "0.1.0",
+      actionCounts: { train_stat: 1 },
+    });
+    const cloned = exportRuntimeState(
+      source.processorOrder,
+      [createSeededRng(1)],
+      source.processorSpecificStates,
+    );
+    const clonedSpecific = cloned.processorSpecificStates![0]!.specificState as {
+      actionCounts: Record<string, number>;
+    };
+    clonedSpecific.actionCounts.train_stat = 77;
+    const sourceSpecific = source.processorSpecificStates![0]!.specificState as {
+      actionCounts: Record<string, number>;
+    };
+    expect(sourceSpecific.actionCounts.train_stat).toBe(1);
+  });
+
+  it("rejects nested getters without invoking them", () => {
+    let calls = 0;
+    const specificState = {};
+    Object.defineProperty(specificState, "actionCounts", {
+      enumerable: true,
+      get() {
+        calls += 1;
+        return { train_stat: 1 };
+      },
+    });
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific(specificState), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+    expect(calls).toBe(0);
+  });
+
+  it("rejects throwing getters without invoking them", () => {
+    let calls = 0;
+    const specificState = {};
+    Object.defineProperty(specificState, "boom", {
+      enumerable: true,
+      get() {
+        calls += 1;
+        throw new Error("should not run");
+      },
+    });
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific(specificState), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+    expect(calls).toBe(0);
+  });
+
+  it("rejects cyclic specificState", () => {
+    const cyclic: Record<string, unknown> = { schemaVersion: "0.1.0" };
+    cyclic["self"] = cyclic;
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific(cyclic), ["weekly-training"]),
+    ).toThrow(WorldEngineError);
+  });
+
+  it("rejects sparse arrays in specificState", () => {
+    const sparse: unknown[] = [];
+    sparse[1] = 1;
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific({ items: sparse }), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+  });
+
+  it("rejects function / symbol / bigint / non-finite numbers", () => {
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific({ fn: () => 1 }), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific({ sym: Symbol("x") }), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific({ big: 1n }), ["weekly-training"]),
+    ).toThrow(WorldEngineError);
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific({ n: Number.NaN }), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific({ n: Number.POSITIVE_INFINITY }), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+    expect(() =>
+      validateAndCloneProcessorRuntimeState(runtimeWithSpecific({ n: Number.NEGATIVE_INFINITY }), [
+        "weekly-training",
+      ]),
+    ).toThrow(WorldEngineError);
+  });
+
+  it("keeps Sprint0 omission and empty processorSpecificStates compatible", () => {
+    const omitted: ProcessorRuntimeState = {
+      processorOrder: ["alpha"],
+      rngStates: [{ processorId: "alpha", state: sampleRngState() }],
+    };
+    const clonedOmitted = validateAndCloneProcessorRuntimeState(omitted, ["alpha"]);
+    expect(clonedOmitted.processorSpecificStates).toBeUndefined();
+
+    const empty = {
+      ...omitted,
+      processorSpecificStates: [],
+    };
+    const clonedEmpty = validateAndCloneProcessorRuntimeState(empty, ["alpha"]);
+    expect(clonedEmpty.processorSpecificStates).toEqual([]);
+  });
+
+  it("rejects cloneRuntimeState top-level processorSpecificStates getter without invoking it", () => {
+    let calls = 0;
+    const source: Record<string, unknown> = {
+      processorOrder: ["weekly-training"],
+      rngStates: [{ processorId: "weekly-training", state: sampleRngState() }],
+    };
+    Object.defineProperty(source, "processorSpecificStates", {
+      enumerable: true,
+      get() {
+        calls += 1;
+        return [{ processorId: "weekly-training", specificState: { x: 1 } }];
+      },
+    });
+    expect(() => cloneRuntimeState(source)).toThrow(WorldEngineError);
+    expect(calls).toBe(0);
+  });
+
+  it("rejects cloneRuntimeState entry.processorId getter without invoking it", () => {
+    let calls = 0;
+    const entry: Record<string, unknown> = {
+      specificState: { schemaVersion: "0.1.0" },
+    };
+    Object.defineProperty(entry, "processorId", {
+      enumerable: true,
+      get() {
+        calls += 1;
+        return "weekly-training";
+      },
+    });
+    const source = {
+      processorOrder: ["weekly-training"],
+      rngStates: [{ processorId: "weekly-training", state: sampleRngState() }],
+      processorSpecificStates: [entry],
+    };
+    expect(() => cloneRuntimeState(source)).toThrow(WorldEngineError);
+    expect(calls).toBe(0);
+  });
+
+  it("rejects cloneRuntimeState entry.specificState getter without invoking it", () => {
+    let calls = 0;
+    const entry: Record<string, unknown> = {
+      processorId: "weekly-training",
+    };
+    Object.defineProperty(entry, "specificState", {
+      enumerable: true,
+      get() {
+        calls += 1;
+        return { schemaVersion: "0.1.0" };
+      },
+    });
+    const source = {
+      processorOrder: ["weekly-training"],
+      rngStates: [{ processorId: "weekly-training", state: sampleRngState() }],
+      processorSpecificStates: [entry],
+    };
+    expect(() => cloneRuntimeState(source)).toThrow(WorldEngineError);
+    expect(calls).toBe(0);
+  });
+
+  it("rejects exportRuntimeState entry.specificState getter without invoking it", () => {
+    let calls = 0;
+    const entry: Record<string, unknown> = {
+      processorId: "weekly-training",
+    };
+    Object.defineProperty(entry, "specificState", {
+      enumerable: true,
+      get() {
+        calls += 1;
+        return { schemaVersion: "0.1.0" };
+      },
+    });
+    expect(() =>
+      exportRuntimeState(
+        ["weekly-training"],
+        [createSeededRng(1)],
+        [entry as { processorId: string; specificState: unknown }],
+      ),
+    ).toThrow(WorldEngineError);
+    expect(calls).toBe(0);
+  });
 });

@@ -1,3 +1,4 @@
+import { cloneValidatedPlainJson } from "../plain-json-snapshot.js";
 import type { AbilityScores, AptitudeScores, StatValueTriple } from "../abilities.js";
 import type { Family, Lineage, Person, Relationship } from "../domain.js";
 import type {
@@ -8,7 +9,6 @@ import type {
 import type { WorldEngineState } from "./types.js";
 import { toWorldEngineError } from "./errors.js";
 import { validateWorldEngineState } from "./validate-state.js";
-import { cloneValidatedPlainJson } from "../sprint1/plain-data.js";
 
 function cloneStatValueTriple(value: StatValueTriple): StatValueTriple {
   return {

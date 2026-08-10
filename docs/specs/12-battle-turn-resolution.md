@@ -1,6 +1,6 @@
 # 12 戦闘ターン解決仕様
 
-- 仕様版: `S1-SPEC-0.1.19`
+- 仕様版: `S1-SPEC-0.1.20`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 行動入力、使用条件、優先度、行動順、命中、ダメージ、間合い、一時状態、ターンログ
 - 非対象: 大会組合せ、ランク、複雑な状態異常、演出文章
@@ -1456,8 +1456,12 @@ domain failureの後にplan生成中dependency failureが起きた場合（例: 
 
 #### 23.2.6 S01-008への契約
 
-S01-008のWorldEngine commit層は、`runBattleToCompletion`が`completed`／`resolution_error`を返した場合だけ`RunBattleCommitPlan`をcommit可能とする。
+S01-008のWorldEngine commit層は、`runBattleToCompletion`が`completed`／`resolution_error`を返した場合だけ`RunBattleCommitPlan`をcommit可能とする。`commitRunBattlePlan`の実装・配線はS01-008本体の範囲であり、本clarifier（S1-SPEC-0.1.20）では契約のみ固定する。
 
+- World RNG／`MatchIdGeneratorState`／`battleResultWeekState`／`processorRuntimeStates`の正規ownerは`Sprint1RunRuntimeState`（10仕様§1.3）。固定7へ永続化しない
+- battle World RNG初期化labelは`battle/world-rng`。weekly-training RNG labelは`processor/weekly-training`（混同禁止）
+- `matchesCompletedThisWorldWeekBeforeBattle`は`battleResultWeekState`からparticipant別completed件数を算出する（`results.length`ではない）。`resolution_error`はregistry登録するがcompleted countへ加算しない
+- `battle-simulation`はproduction Sprint1 adapter pipelineへ登録しない。戦闘は明示的run／`commitRunBattlePlan` facade経由
 - `pre_start_failure`: commitなし
 - `BattleExecutionAbortError`: commitなし。catchした場合も`startRuntimeTransition`／started／finished／developmentEffectsをcommitせず、World RNGを進めず、participant source snapshotを変更しない
 - Sprint 1 battle EventEnvelopeへ新しいイベントは追加しない

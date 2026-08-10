@@ -427,11 +427,12 @@ describe("SimulationIdentity", () => {
     }
     const hex = "a".repeat(64);
     return {
-      schemaVersion: "0.3.0",
+      schemaVersion: "0.4.0",
       seed: 12345,
       initialWorldConfigHash: hex,
       sprint1ConfigHash: sprint1ConfigHashResult.value,
       techniqueCatalogHash: hex,
+      initialWeeklyTrainingSidecarHash: "c".repeat(64),
       battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
       matchIdGeneratorVersion: "match-id-generator-0.1.0",
       initialMatchIdGeneratorStateHash: hex,
@@ -532,11 +533,12 @@ describe("S01-001 acceptance negative probes", () => {
     }
     const hex = "a".repeat(64);
     return {
-      schemaVersion: "0.3.0",
+      schemaVersion: "0.4.0",
       seed: 12345,
       initialWorldConfigHash: hex,
       sprint1ConfigHash: sprint1ConfigHashResult.value,
       techniqueCatalogHash: hex,
+      initialWeeklyTrainingSidecarHash: "c".repeat(64),
       battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
       matchIdGeneratorVersion: "match-id-generator-0.1.0",
       initialMatchIdGeneratorStateHash: hex,

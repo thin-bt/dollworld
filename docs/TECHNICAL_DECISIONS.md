@@ -56,6 +56,22 @@ TypeScript 7は、採用するtypescript-eslint 8.65.0の公式対応範囲外�
 
 新しい実行時依存が必要な場合は、実装を止めて技術決定の変更案を提出する。
 
+## 4.1 Sprint 1 CLI入力（S1-SPEC-0.1.20）
+
+- 既存CLI option（`--years`／`--seed`／`--config`）は壊さない。`--config`は従来どおりSprint 0由来のinitial-world config pathとする。
+- Sprint 1 new run向けに追加するCLI optionは`--sprint1-input <path>`のみとする。`--sprint1-config`／`--technique-catalog`／`--weekly-sidecar`／`--enable-sprint1`等を増やさない。
+- `--sprint1-input`省略時は従来Sprint 0 CLI挙動を完全維持する。指定時のみSprint 1 new runとする。
+- 入力ファイル形状は`Sprint1CliInput`（schemaVersion `0.1.0`）とする。必須fieldは`schemaVersion`／`sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecar`のみ。未知キーは拒否する。
+- `techniqueCatalog`は既存`TechniqueCatalog`正本shape（`identity`／`definitions`）をそのまま入れる。別catalog schemaを作らない。
+- path／mtimeはSimulationIdentity材料にしない。検証済み内容（config hash／catalog hash／sidecar hash）とseed・既存version fieldsだけをidentity材料とする。
+- `--sprint1-input`のparseArgs配線・file loader・WorldEngine登録はS01-008本体の実装範囲とする。本決定はoption契約と入力形状を固定する。
+- Sprint 1 new-runのfresh initialization promotion／`Sprint1RunRuntimeState.eventStream`／`EventAllocationState`契約は02・03・10ミニ仕様を正本とする。保存済みSprint 0 runのsimulationId置換は禁止。
+- 既存`WorldProcessor` interfaceは変更しない。S1-SPEC-0.1.20の production配列`[weekly-training]`はSprint1 transactional processor adapter pipelineのみを意味し、legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`への登録ではない（二重実行禁止）。`WEEKLY_TRAINING_PROCESSOR_ID`はadapter ID／`EventEnvelope.sourceProcessor`である。
+- immutable `Sprint1RunContext`（`sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecarSnapshot`／identity／RunRuleSnapshot）とmutable `Sprint1RunRuntimeState`を`Sprint1RunSession`で束ねる。config／catalog／identity／RunRuleSnapshot／initial sidecarはrun中再読込・再構築しない。context validationは外部`initialMatchIdGeneratorState`依存を持たない。
+- `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`はinitial-world 0.4.0へ、`weeklyTrainingSidecars`および`battleResults`はfinal-world 0.3.0へ投影する。fixed7は exactly 7 files（`battle-results.json`禁止）。
+- `battleResults`はrun全体commit順canonical store。`BattleResultWeekState`は同週count専用。week resetでglobal storeを削除しない。
+- `processorSpecificStates.specificState`はplain JSONのみとし、WorldEngine validate／clone／export／restoreはdescriptor-safe deep cloneする（nested alias禁止）。
+
 ## 5. モジュールとビルド
 
 - ESMを使用する。

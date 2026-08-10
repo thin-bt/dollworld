@@ -559,6 +559,13 @@ export function snapshotDenseArrayOrFail(
   return snapshot;
 }
 
+export {
+  cloneValidatedPlainJson,
+  deepClonePlainJson,
+  snapshotPlainJsonValueOrFail,
+  snapshotPlainJsonValueOrThrow,
+} from "../plain-json-snapshot.js";
+
 export const SHA256_HEX_PATTERN = /^[0-9a-f]{64}$/;
 
 /**
@@ -691,110 +698,6 @@ function freezeRecursive(value: unknown, visiting: WeakSet<object>): void {
 
   if (!Object.isFrozen(value)) {
     Object.freeze(value);
-  }
-}
-
-/**
- * Deep clone of an already-validated plain JSON value.
- *
- * Callers MUST only pass values that already passed a Sprint1 structural validator
- * (or `deepFreezePlainJson`): plain objects/arrays built only from own string-keyed
- * data properties, with no cycles. This function does not call `JSON.stringify`,
- * `toJSON`, or any getters — it copies only own data-descriptor values, recursively,
- * via `Reflect.ownKeys`/`Object.getOwnPropertyDescriptor`. Passing unvalidated or
- * hostile input (Proxies, accessors, sparse arrays) is out of scope: the reflection
- * calls below are guarded against throwing, but no structural issues are reported —
- * use `snapshotPlainObjectOrFail`/`snapshotDenseArrayOrFail` first for untrusted input.
- */
-export function cloneValidatedPlainJson<T>(value: T): T {
-  return cloneValidatedRecursive(value, new WeakSet<object>()) as T;
-}
-
-/** Backward-compatible alias; prefer {@link cloneValidatedPlainJson} in new code. */
-export const deepClonePlainJson = cloneValidatedPlainJson;
-
-function cloneValidatedRecursive(value: unknown, visiting: WeakSet<object>): unknown {
-  if (value === null || typeof value !== "object") {
-    return value;
-  }
-
-  if (visiting.has(value)) {
-    throw new Error("cloneValidatedPlainJson rejects circular references");
-  }
-
-  visiting.add(value);
-  try {
-    let isArray: boolean;
-    try {
-      isArray = Array.isArray(value);
-    } catch (error) {
-      throw new Error(
-        `cloneValidatedPlainJson array reflection failed: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error },
-      );
-    }
-
-    if (isArray) {
-      const arrayValue = value as unknown[];
-      let lengthDescriptor: PropertyDescriptor | undefined;
-      try {
-        lengthDescriptor = Object.getOwnPropertyDescriptor(arrayValue, "length");
-      } catch (error) {
-        throw new Error(
-          `cloneValidatedPlainJson array length descriptor reflection failed: ${error instanceof Error ? error.message : String(error)}`,
-          { cause: error },
-        );
-      }
-      const length = lengthDescriptor?.value;
-      if (typeof length !== "number" || !Number.isInteger(length) || length < 0) {
-        throw new Error("cloneValidatedPlainJson rejects arrays with an invalid length");
-      }
-
-      const cloned: unknown[] = new Array<unknown>(length);
-      for (let index = 0; index < length; index += 1) {
-        let descriptor: PropertyDescriptor | undefined;
-        try {
-          descriptor = Object.getOwnPropertyDescriptor(arrayValue, index);
-        } catch (error) {
-          throw new Error(
-            `cloneValidatedPlainJson property descriptor reflection failed: ${error instanceof Error ? error.message : String(error)}`,
-            { cause: error },
-          );
-        }
-        cloned[index] = cloneValidatedRecursive(descriptor?.value, visiting);
-      }
-      return cloned;
-    }
-
-    let ownKeys: PropertyKey[];
-    try {
-      ownKeys = Reflect.ownKeys(value);
-    } catch (error) {
-      throw new Error(
-        `cloneValidatedPlainJson ownKeys reflection failed: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error },
-      );
-    }
-
-    const cloned: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
-    for (const key of ownKeys) {
-      if (typeof key === "symbol") {
-        throw new Error("cloneValidatedPlainJson rejects Symbol keys");
-      }
-      let descriptor: PropertyDescriptor | undefined;
-      try {
-        descriptor = Object.getOwnPropertyDescriptor(value, key);
-      } catch (error) {
-        throw new Error(
-          `cloneValidatedPlainJson property descriptor reflection failed: ${error instanceof Error ? error.message : String(error)}`,
-          { cause: error },
-        );
-      }
-      cloned[key] = cloneValidatedRecursive(descriptor?.value, visiting);
-    }
-    return cloned;
-  } finally {
-    visiting.delete(value);
   }
 }
 

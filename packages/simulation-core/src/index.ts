@@ -196,10 +196,88 @@ export {
   S0_SPEC_VERSION_FOR_IDENTITY,
   S1_SPEC_VERSION,
   SIMULATION_IDENTITY_SCHEMA_VERSION,
+  SPRINT1_CLI_INPUT_SCHEMA_VERSION,
   SPRINT1_CONFIG_SCHEMA_VERSION,
   SPRINT1_CONFIG_VERSION_DEFAULT,
   START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION,
+  EVENT_ALLOCATION_STATE_SCHEMA_VERSION,
+  BATTLE_RESULT_WEEK_STATE_SCHEMA_VERSION,
+  INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+  RUN_METADATA_DOCUMENT_SCHEMA_VERSION_SPRINT1,
+  INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1,
+  FINAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1,
+  SPRINT1_BATTLE_WORLD_RNG_SEED_LABEL,
+  WEEKLY_TRAINING_PROCESSOR_ID,
+  WEEKLY_TRAINING_PROCESSOR_RNG_SEED_LABEL,
 } from "./sprint1/constants.js";
+export {
+  INITIAL_WEEKLY_TRAINING_SIDECAR_ENTRY_KEYS,
+  INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_KEYS,
+  computeInitialWeeklyTrainingSidecarHash,
+  validateInitialWeeklyTrainingSidecarSnapshot,
+} from "./sprint1/initial-weekly-training-sidecar.js";
+export type {
+  InitialWeeklyTrainingSidecarEntry,
+  InitialWeeklyTrainingSidecarSnapshot,
+} from "./sprint1/initial-weekly-training-sidecar.js";
+export { SPRINT1_CLI_INPUT_KEYS, validateSprint1CliInput } from "./sprint1/sprint1-cli-input.js";
+export type { Sprint1CliInput } from "./sprint1/sprint1-cli-input.js";
+export {
+  createWeeklyTrainingSidecarStateFromInitial,
+  validateWeeklyTrainingSidecarState,
+} from "./sprint1/weekly-training-sidecar-state.js";
+export type { WeeklyTrainingSidecarState } from "./sprint1/weekly-training-sidecar-state.js";
+export {
+  SPRINT1_RUN_CONTEXT_KEYS,
+  createSprint1RunContext,
+  validateSprint1RunContext,
+} from "./sprint1/sprint1-run-context.js";
+export type {
+  Sprint1RunContext,
+  ValidateSprint1RunContextInput,
+} from "./sprint1/sprint1-run-context.js";
+export {
+  SPRINT1_TRANSACTIONAL_PROCESSOR_ADAPTER_PIPELINE,
+  assertBattleResultWeekMatchesWorldDate,
+} from "./sprint1/sprint1-run-session.js";
+export type {
+  LegacyWorldProcessorContract,
+  Sprint1RunRuntimeState,
+  Sprint1RunSession,
+  Sprint1TransactionalProcessorAdapterId,
+  Sprint1WeeklyTrainingAdapterInput,
+  Sprint1WeeklyTrainingAdapterOutput,
+} from "./sprint1/sprint1-run-session.js";
+export {
+  EVENT_ALLOCATION_STATE_KEYS,
+  createEventAllocationStateAfterPromotedInitialEvents,
+  validateEventAllocationState,
+} from "./sprint1/event-allocation-state.js";
+export type { EventAllocationState } from "./sprint1/event-allocation-state.js";
+export {
+  BATTLE_RESULT_WEEK_STATE_KEYS,
+  appendBattleResultToWeekState,
+  assertBattleResultMatchIdNotInWeekState,
+  countCompletedMatchesForPersonThisWorldWeek,
+  createInitialBattleResultWeekState,
+  validateBattleResultWeekState,
+} from "./sprint1/battle-result-week-state.js";
+export type { BattleResultWeekState } from "./sprint1/battle-result-week-state.js";
+export {
+  appendBattleResultToStore,
+  appendCommittedBattleResultToRuntimeStores,
+  assertBattleResultMatchIdNotInStore,
+  assertBattleResultsWeekSuffixInvariant,
+  createInitialBattleResults,
+  validateBattleResultsStore,
+} from "./sprint1/battle-result-store.js";
+export type { BattleResultsStoreContext } from "./sprint1/battle-result-store.js";
+export {
+  createInitialSprint1BattleWorldRngState,
+  createInitialSprint1WeeklyTrainingProcessorRuntimeState,
+  createInitialWeeklyTrainingProcessorRuntimeParts,
+} from "./sprint1/sprint1-runtime-rng.js";
+export type { WeeklyTrainingProcessorRuntimeParts } from "./sprint1/sprint1-runtime-rng.js";
 export {
   FORBIDDEN_MOVEMENT_STATE_MODIFIER_KEYS,
   MOVEMENT_STATE_MODIFIER_ACTION_ORDER_PATHS,
@@ -1066,6 +1144,7 @@ export {
 export type {
   ProcessorRngEntry,
   ProcessorRuntimeState,
+  ProcessorSpecificRuntimeEntry,
   RunWorldOneWeekInput,
   RunWorldWeeksInput,
   RunWorldYearsInput,
@@ -1083,4 +1162,8 @@ export {
   runWorldWeeks,
   runWorldYears,
   validateWorldEngineState,
+  cloneProcessorSpecificState,
+  cloneRuntimeState,
+  exportRuntimeState,
+  validateAndCloneProcessorRuntimeState,
 } from "./world-engine/index.js";

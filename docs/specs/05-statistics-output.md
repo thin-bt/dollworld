@@ -43,34 +43,39 @@ Sprint 0の必須内容:
 - 正常／異常終了
 - 7ファイルの一覧
 
-Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、次を追加する。
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.4.0`とし、次を追加する（nested `SimulationIdentity` wire shapeが0.4.0へ変わったためbump）。
 
 ```text
-- schemaVersion: "0.3.0"
-- simulationIdentity: SimulationIdentity
+- schemaVersion: "0.4.0"
+- simulationIdentity: SimulationIdentity  // schemaVersion "0.4.0"
 - simulationIdentityHash: string
 - eventEnvelopeSchemaVersion: "0.2.0"
 ```
 
+- `simulationIdentity`は02ミニ仕様の`SimulationIdentity` 0.4.0全文（`initialWeeklyTrainingSidecarHash`を含む）。
 - `simulationIdentityHash`は全文から再計算一致必須。
 - `simulationId`は02ミニ仕様に従ってidentity hashから生成する。
-- executionId、現実時刻、性能情報はidentityへ含めない。
+- executionId、現実時刻、性能情報、CLI path／mtimeはidentityへ含めない。
+- `Sprint1RunRuntimeState`オブジェクト自体はrun-metadataへ永続化しない（runtime checkpoint禁止）。`eventStream`の最終出力先は既存`events.jsonl`のみ。`eventAllocationState`／`battleResultWeekState`／`worldRngState`／`matchIdGeneratorState`／`processorRuntimeStates`はruntime-only。sidecarおよび`battleResults`投影は`initial-world`／`final-world`側（後述）。
+- 05の「旧版reader維持」は、実在するSprint 0 fixed7 document readerおよびEventEnvelope 0.1.0 reader等を指す。repositoryに存在しない`SimulationIdentity` 0.3.0専用legacy readerを新設・維持対象として扱わない（02仕様）。
 
 ## 5. `initial-world.json`
 
 初期世界スナップショット全文とgenerationSummaryを保持する。世界1年4月第1週、年初処理反映済み。再読込・不変条件検証可能であること。
 
-Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、トップレベルへ完全な`runRuleSnapshot`を1件だけ保存する。
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.4.0`とし、トップレベルへ完全な`runRuleSnapshot`と`initialWeeklyTrainingSidecarSnapshot`を保存する。
 
 ```text
-- schemaVersion: "0.3.0"
+- schemaVersion: "0.4.0"
 - runRuleSnapshot: RunRuleSnapshot
+- initialWeeklyTrainingSidecarSnapshot: InitialWeeklyTrainingSidecarSnapshot  // schemaVersion "0.1.0"
 - persons[*].sprint1StateSchemaVersion: "0.1.0"
 - persons[*].currentMental
 - persons[*].techniqueStates
 - persons[*].learningFocusTechniqueId
 ```
 
+- `initialWeeklyTrainingSidecarSnapshot`は`Sprint1RunContext`からの投影。runtime current sidecarをinitialへ書き戻さない。
 - `runRuleSnapshot.simulationId`はinitial worldおよびrun-metadataのsimulationIdと一致必須。
 - `runRuleSnapshot.simulationIdentityHash`はrun-metadataの値と一致必須。
 - `runRuleSnapshot.battleProfileAdapterVersion`、`matchIdGeneratorVersion`、`initialMatchIdGeneratorStateHash`、`defaultBattleStrategyVersion`はSimulationIdentityの値と一致必須。
@@ -79,7 +84,7 @@ Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、トッ�
 - replayまたは詳細戦闘ログの再読込時は、同じrunの`initial-world.json.runRuleSnapshot`を参照する。
 - run内に戦闘が0件でもRunRuleSnapshotを保存する。
 - 同一SimulationIdentityではRunRuleSnapshot全文とhashが一致する。
-- `run-rule-snapshot.json`等の8ファイル目を追加しない。
+- `run-rule-snapshot.json`／`sidecar.json`等の8ファイル目を追加しない。
 
 ## 6. `final-world.json`
 
@@ -92,10 +97,12 @@ Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、トッ�
 
 100年実行時は4,800週後、世界101年4月第1週。
 
-Sprint 1以降の新規runでは文書`schemaVersion`を`0.2.0`とし、各人物へ次を直接1組だけ保持する。
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、各人物のSprint1PersonStateに加え、トップレベルへ`weeklyTrainingSidecars`および`battleResults`を投影する。
 
 ```text
-- schemaVersion: "0.2.0"
+- schemaVersion: "0.3.0"
+- weeklyTrainingSidecars: WeeklyTrainingSidecarState  // PersonTemporaryCondition current正本を含む
+- battleResults: BattleResult[]  // run全体commit順。detailedLog含む全文。縮小DTO禁止
 - persons[*].sprint1StateSchemaVersion: "0.1.0"
 - persons[*].currentMental
 - persons[*].techniqueStates
@@ -103,19 +110,34 @@ Sprint 1以降の新規runでは文書`schemaVersion`を`0.2.0`とし、各人�
 ```
 
 - nested複製や同義フィールドを禁止する。
-- `currentMental`、`techniqueStates`、`learningFocusTechniqueId`をfinal world hashと同seed比較対象へ含める。
+- `weeklyTrainingSidecars`は`Sprint1RunRuntimeState.weeklyTrainingSidecars`からの投影。`battleResults`は`Sprint1RunRuntimeState.battleResults`からの投影。`Sprint1RunRuntimeState`オブジェクト全体のcheckpointではない。
+- `currentMental`、`techniqueStates`、`learningFocusTechniqueId`、`weeklyTrainingSidecars`全文、`battleResults`全文（`detailedLog`／`summaryLog`／hashes／RNG final state／`developmentEffects`含む）をfinal world hashと同seed比較対象へ含める。
+- `battleResults` validation: dense array／commit順／duplicate matchIdなし／各`validateBattleResult` success／同一`simulationId`／同一`runRuleSnapshotHash`。正本は`initial-world.runRuleSnapshot`（各BattleResultへRunRuleSnapshot全文を複製しない）。
+- Sprint 1ではBattleResult retention削除を実装しない。`resolution_error`も保存。`pre_start_failure`／abortは保存なし。events.jsonlへturn詳細を複製しない。`battle-results.json`禁止。
 - `techniqueStates`はTechniqueId昇順・重複なし。
-- Sprint 0のlegacy final-world 0.1.0へ新フィールドを暗黙追記しない。
+- Sprint 0のlegacy final-world 0.1.0およびSprint 1旧`0.2.0`へ新フィールドを暗黙追記しない。
 - archived legacy run自体は書き換えずread-onlyとする。Sprint 0 final-worldや途中worldをSprint 1の継続run入力へ変換する機能は本Sprintの対象外とし、暗黙migrationしない。
-- 未知schemaVersionは拒否し、0.1.0 readerと0.2.0 validatorを分離する。
+- 未知schemaVersionは拒否し、0.1.0／0.2.0 readerと0.3.0 validatorを分離する。
 
 ## 7. 文書schemaVersionと互換
 
 | 文書 | 新規runのschemaVersion | 追加内容 |
 |---|---|---|
-| `run-metadata.json` | `0.3.0` | SimulationIdentity 0.3.0、identity hash、EventEnvelope版 |
-| `initial-world.json` | `0.3.0` | RunRuleSnapshot 0.4.0、Sprint1PersonState初期値 |
-| `final-world.json` | `0.2.0` | Sprint1PersonState、技習得・熟練・現在精神力 |
+| `run-metadata.json` | `0.4.0` | SimulationIdentity 0.4.0（`initialWeeklyTrainingSidecarHash`含む）、identity hash、EventEnvelope版 |
+| `initial-world.json` | `0.4.0` | RunRuleSnapshot 0.4.0、Sprint1PersonState初期値、トップレベル`initialWeeklyTrainingSidecarSnapshot` 0.1.0 |
+| `final-world.json` | `0.3.0` | Sprint1PersonState、技習得・熟練・現在精神力、トップレベル`weeklyTrainingSidecars`＋`battleResults` |
+| `InitialWeeklyTrainingSidecarSnapshot` | `0.1.0` | 週間訓練sidecar外部入力（initial-world投影・context所有） |
+| `EventAllocationState` | `0.1.0` | runtime-only（固定7非永続） |
+| `BattleResultWeekState` | `0.1.0` | runtime-only同週count registry（固定7非永続。run全体は`battleResults`） |
+| `EventEnvelope` | `0.2.0` | Sprint 1 new-run events.jsonl |
+| `RunRuleSnapshot` | `0.4.0` | adapter／MatchId generator／DefaultBattleStrategy版 |
+
+Sprint 1新規runでの文書schema bump方針（S1-SPEC-0.1.20）:
+
+- **bumpした**: `SimulationIdentity` `0.3.0`→`0.4.0`、`run-metadata.json` Sprint1 new-run `0.3.0`→`0.4.0`、`initial-world.json` `0.3.0`→`0.4.0`、`final-world.json` `0.2.0`→`0.3.0`（`weeklyTrainingSidecars`＋`battleResults`を同一0.3.0最終shapeとして確定。0.4.0へ追加bumpしない）
+- **bumpしない**: `RunRuleSnapshot` `0.4.0`（既定）、`EventEnvelope` `0.2.0`、`InitialWeeklyTrainingSidecarSnapshot` `0.1.0`、`EventAllocationState` `0.1.0`、`BattleResultWeekState` `0.1.0`、`BattleResult` `0.5.0`
+- fixed7は exactly 7 files（`sidecar.json`／`battle-results.json`禁止）
+- JSON wire shapeが変わる文書だけ版上げする。hash値だけが変わる／shape不変なら版上げしない。legacy readerは維持する。
 
 - 既存Sprint 0の`0.1.0` readerは維持する。
 - `0.1.0`文書へ新フィールドを暗黙追加して書き戻さない。
@@ -159,6 +181,8 @@ UTF-8、ヘッダーあり。各世界年の3月第4週終了後に1行。100年
 
 参照不整合と再現性違反は失敗。
 
+Sprint 1新規runのsame-seed／validation-report比較では、`initialWeeklyTrainingSidecarSnapshot`全文、`final-world.weeklyTrainingSidecars`全文、および`final-world.battleResults`全文を含める（hashだけに省略しない）。validation-reportへ`battleResults` validation項目をSprint1新規run検証へ追加する。
+
 ## 11. `performance.json`
 
 - 実行環境のNode・OS・CPU情報（取得可能範囲）
@@ -179,9 +203,10 @@ Sprint 1以降の新規runでは、固定7ファイルのrename前検証へ次�
 - run-metadata／initial-world／final-worldの文書schemaVersion
 - SimulationIdentity全文（adapter／MatchId generator版・initialMatchIdGeneratorStateHashを含む）、identity hash、simulationIdの再計算一致
 - `initial-world.json.runRuleSnapshot`のschemaVersion、simulationIdentityHash、config identity、catalog identity、hash
+- `initial-world.json.initialWeeklyTrainingSidecarSnapshot`全文（same-seed比較対象）
 - `run-metadata.eventEnvelopeSchemaVersion`とevents.jsonl全行の一致
 - RunRuleSnapshotが1件だけで、BattleState／BattleResultへ完全設定・完全カタログが重複保存されていないこと
-- final-worldの全人物Sprint1PersonStateとworld hash再計算一致
+- final-worldの全人物Sprint1PersonStateと`weeklyTrainingSidecars`全文と`battleResults`全文、world hash再計算一致
 
 SimulationIdentityとRunRuleSnapshotは決定的入力なので同seed比較対象に含める。現実日時、executionId、処理時間、メモリ等の非決定的値は従来どおり除外する。
 
@@ -202,20 +227,21 @@ SimulationIdentityとRunRuleSnapshotは決定的入力なので同seed比較対�
 Sprint 1追加:
 
 - 固定7ファイルの件数・名称がSprint 1導入前後で不変
-- run-metadata.json 0.3.0の必須フィールド
-- initial-world.json 0.3.0の必須フィールド
-- final-world.json 0.2.0の必須フィールドと人物状態検証
+- run-metadata.json 0.4.0の必須フィールド（SimulationIdentity 0.4.0）
+- initial-world.json 0.4.0の必須フィールド（`initialWeeklyTrainingSidecarSnapshot`含む）
+- final-world.json 0.3.0の必須フィールドと人物状態検証（`weeklyTrainingSidecars`＋`battleResults`含む）
 - 旧版reader互換、run-metadata／initial-worldの全決定的入力がある場合だけの明示文書migration、入力不足時とlegacy final-worldのread-only維持
 - 未知文書schemaVersion拒否
-- simulationIdentityHashとsimulationId再計算一致
-- initial-world.jsonへRunRuleSnapshotを正確に1件保存
+- simulationIdentityHashとsimulationId再計算一致（sidecar hash差分を含む）
+- initial-world.jsonへRunRuleSnapshotを正確に1件保存し、`initialWeeklyTrainingSidecarSnapshot`全文を投影
 - RunRuleSnapshot hash再計算一致
 - 戦闘0件runでもsnapshotあり
 - 複数戦闘で完全設定・完全技カタログを試合ごとに複製しない
 - run-metadataのeventEnvelopeSchemaVersionと全EventEnvelope行が一致
 - 0.1.0／0.2.0混在runをrename前検証で拒否
 - 同一条件でSimulationIdentityとRunRuleSnapshot全文一致
-- final-worldのsprint1StateSchemaVersion／currentMental／techniqueStates／learningFocusTechniqueIdがsame seedで全文一致
+- final-worldのsprint1StateSchemaVersion／currentMental／techniqueStates／learningFocusTechniqueId／weeklyTrainingSidecars／battleResultsがsame seedで全文一致
+- validation-report／same-seed比較がsidecar全文およびbattleResults全文を含むこと
 - legacy final-worldへSprint 1フィールドを暗黙追記しない
 
 ## 14. 対象外

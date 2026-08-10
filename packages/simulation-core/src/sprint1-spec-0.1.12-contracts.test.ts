@@ -93,11 +93,12 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
     };
   })();
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     seed: 12345,
     initialWorldConfigHash: hex,
     sprint1ConfigHash: sprint1ConfigHashResult.value,
     techniqueCatalogHash: hex,
+    initialWeeklyTrainingSidecarHash: "c".repeat(64),
     battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
     matchIdGeneratorVersion: "match-id-generator-0.1.0",
     initialMatchIdGeneratorStateHash: hex,
@@ -117,7 +118,7 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
 describe("S1-SPEC-0.1.12 SimulationIdentity / config hash", () => {
   it("publishes weekly-training clarification contracts under the current Sprint 1 registry", () => {
     // Registry is S1-SPEC-0.1.17 after movementChance clarification; weekly formulas remain.
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
   });
 
   it("accepts a new Sprint 1 identity with the current registry version", () => {

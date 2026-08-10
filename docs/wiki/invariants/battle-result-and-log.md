@@ -34,6 +34,8 @@ related:
 - 疲労・負傷などの戦闘後効果（13）
 - 固定 7 ファイル出力との関係は、03・05 に書かれた範囲だけを根拠にする（EventEnvelope 0.2.0、RunRuleSnapshot の保存先など）
 - 詳細戦闘ログ全件を世界イベントへ複製しない（SPEC・03・13）
+- Sprint 1ではcommit済みBattleResult全文（`detailedLog`含む）を`final-world.battleResults`へ保存する（週registryだけでは捨てない。S1-SPEC-0.1.20）
+- BattleResult／戦闘後効果のproductionはS01-007でimplemented / accepted（commit `a39e476`）。WorldEngine commitはS01-008（現在は`S1-SPEC-0.1.20` clarifier中）
 
 ## 関連する正本
 
@@ -44,15 +46,16 @@ related:
 
 ## 関連するコード
 
-- BattleResult productionは未実装（S01-007）
+- BattleResult productionはimplemented / accepted（S01-007受入完了commit `a39e476`）
 - S01-006ターンResolver／DetailedLog履歴検証（actionSequence 0始まり、RNG chain、BattleState bind）は実装済み。索引は [battle-turn-resolution.md](battle-turn-resolution.md)
-- `S1-SPEC-0.1.17`のsourceSnapshot baseline、`S1-SPEC-0.1.19`のBattleResult決定的契約（summary下位型／同点比較／RNG／mastery）は13正本を参照。契約純関数は`battle-result-contracts.ts`
+- `S1-SPEC-0.1.17`のsourceSnapshot baseline、`S1-SPEC-0.1.18`のBattleResult決定的契約（summary下位型／同点比較／RNG／mastery）、`S1-SPEC-0.1.19`のpost-start abortは13／12正本を参照。契約純関数は`battle-result-contracts.ts`／`battle-execution-abort.ts`
+- WorldEngine commit配線はS01-008（現在は`S1-SPEC-0.1.20` clarifier中）
 
 ## 関連するテスト
 
 - ターン詳細ログ検証: `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`
 - `S1-SPEC-0.1.19`契約: `packages/simulation-core/src/sprint1-spec-0.1.18-battle-result-contracts.test.ts`
-- BattleResult完成テストは未実装（S01-007）
+- BattleResult完成テスト: `packages/simulation-core/src/sprint1-battle-result.test.ts`（S01-007／`a39e476`）
 - `S1-SPEC-0.1.14`のターン入力契約テストは`sprint1-spec-0.1.14-turn-contracts.test.ts`
 
 ## 関連する判断

@@ -68,11 +68,12 @@ function identityWithSprint1(version: string): SimulationIdentity {
   const config = expectOk(validateSprint1Config(createDefaultSprint1ConfigInput()));
   const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(config));
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     seed: 1,
     initialWorldConfigHash: "a".repeat(64),
     sprint1ConfigHash,
     techniqueCatalogHash: "b".repeat(64),
+    initialWeeklyTrainingSidecarHash: "c".repeat(64),
     battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
     matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
     initialMatchIdGeneratorStateHash: "c".repeat(64),
@@ -167,11 +168,12 @@ const techniqueCatalogHash = expectOk(
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     seed: 20260807,
     initialWorldConfigHash: "a".repeat(64),
     sprint1ConfigHash,
     techniqueCatalogHash,
+    initialWeeklyTrainingSidecarHash: "c".repeat(64),
     battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
     matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
     initialMatchIdGeneratorStateHash: FIXED_MATCH_ID_STATE_SHA256,
@@ -348,8 +350,8 @@ function expectValidationPathFailure(
 }
 
 describe("S1-SPEC-0.1.18 version registry", () => {
-  it("publishes S1-SPEC-0.1.19 / BattleState 0.6.0 and keeps Sprint1Config SHA", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
+  it("publishes S1-SPEC-0.1.20 / BattleState 0.6.0 and keeps Sprint1Config SHA", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
     expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
     expect(SPRINT1_CONFIG_SCHEMA_VERSION).toBe("0.2.0");
@@ -361,7 +363,7 @@ describe("S1-SPEC-0.1.18 version registry", () => {
   });
 
   it("accepts S1-SPEC-0.1.18 identity and rejects 0.1.17", () => {
-    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.19"));
+    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.20"));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
       expect(createSimulationIdFromIdentity(ok.value, sha256Provider).ok).toBe(true);

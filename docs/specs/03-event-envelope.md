@@ -185,6 +185,30 @@ matchIds: MatchId[]
 - schema外の`battleIds`等を追加しない。
 - EventEnvelope validator、canonical JSON、再読込検証、参照整合検証の対象に含める。
 
+### Sprint 1週間訓練イベント
+
+週間訓練production processorの正式literalは`weekly-training`とする（10仕様）。次を同一literalで使用する。
+
+- Sprint1 transactional processor adapter ID（`WEEKLY_TRAINING_PROCESSOR_ID`）
+- 週間訓練由来`EventEnvelope.sourceProcessor`
+
+legacy `WorldProcessor.processorId`／`RunWorldOneWeekInput.processors`への登録対象ではない。
+
+S01-004が生成する候補（`training.action_selected`／`training.stat_growth_applied`／`training.condition_updated`／`training.forced_rest_applied`／`training.rest_applied`／`technique.learning_progressed`／`technique.acquired`／`technique.mastery_increased`等）をEventEnvelope化する際の`sourceProcessor`は必ず`weekly-training`とする。`eventType`文字列からproducerを推測しない。
+
+候補自体（`eventType`／`personId`／`absoluteWeek`／`payload`）の契約は変更しない。共通append adapterが`sourceProcessor="weekly-training"`を付与し、`EventId`／`simulationId`／`sequence`もappend層だけが付与する。週間processor本体はこれらを発行しない。候補の`absoluteWeek`がweek-start `WorldDate.absoluteWeek`と一致しない場合はrejectする。`entities.personIds`は候補の`personId`1件。その他entitiesは本仕様の現行契約に従う。
+
+### fresh Sprint 1 initialization promotion（initial events）
+
+Sprint 1 new runでは、`generateInitialWorld`が返すprovisional initialEventsを、保存前にSprint 1 new-run EventEnvelope 0.2.0へ昇格させる（02仕様の **fresh Sprint 1 initialization promotion**）。これは保存済みSprint 0 `events.jsonl`のmigrationではない。
+
+- 全件 `schemaVersion="0.2.0"`、`simulationId=final Sprint 1 simulationId`
+- `sequence`／`eventId`／`worldDate`／`eventType`／`origin`／`sourceProcessor`／既存entity reference／`payload`／orderingは変更しない
+- `entities.matchIds`は必ず`[]`（initialization eventは試合非関連）
+- `sourceProcessor`を`weekly-training`へ書き換えない（initialization producerを維持）
+- 再生成・再sequence・eventId再割当禁止
+- promotion後のglobal allocator初期値は`EventAllocationState.nextSequence = promotedInitialEvents.length`（sequences `0..N-1`の既存契約に一致。02・10仕様）
+
 ### Sprint 1戦闘イベント
 
 | eventType | 用途 |
@@ -196,16 +220,18 @@ matchIds: MatchId[]
 
 - `schemaVersion=0.2.0`
 - `origin=simulation`
-- `sourceProcessor=battle-simulation`
+- `sourceProcessor=battle-simulation`（戦闘イベントは従来どおり。`weekly-training`へ変更しない）
 - `entities.personIds`はsideA、sideBのPersonIdをcanonical順ではなく役割を失わないpayloadと併用し、EntityRefs配列自体は共通規則のcanonical昇順へ正規化する。
 - `entities.matchIds`は対象MatchIdを1件保持する。
 - `battle.started`は1試合につき最大1件、`battle.finished`は開始済み試合につき最大1件。
 - 正常終了時の候補順は`battle.started`、`battle.finished`。開始後のresolution_errorでも同じ順とする。開始前検証失敗では両方とも生成しない。
-- 戦闘機能はEventEnvelope候補を返し、グローバルEvent Streamへappendする層が既存のEventId生成器と次sequenceを使って包む。戦闘専用の独立sequenceを発行しない。
+- 戦闘機能はEventEnvelope候補を返し、グローバルEvent Streamへappendする層が`Sprint1RunRuntimeState.eventAllocationState`（および`eventStream`）を使って包む。戦闘専用の独立sequenceを発行しない。
 - 週間訓練を含む各Processorも同じ候補契約を使用し、個別Processorは`eventId`、`simulationId`、`sequence`を発行しない。
+- `battle.started`／`battle.finished`とweekly appendは同一global `eventAllocationState`から連続割当する。
 - WorldEngineは世界週の固定Processor順と各Processor内の固定候補順を連結した後、1シミュレーション共通の0始まりsequenceを割り当てる。
-- 同一世界週の全Processor、世界不変条件、出力候補検証が成功するまで候補をbufferし、後続Processor失敗時はEventId／sequenceを発行せず週全体をrollbackする。
+- 同一世界週の全Processor、世界不変条件、出力候補検証が成功するまで候補をbufferし、後続Processor失敗時はEventId／sequenceを発行せず週全体をrollbackする（`eventStream`／`nextSequence`ともunchanged）。
 - payloadの完全構造は11仕様の`battle.started`、13仕様の`battle.finished`を参照する。
+- `battle-simulation`はSprint 1 production normal-week adapter pipelineへ登録しない（10・12仕様）。戦闘は明示的run／`commitRunBattlePlan` facade経由とする。
 
 必須テスト追加:
 

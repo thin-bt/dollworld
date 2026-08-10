@@ -13,8 +13,68 @@ export { BATTLE_RANGES, TECHNIQUE_CATEGORIES };
 
 export const SPRINT1_CONFIG_SCHEMA_VERSION = "0.2.0" as const;
 export const SPRINT1_CONFIG_VERSION_DEFAULT = "sprint1-balance-0.2.0" as const;
-export const SIMULATION_IDENTITY_SCHEMA_VERSION = "0.3.0" as const;
-export const S1_SPEC_VERSION = "S1-SPEC-0.1.19" as const;
+export const SIMULATION_IDENTITY_SCHEMA_VERSION = "0.4.0" as const;
+export const S1_SPEC_VERSION = "S1-SPEC-0.1.20" as const;
+
+/**
+ * Production Sprint1 transactional processor adapter ID and
+ * weekly-training EventEnvelope.sourceProcessor literal (S1-SPEC-0.1.20 / 03 / 10).
+ * Not a legacy WorldProcessor.processorId registration into RunWorldOneWeekInput.processors.
+ * Single literal — do not dual-manage a second string.
+ */
+export const WEEKLY_TRAINING_PROCESSOR_ID = "weekly-training" as const;
+
+/** InitialWeeklyTrainingSidecarSnapshot schemaVersion (S1-SPEC-0.1.20). */
+export const INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION = "0.1.0" as const;
+
+/** Sprint1CliInput schemaVersion (S1-SPEC-0.1.20). */
+export const SPRINT1_CLI_INPUT_SCHEMA_VERSION = "0.1.0" as const;
+
+/**
+ * EventAllocationState schemaVersion (S1-SPEC-0.1.20 / Sprint1RunRuntimeState).
+ * Global event sequence allocator; EventId stays a pure function of sequence.
+ */
+export const EVENT_ALLOCATION_STATE_SCHEMA_VERSION = "0.1.0" as const;
+
+/**
+ * BattleResultWeekState schemaVersion (S1-SPEC-0.1.20 / Sprint1RunRuntimeState).
+ * Same-week committed BattleResult registry for postProcessContext match counts.
+ */
+export const BATTLE_RESULT_WEEK_STATE_SCHEMA_VERSION = "0.1.0" as const;
+
+/**
+ * Fresh battle World RNG deriveSeed label (S1-SPEC-0.1.20).
+ * ASCII fixed literal — not a display name, path, or processor array index.
+ */
+export const SPRINT1_BATTLE_WORLD_RNG_SEED_LABEL = "battle/world-rng" as const;
+
+/**
+ * Fresh weekly-training processor RNG deriveSeed label (S1-SPEC-0.1.20).
+ * Distinct from {@link SPRINT1_BATTLE_WORLD_RNG_SEED_LABEL} and from WorldEngine's
+ * generic `world-engine/processor/${processorId}` label used by createInitialRuntime.
+ */
+export const WEEKLY_TRAINING_PROCESSOR_RNG_SEED_LABEL = "processor/weekly-training" as const;
+
+/**
+ * Sprint 1 new-run `run-metadata.json` document schemaVersion after SimulationIdentity 0.4.0
+ * nested wire-shape change (05 / S1-SPEC-0.1.20).
+ */
+export const RUN_METADATA_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.4.0" as const;
+
+/**
+ * Sprint 1 new-run `initial-world.json` document schemaVersion (S1-SPEC-0.1.20 fix4).
+ * Adds top-level `initialWeeklyTrainingSidecarSnapshot` (0.3.0 → 0.4.0).
+ */
+export const INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.4.0" as const;
+
+/**
+ * Sprint 1 new-run `final-world.json` document schemaVersion (S1-SPEC-0.1.20).
+ * 0.3.0 final shape: existing final world content + Person Sprint1State +
+ * top-level `weeklyTrainingSidecars` + top-level `battleResults` (full BattleResult[]).
+ * Do not bump to 0.4.0 for battleResults — same uncommitted 0.3.0 shape as fix4/fix5.
+ */
+export const FINAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.3.0" as const;
+
 export const MAIN_SPEC_VERSION_FOR_IDENTITY = "SPEC-0.1.2" as const;
 /** Must equal the Sprint 0 S0_SPEC_VERSION registry entry (00/02/14 mini-specs). */
 export const S0_SPEC_VERSION_FOR_IDENTITY: typeof S0_SPEC_VERSION = S0_SPEC_VERSION;

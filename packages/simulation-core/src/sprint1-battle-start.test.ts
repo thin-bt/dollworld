@@ -212,11 +212,12 @@ const techniqueCatalogHash = expectOk(
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     seed: 20260807,
     initialWorldConfigHash: "a".repeat(64),
     sprint1ConfigHash,
     techniqueCatalogHash,
+    initialWeeklyTrainingSidecarHash: "c".repeat(64),
     battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
     matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
     initialMatchIdGeneratorStateHash: FIXED_MATCH_ID_STATE_SHA256,
@@ -430,7 +431,7 @@ function startInput(overrides: Record<string, unknown> = {}) {
 
 describe("S01-005 version registry", () => {
   it("publishes the S01-005 schema versions and fixed strategy identifiers", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
     expect(RUN_RULE_SNAPSHOT_SCHEMA_VERSION).toBe("0.4.0");
     expect(BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION).toBe("0.1.0");
     expect(BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION).toBe("0.1.0");

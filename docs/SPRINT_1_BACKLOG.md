@@ -2,10 +2,10 @@
 
 - バックログバージョン：`S1-BACKLOG-0.1.0`
 - 対象ゲーム仕様：`SPEC-0.1.2`
-- 対象Sprint 1ミニ仕様：`S1-SPEC-0.1.19`
+- 対象Sprint 1ミニ仕様：`S1-SPEC-0.1.20`
 - 仕様確定commit：`2800d3b959e575f57660c27b344507dd0e38ddb6`
-- 実装状態：S01-001〜S01-007 **実装済み**（S01-007は受入監査中・未commit）、S01-008〜S01-009 **pending**（次の実装着手は S01-008）
-- `S1-SPEC-0.1.19`はpost-start execution abort契約clarification（`RunBattleToCompletionResult` 3 kind維持／`BattleExecutionAbortError`／dependency_failure／internal_invariant_violation／原子的abort／S01-008 commit禁止）。BattleState schema `0.6.0`。先行clarificationとして`S1-SPEC-0.1.18` BattleResult決定契約、`S1-SPEC-0.1.17` sourceSnapshot baselineがある
+- 実装状態：S01-001〜S01-007 **implemented / accepted**（S01-007受入完了commit `a39e476`）、S01-008〜S01-009 **pending**。現在は`S1-SPEC-0.1.20` S01-008 integration contracts clarifier中。clarifier受入後にS01-008実装再開。S01-009未着手。Sprint 1全体は未完了
+- `S1-SPEC-0.1.20`はS01-008 integration contracts clarification（`weekly-training` adapter ID／production adapter pipeline`[weekly-training]`／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／`InitialWeeklyTrainingSidecarSnapshot`／SimulationIdentity `0.4.0`＋`initialWeeklyTrainingSidecarHash`／CLI `--sprint1-input`／run-metadata `0.4.0`／initial-world `0.4.0`／final-world `0.3.0`）。BattleState schema `0.6.0`。先行clarificationとして`S1-SPEC-0.1.19` post-start abort、`S1-SPEC-0.1.18` BattleResult決定契約、`S1-SPEC-0.1.17` sourceSnapshot baselineがある
 
 ## 目的
 
@@ -143,7 +143,7 @@ Sprint 1で必要な公開型、Sprint1Config、validation、canonical化、conf
 - `docs/specs/14-sprint1-config-schema.md`
 - Battle関連の共有IDなど、本タスクが公開する参照型に必要な定義（詳細生成・解決はS01-005以降）
 
-仕様版はすべて`S1-SPEC-0.1.19`。
+仕様版はすべて`S1-SPEC-0.1.20`。
 
 `PersonTechniqueState`の保存構造の所有は本タスク（S01-001）とする。09全体を本タスクで実装しない。
 
@@ -223,7 +223,7 @@ PersonTechniqueState
 - Sprint1Configの正常系・未知キー拒否・境界値
 - config canonical化がキー順・空白・改行に左右されないこと
 - 注入`Sha256Provider`によるconfig hash材料の一致
-- SimulationIdentity.specVersionsの必須値（`SPEC-0.1.2`／`S0-SPEC-0.1.5`／`S1-SPEC-0.1.19`）
+- SimulationIdentity.specVersionsの必須値（`SPEC-0.1.2`／`S0-SPEC-0.1.5`／`S1-SPEC-0.1.20`）
 - AbilityKey／AptitudeKeyがSprint 0公開型と一致すること（`martial`不使用）
 - `PersonTechniqueState`の保存構造が09仕様の全項目を持つこと
 - 整数／nullの型境界（各フィールド）
@@ -265,7 +265,7 @@ PersonTechniqueState
 - `docs/specs/00-domain-glossary.md`
 - `docs/specs/14-sprint1-config-schema.md`（growth／temporaryCondition）
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。
 
 ### 依存タスク
 
@@ -370,7 +370,7 @@ PersonTechniqueState
 - `docs/specs/08-character-growth.md`（人物一時状態・`Sprint1PersonState`との接続。保存型の再定義はしない）
 - `docs/specs/14-sprint1-config-schema.md`（techniqueLearning／techniqueBalance／basicAttackProfiles）
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。
 
 ### 依存タスク
 
@@ -472,7 +472,7 @@ S01-003は両者を接続して技状態の意味的validationを閉じる。保
 - `docs/specs/07-seeded-rng.md`
 - `docs/specs/14-sprint1-config-schema.md`（weeklyPlanner／techniqueLearning／growth／temporaryCondition）
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。
 
 ### 依存タスク
 
@@ -564,7 +564,7 @@ S01-003は両者を接続して技状態の意味的validationを閉じる。保
 - `docs/specs/08-character-growth.md`
 - `docs/specs/14-sprint1-config-schema.md`（battle）
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。
 
 ### 依存タスク
 
@@ -656,7 +656,7 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - `docs/specs/07-seeded-rng.md`
 - `docs/specs/14-sprint1-config-schema.md`（battle）
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。
 
 ### 依存タスク
 
@@ -753,7 +753,7 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - `docs/specs/05-statistics-output.md`
 - `docs/specs/14-sprint1-config-schema.md`
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。
 
 ### 依存タスク
 
@@ -851,7 +851,23 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - `docs/specs/14-sprint1-config-schema.md`
 - `docs/TECHNICAL_DECISIONS.md`（実行構成の固定事項）
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。S01-008着手前に再発明してはならない確定契約は次のとおり（詳細は正本ミニ仕様）。
+
+- `WEEKLY_TRAINING_PROCESSOR_ID`／週間event `sourceProcessor` = `weekly-training`（Sprint1 transactional processor adapter ID。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない。二重実行禁止）
+- production adapter pipeline = `[weekly-training]`のみ（battleはpipeline外）
+- battleの`worldRngState`／`MatchIdGeneratorState`／`processorRuntimeStates`／`battleResults`／`battleResultWeekState`／`eventStream`／`eventAllocationState`／sidecar owner = `Sprint1RunRuntimeState`
+- battle World RNG label = `battle/world-rng`；weekly-training RNG label = `processor/weekly-training`
+- `TrainingProcessorRuntimeState`は`processorRuntimeStates.processorSpecificStates`（直下重複禁止）。初期値は`createInitialTrainingProcessorRuntimeState()`
+- `BattleResultWeekState`：completed＋resolution_error登録／completed-only per-person count／duplicate matchId reject／week advance reset
+- fresh Sprint 1 initialization promotion（provisional→final simulationId／initial events EventEnvelope 0.2.0・`matchIds=[]`。保存済みSprint 0 migrationではない）
+- missing sidecar default禁止。initial sidecarはCLI `Sprint1CliInput`から取得し、`Sprint1RunContext.initialWeeklyTrainingSidecarSnapshot`が所有
+- CLI option = `--sprint1-input`のみ（`Sprint1CliInput` schemaVersion `0.1.0`）
+- SimulationIdentity `0.4.0`＋`initialWeeklyTrainingSidecarHash` binding
+- `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`→initial-world投影、`weeklyTrainingSidecars`＋`battleResults`→final-world投影
+- 文書schema: run-metadata `0.4.0`、initial-world `0.4.0`、final-world `0.3.0`（`weeklyTrainingSidecars`＋`battleResults`）。非bump: RunRuleSnapshot `0.4.0`／EventEnvelope `0.2.0`／InitialWeeklyTrainingSidecarSnapshot `0.1.0`／EventAllocationState `0.1.0`／BattleResultWeekState `0.1.0`／BattleResult `0.5.0`。fixed7は exactly 7 files
+- `commitRunBattlePlan`配線は本タスクで実施（`completed`／`resolution_error`のみcommit）
+- S01-007はimplemented／accepted（commit `a39e476`）。本タスクはclarifier受入後に実装再開
+- fresh new-run初期化は21ステップ（02仕様）
 
 ### 依存タスク
 
@@ -860,14 +876,16 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 
 ### 実装対象
 
-- 週間処理のWorldEngine統合
-- Sprint 1 processor順序
-- config読込とvalidationの実行経路
+- 週間処理のSprint1 transactional processor adapter統合（`weekly-training`。legacy WorldProcessor配列へは登録しない）
+- `Sprint1RunRuntimeState`実装とweek／battle transaction root
+- Sprint 1 adapter pipeline順序（production配列は`[weekly-training]`のみ）
+- config読込とvalidationの実行経路（`--sprint1-input`／`Sprint1CliInput`）
 - `apps/simulator` CLIからの実行
-- SimulationIdentityのSprint 1新規run適用
-- 固定7ファイル維持（増減禁止）
-- events.jsonl／統計／validation-reportへの必要最小統合
-- Sprint 0互換性（既存simulationId非再計算）
+- SimulationIdentity 0.4.0のSprint 1新規run適用
+- `commitRunBattlePlan` WorldEngine配線
+- 固定7ファイル維持（増減禁止・runtime checkpoint非追加。sidecarはinitial-world／final-worldへ投影）
+- events.jsonl／統計／validation-reportへの必要最小統合（run-metadata `0.4.0`／initial-world `0.4.0`／final-world `0.3.0`）
+- Sprint 0互換性（既存simulationId非再計算、`--sprint1-input`省略時の従来挙動）
 
 ### 実装対象外
 
@@ -875,11 +893,12 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - Web／MySQL
 - 固定7以外の新規必須出力ファイル追加
 - Sprint 0既存simulationIdの再計算置換
+- resume／checkpointのdisk persistence
 - S01-009の総合受入シナリオ一式の完成（本タスクで結合は行うが総合ゲートはS01-009）
 
 ### 変更を想定する既存領域
 
-- `packages/simulation-core/**`（WorldEngine／processor）
+- `packages/simulation-core/**`（WorldEngine／processor／Sprint1RunRuntimeState）
 - `apps/simulator/**`（CLI・出力）
 - 本タスクで追加するテスト
 - 必要なら`config/`のSprint 1検証用設定追加（ゲーム仕様そのものの変更ではない）
@@ -888,39 +907,44 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 
 ### 新規公開APIの有無
 
-あり得る。CLIフラグや実行入口の追加は最小限とし、正本とTECHNICAL_DECISIONSにない外部APIを増やさない。
+あり。CLIは`--sprint1-input`のみ追加。正本とTECHNICAL_DECISIONSにない外部APIを増やさない。
 
 ### データ互換性
 
 - Sprint 0既存simulationIdを再計算して置換しない
 - 固定7ファイルを増減しない
-- RunRuleSnapshotは`initial-world.json`へ1件（05）
+- RunRuleSnapshotは`initial-world.json`へ1件（05）。`initialWeeklyTrainingSidecarSnapshot`もinitial-worldへ投影。`weeklyTrainingSidecars`および`battleResults`はfinal-worldへ投影
 - EventEnvelope新規runは0.2.0、既存0.1.0読込契約は維持
+- run-metadata Sprint1 new-runは0.4.0。initial-world 0.4.0／final-world 0.3.0
 
 ### RNGへの影響
 
-あり。World RNGと戦闘RNG／週間RNGの境界を統合時に壊さない。
+あり。World RNGと戦闘RNG／週間RNGの境界を統合時に壊さない。World RNG／MatchIdGeneratorは`Sprint1RunRuntimeState`が所有する。
 
 ### canonical化／hashへの影響
 
-あり。出力文書のschemaVersion／hashを02・05・14どおり。
+あり。出力文書のschemaVersion／hashを02・05・14どおり（SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。
 
 ### 固定7ファイルへの影響
 
-維持。内容へSprint 1必要最小情報を統合するが、ファイル集合は変更しない。
+維持。内容へSprint 1必要最小情報を統合するが、ファイル集合は変更しない。`Sprint1RunRuntimeState`オブジェクト自体をcheckpointとして追加しない。sidecarおよび`battleResults`投影はinitial-world／final-worldトップレベルへ行う。
 
 ### 必須テスト
 
-- CLIからSprint 1設定で実行できること
-- 週間処理と戦闘がprocessor順で動くこと
+- CLIから`--sprint1-input`でSprint 1設定実行できること
+- `--sprint1-input`省略時のSprint 0挙動維持
+- 週間処理が`weekly-training`としてSprint1 adapter pipelineで動くこと（legacy WorldProcessor配列へ登録しない）
+- battleがadapter pipeline外で`commitRunBattlePlan`経由であること
 - 固定7ファイルが生成され増減しないこと
 - Sprint 0回帰（既存シード契約）
 - simulationId非再計算
-- events／統計／validation-reportの必要最小フィールド
+- sidecar hash差分でsimulationId差分
+- events／統計／validation-reportの必要最小フィールド（run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0／sidecar全文／battleResults全文）
 
 ### 受入条件
 
 - 結合対象仕様の受入を満たす
+- 上記確定契約を満たす
 - 固定7増減なし、既存simulationId置換なし
 - `npm run check`が成功する
 
@@ -933,6 +957,7 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - 統合済み実行経路
 - S01-009が使う再現シナリオと計測入口
 - 既知の性能警告扱い（Sprint 0方針を踏襲）
+- DB-011等の将来binding対象は`WEEKLY_TRAINING_PROCESSOR_ID="weekly-training"`
 
 ---
 
@@ -952,7 +977,7 @@ Sprint 1全体の再現性・差分・RNG・canonical／hash／identity・週間
 - `docs/specs/07-seeded-rng.md`
 - Sprint 0回帰に必要な01／04等の既存契約
 
-仕様版は`S1-SPEC-0.1.19`。
+仕様版は`S1-SPEC-0.1.20`。
 
 ### 依存タスク
 
@@ -976,7 +1001,7 @@ Sprint 1全体の再現性・差分・RNG・canonical／hash／identity・週間
 
 - 新機能の追加実装（欠陥修正に限る）
 - 大会・昇格・賞金・Web・MySQL
-- 仕様08〜14の内容変更や`S1-SPEC-0.1.19`の版上げ
+- 仕様08〜14の内容変更や`S1-SPEC-0.1.20`の版上げ
 
 ### 変更を想定する既存領域
 

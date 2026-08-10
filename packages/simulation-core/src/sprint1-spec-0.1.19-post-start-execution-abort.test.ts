@@ -1,5 +1,5 @@
 /**
- * Contract tests for S1-SPEC-0.1.19 post-start execution abort clarification.
+ * Contract tests for S1-SPEC-0.1.20 post-start execution abort clarification.
  * Locks classification / abort error shape. Production wiring through
  * runBattleToCompletion is covered in sprint1-battle-result.test.ts.
  */
@@ -43,11 +43,12 @@ function identityWithSprint1(version: string): SimulationIdentity {
   const config = expectOk(validateSprint1Config(createDefaultSprint1ConfigInput()));
   const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(config));
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     seed: 1,
     initialWorldConfigHash: "a".repeat(64),
     sprint1ConfigHash,
     techniqueCatalogHash: "b".repeat(64),
+    initialWeeklyTrainingSidecarHash: "c".repeat(64),
     battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
     matchIdGeneratorVersion: "match-id-generator-0.1.0",
     initialMatchIdGeneratorStateHash: "c".repeat(64),
@@ -63,9 +64,9 @@ function identityWithSprint1(version: string): SimulationIdentity {
   };
 }
 
-describe("S1-SPEC-0.1.19 version registry", () => {
-  it("publishes S1-SPEC-0.1.19 and keeps main SPEC / Sprint1Config SHA unchanged", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
+describe("S1-SPEC-0.1.20 version registry", () => {
+  it("publishes S1-SPEC-0.1.20 and keeps main SPEC / Sprint1Config SHA unchanged", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
     expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
     expect(SPRINT1_CONFIG_SCHEMA_VERSION).toBe("0.2.0");
     expect(SPRINT1_CONFIG_VERSION_DEFAULT).toBe("sprint1-balance-0.2.0");
@@ -75,13 +76,14 @@ describe("S1-SPEC-0.1.19 version registry", () => {
     );
   });
 
-  it("accepts identity with S1-SPEC-0.1.19 and rejects 0.1.18", () => {
-    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.19"));
+  it("accepts identity with S1-SPEC-0.1.20 and rejects 0.1.18", () => {
+    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.20"));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
-      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.19");
+      expect(ok.value.specVersions[2]?.version).toBe("S1-SPEC-0.1.20");
       expect(createSimulationIdFromIdentity(ok.value, sha256Provider).ok).toBe(true);
     }
+    expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.19")).ok).toBe(false);
     expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.18")).ok).toBe(false);
     expect(validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.17")).ok).toBe(false);
   });
@@ -96,7 +98,7 @@ describe("S1-SPEC-0.1.19 version registry", () => {
   });
 });
 
-describe("S1-SPEC-0.1.19 BattleExecutionAbortError shape", () => {
+describe("S1-SPEC-0.1.20 BattleExecutionAbortError shape", () => {
   it("exposes failureKind / stage / issues and is detectable", () => {
     const issues = Object.freeze([
       { path: "/hash", message: "provider failed", expected: "digest" },
@@ -125,7 +127,7 @@ describe("S1-SPEC-0.1.19 BattleExecutionAbortError shape", () => {
   });
 });
 
-describe("S1-SPEC-0.1.19 outcome classification table", () => {
+describe("S1-SPEC-0.1.20 outcome classification table", () => {
   it("A: provider/hash failure before start → pre_start_failure (no plan)", () => {
     const c = classifyRunBattleToCompletionOutcome({
       startSucceeded: false,
@@ -282,7 +284,7 @@ describe("S1-SPEC-0.1.19 outcome classification table", () => {
   });
 });
 
-describe("S1-SPEC-0.1.19 abort atomicity contracts", () => {
+describe("S1-SPEC-0.1.20 abort atomicity contracts", () => {
   it("J: constructing abort does not mutate caller-owned input objects", () => {
     const issues = [{ path: "/x", message: "fail" }];
     const input = {

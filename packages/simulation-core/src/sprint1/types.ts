@@ -932,15 +932,16 @@ export type SpecVersionEntry = {
 };
 
 /**
- * Sprint 1 SimulationIdentity (02 §12). Catalog/MatchId generator contents are
- * supplied as hashes/versions; their generators are later tasks.
+ * Sprint 1 SimulationIdentity (02 §12 / S1-SPEC-0.1.20). Catalog/MatchId generator
+ * contents and the initial weekly-training sidecar are supplied as hashes/versions.
  */
 export type SimulationIdentity = {
-  schemaVersion: "0.3.0";
+  schemaVersion: "0.4.0";
   seed: number;
   initialWorldConfigHash: string;
   sprint1ConfigHash: string;
   techniqueCatalogHash: string;
+  initialWeeklyTrainingSidecarHash: string;
   battleProfileAdapterVersion: string;
   matchIdGeneratorVersion: string;
   initialMatchIdGeneratorStateHash: string;

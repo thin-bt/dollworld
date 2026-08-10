@@ -1,6 +1,6 @@
 # 11 戦闘開始状態仕様
 
-- 仕様版: `S1-SPEC-0.1.19`
+- 仕様版: `S1-SPEC-0.1.20`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 1対1戦闘の入力、開始状態、参加者スナップショット、戦闘専用RNG
 - 非対象: 大会組合せ、昇格、戦績永続化、観戦画面
@@ -404,6 +404,8 @@ BattleFailureInfo
 ## 10. 戦闘開始トランザクションと専用RNG
 
 Sprint 1の標準WorldEngineが外部公開する戦闘実行APIは12仕様の`runBattleToCompletion`だけとする。`startBattleTransaction`は戦闘モジュール内の純粋な開始計画生成APIであり、`createBattleState`と`beginBattle`も純粋な内部stageとする。これらの返却値を単独でWorldState、生成器状態、イベントStreamへcommitしない。
+
+World RNG current stateおよび`MatchIdGeneratorState` current stateの正規ownerは、固定7 documentではなくruntime root `Sprint1RunRuntimeState`とする（10仕様§1.3）。`Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`battle-simulation`はSprint 1 production normal-week adapter pipelineへ登録しない。戦闘は明示的run／12仕様の`commitRunBattlePlan` facade経由とする。`commitRunBattlePlan`のWorldEngine配線本体はS01-008実装範囲とする。
 
 ```text
 StartBattleResult =

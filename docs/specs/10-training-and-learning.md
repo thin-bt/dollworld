@@ -1,6 +1,6 @@
 # 10 週間行動・訓練・習得処理仕様
 
-- 仕様版: `S1-SPEC-0.1.19`
+- 仕様版: `S1-SPEC-0.1.20`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 週次行動選択、能力訓練、技習得、休養、処理順
 - 非対象: 大会日程、師匠選択、恋愛、結婚、出産
@@ -12,6 +12,172 @@
 正本ではユーザーが訓練等を直接指示せず、人物の性格・能力・関係性に基づく自律判断を観察する。
 
 本書が参照する設定キーの型・範囲・既定値は `14-sprint1-config-schema.md` を正本とする。
+
+## 1.1 production processorId / sourceProcessor
+
+週間訓練の正式literalは次へ固定する。
+
+```text
+WEEKLY_TRAINING_PROCESSOR_ID = "weekly-training"
+```
+
+- `WEEKLY_TRAINING_PROCESSOR_ID = "weekly-training"` は **Sprint1 transactional processor adapter ID** かつ週間訓練由来`EventEnvelope.sourceProcessor`の同一literalとする。
+- legacy `WorldProcessor`／`RunWorldOneWeekInput.processors` へは登録しない。二重実行禁止。
+- production constantは1箇所だけに置き、別文字列を二重管理しない。
+- `eventType`文字列からproducerを推測しない。
+- 戦闘イベントの`sourceProcessor=battle-simulation`は変更しない。
+
+Sprint 1 production normal-week **Sprint1 transactional processor adapter pipeline** は次の1件のみとする。
+
+```text
+[ "weekly-training" ]
+```
+
+- `battle-simulation`をadapter pipelineへ登録しない。戦闘はadapter pipeline外の明示的run／`commitRunBattlePlan` facade経由とし、自動match schedulingはSprint 1範囲外。
+- 既存WorldEngine骨格（current-week phase／worldDate advance／year-start／aging）の順序をS01-008で変更しない。ただし`weekly-training`自体はlegacy WorldProcessor配列には載せない。
+- `weekly-training`はSprint1 transactional processor adapterとして当該週に1回だけ実行する。legacy `WorldProcessor.process`契約での実行や`RunWorldOneWeekInput.processors`への登録は禁止。
+- 新しいcalendar processorを作らない。既存のcalendar／year-start処理をprocessor配列へ移さない。
+
+## 1.2 InitialWeeklyTrainingSidecarSnapshot
+
+S01-004の`WeeklyTrainingPersonRecord`ではPerson以外に次がrequiredであり、WorldEngine adapterは欠落時にneutral／defaultを捏造してはならない。
+
+- `growthProfile`／`growthPotential`／`statGrowthRemainders`／`temporaryCondition`／`motivationFactor`
+- `plannerContext`／`statTargetContext`／`techniqueTargetContexts`
+- `teacherFactorKey`／`discipleCount`
+
+`motivationFactor`を10000へdefaultすることは禁止する。S01-004で既に明文化されたoptional field fallback（例: `styleMatch` omitted→50）は既存契約どおり使用できるが、上記top-level sidecar required field欠落を同じ仕組みで補ってはならない。
+
+```text
+InitialWeeklyTrainingSidecarSnapshot
+- schemaVersion: "0.1.0"
+- entries: InitialWeeklyTrainingSidecarEntry[]  // PersonId Unicode code point ascending、重複禁止
+
+InitialWeeklyTrainingSidecarEntry
+- personId
+- growthProfile
+- growthPotential
+- statGrowthRemainders
+- temporaryCondition
+- motivationFactor
+- plannerContext
+- statTargetContext
+- techniqueTargetContexts
+- teacherFactorKey
+- discipleCount
+```
+
+- Person本体は重複保存しない。
+- Sprint 1 run開始時、initial Worldの全Personとsidecar entryはexact 1:1でなければならない（missing／extra／duplicate／malformedはreject。neutral補完禁止）。
+- 各週のadapterは `current World Person + current sidecar entry` から`WeeklyTrainingPersonRecord`を構築する。
+- `processWeeklyTrainingWeek`成功後、`result.personRecords[].person`をWorld Personへ戻し、person以外（personId／growthProfile／growthPotential／statGrowthRemainders／temporaryCondition／motivationFactor／plannerContext／statTargetContext／techniqueTargetContexts／teacherFactorKey／discipleCount）をcurrent `WeeklyTrainingSidecarState`へ戻す。result側field欠落を前週値で補完せずfailure。
+- sidecar stateは同じweek transactionに含め、任一failure時はrollbackする（battle failure時もcurrent sidecar非変更）。
+- S01-008時点ではsidecar contextをWorld relationshipsから独自に再導出しない。入力された正規sidecarを正本とする。
+- `initialWeeklyTrainingSidecarHash = SHA-256(canonicalJson(validated snapshot))`をSimulationIdentity 0.4.0へbindする（02仕様）。current sidecarが週ごとに変わってもidentity／hash／simulationId／initialWeeklyTrainingSidecarHashは再計算しない。
+
+## 1.3 Sprint1RunRuntimeState／Sprint1RunContext（runtime root／context）
+
+World RNG current stateとMatchIdGeneratorState current stateを、WorldEngineStateへ安易に追加しない。Sprint 1 production runはWorldEngineStateの外に正規runtime rootを持つ。immutableなrun固定材料は別owner `Sprint1RunContext`とし、mutableな`Sprint1RunRuntimeState`と論理`Sprint1RunSession`で束ねる。`Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続だが、canonicalである`weeklyTrainingSidecars`および`battleResults`はfinal-worldへ投影する。
+
+```text
+Sprint1RunRuntimeState（mutable / rollback対象）
+- worldState: WorldEngineState
+- worldRngState: SeededRngState
+- matchIdGeneratorState: MatchIdGeneratorState
+- weeklyTrainingSidecars: WeeklyTrainingSidecarState
+- processorRuntimeStates: 既存WorldEngine ProcessorRuntimeState collection
+- eventStream: promoted／committed EventEnvelope[]（最終出力先は既存events.jsonl）
+- eventAllocationState: EventAllocationState 0.1.0
+- battleResults: BattleResult[]（run全体commit順canonical store。final-worldへ投影）
+- battleResultWeekState: BattleResultWeekState 0.1.0（同週count専用registry）
+
+Sprint1RunContext（immutable / week・battleで変更しない）
+- sprint1Config
+- techniqueCatalog
+- initialWeeklyTrainingSidecarSnapshot
+- simulationIdentity
+- simulationIdentityHash
+- simulationId
+- runRuleSnapshot
+- runRuleSnapshotHash
+
+Sprint1RunSession = { context, runtimeState }
+```
+
+- context validationは上記fieldのみ。外部`initialMatchIdGeneratorState`依存は持たない（`SimulationIdentity.seed`からfresh初期状態を再構築して`initialMatchIdGeneratorStateHash`を検証する）。
+
+```text
+EventAllocationState 0.1.0
+- schemaVersion: "0.1.0"
+- nextSequence: non-negative safe integer
+
+BattleResultWeekState 0.1.0
+- schemaVersion: "0.1.0"
+- absoluteWeek: non-negative safe integer
+- results: BattleResult[]（同週commit順。run全体storeのcurrent-week suffix）
+```
+
+必須invariant: `battleResultWeekState.absoluteWeek === worldState.worldDate.absoluteWeek`（battle facade／commitRunBattlePlan／weekly stepの前に毎回確認）。
+必須invariant: `battleResultWeekState.results`は`battleResults`のcurrent-week committed suffixと順序込みcanonical一致（一方だけappend禁止。同前チェック点で確認）。
+
+### 1.3.0 legacy WorldProcessor vs Sprint1 weekly adapter
+
+既存`WorldProcessor = { processorId, process({state,rng})→WorldEngineState }`は変更しない。production配列`[weekly-training]`は**Sprint1 transactional processor adapter pipeline**のみを意味する。`WEEKLY_TRAINING_PROCESSOR_ID`はadapter ID／`EventEnvelope.sourceProcessor`であり、legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`への登録対象ではない。二重実行禁止。S01-004 candidatesは既存WorldEngineのcalendar／aging eventsより前にglobal Event Streamへ並ぶ（outer transaction成功時のみallocation）。
+
+### 1.3.1 battle World RNG
+
+- label: `SPRINT1_BATTLE_WORLD_RNG_SEED_LABEL = "battle/world-rng"`
+- `initialWorldRngState = createSeededRng(deriveSeed(runSeed, label)).exportState()`
+- `runSeed`は`SimulationIdentity.seed`と同じvalidated seed
+- `generateInitialWorld`内部RNGの現在位置を流用しない
+- fresh生成自体のRNG drawは0。最初の`startBattleTransaction`成功時だけS01-005どおり`nextUint32()`を1回消費してbattleSeedを得る
+- pre_start_failure／commit failureではstate変更0。commit success時だけ`StartBattleRuntimeTransition.nextWorldRngState`へ置換
+- Battle Resolver最終RNG stateをWorld RNGへ戻さない
+- SimulationIdentityへ新fieldを追加しない（seed＋RNG algorithm version＋固定labelから純粋決定）
+
+### 1.3.2 weekly-training processor runtime／RNG
+
+- owner field名は`processorRuntimeStates`（既存`ProcessorRuntimeState` collection）
+- exact型: `{ processorOrder: string[]; rngStates: { processorId; state: SeededRngState }[]; processorSpecificStates?: { processorId; specificState }[] }`（`packages/simulation-core/src/world-engine/types.ts`）
+- Sprint 0互換: `processorSpecificStates`省略可または`[]`。Sprint 1 fresh／run adapterだけがweekly-training specific state exact 1件を要求。resume時missingはreject（欠落を勝手にinitial化しない）
+- weekly-trainingについて`processorId = "weekly-training"` entryをexact 1件持つ
+- RNG label: `WEEKLY_TRAINING_PROCESSOR_RNG_SEED_LABEL = "processor/weekly-training"`（WorldEngine `createInitialRuntime`の`world-engine/processor/${id}`とは別。Sprint1 freshは本labelを使う）
+- `TrainingProcessorRuntimeState`は`processorSpecificStates`のweekly-training entryの`specificState`として保持する。初期値は必ず`createInitialTrainingProcessorRuntimeState()`
+- `specificState`はplain JSON valueのみ（null／boolean／string／finite number／dense array／plain object）。validate／clone／export／restoreはdescriptor-safe deep cloneでsourceとnested参照を共有しない（getter実行禁止／structuredClone単独信用禁止）
+- `processWeeklyTrainingWeek`成功時: `result.runtimeState`／`result.rngState`を同entryへ同じweek transactionでcommit。後段failure時はTrainingProcessorRuntimeState／weekly RNG／World／sidecar／eventStream／eventAllocationState／worldDateを全部同時rollback。rngStateだけ先行commitしない
+
+### 1.3.3 BattleResult store（run全体）とBattleResultWeekState（同週count registry）
+
+- run全体canonical owner: `Sprint1RunRuntimeState.battleResults: BattleResult[]`（commit順）。fresh `battleResults = []`
+- 同週count registry owner: `Sprint1RunRuntimeState.battleResultWeekState`
+- fresh week registry: `{ schemaVersion:"0.1.0", absoluteWeek: promotedWorld.worldDate.absoluteWeek, results: [] }`
+- `commitRunBattlePlan`成功時: `completed` BattleResultおよび`resolution_error`のfailed BattleResultを、同一outer transactionで`battleResults`と`battleResultWeekState.results`の両方へcommit順append。`pre_start_failure`／post-start execution abort／commit failureはどちらにもappendなし
+- 同じmatchIdの二重登録はpreflightでrejectし、`battleResults`を含む全runtime変更0
+- `matchesCompletedThisWorldWeekBeforeBattle`のcount sourceは`battleResultWeekState.results`のみ（`battleResults.length`を使わない）。対象personIdについて current absoluteWeek の results のうち `resultKind === "completed"` かつ finalState の participantA/B.personId が一致する件数。`resolution_error`（`resultKind="failed"`）は両storeへ登録するがcompleted countへ加算しない
+- WorldEngine facadeがweek registryから`BattlePostProcessContext`を生成する。callerが任意countを指定して正本化しない
+- 週跨ぎ: week transaction成功で`worldDate.absoluteWeek`が進んだ時点で、同じouter transaction内に`battleResultWeekState`を`{ schemaVersion:"0.1.0", absoluteWeek: newAbsoluteWeek, results: [] }`へreset。**`battleResults`は変更しない**（過去BattleResultを週resetで削除しない）。week failure時はworldDate／旧registry／`battleResults`ともunchanged。worldDateだけ進んでregistryが旧週のまま残る状態／registryだけ先行resetは禁止
+- suffix invariant: `battleResultWeekState.results`は`battleResults`のcurrent-week committed suffixと順序込みcanonical一致必須（battle facade／commit／weekly step前に確認）
+- `battleResults`は`final-world.json`トップレベルへBattleResult全文（`detailedLog`含む）として投影。`battleResultWeekState`はruntime-only。`battle-results.json`等の固定7追加禁止。events.jsonlには既存どおり`battle.started`／`battle.finished`のみ（turn詳細を複製しない）
+- Sprint 1ではBattleResult retention削除を実装しない（本体SPECの4年／100年方針を先取りしない）
+
+### 1.3.4 WeeklyTrainingSidecarState／battle developmentEffects適用先
+
+- `WeeklyTrainingSidecarState`はInitial snapshotと同じshape。fresh current = deep clone(initial)。current変更でも`initialWeeklyTrainingSidecarHash`／SimulationIdentityは再計算しない
+- owner: current runtimeは`Sprint1RunRuntimeState.weeklyTrainingSidecars`。初期固定値は`Sprint1RunContext.initialWeeklyTrainingSidecarSnapshot`
+- `PersonTemporaryCondition`のcurrent正本は`weeklyTrainingSidecars[].temporaryCondition`。Personへfatigue／injury／condition／confidenceを新field追加しない
+- BattleParticipantSource: Person本体＋sidecar temporaryCondition。missing sidecar reject／neutral補完禁止
+- completedのみ適用: fatigue／injury→sidecar（injuryはsource+delta clamp）、condition／confidence→authoritative `conditionAfter`／`confidenceAfter`をsidecarへ（`conditionRequestedDelta`／`confidenceRequestedDelta`を直接加算しない）、currentMental／techniqueStateDeltas→`Person.sprint1State`。`battleExperienceSummary`はPersonへ新規保存しない（BattleResult内部）
+- resolution_error／abort／pre_start／commit failure: Person・sidecar変更0
+
+### 1.3.5 共通
+
+- 現行WorldEngineは`startSequence`／`nextSequence`の裸整数のみを持ち、同意味のnamed Event allocation runtime型は存在しないため`eventAllocationState`を新規定義する
+- EventId用の独立mutable generator stateは作らない。eventIdは03契約どおりsequenceから純粋決定する
+- RNG stream分離: (A) generateInitialWorld用RNG (B) weekly-training processor RNG `processor/weekly-training` (C) battle World RNG `battle/world-rng`。Battle Resolver内部RNGはCから1回drawしたbattleSeedで初期化。weekly RNGからbattleSeedを取らない／battle World RNGでtrainingを処理しない
+- fresh initialization promotion後の初期値: `eventStream = promoted initialEvents`、`eventAllocationState.nextSequence = promotedInitialEvents.length`（initial sequences `0..N-1` ⇒ nextSequence = N）
+- `Sprint1RunRuntimeState`はS01-008のtransaction rootとする（contextは不変）。week／battle commitではruntime全componentをdraft cloneし、全validation成功後にだけrootを置換する。任一failure時はroot全体非変更（sequenceだけ進むことを禁止）
+- `battle.started`／`battle.finished`も同じglobal `eventAllocationState`から連続割当する
+- **runtime checkpoint vs projection**: `Sprint1RunRuntimeState`オブジェクト自体はcheckpointとして固定7へ永続化しない（resume／checkpoint disk persistenceはS01-008対象外）。一方、canonicalである`weeklyTrainingSidecars`および`battleResults`は`final-world.json`トップレベルへ投影する。`Sprint1RunContext.initialWeeklyTrainingSidecarSnapshot`は`initial-world.json`トップレベルへ投影する。`eventAllocationState`／`battleResultWeekState`／`worldRngState`／`matchIdGeneratorState`／`processorRuntimeStates`はruntime-onlyのまま。固定7は exactly 7 files（`sidecar.json`／`battle-results.json`等の8ファイル目を作らない）
 
 ## 2. 週間行動
 
@@ -714,7 +880,7 @@ delta=0および生成条件:
 - `inactive`人物は0件（行動選択イベントも生成しない）
 - `acquirable`では`technique.learning_progressed`を生成しない（§6.2.1）
 
-週間Processorが返すのはEventEnvelope候補であり、`eventId`、`simulationId`、`sequence`を持たない。共通append層がEventEnvelope 0.2.0へ包み、`entities.personIds`へ対象人物を設定する。
+週間Processorが返すのはEventEnvelope候補であり、`eventId`、`simulationId`、`sequence`を持たない。共通append層がEventEnvelope 0.2.0へ包み、`sourceProcessor="weekly-training"`と`entities.personIds`（候補personId 1件）を設定する。
 
 ## 12. エラー処理
 

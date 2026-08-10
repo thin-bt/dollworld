@@ -37,7 +37,7 @@ related:
 
 ## 概要
 
-Sprint 1 の仕様は `S1-SPEC-0.1.19` が現行である。正本版は `SPEC-0.1.2`。`S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`。`0.1.12` は週間処理契約のclarificationであり、Sprint1Config balance／hashは不変。`0.1.13` は MatchId generator契約の明文化である。`0.1.14` は戦闘ターン入力契約（replacementReason／battle-action-script／技使用回数）の明文化である。`0.1.15` は移動状態補正（`moverStateModifier`／`opponentStateModifier`）の明文化である。`0.1.16` は`BattleActionLog.movementChance`の明文化である。`0.1.17` は戦闘開始`sourceSnapshot` baselineの明文化である（BattleState schema `0.6.0`）。`0.1.18` はBattleResult決定的契約clarificationである。`0.1.19` はpost-start execution abort契約clarificationである。
+Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0.1.2`。`S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`。`0.1.12` は週間処理契約のclarificationであり、Sprint1Config balance／hashは不変。`0.1.13` は MatchId generator契約の明文化である。`0.1.14` は戦闘ターン入力契約（replacementReason／battle-action-script／技使用回数）の明文化である。`0.1.15` は移動状態補正（`moverStateModifier`／`opponentStateModifier`）の明文化である。`0.1.16` は`BattleActionLog.movementChance`の明文化である。`0.1.17` は戦闘開始`sourceSnapshot` baselineの明文化である（BattleState schema `0.6.0`）。`0.1.18` はBattleResult決定的契約clarificationである。`0.1.19` はpost-start execution abort契約clarificationである。`0.1.20` はS01-008 integration contracts clarificationである（`weekly-training` adapter／`Sprint1RunRuntimeState`／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。
 
 本ページは説明・索引である。実装や仕様判断の根拠には使わない。正本と矛盾する場合は正本を優先する。
 
@@ -45,7 +45,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.19` が現行である。正本版は `SPEC-0
 
 ### 仕様状態
 
-- ミニ仕様版: `S1-SPEC-0.1.19`
+- ミニ仕様版: `S1-SPEC-0.1.20`
 - 正本版: `SPEC-0.1.2`
 - `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - 08〜14 は作成・受入監査済み（[`docs/SPEC_PREPARATION_PLAN.md`](../../SPEC_PREPARATION_PLAN.md)）
@@ -59,15 +59,15 @@ Sprint 1 の仕様は `S1-SPEC-0.1.19` が現行である。正本版は `SPEC-0
 - ターン解決（12, 14）
 - 決着・結果・戦闘ログ（13, 14）
 - Sprint1Config（14）
-- SimulationIdentity 拡張（00, 02, 05, 14）
+- SimulationIdentity 拡張（00, 02, 05, 14）— schemaVersion `0.4.0`／`initialWeeklyTrainingSidecarHash`
 
 ### 実装状態
 
 - Sprint 1全体は**未完了**
-- S01-001〜S01-007は実装済み（S01-007は受入監査中・未commit）。次の実装着手はS01-008
+- S01-001〜S01-007はimplemented / accepted（S01-007受入完了commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開（統合契約は固定済み・配線未着手）。S01-009未着手
 - 戦闘開始（11）・ターン解決（12）・BattleResult／戦闘後効果（13）は実装済み。WorldEngine／CLI本統合は未実装
-- `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy`／`runBattleToCompletion`／`finalizeBattleResult`／`validateBattleResult` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`。BattleResult決定契約は `S1-SPEC-0.1.18`。post-start execution abort契約は `S1-SPEC-0.1.19`
-- 週間処理と戦闘のWorldEngine登録はS01-008（S01-004〜S01-007では未実施）
+- `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy`／`runBattleToCompletion`／`finalizeBattleResult`／`validateBattleResult` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`。BattleResult決定契約は `S1-SPEC-0.1.18`。post-start execution abort契約は `S1-SPEC-0.1.19`。S01-008統合契約は `S1-SPEC-0.1.20`
+- 週間処理のSprint1 transactional adapter配線と戦闘の`commitRunBattlePlan`配線はS01-008（S01-004〜S01-007では未実施）。legacy WorldProcessor配列へweekly-trainingを登録しない
 - 本Wikiの同期や `npm run check` の成功は、Sprint 1全体の実装完了を意味しない
 
 ### 実装タスク
@@ -104,6 +104,8 @@ Sprint 1 の仕様は `S1-SPEC-0.1.19` が現行である。正本版は `SPEC-0
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.13-match-id-generator-contracts.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.18-battle-result-contracts.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.19-post-start-execution-abort.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.20-s01-008-integration-contracts.test.ts`
 
 ## 関連する判断
 
@@ -112,7 +114,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.19` が現行である。正本版は `SPEC-0
 
 ## 未解決事項
 
-- 次の実装着手は S01-008（WorldEngine・CLI・出力統合）。BattleResult／戦闘後効果変換は S01-007で用意済み。Sprint 1全体は未完了
+- 現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開（WorldEngine・CLI・出力統合）。BattleResult／戦闘後効果変換は S01-007でimplemented／accepted（commit `a39e476`）。S01-009未着手。Sprint 1全体は未完了
 
 ## 関連Wikiページ
 

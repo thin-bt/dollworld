@@ -64,7 +64,7 @@ World 人物を戦闘中に直接書き換えず、snapshot と結果経由で�
 
 ### 週間処理の入出力境界（S01-004実装済み）
 
-週間処理は WorldEngine から独立した純粋関数として実装されている。WorldEngine への登録は S01-008。
+週間処理は WorldEngine から独立した純粋関数として実装されている。Sprint1 transactional processor adapter への配線は S01-008。production adapter ID／event `sourceProcessor` は `weekly-training`（`S1-SPEC-0.1.20`）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors` へは登録しない。
 
 ```text
 入力（検証前）
@@ -79,7 +79,25 @@ RuntimeState累積・出力凍結
 出力: 更新済み人物レコード / RuntimeState / RNG状態 / イベントcandidate列
 ```
 
-`rngState`はdescriptor-safeな`validateSeededRngState`通過後にだけimportする。正本10・14がルールを定義していない入力値（planner context score、師匠推薦度、styleMatch、相性など）は sidecar として adapter から受け取り、処理側で導出しない。
+`rngState`はdescriptor-safeな`validateSeededRngState`通過後にだけimportする。正本10・14がルールを定義していない入力値（planner context score、師匠推薦度、styleMatch、相性など）は sidecar として adapter から受け取り、処理側で導出しない。S01-008では`InitialWeeklyTrainingSidecarSnapshot`をCLIから受け取り、`Sprint1RunRuntimeState.weeklyTrainingSidecars`が所有する。missing sidecarのneutral defaultは禁止。
+
+### Sprint1RunRuntimeState／Sprint1RunContext（S1-SPEC-0.1.20／S01-008）
+
+mutable runtime root と immutable context（runtime checkpoint vs projection を区別）:
+
+- `Sprint1RunRuntimeState`: `worldState`／`worldRngState`／`matchIdGeneratorState`／`weeklyTrainingSidecars`（`WeeklyTrainingSidecarState`）／`processorRuntimeStates`／`eventStream`／`eventAllocationState`／`battleResults`／`battleResultWeekState`
+- `Sprint1RunContext`: `sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecarSnapshot`／`simulationIdentity`(+hash)／`simulationId`／`runRuleSnapshot`(+hash)。外部`initialMatchIdGeneratorState`依存なし
+- 論理`Sprint1RunSession = { context, runtimeState }`。rollbackはruntimeのみ
+- weekly `TrainingProcessorRuntimeState`は`processorRuntimeStates.processorSpecificStates`（plain JSON deep-clone）
+- production `[weekly-training]` = Sprint1 transactional adapter pipeline（legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない。二重実行禁止）
+- battle World RNG label `battle/world-rng`／weekly RNG label `processor/weekly-training`
+- fresh initialization promotion後: `eventStream = promoted initialEvents`、`nextSequence = promotedInitialEvents.length`、`battleResults = []`、`battleResultWeekState.results = []`
+- `battleResultWeekState.absoluteWeek === worldDate.absoluteWeek`必須。week.resultsは`battleResults` current-week suffixとcanonical一致必須
+- week advance成功時: week registryだけ`results=[]`へreset。`battleResults`は保持
+- battleはadapter pipeline外。`commitRunBattlePlan`配線はS01-008
+- `matchesCompletedThisWorldWeekBeforeBattle`はweek registryのparticipant別completed件数（`battleResults.length`ではない。resolution_errorはcount+0）
+- `PersonTemporaryCondition` current正本はweekly sidecar。Personへfatigue等新field追加なし
+- `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`→initial-world 0.4.0投影、`weeklyTrainingSidecars`＋`battleResults`→final-world 0.3.0投影。fixed7 exactly 7 files
 
 ### 戦闘開始の入出力境界（S01-005実装済み）
 
@@ -113,7 +131,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 出力: 更新済みBattleState / ターンログ材料 / RNG状態（失敗時は部分更新なし）
 ```
 
-移動状態補正は `S1-SPEC-0.1.15` の `moverStateModifier`／`opponentStateModifier`（`battle.actionOrder`係数共用）を使う。`BattleActionLog.movementChance`（floor整数パーセント0..100、RNG非消費）は `S1-SPEC-0.1.16` のproduction実装。`DefaultBattleStrategy` は default_strategy 源の行動決定に用いる。BattleResult／WorldEngineは未実装。
+移動状態補正は `S1-SPEC-0.1.15` の `moverStateModifier`／`opponentStateModifier`（`battle.actionOrder`係数共用）を使う。`BattleActionLog.movementChance`（floor整数パーセント0..100、RNG非消費）は `S1-SPEC-0.1.16` のproduction実装。`DefaultBattleStrategy` は default_strategy 源の行動決定に用いる。BattleResult（S01-007）はimplemented／accepted（commit `a39e476`）。WorldEngine登録はS01-008。
 
 `runBattleToCompletion`（S01-007）の結果は `completed`／`resolution_error`／`pre_start_failure` の3種のみ。start成功後に正規commitPlanを構築不能なdependency／invariant failureは `BattleExecutionAbortError` としてthrowし、startRuntimeTransition／started／finishedをcommitしない（`S1-SPEC-0.1.19`）。
 
@@ -127,7 +145,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 - `packages/simulation-core/src/sprint1/process-weekly-training-week.ts`（週間Processor入口）
 - `packages/simulation-core/src/sprint1/start-battle-transaction.ts`（戦闘開始入口、内部）
 - `packages/simulation-core/src/sprint1/prepare-battle-turn.ts`／`resolve-battle-turn.ts`／`default-battle-strategy.ts`
-- BattleResult（S01-007）／WorldEngine登録（S01-008）は未実装
+- BattleResult（S01-007）はimplemented / accepted（commit `a39e476`）。WorldEngine登録（S01-008）は未実装。現在は`S1-SPEC-0.1.20` clarifier中
 
 ## 関連するテスト
 
@@ -138,6 +156,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 - `packages/simulation-core/src/sprint1-battle-start.test.ts`
 - `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
+- `packages/simulation-core/src/sprint1-spec-0.1.20-s01-008-integration-contracts.test.ts`
 
 ## 関連する判断
 
@@ -145,7 +164,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 
 ## 未解決事項
 
-該当なし。
+S01-008本体（WorldEngine／CLI配線）は未実装。現在は`S1-SPEC-0.1.20` clarifier受入監査中。順: clarifier accepted → S01-008 implementation → S01-009。
 
 ## 関連Wikiページ
 

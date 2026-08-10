@@ -1,3 +1,13 @@
+import { snapshotPlainJsonValueOrFail } from "../plain-json-snapshot.js";
+import { WorldEngineError, toWorldEngineError } from "./errors.js";
+import { readEnumerableDataProperty } from "./safe-access.js";
+import { assertDataArray, assertDataRecord, dataValue, isPlainObject, setFrom } from "./schema.js";
+import type {
+  ProcessorRuntimeState,
+  ProcessorSpecificRuntimeEntry,
+  WorldProcessor,
+} from "./types.js";
+import type { ValidationIssue } from "../validation.js";
 import {
   createSeededRng,
   deriveSeed,
@@ -6,10 +16,6 @@ import {
   type SeededRng,
   type SeededRngState,
 } from "../rng.js";
-import { WorldEngineError, toWorldEngineError } from "./errors.js";
-import { readEnumerableDataProperty } from "./safe-access.js";
-import { assertDataArray, assertDataRecord, dataValue, isPlainObject, setFrom } from "./schema.js";
-import type { ProcessorRuntimeState, WorldProcessor } from "./types.js";
 
 const UINT32_MAX = 4294967295;
 
@@ -221,8 +227,9 @@ export function createInitialRuntime(
   };
 }
 
-const RUNTIME_KEYS = setFrom(["processorOrder", "rngStates"]);
+const RUNTIME_KEYS = setFrom(["processorOrder", "rngStates", "processorSpecificStates"]);
 const ENTRY_KEYS = setFrom(["processorId", "state"]);
+const SPECIFIC_ENTRY_KEYS = setFrom(["processorId", "specificState"]);
 const RNG_STATE_KEYS = setFrom(["algorithmVersion", "s0", "s1", "s2", "s3"]);
 
 /**
@@ -336,9 +343,77 @@ export function validateAndCloneProcessorRuntimeState(
     }
   }
 
+  let processorSpecificStates: ProcessorRuntimeState["processorSpecificStates"];
+  if (Object.prototype.hasOwnProperty.call(runtimeState, "processorSpecificStates")) {
+    const specificValue = dataValue(
+      runtimeState,
+      "processorSpecificStates",
+      "processorRuntimeState",
+    );
+    assertDataArray(specificValue, "processorRuntimeState.processorSpecificStates");
+    const specificEntries: NonNullable<ProcessorRuntimeState["processorSpecificStates"]> = [];
+    const specificSeen = new Set<string>();
+    for (let i = 0; i < specificValue.length; i += 1) {
+      const entry = specificValue[i];
+      if (!isPlainObject(entry)) {
+        throw new WorldEngineError(
+          "processorRuntimeState processorSpecificStates entry must be an object",
+          { field: "processorSpecificStates" },
+        );
+      }
+      assertDataRecord(
+        entry,
+        SPECIFIC_ENTRY_KEYS,
+        `processorRuntimeState.processorSpecificStates[${String(i)}]`,
+      );
+      const processorId = dataValue(entry, "processorId", `processorSpecificStates[${String(i)}]`);
+      if (typeof processorId !== "string") {
+        throw new WorldEngineError("processorSpecificStates.processorId must be a string", {
+          field: "processorSpecificStates",
+        });
+      }
+      if (!seen.has(processorId)) {
+        throw new WorldEngineError(
+          "processorSpecificStates.processorId must appear in processorOrder",
+          {
+            processorId,
+            field: "processorSpecificStates",
+          },
+        );
+      }
+      if (specificSeen.has(processorId)) {
+        throw new WorldEngineError("processorSpecificStates has duplicate processorId", {
+          processorId,
+          field: "processorSpecificStates",
+        });
+      }
+      specificSeen.add(processorId);
+      const specificState = dataValue(
+        entry,
+        "specificState",
+        `processorSpecificStates[${String(i)}]`,
+      );
+      if (specificState === undefined) {
+        throw new WorldEngineError("processorSpecificStates.specificState is required", {
+          processorId,
+          field: "processorSpecificStates",
+        });
+      }
+      specificEntries.push({
+        processorId,
+        specificState: cloneProcessorSpecificState(
+          specificState,
+          `processorSpecificStates[${String(i)}]/specificState`,
+        ),
+      });
+    }
+    processorSpecificStates = specificEntries;
+  }
+
   return {
     processorOrder: [...processorOrder],
     rngStates,
+    ...(processorSpecificStates !== undefined ? { processorSpecificStates } : {}),
   };
 }
 
@@ -382,11 +457,23 @@ export function restoreRuntime(
     runtimeState: {
       processorOrder: [...order],
       rngStates,
+      ...(cloned.processorSpecificStates !== undefined
+        ? {
+            processorSpecificStates: cloneProcessorSpecificStates(
+              cloned.processorSpecificStates,
+              "processorSpecificStates",
+            ),
+          }
+        : {}),
     },
   };
 }
 
-export function exportRuntimeState(processorOrder: unknown, rngs: unknown): ProcessorRuntimeState {
+export function exportRuntimeState(
+  processorOrder: unknown,
+  rngs: unknown,
+  processorSpecificStates?: ProcessorRuntimeState["processorSpecificStates"],
+): ProcessorRuntimeState {
   if (!Array.isArray(processorOrder)) {
     throw new WorldEngineError("processorOrder must be an array", { field: "processorOrder" });
   }
@@ -399,7 +486,7 @@ export function exportRuntimeState(processorOrder: unknown, rngs: unknown): Proc
       detail: `order=${String(processorOrder.length)} rngs=${String(rngs.length)}`,
     });
   }
-  return {
+  const base: ProcessorRuntimeState = {
     processorOrder: processorOrder.map((processorId, index) => {
       if (typeof processorId !== "string") {
         throw new WorldEngineError("processorOrder entries must be strings", {
@@ -432,34 +519,117 @@ export function exportRuntimeState(processorOrder: unknown, rngs: unknown): Proc
       };
     }),
   };
+  if (processorSpecificStates === undefined) {
+    return base;
+  }
+  return {
+    ...base,
+    processorSpecificStates: cloneProcessorSpecificStates(
+      processorSpecificStates,
+      "processorSpecificStates",
+    ),
+  };
 }
 
 export function cloneRuntimeState(runtimeState: unknown): ProcessorRuntimeState {
-  if (runtimeState === null || typeof runtimeState !== "object" || Array.isArray(runtimeState)) {
-    throw new WorldEngineError("processorRuntimeState must be an object", {
+  if (!isPlainObject(runtimeState)) {
+    throw new WorldEngineError("processorRuntimeState must be a plain object", {
       field: "processorRuntimeState",
     });
   }
-  const typed = runtimeState as ProcessorRuntimeState;
-  if (!Array.isArray(typed.processorOrder) || !Array.isArray(typed.rngStates)) {
-    throw new WorldEngineError("processorRuntimeState shape is invalid", {
-      field: "processorRuntimeState",
+  // Descriptor-safe peek of processorOrder only — never invoke top-level getters
+  // (including hostile processorSpecificStates). Full validation/clone goes through
+  // validateAndCloneProcessorRuntimeState.
+  const orderDescriptor = Object.getOwnPropertyDescriptor(runtimeState, "processorOrder");
+  if (orderDescriptor === undefined) {
+    throw new WorldEngineError("processorRuntimeState.processorOrder is required", {
+      field: "processorOrder",
     });
   }
-  return {
-    processorOrder: [...typed.processorOrder],
-    rngStates: typed.rngStates.map((entry) => {
-      if (entry === null || typeof entry !== "object") {
-        throw new WorldEngineError("processorRuntimeState rngStates entry must be an object", {
-          field: "rngStates",
-        });
-      }
-      return {
-        processorId: entry.processorId,
-        state: cloneRngState(entry.state),
-      };
-    }),
-  };
+  if (orderDescriptor.get !== undefined || orderDescriptor.set !== undefined) {
+    throw new WorldEngineError(
+      "processorRuntimeState.processorOrder must be a data property (accessor forbidden)",
+      { field: "processorOrder" },
+    );
+  }
+  if (orderDescriptor.enumerable !== true) {
+    throw new WorldEngineError("processorRuntimeState.processorOrder must be enumerable", {
+      field: "processorOrder",
+    });
+  }
+  assertDataArray(orderDescriptor.value, "processorRuntimeState.processorOrder");
+  const expectedOrder: string[] = [];
+  for (let i = 0; i < orderDescriptor.value.length; i += 1) {
+    const id = orderDescriptor.value[i];
+    if (typeof id !== "string") {
+      throw new WorldEngineError("processorOrder entries must be strings", {
+        field: "processorOrder",
+        detail: `index=${String(i)}`,
+      });
+    }
+    expectedOrder.push(id);
+  }
+  return validateAndCloneProcessorRuntimeState(runtimeState, expectedOrder);
+}
+
+/**
+ * Descriptor-safe deep clone of processor-specific deterministic runtime payload.
+ * Rejects non-plain-JSON values and never aliases nested objects/arrays.
+ */
+export function cloneProcessorSpecificState(specificState: unknown, path: string): unknown {
+  const issues: ValidationIssue[] = [];
+  const cloned = snapshotPlainJsonValueOrFail(specificState, path, issues);
+  if (cloned === undefined || issues.length > 0) {
+    const first = issues[0];
+    throw new WorldEngineError(
+      first?.message ?? "processorSpecificStates.specificState must be plain JSON",
+      {
+        field: "processorSpecificStates",
+        detail: first === undefined ? path : `${first.path}: ${first.message}`,
+      },
+    );
+  }
+  return cloned;
+}
+
+function cloneProcessorSpecificStates(
+  entries: unknown,
+  pathPrefix: string,
+): ProcessorSpecificRuntimeEntry[] {
+  assertDataArray(entries, pathPrefix);
+  const cloned: ProcessorSpecificRuntimeEntry[] = [];
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (!isPlainObject(entry)) {
+      throw new WorldEngineError("processorSpecificStates entry must be an object", {
+        field: "processorSpecificStates",
+        detail: `${pathPrefix}[${String(index)}]`,
+      });
+    }
+    assertDataRecord(entry, SPECIFIC_ENTRY_KEYS, `${pathPrefix}[${String(index)}]`);
+    const processorId = dataValue(entry, "processorId", `${pathPrefix}[${String(index)}]`);
+    if (typeof processorId !== "string") {
+      throw new WorldEngineError("processorSpecificStates.processorId must be a string", {
+        field: "processorSpecificStates",
+        detail: `${pathPrefix}[${String(index)}]`,
+      });
+    }
+    const specificState = dataValue(entry, "specificState", `${pathPrefix}[${String(index)}]`);
+    if (specificState === undefined) {
+      throw new WorldEngineError("processorSpecificStates.specificState is required", {
+        field: "processorSpecificStates",
+        detail: `${pathPrefix}[${String(index)}]`,
+      });
+    }
+    cloned.push({
+      processorId,
+      specificState: cloneProcessorSpecificState(
+        specificState,
+        `${pathPrefix}[${String(index)}]/specificState`,
+      ),
+    });
+  }
+  return cloned;
 }
 
 function assertPrintableAsciiProcessorId(processorId: string): void {

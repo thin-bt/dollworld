@@ -21,9 +21,45 @@ last_verified: 2026-08-08
 
 ## 履歴
 
+### 2026-08-09 — S1-SPEC-0.1.20 受入監査修正5（battleResults store／final-world投影）
+
+- 版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）
+- `Sprint1RunRuntimeState.battleResults`をrun全体canonical storeとして追加。week registryと役割分離
+- final-world 0.3.0へ`battleResults`全文投影（0.4.0非bump）。retention削除未実装。events.jsonlへturn詳細非複製
+- week suffix invariant／`cloneRuntimeState` getter非実行
+
+### 2026-08-09 — S1-SPEC-0.1.20 受入監査修正4（adapter境界／document schema投影）
+
+- 版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）
+- weekly-trainingはSprint1 transactional adapter ID／`sourceProcessor`であり、legacy WorldProcessor／`RunWorldOneWeekInput.processors`へは登録しない
+- document schema: initial-world `0.4.0`（`initialWeeklyTrainingSidecarSnapshot`）、final-world `0.3.0`（`weeklyTrainingSidecars`）
+- `Sprint1RunContext`最終shapeに`initialWeeklyTrainingSidecarSnapshot`。runtime checkpoint vs projectionを明文化
+- fixed7は exactly 7 files
+
+### 2026-08-09 — S1-SPEC-0.1.20 受入監査修正2（BattleResultWeekState／RNG labels／processorRuntimeStates）
+
+- 版番号は`S1-SPEC-0.1.20`のまま
+- `BattleResultWeekState`／battle World RNG `battle/world-rng`／weekly-training RNG `processor/weekly-training`／`processorSpecificStates`最小拡張
+- fresh new-run初期化を21ステップへ更新。S01-008再判断禁止契約を追記
+
+### 2026-08-09 — S1-SPEC-0.1.20 受入監査修正1（promotion／EventAllocation／S01-007 current-state同期）
+
+- 版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）
+- S01-001〜007をimplemented／acceptedへ同期（S01-007受入完了commit `a39e476`）。現在は0.1.20 clarifier中
+- fresh Sprint 1 initialization promotion／`EventAllocationState`／`eventStream` ownerを正本化
+- SimulationIdentity 0.3.0専用legacy readerはrepositoryに無く新設しない旨を明記
+- 過去日時点の「当時S01-007受入監査中」履歴エントリは歴史記録として維持
+
+### 2026-08-09 — S1-SPEC-0.1.20 S01-008 integration contracts clarification
+
+- Sprint 1ミニ仕様を`S1-SPEC-0.1.20`へ版上げ。S01-008着手前の統合契約を明文化
+- `weekly-training` literal／production adapter pipeline`[weekly-training]`／`Sprint1RunRuntimeState`／`InitialWeeklyTrainingSidecarSnapshot`／SimulationIdentity `0.4.0`＋`initialWeeklyTrainingSidecarHash`／CLI `--sprint1-input`／run-metadata `0.4.0`（当時の記述: initial-world／final-world非bump。fix4でinitial-world 0.4.0／final-world 0.3.0へ更新）
+- S01-008はpendingのまま。WorldEngine／CLI配線は未実装。foundation契約テストを追加
+- Wiki: S01-008確定契約一覧、sprint1／architecture／glossaryを追随
+
 ### 2026-08-09 — S01-007 受入監査修正2進行（0.1.19 abort配線／validator bind）
 
-- S01-007 production WIPを`S1-SPEC-0.1.19`上へ復元。受入監査中・未commit
+- S01-007 production WIPを`S1-SPEC-0.1.19`上へ復元。受入監査中・未commit（当時の履歴）
 - `BattleExecutionAbortError` production配線、BattleResult top-level↔finalState bind、structuralValidation全field bindを実施中
 - 次はS01-008（WorldEngine commit）
 

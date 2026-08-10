@@ -11,7 +11,9 @@ sources:
 last_verified: 2026-08-01
 related:
   - simulation-core.md
+  - sprint1-processing-flow.md
   - ../glossary/processor-runtime-state.md
+  - ../tasks/S01-008.md
 ---
 
 # WorldEngine
@@ -32,6 +34,15 @@ related:
 - 受入の例: 100年=4800週、年次統計確定通知100回、終了は世界101年4月第1週年初後
 
 Sprint 0 では修行・戦闘・大会・結婚・出産・死亡 processor は対象外。
+
+### Sprint 1（S1-SPEC-0.1.20）
+
+- production normal-week Sprint1 transactional adapter pipelineは`[weekly-training]`のみ（配線はS01-008）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない
+- `battle-simulation`はadapter pipelineへ登録しない。戦闘は明示的run／`commitRunBattlePlan` facade経由
+- World RNG／MatchIdGenerator／`eventStream`／`eventAllocationState`の正規ownerは`Sprint1RunRuntimeState`（オブジェクト自体はcheckpoint非永続）。`weeklyTrainingSidecars`はfinal-worldへ投影
+- `TrainingProcessorRuntimeState`は既存`ProcessorRuntimeState`経由
+- fresh Sprint 1 initialization promotion（provisional→final simulationId／initial events 0.2.0）はS01-008で実装。既存骨格（current-week phase／worldDate advance／year-start／aging）の順序は変更しない
+- S01-007はimplemented / accepted（commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中
 
 ## 関連する正本
 

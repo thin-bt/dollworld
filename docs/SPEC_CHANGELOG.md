@@ -1,5 +1,28 @@
 # 変更履歴
 
+## 2026-08-09：S1-SPEC-0.1.20（S01-008 integration contracts clarification）
+
+S01-008着手時に判明した正本未定義（週間processor literal／production processor配列／runtime root／weekly sidecar／CLI入力経路）と、外部sidecarをSimulationIdentityへbindする不足を明文化した。既存balanceの意図変更ではなく、統合契約の未定義解消である。WorldEngine／CLI本体配線は本clarifierの対象外（S01-008実装）。版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）。受入監査修正1で初期化promotion／EventAllocation／S01-007 current-state同期／0.3.0 reader記述整理を、受入監査修正2で`BattleResultWeekState`／battle World RNG／weekly-training processorRuntimeStates物理ownerを、受入監査修正3で`processorSpecificStates` deep-clone／Sprint1 adapter境界／`Sprint1RunContext`／`WeeklyTrainingSidecarState`／developmentEffects適用先／weekly transaction最終順を、受入監査修正4でweekly-training／legacy WorldProcessor矛盾解消・document schema投影（initial-world 0.4.0／final-world 0.3.0）・`Sprint1RunContext.initialWeeklyTrainingSidecarSnapshot`最終shapeを、受入監査修正5でrun全体`battleResults` canonical store／final-world 0.3.0への`battleResults`投影／week suffix invariant／`cloneRuntimeState` getter非実行を同版へ追記した。
+
+- production週間processor literalを`weekly-training`へ固定（Sprint1 transactional processor adapter IDかつ週間由来`EventEnvelope.sourceProcessor`と同一literal）。既存`WorldProcessor` interfaceは変更しない。production配列`[weekly-training]`はSprint1 transactional processor adapter pipelineのみを意味し、legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない（二重実行禁止）
+- Sprint 1 production normal-week adapter pipelineは`[weekly-training]`のみ。`battle-simulation`はpipeline外の明示的run／`commitRunBattlePlan` facade経由
+- runtime-only root `Sprint1RunRuntimeState`最終論理shape: `worldState`／`worldRngState`／`matchIdGeneratorState`／`weeklyTrainingSidecars`／`processorRuntimeStates`／`eventStream`／`eventAllocationState`／`battleResults`／`battleResultWeekState`。加えてimmutable `Sprint1RunContext`と論理`Sprint1RunSession`
+- `battleResults`: run全体のcommit順canonical BattleResult store。fresh `[]`。completed／`resolution_error`のみappend。`pre_start_failure`／abort／commit failureは非append。duplicate matchId reject。week advanceでは`battleResultWeekState.results`のみ`[]`へresetし、`battleResults`は保持。week.resultsはglobal suffixとcanonical一致必須。count sourceはweek registryのみ
+- `Sprint1RunContext`最終shape: `sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecarSnapshot`／`simulationIdentity`(+hash)／`simulationId`／`runRuleSnapshot`(+hash)。context validationは外部`initialMatchIdGeneratorState`依存なし（identity seedから再構築）
+- `EventAllocationState` 0.1.0／`BattleResultWeekState` 0.1.0。`matchesCompletedThisWorldWeekBeforeBattle`はparticipant別completed件数（`results.length`ではない）。`resolution_error`はregistry登録するがcompleted countへ加算しない
+- battle World RNG label `battle/world-rng`、weekly-training RNG label `processor/weekly-training`。両stream分離。`ProcessorRuntimeState`へoptional `processorSpecificStates`を最小拡張（Sprint 0省略可）。`specificState`はplain JSON descriptor-safe deep-clone。`cloneRuntimeState`／entry getter非実行
+- `WeeklyTrainingSidecarState`／`PersonTemporaryCondition` sidecar正本／developmentEffects物理適用先／`battleResultWeekState.absoluteWeek === worldDate.absoluteWeek`／weekly transaction最終順とEventEnvelope順
+- fresh Sprint1 new-run初期化は21ステップ（promotion／RNG／processor runtime／EventAllocation／BattleResultWeekState／root束ね／adapter pipeline登録）
+- `InitialWeeklyTrainingSidecarSnapshot` schemaVersion `0.1.0`（Person本体非複製・PersonId昇順・initial Worldと1:1・neutral default禁止・`motivationFactor`欠落拒否）
+- `SimulationIdentity` schemaVersion `0.3.0`→`0.4.0`。必須field `initialWeeklyTrainingSidecarHash`を追加し、sidecar変更でsimulationIdentityHash／simulationIdが変わることを必須とする
+- current new-run `validateSimulationIdentity`は0.4.0のみ受理。repositoryに0.3.0専用public legacy readerは無く、clarifierで新設しない。維持するlegacyはSprint 0 fixed7／EventEnvelope 0.1.0／`createSimulationId`／保存済みSprint 0 simulationId
+- CLI新規optionは`--sprint1-input`のみ。`Sprint1CliInput` schemaVersion `0.1.0`（`schemaVersion`／`sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecar`）。path／mtimeはidentity材料にしない
+- 文書schema: `run-metadata.json` Sprint1 new-run `0.4.0`、`initial-world.json` `0.3.0`→`0.4.0`（トップレベル`initialWeeklyTrainingSidecarSnapshot`）、`final-world.json` `0.2.0`→`0.3.0`（トップレベル`weeklyTrainingSidecars`＋`battleResults`を同一0.3.0最終shapeとして確定。0.4.0へ追加bumpしない）。**非bump**: `RunRuleSnapshot` `0.4.0`、`EventEnvelope` `0.2.0`、`InitialWeeklyTrainingSidecarSnapshot` `0.1.0`、`EventAllocationState` `0.1.0`、`BattleResultWeekState` `0.1.0`、`BattleResult` `0.5.0`
+- runtime checkpoint vs projection: `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`weeklyTrainingSidecars`および`battleResults`（`detailedLog`含む全文）はfinal-worldへ、`initialWeeklyTrainingSidecarSnapshot`はinitial-worldへ投影。fixed7は exactly 7 files（`sidecar.json`／`battle-results.json`禁止）。events.jsonlへturn詳細非複製。Sprint 1ではretention削除未実装
+- RunRuleSnapshotへsidecar全文／`initialWeeklyTrainingSidecarHash`を直接追加しない（`simulationIdentityHash`経由でbind）
+- Sprint1Config構造・既定値・canonical SHAは不変。Sprint 0 CLI／legacy simulationId／固定7件数は不変
+- 実装状態（current）: S01-001〜S01-007はimplemented／accepted（S01-007受入完了commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開。S01-009未着手。Sprint 1全体は未完了
+
 ## 2026-08-09：S1-SPEC-0.1.19（post-start execution abort 契約clarification）
 
 S01-007受入監査で判明した、`startBattleTransaction`成功後のdependency／infrastructure failure契約を明文化した。既存balanceの意図変更ではなく、結果型境界の未定義解消である。

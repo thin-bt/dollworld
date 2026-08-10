@@ -143,15 +143,16 @@ manifest不整合時は生成中止。
 
 ## 12. Sprint 1 SimulationIdentity
 
-Sprint 1以降に開始する新規runでは、設定ハッシュ・seed・仕様版に加え、Sprint 1の決定的ルール入力を含む`SimulationIdentity`から`simulationId`を生成する。Sprint 1仕様版は`S1-SPEC-0.1.19`。旧`S1-SPEC-0.1.17`を新規runの現行Sprint 1 identityとして受理しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない。
+Sprint 1以降に開始する新規runでは、設定ハッシュ・seed・仕様版に加え、Sprint 1の決定的ルール入力を含む`SimulationIdentity`から`simulationId`を生成する。Sprint 1仕様版は`S1-SPEC-0.1.20`。新規runの現行Sprint 1 identityとして旧`S1-SPEC-0.1.19`および`SimulationIdentity` schemaVersion `0.3.0`を受理しない。Sprint 0で生成済みの旧`simulationId`を再計算して置換しない（保存済み／archived Sprint 0 runのmigrationではない。後述の fresh Sprint 1 initialization promotion は、まだ固定7へ保存されておらず WorldEngine へ commit されていない transaction-local provisional だけを対象とする）。
 
 ```text
 SimulationIdentity
-- schemaVersion: "0.3.0"
+- schemaVersion: "0.4.0"
 - seed
 - initialWorldConfigHash
 - sprint1ConfigHash
 - techniqueCatalogHash
+- initialWeeklyTrainingSidecarHash
 - battleProfileAdapterVersion
 - matchIdGeneratorVersion
 - initialMatchIdGeneratorStateHash
@@ -159,7 +160,7 @@ SimulationIdentity
 - specVersions:
     - { specSetId: "main", version: "SPEC-0.1.2" }
     - { specSetId: "sprint0", version: "S0-SPEC-0.1.5" }
-    - { specSetId: "sprint1", version: "S1-SPEC-0.1.19" }
+    - { specSetId: "sprint1", version: "S1-SPEC-0.1.20" }
 - rngAlgorithmVersion
 - canonicalJsonVersion
 - hashAlgorithm: "SHA-256"
@@ -167,7 +168,8 @@ SimulationIdentity
 
 - `specVersions`は`specSetId`昇順へcanonical正規化する。
 - `seed`はrunへ渡された決定的seedそのものを使用し、派生seedやexecutionIdを使用しない。
-- `initialWorldConfigHash`、`sprint1ConfigHash`、`techniqueCatalogHash`は各完全内容のcanonical JSON SHA-256と一致必須。
+- `initialWorldConfigHash`、`sprint1ConfigHash`、`techniqueCatalogHash`、`initialWeeklyTrainingSidecarHash`は各完全内容のcanonical JSON SHA-256と一致必須。
+- `initialWeeklyTrainingSidecarHash = SHA-256(canonicalJson(validated InitialWeeklyTrainingSidecarSnapshot))`（10仕様）。sidecar内容が変わればsimulationIdentityHashおよびsimulationIdも変わることを必須とする。
 - `battleProfileAdapterVersion`は11仕様の人物正規化adapter版と一致必須。
 - `matchIdGeneratorVersion`は00ミニ仕様の決定的MatchId生成器版（Sprint 1初期値`match-id-generator-0.1.0`）と一致必須。
 - `initialMatchIdGeneratorStateHash`はfresh runのseed・generatorVersion・固定namespace `"match"`から生成した初期`MatchIdGeneratorState`（schemaVersion `0.1.0`、`nextSequence=1`）のcanonical JSON SHA-256と一致必須。任意の現在nextSequenceや途中stateを初期値として注入しない。任意状態から開始するresume runは保存済みruntime checkpointを使用し、新しいSimulationIdentityを作り直さない。
@@ -175,12 +177,13 @@ SimulationIdentity
 - `rngAlgorithmVersion`は07仕様の実装版文字列と一致必須。
 - `canonicalJsonVersion`は実際にhash算出へ使用するcanonical JSON実装版と一致必須。
 - `hashAlgorithm`はSprint 1では`SHA-256`へ固定し、別名や暗黙既定値を許可しない。
-- 現実時刻、executionId、Git commit、OS、Node、パス、処理時間、メモリは含めない。
+- 現実時刻、executionId、Git commit、OS、Node、パス、処理時間、メモリは含めない。CLIの入力path／mtimeもidentity材料にしない。
 - MatchId文字列そのもの、現在の`nextSequence`、途中のgenerator state hashをSimulationIdentity材料へ含めない。
 - seedが異なれば初期MatchIdGeneratorState本文・`initialMatchIdGeneratorStateHash`・SimulationIdentity hash・simulationIdが差分する。同じseedと各identity入力ならこれらは一致する。
 - 異なるrunでは同じMatchId文字列（例: `match_000000000001`）を許可する。seedはMatchId文字列へ混ぜない。
+- RunRuleSnapshotへ`initialWeeklyTrainingSidecarHash`やsidecar全文を直接追加しない。sidecarは`simulationIdentityHash`経由でbindする。
 
-生成順序:
+生成順序（hash／id）:
 
 ```text
 simulationIdentityHash
@@ -190,40 +193,238 @@ simulationId
 = existingSimulationIdFactory(simulationIdentityHash)
 ```
 
-1. 初期世界設定、Sprint1Config、TechniqueCatalogを検証する。
-2. seed、matchIdGeneratorVersion、固定namespaceからfresh run用の初期MatchIdGeneratorStateを生成し、`initialMatchIdGeneratorStateHash`を算出する。
-3. 各設定・カタログhashを算出する。
-4. `SimulationIdentity`をcanonical化して`simulationIdentityHash`を算出する。
-5. 既存のSimulationId branded constructor／factoryへhashを渡し、`simulationId`を生成する。
-6. `simulationId`生成後に11仕様のRunRuleSnapshotを構築する。
-7. 最後に`runRuleSnapshotHash`を算出する。
-
 `runRuleSnapshotHash`をsimulationId生成入力へ含めない。RunRuleSnapshotはsimulationIdを含むため、含めると循環依存になる。
+
+### Sprint 1 new-run 初期化順（promotion／runtime込み・21ステップ）
+
+1. `--config`を既存InitialWorldConfig loader／validatorで読む
+2. `--sprint1-input`を`Sprint1CliInput` validatorで読む
+3. Sprint1Configを既存validatorで検証する
+4. TechniqueCatalogを既存validator／hashで検証する
+5. `InitialWeeklyTrainingSidecarSnapshot`を検証する
+6. `generateInitialWorld`で provisional fresh initial World ＋ initialEvents を生成する（この時点の`simulationId`はSprint 0方式の provisional simulationId）
+7. S01-002正規adapterで`Sprint1PersonState`を付与する（この段階ではsimulationId／initial event identityを勝手に変更しない）
+8. World Person集合とsidecar PersonId集合のexact 1:1を確認する（欠落・余剰・重複・malformedは拒否。neutral補完禁止）
+9. fresh `MatchIdGeneratorState`を生成し、`initialMatchIdGeneratorStateHash`を算出する
+10. `initialWorldConfigHash`／`sprint1ConfigHash`／`techniqueCatalogHash`／`initialWeeklyTrainingSidecarHash`／その他SimulationIdentity入力を確定する
+11. `SimulationIdentity` 0.4.0を生成する
+12. `simulationIdentityHash`を生成する
+13. final Sprint 1 `simulationId`を生成する
+14. **fresh Sprint 1 initialization promotion**（後述）: initial Worldの`simulationId`をfinalへbindし、initialEventsをEventEnvelope 0.2.0へpromotionする
+15. RunRuleSnapshotを生成し、`runRuleSnapshotHash`を算出する
+16. initial battle World RNG生成（label `battle/world-rng`）→ `worldRngState`
+17. weekly-training processor runtime生成（processorId `weekly-training`、RNG label `processor/weekly-training`、`createInitialTrainingProcessorRuntimeState()`）→ `processorRuntimeStates`
+18. `EventAllocationState`生成（`nextSequence = promotedInitialEvents.length`）
+19. `BattleResultWeekState`生成（`absoluteWeek = promotedWorld.worldDate.absoluteWeek`、`results = []`）
+20. `Sprint1RunRuntimeState`生成（全runtime componentを1 rootへ束ねる）＋同時にimmutable `Sprint1RunContext`を1回作成し、論理`Sprint1RunSession{context,runtimeState}`とする
+21. `weekly-training`をSprint1 transactional processor adapter pipelineへ登録（既存`RunWorldOneWeekInput.processors`へ二重登録しない）
+
+この完了前にfixed7 writerを開始しない。promotion前のprovisional snapshot／eventsを固定7へ保存してはいけない。いずれのvalidation failureでもrun開始前failureとし、一部補完して開始しない。本clarifierでは配線本体（S01-008）は未実施であり、正本契約のみ確定する。
+
+### fresh Sprint 1 initialization promotion
+
+既存`generateInitialWorld`はSprint 0方式で計算したprovisional `simulationId`を持つfresh snapshotとinitialEventsを返す。Sprint 1 new runではSimulationIdentity 0.4.0から最終`simulationId`を生成するため、transaction-local fresh resultを最終identityへ昇格させる境界を次に固定する。
+
+これは **fresh Sprint 1 initialization promotion** であり、保存済み／archived Sprint 0 runのmigrationではない。
+
+対象:
+
+- 直接`generateInitialWorld`から得た、まだ固定7へ保存されておらず、まだWorldEngine runtimeへcommitされていないfresh initial generation resultのみ
+- archive済みrun、既存Sprint 0 run、保存済み`events.jsonl`には適用禁止
+
+precondition（不一致・tamperならrun開始失敗）:
+
+- fresh initial WorldDateである
+- snapshot.simulationIdは`generateInitialWorld`が生成したprovisional simulationId
+- initialEvents全件も同じprovisional simulationId
+- initial event sequenceが既存generator契約どおり連続（03どおり0始まりの途切れない連番。実装は`buildInitialEvents`）
+- initialEventsが`generateInitialWorld`から直接得たordered stream
+- Sprint1PersonState attach後もsimulationId／initial event identityを勝手に変更していない
+
+promoted World（cloneしたfresh initial Worldについて）:
+
+- `simulationId`だけを最終Sprint 1 simulationIdへ置換する
+- 以下はそのまま保持: `configHash`、seed由来World内容、`worldDate`、persons、families、lineages、relationships、generationSummary、その他initial generation content
+- 人物や世界を再生成しない。promotionによるRNG消費は0
+
+promoted initial events:
+
+- 各件をSprint 1 new-run EventEnvelope 0.2.0へ変換する
+- 全件 `schemaVersion = "0.2.0"`、`simulationId = final Sprint 1 simulationId`
+- 既存initial eventから変更しない: `sequence`、`eventId`、`worldDate`、`eventType`、`origin`、`sourceProcessor`、person／family／lineage等の既存entity reference、`payload`、event ordering
+- EventEnvelope 0.2.0で新設された`entities.matchIds`はinitial eventでは必ず`[]`
+- initial eventを再生成しない／再sequenceしない／eventIdを再割当しない／payloadを書き換えない
+- `origin`／`sourceProcessor`を`weekly-training`等へ変更しない。initialization eventは既存initialization producer（`initial-world-generation`）を維持する
+
+failure atomicity（promotion validation failure時）:
+
+- fixed7出力0
+- Sprint1 runtime生成0
+- WorldEngine commit 0
+- event append 0
+- でrun開始失敗
+
+### Sprint1RunRuntimeState / Sprint1RunContext / Sprint1RunSession（最終論理shape）
+
+mutable runtime root（オブジェクト自体はcheckpoint非永続。sidecar投影は後述）:
+
+```text
+Sprint1RunRuntimeState
+- worldState: WorldEngineState
+- worldRngState: SeededRngState
+- matchIdGeneratorState: MatchIdGeneratorState
+- weeklyTrainingSidecars: WeeklyTrainingSidecarState
+- processorRuntimeStates: 既存WorldEngine ProcessorRuntimeState collection
+- eventStream: promoted／committed EventEnvelope[]（最終出力先は既存events.jsonl）
+- eventAllocationState: EventAllocationState 0.1.0
+- battleResults: BattleResult[]（run全体のcommit順canonical store。final-worldへ投影）
+- battleResultWeekState: BattleResultWeekState 0.1.0（同週count専用registry）
+```
+
+immutable run固定正本（fresh initialization時に1回だけ作成。week／battleで変更しない）:
+
+```text
+Sprint1RunContext
+- sprint1Config
+- techniqueCatalog
+- initialWeeklyTrainingSidecarSnapshot
+- simulationIdentity
+- simulationIdentityHash
+- simulationId
+- runRuleSnapshot
+- runRuleSnapshotHash
+```
+
+- context validationは上記fieldのみ。外部`initialMatchIdGeneratorState`依存は持たない。`SimulationIdentity.seed`からfresh初期`MatchIdGeneratorState`を再構築し、`initialMatchIdGeneratorStateHash`と照合する。
+
+production run/session facadeの論理owner:
+
+```text
+Sprint1RunSession
+- context: Sprint1RunContext
+- runtimeState: Sprint1RunRuntimeState
+```
+
+- rollback対象は`runtimeState`のみ。`context`は常に不変
+- Sha256Provider／filesystem path／logger／current time／performance／mutable RNG objectはcontext canonical fieldに入れない（dependency）
+- `Sprint1RunContext`専用の固定8ファイル目は禁止。既存fixed7へ現行契約どおりmaterialize／投影する（identity→run-metadata、RunRuleSnapshot→initial-world.runRuleSnapshot、`initialWeeklyTrainingSidecarSnapshot`→initial-worldトップレベル、config／catalog hash→既存identity／snapshot参照）。全文を新fileへ複製しない
+- **runtime checkpoint vs projection**: `Sprint1RunRuntimeState`オブジェクト自体はcheckpointとして固定7へ永続化しない。canonical game stateである`weeklyTrainingSidecars`およびrun全体`battleResults`は`final-world.json`トップレベルへ投影する。`eventAllocationState`／`battleResultWeekState`／`worldRngState`／`matchIdGeneratorState`／`processorRuntimeStates`はruntime-onlyのまま。固定7は exactly 7 files（`sidecar.json`／`battle-results.json`禁止）
+- initialization owner: `initialWeeklyTrainingSidecarSnapshot`の正本ownerは`Sprint1RunContext`。`initial-world.json`へ投影する値はcontextから取り、runtime current sidecarをinitialへ書き戻さない。`weeklyTrainingSidecars`のcurrent正本ownerは`Sprint1RunRuntimeState`であり、`final-world.json`投影もruntime currentから取る。`battleResults`の正本ownerも`Sprint1RunRuntimeState`であり、`final-world.battleResults`へ全文投影する（`detailedLog`含む。縮小DTO禁止）
+- `WeeklyTrainingSidecarState`は`InitialWeeklyTrainingSidecarSnapshot` 0.1.0と同じentry shape／ordering／validation。意味分離: Initial＝run identity入力の固定初期値（context所有）、WeeklyTrainingSidecarState＝run中に変化するcurrent runtime。fresh時`current = validated deep clone(initial)`（参照非共有）。`initialWeeklyTrainingSidecarHash`は初期snapshotだけのhashであり、current変更で再計算しない
+- 必須invariant: `battleResultWeekState.absoluteWeek === worldState.worldDate.absoluteWeek`（battle run／commitRunBattlePlan／weekly stepの前に毎回確認。不一致はreject／root変更0）
+- 必須invariant: `battleResultWeekState.results`は`battleResults`のcurrent-week committed suffixと順序込みcanonical一致（N=week.results.length。N===0ならempty可。N>0なら`battleResults.slice(length-N)`と一致。一方だけappend禁止。battle facade／commit／weekly step前に確認）
+
+```text
+EventAllocationState 0.1.0
+- schemaVersion: "0.1.0"
+- nextSequence: non-negative safe integer
+
+BattleResultWeekState 0.1.0
+- schemaVersion: "0.1.0"
+- absoluteWeek: non-negative safe integer
+- results: BattleResult[]（同週commit順。run全体storeのcurrent-week suffix）
+```
+
+- fresh `battleResults = []`。`commitRunBattlePlan`成功時はcompletedおよび`resolution_error`のfailed BattleResultを`battleResults`と`battleResultWeekState.results`へ同一outer transactionでappend。`pre_start_failure`／post-start execution abort／commit failureはどちらにもappendしない。同じmatchIdの二重登録はreject（`battleResults`含むroot変更0）
+- `matchesCompletedThisWorldWeekBeforeBattle`のcount sourceは`battleResultWeekState.results`のみ（`battleResults.length`を使わない）。completedだけcount。`resolution_error`は両storeへ登録するがcount+0
+- Sprint 1ではBattleResult削除／retention適用を実装しない。全commit済みBattleResultを`final-world.battleResults`へ保存する。events.jsonlへturn／action詳細ログを複製しない（`battle.started`／`battle.finished`のみ）
+
+重複禁止: `TrainingProcessorRuntimeState`直下保存なし／weekly RNG直下保存なし／EventId専用generatorなし／BattleResult別固定7 fileなし（`battle-results.json`禁止）。
+
+### Sprint1 transactional processor adapter pipeline（legacy WorldProcessorとの境界）
+
+既存production `WorldProcessor` exact型（変更禁止）:
+
+```text
+WorldProcessor = {
+  processorId,
+  process({ state: WorldEngineState, rng: SeededRng }): WorldEngineState
+}
+```
+
+S01-004 `processWeeklyTrainingWeek`は別契約（absoluteWeek／personRecords／config／catalog／runtimeState／rngState → personRecords／runtimeState／rngState／eventCandidates）。weekly-trainingを既存`WorldProcessor.process`へ無理に押し込み、sidecar／config／catalogをclosure／global captureしたり、event candidateを副作用appendしたり、specific runtimeを外部mutable変数更新する方式は禁止。
+
+本仕様でいう production processor配列 = `[weekly-training]` は、**Sprint1 transactional processor adapter pipeline** の配列を意味する。`WEEKLY_TRAINING_PROCESSOR_ID`はadapter ID／`EventEnvelope.sourceProcessor`であり、legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`への登録対象ではない。二重実行禁止。
+
+Sprint1WeeklyTrainingAdapterInput（最低限）:
+
+- absoluteWeek／worldState／weeklyTrainingSidecars／sprint1Config／techniqueCatalog／processorRuntimeStates
+
+Sprint1WeeklyTrainingAdapterOutput（最低限）:
+
+- worldState／weeklyTrainingSidecars／processorRuntimeStates／eventCandidates（まだEventEnvelope未確定のcandidate列）
+
+adapterはrootを直接変更せず、validated clone／transaction draftから結果を返す。手順の要約: weekly RNG entry exact 1／specificState exact 1 → `validateTrainingProcessorRuntimeState` → Person+sidecarからWeeklyTrainingPersonRecord構築 → `processWeeklyTrainingWeek` 1回 → personをWorldへ／person以外をsidecarへ／runtimeState・rngStateをweekly entryへ／eventCandidatesを返す。missing／duplicateはreject。fresh以外で欠落を`createInitialTrainingProcessorRuntimeState()`へ勝手補完禁止。
+
+### S01-008 production weekly transaction最終順
+
+1. current Sprint1RunSession → runtime全体clone draft
+2. runtime／context cross validation
+3. `battleResultWeekState.absoluteWeek == worldDate.absoluteWeek`確認および`battleResults`／week suffix invariant確認
+4. Sprint1 transactional processor adapter pipeline `[weekly-training]`
+5. S01-004 candidatesをtransaction-local保持
+6. 既存WorldEngine calendar／year-start／aging weekly処理（weekly-trainingをlegacy processorsへ二重登録しない。S01-008で他の新規WorldProcessorを発明しない）
+7. 既存WorldEngine eventsをtransaction-local取得
+8. current week S01-004 candidatesをcandidate順でEventEnvelope 0.2.0化 → その後に既存WorldEngine eventsを既存順で続ける
+9. 全eventを同一global nextSequenceから連続allocation（成功まではsequence／eventIdを永続commitしない）
+10. 全World／person／sidecar／runtime／event validation
+11. worldDateが次週へ進んだなら`battleResultWeekState`をnew week／`results=[]`へreset（同じouter commit）。**`battleResults`は変更しない**（過去BattleResultを週resetで削除しない）。worldDateだけ進んでregistryが旧週のまま／registryだけ先行resetは禁止。weekly failure時は`battleResults`／`battleResultWeekState`とも旧値維持
+12. 全部成功時だけSprint1RunRuntimeStateを1回置換。failure時は旧root完全維持
+
+最終成功時のglobal Event Stream順:
+
+1. 既にcommitted済みeventStream
+2. current week weekly-training candidates（S01-004 candidate順）
+3. 同じ週transactionで既存WorldEngineが生成するcalendar／year-start／aging等（既存WorldEngine順）
+
+### battle participant／developmentEffectsの物理World適用先
+
+- `PersonTemporaryCondition`（fatigue／injury／condition／confidence）のcurrent正本は`weeklyTrainingSidecars[].temporaryCondition`。Personへこれらを新fieldとして追加しない
+- BattleParticipantSource構築: Person本体（identity／status／age／abilities／aptitudes／sprint1State等）＋sidecarのtemporaryCondition。missing sidecarはreject。neutral補完禁止。sourceSnapshotHashはこのcombined canonicalを正本とする
+- completed BattleResultのみ人物効果適用。fatigue／injuryはsidecarへ（injuryはsource+injuryDeltaのclamp。BattleResultのinjuryDeltaを絶対値へ変えない）。condition／confidenceはauthoritative `conditionAfter`／`confidenceAfter`をnext sidecar値とし、`conditionRequestedDelta`／`confidenceRequestedDelta`を直接加算しない。currentMental／techniqueStateDeltasは`Person.sprint1State`へ。`battleExperienceSummary`はBattleResult内部情報として保持するだけで、PersonへbattleExperience等の新fieldを推測追加しない
+- resolution_error／pre_start_failure／abort／commit failure: Person変更0／current sidecar変更0
+
+- 現行WorldEngineは`WorldEngineRunResult.nextSequence`／入力`startSequence`として裸の非負safe整数を扱う。named Event allocation型はrepositoryに無かったため`eventAllocationState`を新規定義した（`packages/simulation-core/src/sprint1/event-allocation-state.ts`）
+- EventId用の独立mutable generator stateは作らない。eventIdは既存EventEnvelope契約どおりsequenceから純粋決定する
+- `processorRuntimeStates`は既存`ProcessorRuntimeState`（`processorOrder`／`rngStates`／optional `processorSpecificStates`）。Sprint 0は`processorSpecificStates`省略可。Sprint 1 weekly-trainingは`processorSpecificStates`へ`TrainingProcessorRuntimeState`をexact 1件保持する（直下へ`trainingProcessorRuntimeState`を作らない）。`specificState`はplain JSONのみ許可し、validate／clone／export／restoreはdescriptor-safe deep clone（nested alias禁止。getter実行禁止）
+- fresh battle World RNG: `createSeededRng(deriveSeed(runSeed, "battle/world-rng")).exportState()`。`generateInitialWorld`内部RNG位置を流用しない。fresh生成のRNG drawは0。最初の`startBattleTransaction`成功時だけS01-005どおり`nextUint32()`を1回消費
+- fresh weekly-training RNG: `createSeededRng(deriveSeed(runSeed, "processor/weekly-training")).exportState()`。WorldEngine `createInitialRuntime`の`world-engine/processor/${id}` labelとは別。Sprint1 fresh initはこの固定labelを使う
+- fresh `battleResultWeekState`: `{ schemaVersion:"0.1.0", absoluteWeek: promotedWorld.worldDate.absoluteWeek, results: [] }`
+- fresh `battleResults`: `[]`
+- fresh initialization promotion後: `eventStream = promoted initialEvents`、`eventAllocationState.nextSequence = promotedInitialEvents.length`
+- week／battle commitでは全runtime componentを同一transaction draftへ含め、成功時だけroot置換。failure時はroot全体unchanged（RNG／sequence／registryだけ先行commit禁止）
+- `battle.started`／`battle.finished`も同じglobal `eventAllocationState`から連続割当
+- `eventStream`は最終的に既存`events.jsonl`へ出力。`eventAllocationState`／`battleResultWeekState`／`worldRngState`／`matchIdGeneratorState`／`processorRuntimeStates`はS01-008ではruntime-only（`Sprint1RunRuntimeState`全体をcheckpointとして固定7へ保存しない）。一方`weeklyTrainingSidecars`および`battleResults`（BattleResult全文／`detailedLog`含む）はcanonicalとして`final-world.json`へ投影し、`initialWeeklyTrainingSidecarSnapshot`は`initial-world.json`へ投影する。固定7件数は不変（8ファイル目禁止。`battle-results.json`禁止）
 
 保存と検証:
 
-- `run-metadata.json`へ`simulationIdentity`全文と`simulationIdentityHash`を1件保存する。
-- `initial-world.json.runRuleSnapshot.simulationIdentityHash`とrun-metadataの値を一致させる。
-- EventEnvelope、BattleState、BattleResultの`simulationId`は同じ値を使用する。
+- `run-metadata.json`へ`simulationIdentity`全文と`simulationIdentityHash`を1件保存する（Sprint 1新規runの文書schemaVersionは`0.4.0`。05ミニ仕様）。
+- `initial-world.json`文書schemaVersionは`0.4.0`（トップレベル`initialWeeklyTrainingSidecarSnapshot`＋既存`runRuleSnapshot`）。`runRuleSnapshot.simulationIdentityHash`とrun-metadataの値を一致させる。
+- `final-world.json`文書schemaVersionは`0.3.0`（トップレベル`weeklyTrainingSidecars`＋`battleResults`＋既存Sprint1PersonState）。schemaVersionは0.4.0へbumpしない。
+- EventEnvelope、BattleState、BattleResultの`simulationId`は同じ最終Sprint 1値を使用する（promotion後）。
 - 同じSimulationIdentityでsimulationIdが全文一致することを必須とする。
 - いずれかの決定的入力が異なる場合、simulationIdも異なることを必須とする。
 - 同じversion文字列でcanonical内容またはhashが異なる入力を拒否する。
+- `validateRunRuleSnapshotAgainstIdentity`はSimulationIdentity 0.4.0を正として検証する。
 
 旧run互換:
 
 - 旧runは保存済みsimulationIdをそのまま読み、legacy identityとして扱う。
-- Sprint 1の新規writerは必ず本規定を使用する。
+- Sprint 1の新規writerは必ず本規定（0.4.0）を使用する。
 - legacy runへSprint 1イベントや戦闘結果を追記しない。
+- `SimulationIdentity` schemaVersion `0.3.0`はS01-001〜007間のSprint 1 foundation schemaであり、S01-008 production fixed7 writer完成前に0.4.0へ更新された。repositoryに0.3.0専用のpublic legacy reader moduleは存在しない。clarifierのためだけに新しい0.3.0 legacy readerを新設しない。current new-run `validateSimulationIdentity`は0.4.0のみ受理し、0.3.0はcurrent new-run identityとしてrejectする。
+- 維持必須の実在legacyはSprint 0側: fixed7 document reader、EventEnvelope 0.1.0 reader、Sprint 0 `createSimulationId`、保存済みSprint 0 simulationId。
 - legacy final-worldまたは途中worldからSprint 1継続runを生成するmigrationは本Sprintの対象外とする。将来実装する場合も新しいSimulationIdentityとsimulationIdを必要とし、旧runを変更してはならない。
 
 必須テスト:
 
 - 同一identityでsimulationId一致
-- seed、各hash、各spec version、battle profile adapter version、MatchId generator version、初期MatchId generator state hash、DefaultBattleStrategy version、RNG version、canonical JSON versionのどれか1つが異なるとsimulationId差分
-- executionId、現実時刻、処理時間の差はsimulationIdへ影響しない
+- seed、各hash（sidecar hash含む）、各spec version、battle profile adapter version、MatchId generator version、初期MatchId generator state hash、DefaultBattleStrategy version、RNG version、canonical JSON versionのどれか1つが異なるとsimulationId差分
+- executionId、現実時刻、処理時間、CLI pathの差はsimulationIdへ影響しない
 - runRuleSnapshotHashをidentityへ含めないこと
 - run-metadata、initial-world、EventEnvelope、BattleState、BattleResultのsimulationId一致
 - legacy runを暗黙変換しないこと
+- 新規Sprint 1 identityとしてschemaVersion `0.3.0`を拒否すること
 
 ## 13. エラー方針
 

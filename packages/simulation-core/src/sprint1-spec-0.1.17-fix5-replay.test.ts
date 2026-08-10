@@ -153,11 +153,12 @@ const techniqueCatalogHash = expectOk(
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     seed: 20260808,
     initialWorldConfigHash: "a".repeat(64),
     sprint1ConfigHash,
     techniqueCatalogHash,
+    initialWeeklyTrainingSidecarHash: "c".repeat(64),
     battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
     matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
     initialMatchIdGeneratorStateHash: FIXED_MATCH_ID_STATE_SHA256,
@@ -342,8 +343,8 @@ function withLogs(state: BattleState, actionLogs: BattleState["detailedLog"]["ac
 }
 
 describe("S01-006 fix5 always-on sourceSnapshotHash", () => {
-  it("publishes S1-SPEC-0.1.19 / BattleState 0.6.0", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
+  it("publishes S1-SPEC-0.1.20 / BattleState 0.6.0", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
   });
 

@@ -17,20 +17,20 @@
 
 | ミニ仕様 | 状態 |
 |---|---|
-| 08 人物能力・成長 | 作成・受入監査済み（`S1-SPEC-0.1.19`） |
-| 09 技データ・習得 | 作成・受入監査済み（`S1-SPEC-0.1.19`） |
-| 10 週間行動・訓練・習得処理 | 作成・受入監査済み（`S1-SPEC-0.1.19`） |
-| 11 戦闘開始状態 | 作成・受入監査済み（`S1-SPEC-0.1.19`） |
-| 12 戦闘ターン解決 | 作成・受入監査済み（`S1-SPEC-0.1.19`） |
-| 13 戦闘終了・結果・ログ | 作成・受入監査済み（`S1-SPEC-0.1.19`） |
-| 14 Sprint 1共通設定スキーマ | 作成・受入監査済み（`S1-SPEC-0.1.19`） |
+| 08 人物能力・成長 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
+| 09 技データ・習得 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
+| 10 週間行動・訓練・習得処理 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
+| 11 戦闘開始状態 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
+| 12 戦闘ターン解決 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
+| 13 戦闘終了・結果・ログ | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
+| 14 Sprint 1共通設定スキーマ | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
 
 ### Sprint 1準備状況
 
 | 項目 | 状態 |
 |---|---|
 | 正本`SPEC-0.1.2` | 確定 |
-| ミニ仕様08〜14（`S1-SPEC-0.1.19`） | 仕様定義済み・受入監査済み（post-start execution abortを`S1-SPEC-0.1.19`、BattleResult決定的契約を`S1-SPEC-0.1.18`で明文化。戦闘開始`sourceSnapshot` baselineは`S1-SPEC-0.1.17`、`BattleActionLog.movementChance`は`S1-SPEC-0.1.16`、移動状態補正は`S1-SPEC-0.1.15`、ターン入力契約は`S1-SPEC-0.1.14`、MatchId generator契約は`S1-SPEC-0.1.13`、週間処理契約は`S1-SPEC-0.1.12`で明文化済み） |
+| ミニ仕様08〜14（`S1-SPEC-0.1.20`） | 仕様定義済み・受入監査済み（S01-008 integration contractsを`S1-SPEC-0.1.20`、post-start execution abortを`S1-SPEC-0.1.19`、BattleResult決定的契約を`S1-SPEC-0.1.18`で明文化。戦闘開始`sourceSnapshot` baselineは`S1-SPEC-0.1.17`、`BattleActionLog.movementChance`は`S1-SPEC-0.1.16`、移動状態補正は`S1-SPEC-0.1.15`、ターン入力契約は`S1-SPEC-0.1.14`、MatchId generator契約は`S1-SPEC-0.1.13`、週間処理契約は`S1-SPEC-0.1.12`で明文化済み） |
 | LLM Wiki同期 | 同期済み |
 | 実装バックログ | 定義済み（`docs/SPRINT_1_BACKLOG.md`、S01-001〜S01-009） |
 | S01-001 ドメイン型・設定基盤 | **実装完了**（master統合済み） |
@@ -38,10 +38,11 @@
 | S01-003 技カタログ・熟練度・習得状態 | **実装完了**（master統合済み） |
 | S01-004 週間行動・訓練・技習得 | **実装完了**（週間Processor。WorldEngine登録はS01-008） |
 | S01-005 戦闘開始・BattleState生成 | **実装完了**（MatchId生成器・RunRuleSnapshot・開始トランザクション。WorldEngine登録はS01-008） |
-| S01-006 戦闘ターン解決 | **実装完了**（productionターンResolver・`movementChance` production・ActionLog完全検証。BattleResult完成はS01-007、WorldEngine登録はS01-008） |
-| Sprint 1全体 | **未完了**（S01-007〜S01-009は未着手） |
+| S01-006 戦闘ターン解決 | **実装完了**（productionターンResolver・`movementChance` production・ActionLog完全検証。WorldEngine登録はS01-008） |
+| S01-007 戦闘終了・結果・ログ | **implemented / accepted**（受入完了commit `a39e476`。WorldEngine commitはS01-008） |
+| Sprint 1全体 | **未完了**（次はS01-008。S01-008〜009はpending） |
 
-次の実装着手タスクは **S01-007**（戦闘終了・結果・ログ・戦闘後効果）。S01-001〜S01-006は実装済み。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18` で明文化済み。戦闘開始`sourceSnapshot` baselineは `S1-SPEC-0.1.17` で明文化済み。`BattleActionLog.movementChance`は `S1-SPEC-0.1.16` で明文化済みで、production実装はS01-006で完了した。移動状態補正（`moverStateModifier`／`opponentStateModifier`）は `S1-SPEC-0.1.15` で明文化済み。ターン入力契約（`replacementReason`／`battle-action-script-0.1.0`／技使用回数）は `S1-SPEC-0.1.14` で明文化済み。MatchId generator契約は `S1-SPEC-0.1.13` で明文化済みで、production実装はS01-005で完了した。S01-004の週間Processor、S01-005の戦闘開始、S01-006のターンResolverはいずれも純粋関数として実装済みであり、WorldEngineへの登録は **S01-008** で行う。BattleResult完成とWorldEngine接続は未実装。
+現在は `S1-SPEC-0.1.20` S01-008 integration contracts clarifier中。clarifier受入後に **S01-008**（WorldEngine・CLI・出力統合）を実装再開する。S01-001〜S01-007はimplemented／accepted（S01-007受入完了commit `a39e476`）。S01-009は未着手。Sprint 1全体は未完了。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数は実装済みであり、WorldEngine／CLI配線は **S01-008** で行う。
 
 Sprint 1実装時は、正本`SPEC-0.1.2`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述を参照する。
 

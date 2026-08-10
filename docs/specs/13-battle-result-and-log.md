@@ -1,6 +1,6 @@
 # 13 戦闘終了・判定・ログ仕様
 
-- 仕様版: `S1-SPEC-0.1.19`
+- 仕様版: `S1-SPEC-0.1.20`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 戦闘終了、判定勝ち、BattleResult、疲労・負傷効果、概要・詳細ログ
 - 非対象: 大会順位、昇格、賞金、長期ログ削除、観戦UI
@@ -68,7 +68,17 @@ techniqueScore
 = min(15, sum(successfulTechniqueImportancePoints))
 
 initiativeScore
-= min(10, max(0, floor(advantageTurnCount * 10 / max(1, turnsExecuted))))
+= min(
+    battle.judgement.initiativeMaximum,
+    max(
+      0,
+      round(
+        advantageTurnCount
+        * battle.judgement.initiativeMaximum
+        / max(1, turnsExecuted)
+      )
+    )
+  )
 
 defenseScore
 = min(10, successfulDefenses + successfulEvasions + successfulCounters * 2)
@@ -86,7 +96,7 @@ passivityPenalty
 | advanced | 3 |
 | secret | 5 |
 
-`initiativeScore`は中間浮動小数を保存せず、`advantageTurnCount * 10 / max(1, turnsExecuted)`を最後に`floor`する。各ターン終了時に優勢側を1人だけ決め、同値ターンはどちらにも加算しない。`invalidActionCount` は12仕様の不正行動置換回数と一致させる。予約actionTraitsを実行しないSprint 1では `successfulCounters=0` とする。各係数は `battle.judgement` 設定で管理する。
+`damageScore`は`floor`する。`initiativeScore`は中間浮動小数を保存せず、`advantageTurnCount * battle.judgement.initiativeMaximum / max(1, turnsExecuted)`を`Math.round`相当で丸める（`floor`しない）。デフォルト`initiativeMaximum=10`・`turnsExecuted=4`のとき advantageTurnCount 0/1/2/3/4 → initiativeScore 0/3/5/8/10（1/4×10=2.5→3、3/4×10=7.5→8）。各ターン終了時に優勢側を1人だけ決め、同値ターンはどちらにも加算しない。`invalidActionCount` は12仕様の不正行動置換回数と一致させる。予約actionTraitsを実行しないSprint 1では `successfulCounters=0` とする。各係数は `battle.judgement` 設定で管理する。productionの`judgeScore`再計算も同じhelperを用いる。
 
 ### 4.2 判定得点構造
 
@@ -710,6 +720,17 @@ Sprint 1では削除処理を実装しない。
 
 Sprint 1の結果builderはBattleResultを未commitの決定的結果として返す。標準WorldEngineでは12仕様のRunBattleCommitPlanへ組み込み、両生成状態・人物効果・イベント候補と不可分にcommitされるまで確定済み結果として扱わない。
 
+### 13.1 Sprint 1 / S01-008 保存正本（S1-SPEC-0.1.20）
+
+- 詳細戦闘ログ本体は`BattleResult.detailedLog`へ保持する（本体SPECの概要／詳細分離と一致）
+- run全体のcommit済みBattleResult正本は`Sprint1RunRuntimeState.battleResults`（commit順）
+- 同週count用registryは`BattleResultWeekState.results`（week advanceで`[]`へresetするが、`battleResults`は消さない）
+- S01-008 Sprint1 new-runの`final-world.json` 0.3.0トップレベルへ`battleResults`全文を保存する（`detailedLog`／`summaryLog`／hashes／RNG final state／`developmentEffects`を削らない）
+- events.jsonlへturn／action詳細ログを複製しない（`battle.started`／`battle.finished`のみ）
+- `battle-results.json`等の固定7追加禁止
+- 本体SPECの通常4年／重要100年 retention削除は将来Sprint。S01-008で先取りしない
+- `resolution_error` BattleResultも監査可能な確定結果として保存する。`pre_start_failure`／abortはBattleResult自体が無いため保存なし
+
 ## 14. finalStateHash
 
 次の決定的部分をcanonical JSON化しSHA-256を算出する。
@@ -768,7 +789,7 @@ BattleResultValidation
 - winner／loser整合
 - endReasonと最終状態整合
 - turnsExecuted整合
-- judgeScoreの内訳・initiativeScoreのfloor・total clamp・再計算一致
+- judgeScoreの内訳・initiativeScoreのround（damageScoreはfloor）・total clamp・再計算一致
 - judge_decisionではwinner／loserがjudgeScore比較・同点規則と一致
 - 双方unable_to_continueではjudgeScore必須で、winner／loserが同じ判定比較・同点規則と一致
 - 判定を使用しない終了理由ではjudgeScore=null

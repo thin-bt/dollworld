@@ -42,6 +42,7 @@ const ROOT_KEYS = [
   "initialWorldConfigHash",
   "sprint1ConfigHash",
   "techniqueCatalogHash",
+  "initialWeeklyTrainingSidecarHash",
   "battleProfileAdapterVersion",
   "matchIdGeneratorVersion",
   "initialMatchIdGeneratorStateHash",
@@ -239,6 +240,12 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
   const initialWorldConfigHash = requireHashHex(object, "initialWorldConfigHash", "", issues);
   const sprint1ConfigHash = requireHashHex(object, "sprint1ConfigHash", "", issues);
   const techniqueCatalogHash = requireHashHex(object, "techniqueCatalogHash", "", issues);
+  const initialWeeklyTrainingSidecarHash = requireHashHex(
+    object,
+    "initialWeeklyTrainingSidecarHash",
+    "",
+    issues,
+  );
   const battleProfileAdapterVersion = requireLiteralString(
     object,
     "battleProfileAdapterVersion",
@@ -289,6 +296,7 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     initialWorldConfigHash === undefined ||
     sprint1ConfigHash === undefined ||
     techniqueCatalogHash === undefined ||
+    initialWeeklyTrainingSidecarHash === undefined ||
     battleProfileAdapterVersion === undefined ||
     matchIdGeneratorVersion === undefined ||
     initialMatchIdGeneratorStateHash === undefined ||
@@ -308,6 +316,7 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     initialWorldConfigHash,
     sprint1ConfigHash,
     techniqueCatalogHash,
+    initialWeeklyTrainingSidecarHash,
     battleProfileAdapterVersion,
     matchIdGeneratorVersion,
     initialMatchIdGeneratorStateHash,

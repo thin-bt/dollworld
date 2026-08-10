@@ -1,6 +1,7 @@
 export type {
   ProcessorRngEntry,
   ProcessorRuntimeState,
+  ProcessorSpecificRuntimeEntry,
   RunWorldOneWeekInput,
   RunWorldWeeksInput,
   RunWorldYearsInput,
@@ -14,3 +15,9 @@ export { WorldEngineError, type WorldEngineErrorContext } from "./errors.js";
 export { cloneWorldEngineState } from "./clone.js";
 export { validateWorldEngineState } from "./validate-state.js";
 export { createWorldEngineState, runWorldOneWeek, runWorldWeeks, runWorldYears } from "./engine.js";
+export {
+  cloneProcessorSpecificState,
+  cloneRuntimeState,
+  exportRuntimeState,
+  validateAndCloneProcessorRuntimeState,
+} from "./processor-runtime.js";

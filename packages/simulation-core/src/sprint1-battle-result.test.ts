@@ -192,11 +192,12 @@ const techniqueCatalogHash = expectOk(
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.3.0",
+    schemaVersion: "0.4.0",
     seed: 20260807,
     initialWorldConfigHash: "a".repeat(64),
     sprint1ConfigHash,
     techniqueCatalogHash,
+    initialWeeklyTrainingSidecarHash: "c".repeat(64),
     battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
     matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
     initialMatchIdGeneratorStateHash: FIXED_MATCH_ID_STATE_SHA256,
@@ -424,7 +425,7 @@ describe("S01-007 BattleResult production", () => {
   it("publishes BattleResult schemaVersion 0.5.0 and finished event type", () => {
     expect(BATTLE_RESULT_SCHEMA_VERSION).toBe("0.5.0");
     expect(BATTLE_FINISHED_EVENT_TYPE).toBe("battle.finished");
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.19");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
   });
 
   it("completes knockout with winner/loser, effects, finished candidate, world conversion", () => {
@@ -3076,7 +3077,7 @@ function findDependencyAbort(
   throw new Error(`did not observe dependency_failure abort at ${stage}`);
 }
 
-describe("S1-SPEC-0.1.19 production abort wiring via runBattleToCompletion", () => {
+describe("S1-SPEC-0.1.20 production abort wiring via runBattleToCompletion", () => {
   it("provider failure before start → pre_start_failure (not abort)", () => {
     const provider = failAfterProvider(sha256Provider, 0);
     const result = runBattleToCompletion(completionInput(), provider);

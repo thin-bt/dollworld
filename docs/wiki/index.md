@@ -27,7 +27,7 @@ related:
 このWikiは、確定した仕様・設計判断・不変条件・タスク履歴を横断参照するための**説明・索引**です。正本ではありません。実装や仕様判断の根拠には使わないでください。
 
 Sprint 0 基点: タグ `sprint0-complete`（commit `504fa3cc16346dd0c6480e8328e42518e68215d3`）。  
-Sprint 1 仕様現行版: `S1-SPEC-0.1.19`（`0.1.11` 確定 commit `2800d3b959e575f57660c27b344507dd0e38ddb6`、`0.1.12` は週間処理契約clarification、`0.1.13` は MatchId generator契約明文化、`0.1.14` はターン入力契約明文化、`0.1.15` は移動状態補正明文化、`0.1.16` は`BattleActionLog.movementChance`明文化、`0.1.17` は戦闘開始`sourceSnapshot` baseline明文化、`0.1.18` はBattleResult決定的契約clarification）。Sprint 1全体の実装は未完了（S01-001〜006は実装済み、次はS01-007。S01-007〜009は未着手）。
+Sprint 1 仕様現行版: `S1-SPEC-0.1.20`（`0.1.11` 確定 commit `2800d3b959e575f57660c27b344507dd0e38ddb6`、`0.1.19` はpost-start abort、`0.1.20` はS01-008 integration contracts）。Sprint 1全体の実装は未完了（S01-001〜007実装済み、次はS01-008。S01-008〜009はpending）。
 
 ## 正本の優先順位
 
@@ -70,12 +70,12 @@ Sprint 1 仕様現行版: `S1-SPEC-0.1.19`（`0.1.11` 確定 commit `2800d3b959e
 ## タスク別リンク
 
 - [Sprint 0／Sprint 1 タスク索引](tasks/index.md)
-- S01-001〜006 implemented、次は S01-007、S01-007〜009 pending
+- S01-001〜007 implemented / accepted（S01-007受入完了commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開。S01-009未着手。Sprint 1全体は未完了
 
 ## Sprint別リンク
 
 - [Sprint 0](sprints/sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprints/sprint1.md) — 仕様 `S1-SPEC-0.1.19`（全体未完了、次はS01-007）
+- [Sprint 1](sprints/sprint1.md) — 仕様 `S1-SPEC-0.1.20`（全体未完了、次はS01-008）
 
 ## その他
 
