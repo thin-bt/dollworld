@@ -70,8 +70,7 @@ Sprint 1 仕様現行版: `S1-SPEC-0.1.20`（`0.1.11` 確定 commit `2800d3b959e
 ## タスク別リンク
 
 - [Sprint 0／Sprint 1 タスク索引](tasks/index.md)
-- S01-001〜007 implemented / accepted（S01-007受入完了commit `a39e476`）
-- S01-008は**implemented / accepted**（production実装済み）
+- S01-001〜008 implemented / accepted（S01-007受入完了commit `a39e476`、S01-008受入完了commit `7c47847`）
 - S01-009 pending／未着手。Sprint 1全体は未完了。次の実装着手は S01-009
 
 ## Sprint別リンク

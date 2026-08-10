@@ -131,7 +131,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 出力: 更新済みBattleState / ターンログ材料 / RNG状態（失敗時は部分更新なし）
 ```
 
-移動状態補正は `S1-SPEC-0.1.15` の `moverStateModifier`／`opponentStateModifier`（`battle.actionOrder`係数共用）を使う。`BattleActionLog.movementChance`（floor整数パーセント0..100、RNG非消費）は `S1-SPEC-0.1.16` のproduction実装。`DefaultBattleStrategy` は default_strategy 源の行動決定に用いる。BattleResult（S01-007）はimplemented／accepted（commit `a39e476`）。WorldEngine登録はS01-008。
+移動状態補正は `S1-SPEC-0.1.15` の `moverStateModifier`／`opponentStateModifier`（`battle.actionOrder`係数共用）を使う。`BattleActionLog.movementChance`（floor整数パーセント0..100、RNG非消費）は `S1-SPEC-0.1.16` のproduction実装。`DefaultBattleStrategy` は default_strategy 源の行動決定に用いる。BattleResult（S01-007）はimplemented／accepted（commit `a39e476`）。World commit配線はS01-008でproduction実装済み（accepted）。
 
 `runBattleToCompletion`（S01-007）の結果は `completed`／`resolution_error`／`pre_start_failure` の3種のみ。start成功後に正規commitPlanを構築不能なdependency／invariant failureは `BattleExecutionAbortError` としてthrowし、startRuntimeTransition／started／finishedをcommitしない（`S1-SPEC-0.1.19`）。
 

@@ -7,14 +7,14 @@ sources:
   - docs/TECHNICAL_DECISIONS.md
   - docs/SPEC.md
   - docs/SPRINT_0_BACKLOG.md
-last_verified: 2026-08-05
+last_verified: 2026-08-11
 ---
 
 # アーキテクチャ索引
 
 ## 概要
 
-Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実装済み配置と責務分割、Sprint 1は仕様確定済みの処理境界と戦闘ライフサイクルを区別する（S01-001〜005実装済み、次はS01-006）。詳細は TECHNICAL_DECISIONS・正式ミニ仕様・コードを正とする。
+Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実装済み配置と責務分割、Sprint 1はS01-001〜008がimplemented / acceptedで、現在はS01-009総合受入検証がpending。詳細はTECHNICAL_DECISIONS・正式ミニ仕様・コードを正とする。
 
 ## 現在確定している内容
 
@@ -26,12 +26,12 @@ Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実�
 - [ヘッドレスCLI](headless-cli.md)
 - [固定出力契約](output-contract.md)
 
-### Sprint 1（仕様確定済み、S01-001〜003実装済み）
+### Sprint 1（S01-001〜008 implemented / accepted）
 
 - [Sprint 1処理の流れ](sprint1-processing-flow.md)
 - [戦闘ライフサイクル](battle-lifecycle.md)
 
-週間Processor（S01-004）・戦闘Processor以降は未実装。下位ページを全体完了と扱わない。
+週間処理・戦闘・WorldEngine／CLI／fixed7統合はS01-004〜008でproduction実装・受入済み。Sprint 1全体はS01-009総合受入検証がacceptedになるまで完了扱いにしない。
 
 ## 関連する正本
 
@@ -45,20 +45,19 @@ Sprint 0:
 - `packages/simulation-core/`
 - `apps/simulator/`
 
-Sprint 1（S01-001〜003）:
+Sprint 1（S01-001〜008）:
 
 - `packages/simulation-core/src/sprint1/`
+- `apps/simulator/`（S01-008 CLI／fixed7統合）
 
 ## 関連するテスト
 
 Sprint 0 の各パッケージ Vitest テスト（詳細は下位ページ）。
 
-Sprint 1（S01-001〜003）:
+Sprint 1:
 
-- `packages/simulation-core/src/sprint1-foundation.test.ts`
-- `packages/simulation-core/src/sprint1-person-growth.test.ts`
-- `packages/simulation-core/src/sprint1-technique-catalog.test.ts`
-- `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
+- S01-001〜008の`packages/simulation-core`／`apps/simulator` regression・integration tests
+- 現在の総合完了ゲートはS01-009 `npm run verify:sprint1`（未実装／pending）
 
 ## 関連する判断
 

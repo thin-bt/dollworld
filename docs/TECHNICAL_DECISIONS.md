@@ -64,13 +64,44 @@ TypeScript 7は、採用するtypescript-eslint 8.65.0の公式対応範囲外�
 - 入力ファイル形状は`Sprint1CliInput`（schemaVersion `0.1.0`）とする。必須fieldは`schemaVersion`／`sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecar`のみ。未知キーは拒否する。
 - `techniqueCatalog`は既存`TechniqueCatalog`正本shape（`identity`／`definitions`）をそのまま入れる。別catalog schemaを作らない。
 - path／mtimeはSimulationIdentity材料にしない。検証済み内容（config hash／catalog hash／sidecar hash）とseed・既存version fieldsだけをidentity材料とする。
-- `--sprint1-input`のparseArgs配線・file loader・WorldEngine登録はS01-008本体の実装範囲とする。本決定はoption契約と入力形状を固定する。
+- `--sprint1-input`のparseArgs配線・file loader・Sprint1 WorldEngine／run-session統合はS01-008でproduction実装・accepted済み。本決定はoption契約と入力形状を固定する。
 - Sprint 1 new-runのfresh initialization promotion／`Sprint1RunRuntimeState.eventStream`／`EventAllocationState`契約は02・03・10ミニ仕様を正本とする。保存済みSprint 0 runのsimulationId置換は禁止。
 - 既存`WorldProcessor` interfaceは変更しない。S1-SPEC-0.1.20の production配列`[weekly-training]`はSprint1 transactional processor adapter pipelineのみを意味し、legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`への登録ではない（二重実行禁止）。`WEEKLY_TRAINING_PROCESSOR_ID`はadapter ID／`EventEnvelope.sourceProcessor`である。
 - immutable `Sprint1RunContext`（`sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecarSnapshot`／identity／RunRuleSnapshot）とmutable `Sprint1RunRuntimeState`を`Sprint1RunSession`で束ねる。config／catalog／identity／RunRuleSnapshot／initial sidecarはrun中再読込・再構築しない。context validationは外部`initialMatchIdGeneratorState`依存を持たない。
 - `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`はinitial-world 0.4.0へ、`weeklyTrainingSidecars`および`battleResults`はfinal-world 0.3.0へ投影する。fixed7は exactly 7 files（`battle-results.json`禁止）。
 - `battleResults`はrun全体commit順canonical store。`BattleResultWeekState`は同週count専用。week resetでglobal storeを削除しない。
 - `processorSpecificStates.specificState`はplain JSONのみとし、WorldEngine validate／clone／export／restoreはdescriptor-safe deep cloneする（nested alias禁止）。
+
+
+## 4.2 Sprint 1完了検証（S01-009）
+
+- Sprint 1総合完了検証の正規入口はルート`npm run verify:sprint1`とする。実装は`apps/simulator`のverification領域へ置き、`simulation-core`へNode固有I/Oを入れない。
+- `verify:sprint1`のscript起動／build／Node entrypointは既存`verify:sprint0`のworkspaceパターンを踏襲し、S01-009専用に`tsx`／`ts-node`等の新runner依存を追加しない。
+- 完了レポートは`output/sprint1-verification/sprint1-completion-report.json`（verification schema `0.1.0`）へ出力する。これはsimulation runの固定7ファイルではない。
+- verification-owned CLI runは`output/sprint1-verification/runs/<run-key>/`をaccepted `runCli`のoutputRootとして分離し、実fixed7は既存writer layoutどおりその下の`<runId>/`に置く。`<runId>`階層をflattenしない。各run-key rootは実行前empty／nonexistent、成功後exactly 1 runId directoryを必須とする。開始時に掃除してよいのはverification-owned runs領域とcompletion report tempだけで、一般の`output/`やユーザーrunを削除しない。run key／絶対pathをSimulationIdentity材料へ入れない。
+- weekly＋technique＋battle統合シナリオのfixed7も同じrun-key／runId layoutを使い、S01-008 accepted `buildAndWriteSprint1RunOutput`＋`evaluateReferenceIntegrity`経路を再利用する。verification用flat writer／別integrity計算は作らない。
+- run分離はaccepted `runCli(argv, { outputRoot })`のprogrammatic optionを利用してよく、`--output-root`等のpublic CLI argv optionを追加しない。same-seed 2runはfresh invocation＋別output rootを必須とするがOS processまでは要求しない。population performanceのみSprint0方式の独立子processを維持する。
+- 長期・性能検証は通常`npm test`へ暗黙追加せず、`verify:sprint1`から明示実行する。
+- verification seed matrixは`baseSeed=12345`／`alternateSeed=54321`。same-seedはbase seed 100年×2、different-seedは12345 vs 54321を100年、boundary seedは0／4294967295各2回の1年run。年数profileは10／50／100／300年（base seed）。
+- Sprint 1人口別性能はSprint 0と同じ600／2000／5000人・100年を使用し、全profile seedは12345へ固定する。600=30秒、2000=120秒をwarning基準、5000はmeasure onlyとする。性能超過だけでfunctional failureにしない。5000のmeasure onlyはthresholdなしの意味で、required profile自体はfunctional成功時`passed`とする。
+- performance sidecar factoryのtemplate値はaccepted `apps/simulator/fixtures/sprint1/sprint1-input.json`のvalidated initial sidecar entriesをPersonId Unicode昇順に見た先頭entryへ固定し、各performance PersonIdでは`personId`だけ差し替える。performance専用balance値／production defaultを作らない。
+- Sprint 1 performance threshold超過warningは`VerificationIssue.code=SPRINT1_PERFORMANCE_WARNING`、`scope=performance/<population>`へ固定し、messageにpopulation／years／actualSeconds／warningSecondsを含める。
+- population performanceの子プロセス分離・timer／maxRSS測定境界はSprint 0 verifier方式を再利用し、600→2000→5000の順で1 childずつ順次実行する。performance worker同士を並列実行しない。
+- Sprint 1 performance用sidecar生成はverification fixture factoryに限定し、production default／fallbackへ流用しない。
+- `verify:sprint1`は`npm run check`、独立`npm run wiki:check`、`git diff --check HEAD`相当、`npm run verify:sprint0`を総合sub-gateへ含め、各command resultをreportへ保存する。Sprint 0のperformance warningだけではSprint 1をfailureにしない。
+- `verify:sprint1`は自身をsub-gateとして再帰実行しない。Sprint 0 completion reportはaccepted正規path `output/sprint0-verification/sprint0-completion-report.json`だけを読み、filesystem探索で別reportを選ばない。accepted reportの`warningCount`＋`performanceWarnings`を正本fieldとし、存在しない`warnings`配列を前提にしない。Sprint0 verification領域のaccepted report型／validatorを再利用してsource wire型を再定義せず、validated performance warning message件数と`warningCount`を一致確認する。各source warning messageをtop-level Sprint 1 `warnings`へexactly 1件ずつimportし、Sprint 1 performance warningと合わせて`warningCount`へ反映する。
+- S01-009 accepted後はmaster上のclean treeで`verify:sprint1`を再実行し、`overallPassed=true`、`functionalFailureCount=0`、`workingTreeDirty=false`、reportの`gitCommit`=HEADを確認してから`Sprint 1`完了tag `sprint1-complete`を付ける。official verifierはGit worktree内のHEAD解決を必須とし、HEAD不明をnull fallbackでpassさせない。`verify:sprint1`自身はtagを作成・移動・削除せず、tagは受入後の明示的finalization操作とする。
+- same-seed比較は05仕様の決定性除外規則を正とする。run-metadataはexisting schema validation後、exact `runId`／`realStartedAt`／`realEndedAt`だけを除外し、残りをproduction `toCanonicalJson`で比較する。S01-008に独立production comparator APIは存在しないため、S01-009の比較helperは`apps/simulator` verification内部に置き、simulation-coreへ公開しない。
+- integrated battleは`official`＋production `default_strategy`を使用し、scripted actionsや自動battle schedulerで結果を固定しない。
+- integrated weekly eventは`sourceProcessor=weekly-training`だけを対象とし、actorはS01-008 allocation後の`EventEnvelope.entities.personIds` exact 1件を正本としてpayloadから人物を推測しない。技状態更新actorをofficial participantへbindし、weekly前後の`Person.sprint1State.techniqueStates`実差と更新後source反映を確認する。
+- integrated battleの入力はaccepted public境界を再利用する。参加資格は`isEligibleForBattleKind`、participant sourceは`validateBattleParticipantSource`、World hashは`computeExpectedWorldStateHash`、同週試合数は`computeMatchesCompletedThisWorldWeekBeforeBattle`、default action source identityは`createDefaultStrategyActionSourceIdentity`／`validateDefaultBattleStrategySource`を使用し、verification側でhash／count／eligibility／strategy採点を再実装しない。battle attemptは各独立scenarioで1回のみとし、completed以外をretryして隠さない。
+- integrated scenarioのcheckpoint比較は`Sprint1RunRuntimeState`のdeterministic owner全体（World／両RNG系／sidecar／processor runtime／events／allocator／BattleResult global+week）を対象とし、production `toCanonicalJson`＋既存`Sha256Provider`以外のcanonical/hash方式を作らない。統合シナリオはweekly step exact 2回、`weeksExecuted=2`／`yearsExecuted=0`／`yearEnds=[]`でfixed7へ投影し、yearly CSVはheaderのみとする。
+- identity/canonical検証のsidecar単一値mutationはPersonId昇順先頭entryの`motivationFactor`をrange内で±1するだけとし、key-order testは値・配列順を変えない。production `Math.random` scanはsimulation-core／simulator production sourceを対象としtests／verification-only sourceを除外する。comment／string literalの文字列一致はfailureにせず、実行コード上のcall expressionだけをAST／token-awareに判定する。
+- `verify:sprint1`はexit 0=`overallPassed=true` report正常生成、exit 1=functional／harness failure。集約可能なfailureでは`overallPassed=false` reportを必ずatomic writeし、report write/read-back自体のfailureだけreport不在exit 1を許す。前回passed reportのstale残存を防ぎ、completion reportは一時file→rename→再読込validationする。
+- required gateを前提failureで実行できない場合は`blocked`としてfunctional failureへ集約し、黙ってskipしない。
+- S01-009受入中はdirty reportを許容するが、最終`Sprint 1` tag前はverification前後ともclean treeを必須とする。`_handoff-artifacts/`等のuntracked artifactはrepository外へ退避／削除し、tag通過目的のignore追加で隠さない。
+- completion reportのSHA-256はreport生成・read-back validation後のfile bytesを外部計算し、JSON本文へ自己hashを埋め込まない。`sprint1-complete`既存tagをforce moveせず、別commitを指す場合は停止して確認する。
+- verification用helper／reportは新しいゲーム仕様・public simulation API・実行時依存を追加する根拠にしない。
 
 ## 5. モジュールとビルド
 

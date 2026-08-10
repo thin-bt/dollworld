@@ -26,7 +26,8 @@ related:
 - 代表コマンド: `npm run simulate -- --years 100 --seed 12345 --config config/initial-world.config.json`
 - Sprint 0 完了検証: `npm run verify:sprint0`
 - core は `node:crypto` を直接 import しない（Sha256 は CLI 側注入）
-- Sprint 1（`S1-SPEC-0.1.20`）: 新規optionは`--sprint1-input`のみ（`Sprint1CliInput` 0.1.0）。省略時はSprint 0挙動維持。配線はS01-008
+- Sprint 1（`S1-SPEC-0.1.20`）: 新規optionは`--sprint1-input`のみ（`Sprint1CliInput` 0.1.0）。省略時はSprint 0挙動維持。S01-008でproduction配線済み／accepted
+- Sprint 1 完了検証: S01-009でルート`npm run verify:sprint1`を実装予定。simulation CLI optionは増やさず、verification entrypointを別scriptとする
 
 ## 関連する正本
 

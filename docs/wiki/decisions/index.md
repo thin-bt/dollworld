@@ -6,7 +6,7 @@ scope: cross-sprint
 sources:
   - docs/TECHNICAL_DECISIONS.md
   - docs/SPRINT_0_BACKLOG.md
-last_verified: 2026-08-01
+last_verified: 2026-08-11
 ---
 
 # 設計判断索引
@@ -34,7 +34,7 @@ Sprint 0・Sprint 1を横断する設計判断索引。正本は TECHNICAL_DECIS
 
 ## 関連するコード
 
-該当なし（判断の索引）。S01-001〜005は実装済み。次はS01-006。
+該当なし（判断の索引）。S01-001〜008はimplemented / accepted。現在の次タスクはS01-009（pending／未着手）。
 
 ## 関連するテスト
 

@@ -1,5 +1,24 @@
 # 変更履歴
 
+## 2026-08-11：S01-009 Sprint 1総合受入検証 clarification（管理資料）
+- 追加監査で`verify:sprint1`のsub-gate順序を固定し、`npm run wiki:check`／`git diff --check HEAD`を独立commandとして明記。script起動方式は既存`verify:sprint0`のbuild／Node patternを踏襲し、新runner依存追加を禁止。
+- 追加監査でverification `runs/<run-key>/`は`runCli`のoutputRootであり、fixed7は既存layoutの`<run-key>/<runId>/`に置くことを明記。runId階層のflatten禁止、各run-key成功時exactly 1 runId directoryを固定。
+- 追加監査でofficial verifierのGit HEAD解決必須・`verify:sprint1`自身のtag操作禁止、weekly eventの`sourceProcessor=weekly-training` bind、Sprint1 performance warning code/scopeを固定。
+
+- 再監査: weekly-training event actorを`EventEnvelope.entities.personIds` exact 1件へ固定。Sprint0 `performanceWarnings` wire型はS01-009で再定義せずaccepted report型／validatorを再利用。集約可能なfailureは`overallPassed=false` report必須。population performanceは600→2000→5000逐次child、same-seed run-metadataは非決定exact 3 fieldだけ除外したproduction canonical比較、`Math.random`はcall expressionのみtoken-aware scanへ固定。
+S01-008受入完了後、S01-009を実装時再判断なしで開始できるよう、Sprint 1総合verificationの実行入口・検証matrix・completion report・clean-tree完了手順を管理資料へ明文化した。ゲーム仕様・wire shape・RNG・balanceの変更ではなく、`S1-SPEC-0.1.20`は非bump。
+
+- current state: S01-001〜008 implemented / accepted（S01-008受入完了commit `7c47847`）、S01-009 pending／未着手、Sprint 1全体は未完了
+- 正規入口`npm run verify:sprint1`、completion report `output/sprint1-verification/sprint1-completion-report.json`（verification schema `0.1.0`）
+- same-seed 12345・100年×2、different-seed 12345 vs 54321の実体差、boundary seed 0／4294967295各1年×2、10／50／100／300年profile
+- integrated scenarioはweekly→official participant自身の技状態更新event→更新済みPersonのbattle source反映→`official` battle（production `default_strategy`）→commit→次週registry reset→fixed7。自動battle scheduler／scripted actionによる結果固定は禁止
+- population performanceはseed 12345固定で600／2000／5000人×100年。30秒／120秒warning、5000 measure only。性能超過aloneではfunctional failureにしないが、各profileのsession／invariant failureはfunctional failure
+- verifierはexit 0/1、stale completion report防止、report atomic write／read-back validation、required gateのsilent skip禁止を契約化
+- same-seed比較は05仕様の決定性除外規則を正本とし、存在しないS01-008 production comparator APIを前提にしない。verification-private comparatorはapps/simulator内部に限定
+- accepted後はclean masterで再実行し、reportと実`git status`の双方がcleanであることを確認後、合格commitへ`Sprint 1`完了tag `sprint1-complete`を付ける。`_handoff-artifacts/`等のuntracked artifactは最終clean run前にrepository外へ退避または削除し、tag通過目的の`.gitignore`追加は禁止
+- 再監査でrun分離は既存programmatic `runCli(...,{outputRoot})`を使用し新`--output-root` optionを作らないこと、integrated scenarioの技状態更新actorを実際のofficial participantへbindすること、performance seed=12345、共通status=`not_performed`表記、completion report自己SHA禁止、`verify:sprint1`自己再帰禁止、tag force move禁止を追加固定
+- Sprint 0回帰warningはaccepted completion reportの`warningCount`＋`performanceWarnings`を正本とし、存在しないsource `warnings`配列を前提にしない。5000人measure-only profileはrequired functional gateとして成功時`passed`。integrated scenario fixed7はweekly exact 2回（`weeksExecuted=2`／`yearsExecuted=0`／yearly data row 0）へ固定
+
 ## 2026-08-09：S1-SPEC-0.1.20（S01-008 integration contracts clarification）
 
 S01-008着手時に判明した正本未定義（週間processor literal／production processor配列／runtime root／weekly sidecar／CLI入力経路）と、外部sidecarをSimulationIdentityへbindする不足を明文化した。既存balanceの意図変更ではなく、統合契約の未定義解消である。WorldEngine／CLI本体配線は本clarifierの対象外（S01-008実装）。版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）。受入監査修正1で初期化promotion／EventAllocation／S01-007 current-state同期／0.3.0 reader記述整理を、受入監査修正2で`BattleResultWeekState`／battle World RNG／weekly-training processorRuntimeStates物理ownerを、受入監査修正3で`processorSpecificStates` deep-clone／Sprint1 adapter境界／`Sprint1RunContext`／`WeeklyTrainingSidecarState`／developmentEffects適用先／weekly transaction最終順を、受入監査修正4でweekly-training／legacy WorldProcessor矛盾解消・document schema投影（initial-world 0.4.0／final-world 0.3.0）・`Sprint1RunContext.initialWeeklyTrainingSidecarSnapshot`最終shapeを、受入監査修正5でrun全体`battleResults` canonical store／final-world 0.3.0への`battleResults`投影／week suffix invariant／`cloneRuntimeState` getter非実行を同版へ追記した。
@@ -21,7 +40,7 @@ S01-008着手時に判明した正本未定義（週間processor literal／produ
 - runtime checkpoint vs projection: `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`weeklyTrainingSidecars`および`battleResults`（`detailedLog`含む全文）はfinal-worldへ、`initialWeeklyTrainingSidecarSnapshot`はinitial-worldへ投影。fixed7は exactly 7 files（`sidecar.json`／`battle-results.json`禁止）。events.jsonlへturn詳細非複製。Sprint 1ではretention削除未実装
 - RunRuleSnapshotへsidecar全文／`initialWeeklyTrainingSidecarHash`を直接追加しない（`simulationIdentityHash`経由でbind）
 - Sprint1Config構造・既定値・canonical SHAは不変。Sprint 0 CLI／legacy simulationId／固定7件数は不変
-- 実装状態（current）: S01-001〜S01-007はimplemented／accepted（S01-007受入完了commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開。S01-009未着手。Sprint 1全体は未完了
+- 実装状態（当時）: S01-001〜S01-007はimplemented／accepted（S01-007受入完了commit `a39e476`）。この0.1.20 clarification当時はS01-008実装前。current stateは上記2026-08-11管理資料を参照
 
 ## 2026-08-09：S1-SPEC-0.1.19（post-start execution abort 契約clarification）
 

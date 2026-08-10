@@ -18,11 +18,13 @@ sources:
   - docs/specs/13-battle-result-and-log.md
   - docs/specs/14-sprint1-config-schema.md
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
+  - commit:d28d6666263f307ead492fc00256b70dc42e9ad9
   - commit:259a219d29b626c4678e5b248b8a8453861797f9
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-10
+  - commit:7c478477a978726d2e740fe20dff1b2cd48e9f68
+last_verified: 2026-08-11
 related:
   - ../glossary/abilities-and-aptitudes.md
   - ../glossary/techniques-and-mastery.md
@@ -70,6 +72,8 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 - `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy`／`runBattleToCompletion`／`finalizeBattleResult`／`validateBattleResult` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`。BattleResult決定契約は `S1-SPEC-0.1.18`。post-start execution abort契約は `S1-SPEC-0.1.19`。S01-008統合契約は `S1-SPEC-0.1.20`
 - 週間処理のSprint1 transactional adapter配線と戦闘の`commitRunBattlePlan`配線はS01-008で**production実装済み**（accepted）。legacy WorldProcessor配列へweekly-trainingを登録しない
 - 本Wikiの同期や `npm run check` の成功は、Sprint 1全体の実装完了を意味しない
+- S01-009の実装前clarifierは確定済み。正規完了検証入口は`npm run verify:sprint1`、same-seed 100年×2、different-seed実体差、boundary seed、10／50／100／300年、weekly＋technique＋`official` battle（default strategy）統合、600／2000／5000人性能、`verify:sprint0`回帰を総合する。verifierはexit 0/1・stale report防止・atomic completion reportを契約化。verification runは`output/sprint1-verification/runs/<run-key>/`へ分離し、battle入力はS01-008 accepted public helperを再利用する
+- S01-009 accepted後、clean masterで`verify:sprint1`を再実行して合格したcommitへ`Sprint 1`完了tag `sprint1-complete`を付ける
 
 ### 実装タスク
 

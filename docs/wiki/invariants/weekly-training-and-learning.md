@@ -31,7 +31,7 @@ related:
 - Sprint 1 で扱わない大会日程等を週間処理へ混入しない（10 の対象外）
 - `S1-SPEC-0.1.12`で明文化: 強制休養は`severe_injury`／`fatigue_threshold`のみ（`unableToContinueThreshold`は戦闘専用）
 - rest fallback reasons・scoreHundredths整数式・TrainingProcessorRuntimeState・event責務順は 10／14 を正とする
-- S01-004で週間Processorを実装済み（WorldEngine登録は未実施。S01-008）
+- S01-004で週間処理を実装済み。Sprint1 transactional adapterへのproduction配線はS01-008でimplemented / accepted。legacy WorldProcessor配列へweekly-trainingは登録しない
 
 ### S01-004実装で固定された不変条件
 
@@ -63,7 +63,7 @@ related:
 
 ## 関連するコード
 
-S01-003の純粋候補判定入口（週間更新・RNG・イベントは未実装）:
+S01-003で実装した純粋候補判定入口（これら自身は週間更新・RNG・イベントを行わない。週間production処理はS01-004、WorldEngine接続はS01-008でaccepted）:
 
 - `evaluateTechniqueAcquisitionConditions`
 - `deriveLearningTargetStatus`
@@ -98,7 +98,7 @@ S01-004の週間Planner・progress／mastery実更新・RNG・訓練イベント
 
 ## 未解決事項
 
-EventEnvelope化とWorldEngineへの週間処理登録は S01-008。Sprint 1全体は未完了。
+EventEnvelope化とSprint1 transactional weekly adapter配線はS01-008でproduction実装済み（accepted）。Sprint 1全体は未完了で、次はS01-009。
 
 ## 関連Wikiページ
 

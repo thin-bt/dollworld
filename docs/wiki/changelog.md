@@ -15,6 +15,27 @@ last_verified: 2026-08-11
 
 # Wiki更新履歴
 
+## 2026-08-11 — S01-009実装前clarifier
+- 追加監査でpopulation performance用sidecar templateをaccepted tiny `sprint1-input.json`のPersonId昇順先頭validated entryへ固定し、各generated PersonIdでは`personId`だけ差し替える契約を追加。performance専用balance値の発明を禁止。
+- 追加監査でintegrated scenarioのfixed7をS01-008 accepted `buildAndWriteSprint1RunOutput`＋`evaluateReferenceIntegrity`／run-key→runId layoutへ固定。Sprint0回帰report読込先を`output/sprint0-verification/sprint0-completion-report.json`へ固定し、必須diff gate表記を`git diff --check HEAD`へ統一。
+- 追加監査で`verify:sprint1`のsub-gate順序を固定し、`npm run wiki:check`／`git diff --check HEAD`を独立commandとして明記。script起動方式は既存`verify:sprint0`のbuild／Node patternを踏襲し、新runner依存追加を禁止。
+- 追加監査でverification `runs/<run-key>/`は`runCli`のoutputRootであり、fixed7は既存layoutの`<run-key>/<runId>/`に置くことを明記。runId階層のflatten禁止、各run-key成功時exactly 1 runId directoryを固定。
+- 追加監査でofficial verifierのGit HEAD解決必須・`verify:sprint1`自身のtag操作禁止、weekly eventの`sourceProcessor=weekly-training` bind、Sprint1 performance warning code/scopeを固定。
+
+- S01-008 accepted（commit `7c47847`）を正本current-stateへ同期。
+- S01-009の正規入口を`npm run verify:sprint1`、completion reportを`output/sprint1-verification/sprint1-completion-report.json`へ固定。
+- same-seed 100年×2、different-seed実体差、boundary seed、10／50／100／300年、weekly＋technique＋battle統合、600／2000／5000人性能、Sprint 0回帰を完了ゲートとして明文化。
+- 性能超過aloneはSprint 0と同じwarning扱い。S01-009 accepted後はclean masterで再検証し、合格commitへ`Sprint 1`完了tag `sprint1-complete`を付ける契約を追加。
+- 再監査で、存在しないS01-008 production comparator前提を削除し05仕様準拠verification-private comparatorへ修正。integrated battleを`official`＋`default_strategy`へ固定。
+- verifier exit 0/1、stale report防止、atomic report／read-back validation、required gate `blocked`扱い、100年run再利用規則、最終clean run前のhandoff artifact退避を追記。
+- 再々監査でverification-owned run rootを`output/sprint1-verification/runs/<run-key>/`へ固定し、一般`output/`のcleanup禁止を明記。integrated battleはaccepted public helperでeligibility／participant／World hash／same-week countを組み立てる契約へ具体化。identity mutation／`Math.random` scan範囲も固定。
+- current WikiのS01-001〜007／architecture indexに残っていた旧「次タスク」「WorldEngine未接続」表現をS01-008 accepted／S01-009 pendingへ同期。
+- 追加再監査で、run分離は既存programmatic `outputRoot`のみ（新`--output-root`禁止）、integrated technique actor→official participant bind、performance seed=12345、`not_performed`表記、report自己SHA禁止／self-recursion禁止／tag force禁止を固定。
+- Sprint 0 warning sourceをaccepted reportの`warningCount`＋`performanceWarnings`へ修正し、5000 measure-only profileはrequired gateとして成功時`passed`、integrated fixed7はweekly exact 2回・yearly data row 0へ固定。
+- 追加監査でweekly-training event actorを`EventEnvelope.entities.personIds` exact 1件へ固定。Sprint0 `performanceWarnings`のwire型はS01-009側で再定義せずaccepted Sprint0 completion-report型／validatorを再利用し、集約可能なverification failureでは`overallPassed=false` reportを必須化。
+- 追加監査でpopulation performanceを600→2000→5000の逐次child実行へ固定し、same-seed run-metadataは非決定exact 3 fieldだけ除外したproduction canonical比較、`Math.random`はcall expressionだけのtoken-aware scanへ固定。
+- `S1-SPEC-0.1.20`は非bump。ゲーム仕様・wire shapeは変更していない。
+
 ## 概要
 
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。

@@ -219,7 +219,7 @@ simulationId
 20. `Sprint1RunRuntimeState`生成（全runtime componentを1 rootへ束ねる）＋同時にimmutable `Sprint1RunContext`を1回作成し、論理`Sprint1RunSession{context,runtimeState}`とする
 21. `weekly-training`をSprint1 transactional processor adapter pipelineへ登録（既存`RunWorldOneWeekInput.processors`へ二重登録しない）
 
-この完了前にfixed7 writerを開始しない。promotion前のprovisional snapshot／eventsを固定7へ保存してはいけない。いずれのvalidation failureでもrun開始前failureとし、一部補完して開始しない。本clarifierでは配線本体（S01-008）は未実施であり、正本契約のみ確定する。
+この完了前にfixed7 writerを開始しない。promotion前のprovisional snapshot／eventsを固定7へ保存してはいけない。いずれのvalidation failureでもrun開始前failureとし、一部補完して開始しない。S1-SPEC-0.1.20 clarification実施時点では配線本体（S01-008）は未実施で、ここでは正本契約のみを確定した。currentではS01-008がimplemented / accepted（commit `7c47847`）であり、本節のpromotion契約はproductionへ配線済み。
 
 ### fresh Sprint 1 initialization promotion
 
