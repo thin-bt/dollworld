@@ -4,8 +4,12 @@
 - 対象ゲーム仕様：`SPEC-0.1.2`
 - 対象Sprint 1ミニ仕様：`S1-SPEC-0.1.20`
 - 仕様確定commit：`2800d3b959e575f57660c27b344507dd0e38ddb6`
-- 実装状態：S01-001〜S01-007 **implemented / accepted**（S01-007受入完了commit `a39e476`）、S01-008〜S01-009 **pending**。現在は`S1-SPEC-0.1.20` S01-008 integration contracts clarifier中。clarifier受入後にS01-008実装再開。S01-009未着手。Sprint 1全体は未完了
+- 実装状態：
+  - S01-001〜S01-007 **implemented / accepted**（S01-007受入完了commit `a39e476`）
+  - S01-008 **implemented / 受入監査中**（WorldEngine・CLI・出力統合production実装済み。受入監査完了前）
+  - S01-009 **pending**／未着手。Sprint 1全体は未完了
 - `S1-SPEC-0.1.20`はS01-008 integration contracts clarification（`weekly-training` adapter ID／production adapter pipeline`[weekly-training]`／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／`InitialWeeklyTrainingSidecarSnapshot`／SimulationIdentity `0.4.0`＋`initialWeeklyTrainingSidecarHash`／CLI `--sprint1-input`／run-metadata `0.4.0`／initial-world `0.4.0`／final-world `0.3.0`）。BattleState schema `0.6.0`。先行clarificationとして`S1-SPEC-0.1.19` post-start abort、`S1-SPEC-0.1.18` BattleResult決定契約、`S1-SPEC-0.1.17` sourceSnapshot baselineがある
+- 実装順序の正本: clarifier accepted → S01-008 → S01-009
 
 ## 目的
 
@@ -866,7 +870,10 @@ BattleState／ルール参照hashなど11・14が求める範囲の準備。最�
 - `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`→initial-world投影、`weeklyTrainingSidecars`＋`battleResults`→final-world投影
 - 文書schema: run-metadata `0.4.0`、initial-world `0.4.0`、final-world `0.3.0`（`weeklyTrainingSidecars`＋`battleResults`）。非bump: RunRuleSnapshot `0.4.0`／EventEnvelope `0.2.0`／InitialWeeklyTrainingSidecarSnapshot `0.1.0`／EventAllocationState `0.1.0`／BattleResultWeekState `0.1.0`／BattleResult `0.5.0`。fixed7は exactly 7 files
 - `commitRunBattlePlan`配線は本タスクで実施（`completed`／`resolution_error`のみcommit）
-- S01-007はimplemented／accepted（commit `a39e476`）。本タスクはclarifier受入後に実装再開
+- S01-007はimplemented／accepted（commit `a39e476`）。
+- 本タスクはproduction実装済み（`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers）。
+- 本タスクのステータスは **受入監査中**（accepted前）。
+- 実装順序: clarifier accepted → S01-008 → S01-009
 - fresh new-run初期化は21ステップ（02仕様）
 
 ### 依存タスク

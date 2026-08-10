@@ -22,7 +22,7 @@ sources:
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-08
+last_verified: 2026-08-10
 related:
   - ../glossary/abilities-and-aptitudes.md
   - ../glossary/techniques-and-mastery.md
@@ -64,10 +64,11 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 ### 実装状態
 
 - Sprint 1全体は**未完了**
-- S01-001〜S01-007はimplemented / accepted（S01-007受入完了commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開（統合契約は固定済み・配線未着手）。S01-009未着手
-- 戦闘開始（11）・ターン解決（12）・BattleResult／戦闘後効果（13）は実装済み。WorldEngine／CLI本統合は未実装
+- S01-001〜S01-008はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了）
+- S01-009 pending／未着手
+- 戦闘開始（11）・ターン解決（12）・BattleResult／戦闘後効果（13）は実装済み。WorldEngine／CLI本統合はS01-008でproduction実装済み（accepted）
 - `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy`／`runBattleToCompletion`／`finalizeBattleResult`／`validateBattleResult` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`。BattleResult決定契約は `S1-SPEC-0.1.18`。post-start execution abort契約は `S1-SPEC-0.1.19`。S01-008統合契約は `S1-SPEC-0.1.20`
-- 週間処理のSprint1 transactional adapter配線と戦闘の`commitRunBattlePlan`配線はS01-008（S01-004〜S01-007では未実施）。legacy WorldProcessor配列へweekly-trainingを登録しない
+- 週間処理のSprint1 transactional adapter配線と戦闘の`commitRunBattlePlan`配線はS01-008で**production実装済み**（accepted）。legacy WorldProcessor配列へweekly-trainingを登録しない
 - 本Wikiの同期や `npm run check` の成功は、Sprint 1全体の実装完了を意味しない
 
 ### 実装タスク
@@ -88,7 +89,10 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 
 ## 関連するコード
 
-- `packages/simulation-core/src/sprint1/`（S01-001〜007の公開型・validation・カタログ／成長API・週間Processor・戦闘開始・ターン解決・BattleResult）
+- `packages/simulation-core/src/sprint1/`（S01-001〜008の公開型・validation・カタログ／成長API・週間Processor・戦闘開始・ターン解決・BattleResult・session／weekly step／battle commit）
+- `packages/simulation-core/src/sprint1/create-sprint1-run-session.ts`／`sprint1-weekly-step.ts`／`weekly-training-adapter.ts`／`commit-run-battle-plan.ts`（S01-008）
+- `apps/simulator/src/cli.ts`（`--sprint1-input`）／`apps/simulator/src/output/build-sprint1-run-output.ts`（fixed7 Sprint1 writers）
+- `apps/simulator/fixtures/sprint1/`（検証用fixture）
 - `packages/simulation-core/src/sprint1/constants.ts`（`S1_SPEC_VERSION`）
 - `packages/simulation-core/src/index.ts`（package root export）
 
@@ -106,6 +110,11 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 - `packages/simulation-core/src/sprint1-spec-0.1.18-battle-result-contracts.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.19-post-start-execution-abort.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.20-s01-008-integration-contracts.test.ts`
+- `packages/simulation-core/src/sprint1-s01-008-initialization.test.ts`
+- `packages/simulation-core/src/sprint1-s01-008-weekly-step.test.ts`
+- `packages/simulation-core/src/sprint1-s01-008-commit-battle.test.ts`
+- `apps/simulator/src/cli.sprint1.test.ts`
+- `apps/simulator/src/output/sprint1-output.test.ts`
 
 ## 関連する判断
 
@@ -114,7 +123,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 
 ## 未解決事項
 
-- 現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開（WorldEngine・CLI・出力統合）。BattleResult／戦闘後効果変換は S01-007でimplemented／accepted（commit `a39e476`）。S01-009未着手。Sprint 1全体は未完了
+- S01-008は**implemented / accepted**。S01-009 pending／未着手。Sprint 1全体は未完了。次の実装着手は S01-009
 
 ## 関連Wikiページ
 

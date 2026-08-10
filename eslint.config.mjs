@@ -13,6 +13,7 @@ export default defineConfig(
       "data/**",
       "config/**",
       "package-lock.json",
+      "apps/simulator/scripts/**",
     ],
   },
   eslint.configs.recommended,

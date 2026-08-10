@@ -35,7 +35,7 @@ related:
 - 固定 7 ファイル出力との関係は、03・05 に書かれた範囲だけを根拠にする（EventEnvelope 0.2.0、RunRuleSnapshot の保存先など）
 - 詳細戦闘ログ全件を世界イベントへ複製しない（SPEC・03・13）
 - Sprint 1ではcommit済みBattleResult全文（`detailedLog`含む）を`final-world.battleResults`へ保存する（週registryだけでは捨てない。S1-SPEC-0.1.20）
-- BattleResult／戦闘後効果のproductionはS01-007でimplemented / accepted（commit `a39e476`）。WorldEngine commitはS01-008（現在は`S1-SPEC-0.1.20` clarifier中）
+- BattleResult／戦闘後効果のproductionはS01-007でimplemented / accepted（commit `a39e476`）。WorldEngine commitはS01-008（implemented / accepted）
 
 ## 関連する正本
 
@@ -49,7 +49,7 @@ related:
 - BattleResult productionはimplemented / accepted（S01-007受入完了commit `a39e476`）
 - S01-006ターンResolver／DetailedLog履歴検証（actionSequence 0始まり、RNG chain、BattleState bind）は実装済み。索引は [battle-turn-resolution.md](battle-turn-resolution.md)
 - `S1-SPEC-0.1.17`のsourceSnapshot baseline、`S1-SPEC-0.1.18`のBattleResult決定的契約（summary下位型／同点比較／RNG／mastery）、`S1-SPEC-0.1.19`のpost-start abortは13／12正本を参照。契約純関数は`battle-result-contracts.ts`／`battle-execution-abort.ts`
-- WorldEngine commit配線はS01-008（現在は`S1-SPEC-0.1.20` clarifier中）
+- WorldEngine commit配線はS01-008（implemented / accepted）
 
 ## 関連するテスト
 

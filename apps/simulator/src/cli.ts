@@ -3,13 +3,17 @@ import {
   computeConfigHash,
   computeNameDataHash,
   createSeededRng,
+  createSprint1RunSession,
   createWorldEngineState,
   generateInitialWorld,
   RNG_ALGORITHM_VERSION,
   S0_SPEC_VERSION,
   SIMULATION_SPEC_VERSION,
   validateInitialWorldConfig,
+  validateSprint1CliInput,
+  type InitialWorldConfig,
   type Sha256Provider,
+  type ValidatedNameData,
 } from "@shared-world/simulation-core";
 import {
   FileLoadError,
@@ -19,12 +23,14 @@ import {
 } from "./file-loader.js";
 import { createNodeSha256Provider } from "./node-sha256-provider.js";
 import { buildAndWriteRunOutput } from "./output/build-run-output.js";
+import { buildAndWriteSprint1RunOutput } from "./output/build-sprint1-run-output.js";
 import { createNodeFsOps, type FsOps } from "./output/fs-ops.js";
 import { createRunIdGenerator, type Clock, type RunIdGenerator } from "./output/run-id.js";
 import {
   runSimulationWithYearlyCapture,
   type SimulationWithYearlyResult,
 } from "./output/run-simulation-yearly.js";
+import { runSprint1SimulationWithYearlyCapture } from "./output/run-sprint1-simulation-yearly.js";
 import { summarizeValidationFailure } from "./output/validation-report.js";
 
 export const EXIT_SUCCESS = 0;
@@ -33,16 +39,18 @@ export const EXIT_USAGE_ERROR = 2;
 
 const UINT32_MAX = 4294967295;
 
-const HELP_TEXT = `Usage: npm run simulate -- --years <n> --seed <n> --config <path>
+const HELP_TEXT = `Usage: npm run simulate -- --years <n> --seed <n> --config <path> [--sprint1-input <path>]
 
 Options:
-  --help              Show this help message
-  --years <n>         Positive integer number of world years to simulate
-  --seed <n>          Seed integer in 0..4294967295
-  --config <path>     Path to initial-world config JSON (relative to cwd)
+  --help                  Show this help message
+  --years <n>             Positive integer number of world years to simulate
+  --seed <n>              Seed integer in 0..4294967295
+  --config <path>         Path to initial-world config JSON (relative to cwd)
+  --sprint1-input <path>  Optional Sprint 1 CLI input JSON (enables Sprint 1 mode)
 
 Example:
   npm run simulate -- --years 1 --seed 12345 --config config/initial-world.config.json
+  npm run simulate -- --years 1 --seed 4242 --config apps/simulator/fixtures/sprint1/tiny-initial-world.config.json --sprint1-input apps/simulator/fixtures/sprint1/sprint1-input.json
 `;
 
 export type CliResult = {
@@ -78,6 +86,7 @@ type ParsedCliArgs =
       years: number;
       seed: number;
       configPath: string;
+      sprint1InputPath?: string;
     }
   | { kind: "usageError"; message: string };
 
@@ -122,6 +131,7 @@ function parseCliArgs(argv: readonly string[]): ParsedCliArgs {
     years?: string;
     seed?: string;
     config?: string;
+    "sprint1-input"?: string;
   };
   try {
     const parsed = parseArgs({
@@ -131,6 +141,7 @@ function parseCliArgs(argv: readonly string[]): ParsedCliArgs {
         years: { type: "string" },
         seed: { type: "string" },
         config: { type: "string" },
+        "sprint1-input": { type: "string" },
       },
       strict: true,
       allowPositionals: false,
@@ -169,11 +180,20 @@ function parseCliArgs(argv: readonly string[]): ParsedCliArgs {
     return { kind: "usageError", message: "--config must be a non-empty path" };
   }
 
+  let sprint1InputPath: string | undefined;
+  if (values["sprint1-input"] !== undefined) {
+    if (values["sprint1-input"].trim() === "") {
+      return { kind: "usageError", message: "--sprint1-input must be a non-empty path" };
+    }
+    sprint1InputPath = values["sprint1-input"];
+  }
+
   return {
     kind: "run",
     years,
     seed,
     configPath: values.config,
+    ...(sprint1InputPath !== undefined ? { sprint1InputPath } : {}),
   };
 }
 
@@ -374,5 +394,193 @@ export function runCli(argv: readonly string[], options: RunCliOptions): CliResu
       stderr: `${parsed.message}\n`,
     };
   }
+  if (parsed.sprint1InputPath !== undefined) {
+    return runSprint1Simulation({ ...parsed, sprint1InputPath: parsed.sprint1InputPath }, options);
+  }
   return runSimulation(parsed, options);
+}
+
+function loadConfigAndNameData(
+  args: Extract<ParsedCliArgs, { kind: "run" }>,
+  options: RunCliOptions,
+  sha256Provider: Sha256Provider,
+):
+  | { ok: true; config: InitialWorldConfig; nameData: ValidatedNameData }
+  | { ok: false; result: CliResult } {
+  const absoluteConfigPath = resolveConfigPath(options.cwd, args.configPath);
+
+  let configJson: unknown;
+  try {
+    configJson = readJsonFile(absoluteConfigPath);
+  } catch (error) {
+    return {
+      ok: false,
+      result: {
+        exitCode: EXIT_RUNTIME_ERROR,
+        stdout: "",
+        stderr: `${formatErrorMessage(error)}\n`,
+      },
+    };
+  }
+
+  const configResult = validateInitialWorldConfig(configJson);
+  if (!configResult.ok) {
+    return {
+      ok: false,
+      result: {
+        exitCode: EXIT_RUNTIME_ERROR,
+        stdout: "",
+        stderr: `config validation failed: ${JSON.stringify(configResult.issues)}\n`,
+      },
+    };
+  }
+  const config = configResult.value;
+
+  let nameData;
+  try {
+    nameData = loadValidatedNameData({
+      cwd: options.cwd,
+      manifestPath: config.nameData.manifestPath,
+      requiredVersion: config.nameData.requiredVersion,
+      initialFamilyCount: config.families.initialFamilyCount,
+      sha256Provider,
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      result: {
+        exitCode: EXIT_RUNTIME_ERROR,
+        stdout: "",
+        stderr: `${formatErrorMessage(error)}\n`,
+      },
+    };
+  }
+
+  return { ok: true, config, nameData };
+}
+
+function runSprint1Simulation(
+  args: Extract<ParsedCliArgs, { kind: "run" }> & { sprint1InputPath: string },
+  options: RunCliOptions,
+): CliResult {
+  const sha256Provider = options.sha256Provider ?? createNodeSha256Provider();
+  const fs = options.fs ?? createNodeFsOps();
+  const clock = options.clock ?? (() => new Date());
+  const runIdGenerator = options.runIdGenerator ?? createRunIdGenerator(clock);
+  const outputRoot = options.outputRoot ?? fs.join(options.cwd, "output");
+
+  const loaded = loadConfigAndNameData(args, options, sha256Provider);
+  if (!loaded.ok) {
+    return loaded.result;
+  }
+  const { config, nameData } = loaded;
+
+  const absoluteSprint1InputPath = resolveConfigPath(options.cwd, args.sprint1InputPath);
+  let sprint1InputJson: unknown;
+  try {
+    sprint1InputJson = readJsonFile(absoluteSprint1InputPath);
+  } catch (error) {
+    return {
+      exitCode: EXIT_RUNTIME_ERROR,
+      stdout: "",
+      stderr: `${formatErrorMessage(error)}\n`,
+    };
+  }
+
+  const sprint1InputResult = validateSprint1CliInput(sprint1InputJson, sha256Provider);
+  if (!sprint1InputResult.ok) {
+    return {
+      exitCode: EXIT_RUNTIME_ERROR,
+      stdout: "",
+      stderr: `sprint1-input validation failed: ${JSON.stringify(sprint1InputResult.issues)}\n`,
+    };
+  }
+
+  const nameDataHash = computeNameDataHash(nameData.manifest, sha256Provider);
+
+  const sessionResult = createSprint1RunSession(
+    {
+      seed: args.seed,
+      config,
+      nameData,
+      sprint1CliInput: sprint1InputJson,
+    },
+    sha256Provider,
+  );
+  if (!sessionResult.ok) {
+    return {
+      exitCode: EXIT_RUNTIME_ERROR,
+      stdout: "",
+      stderr: `sprint1 run session creation failed: ${JSON.stringify(sessionResult.issues)}\n`,
+    };
+  }
+
+  try {
+    const realStartedAt = clock();
+    const startedMs = Date.now();
+
+    const simulation = runSprint1SimulationWithYearlyCapture({
+      initialSession: sessionResult.value.session,
+      years: args.years,
+      sha256Provider,
+    });
+
+    const realEndedAt = clock();
+    const totalMilliseconds = Date.now() - startedMs;
+    const runId = runIdGenerator.next();
+
+    const written = buildAndWriteSprint1RunOutput({
+      fs,
+      outputRoot,
+      runId,
+      cwd: options.cwd,
+      configSchemaVersion: config.schemaVersion,
+      nameDataVersion: nameData.manifest.nameDataVersion,
+      nameDataHash,
+      simulationSpecVersion: SIMULATION_SPEC_VERSION,
+      performanceTargets: config.performanceTargets,
+      createResult: sessionResult.value,
+      simulation,
+      provider: sha256Provider,
+      realStartedAt,
+      realEndedAt,
+      totalMilliseconds,
+      ...(options.afterTempWrite !== undefined ? { afterTempWrite: options.afterTempWrite } : {}),
+    });
+
+    if (!written.validationReport.overallPassed) {
+      const reason = summarizeValidationFailure(written.validationReport);
+      return {
+        exitCode: EXIT_RUNTIME_ERROR,
+        stdout: "",
+        stderr: `validation failed: ${reason}\n`,
+      };
+    }
+
+    const initialSnapshot = sessionResult.value.initialWorldSnapshotForOutput;
+    const summary = buildSummary({
+      years: args.years,
+      seed: args.seed,
+      simulationId: simulation.finalSession.context.simulationId,
+      initialPersonCount: initialSnapshot.persons.length,
+      initialFamilyCount: initialSnapshot.families.length,
+      initialLineageCount: initialSnapshot.lineages.length,
+      finalWorldDate: simulation.finalSession.runtimeState.worldState.worldDate,
+      weeksExecuted: simulation.weeksExecuted,
+      runId,
+      outputDirectory: written.atomic.runDirectory,
+    });
+
+    return {
+      exitCode: EXIT_SUCCESS,
+      stdout: `${summary}\n`,
+      stderr: "",
+    };
+  } catch (error) {
+    return {
+      exitCode: EXIT_RUNTIME_ERROR,
+      stdout: "",
+      stderr: `${formatErrorMessage(error)}\n`,
+    };
+  }
 }

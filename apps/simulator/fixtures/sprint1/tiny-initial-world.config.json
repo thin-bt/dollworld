@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "0.2.3",
+  "profileId": "tiny-sprint1-cli-v1",
+  "purpose": "Sprint 0の再現性・参照整合性・性能検証用。ゲーム正式値ではない。",
+  "world": {
+    "startYear": 1,
+    "startMonth": 4,
+    "startWeekOfMonth": 1,
+    "weeksPerMonth": 4,
+    "monthsPerYear": 12,
+    "birthMonth": 4,
+    "birthWeekOfMonth": 1
+  },
+  "population": {
+    "totalLiving": 10,
+    "initialUserFounderCount": 0,
+    "sexRatioMale": 0.5,
+    "ageBands": [
+      {
+        "minAge": 0,
+        "maxAge": 7,
+        "count": 4
+      },
+      {
+        "minAge": 8,
+        "maxAge": 15,
+        "count": 2
+      },
+      {
+        "minAge": 16,
+        "maxAge": 41,
+        "count": 2
+      },
+      {
+        "minAge": 42,
+        "maxAge": 70,
+        "count": 2
+      }
+    ],
+    "activeRankDistribution": {
+      "F": 0,
+      "E": 0,
+      "D": 0,
+      "C": 1,
+      "B": 1,
+      "A": 0,
+      "S": 0
+    }
+  },
+  "history": {
+    "initialDeceasedAncestors": 5,
+    "minimumGenerationDepth": 1,
+    "maximumGenerationDepth": 2,
+    "earliestHistoricalYear": -120,
+    "minimumAgeAtDeath": 18,
+    "maximumAgeAtDeath": 70,
+    "createExistingRelationships": true,
+    "createPastTournamentHistory": false
+  },
+  "relationships": {
+    "knownParentCoverage": 0.5,
+    "twoKnownParentsCoverageAmongCovered": 0.5,
+    "retiredSpouseCoverage": 0.4,
+    "formalMasterCoverageAge8To41": 0.5,
+    "minimumParentAgeAtChildbirth": 18,
+    "maximumBiologicalParents": 2
+  },
+  "families": {
+    "initialFamilyCount": 3,
+    "minimumMembersPerFamily": 1,
+    "maximumMembersPerFamily": 8,
+    "baseBirthRateRange": {
+      "min": 0,
+      "max": 0
+    }
+  },
+  "lineages": {
+    "initialLineageCount": 2,
+    "initialQualifiedMasters": 1,
+    "techniqueFocusWeights": {
+      "unarmed": 0.5,
+      "sword": 0.25,
+      "magic": 0.25
+    }
+  },
+  "abilities": {
+    "minimum": 0,
+    "maximum": 100,
+    "initialSurfaceValueRange": {
+      "min": 15,
+      "max": 65
+    },
+    "initialGeneticValueRange": {
+      "min": 10,
+      "max": 90
+    },
+    "initialAptitudeRange": {
+      "min": 20,
+      "max": 80
+    },
+    "initialAptitudeGeneticValueRange": {
+      "min": 10,
+      "max": 90
+    }
+  },
+  "nameData": {
+    "manifestPath": "data/names/name-data.manifest.json",
+    "requiredVersion": "NAMES-0.1.2",
+    "neutralGivenNameProbability": 0.1,
+    "familyNameSelection": "without_replacement",
+    "avoidDuplicateLivingFullNameWithinFamily": true,
+    "displayFormat": "{givenName}・{familyName}"
+  },
+  "simulation": {
+    "defaultSeed": 12345,
+    "rngAlgorithm": "xoshiro128ss-v1",
+    "defaultYears": 100,
+    "benchmarkYears": [10, 50, 100, 300],
+    "emitWeeklyEvents": false
+  },
+  "validationTargets": {
+    "maximumInitialPopulationMismatch": 0,
+    "maximumBrokenReferenceCount": 0,
+    "sameSeedMustMatch": true,
+    "differentSeedShouldDiffer": true
+  },
+  "performanceTargets": {
+    "warningSecondsFor600People100Years": 30,
+    "warningSecondsFor2000People100Years": 120,
+    "measureOnlyPopulation": 5000
+  }
+}

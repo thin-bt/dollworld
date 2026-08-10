@@ -30,7 +30,9 @@ Wiki作成・更新時に発見した、正本・コード・テスト間の矛�
 - Sprint 0 の確定実装・正本（`sprint0-complete`）
 - Sprint 1 の `S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - Sprint 1 の現行仕様は `S1-SPEC-0.1.20`（S01-008 integration contracts clarification）。`S1-SPEC-0.1.19` はpost-start abort、`S1-SPEC-0.1.18` はBattleResult決定的契約、`S1-SPEC-0.1.17` は戦闘開始`sourceSnapshot` baseline明文化（BattleState schema `0.6.0`）として履歴。`2800d3b...` を `S1-SPEC-0.1.12`〜`S1-SPEC-0.1.20` の内容 commit として扱わない
-- 実装状態: S01-001〜S01-007 implemented / accepted（S01-007受入完了commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開（契約固定済み・配線未着手）。S01-009未着手。Sprint 1 全体は未完了。WorldEngine／CLI本統合は未実装
+- 実装状態: S01-001〜S01-008 implemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了）。
+- S01-008は**implemented / accepted**（WorldEngine／CLI本統合 production実装済み）。
+- S01-009 pending／未着手。Sprint 1 全体は未完了。次の実装着手は S01-009
 - コード側 `S1_SPEC_VERSION`／SimulationIdentity レジストリは `S1-SPEC-0.1.20`、SimulationIdentity schemaVersionは `0.4.0`、`BattleState.schemaVersion`は `0.6.0`。旧`S1-SPEC-0.1.19`／identity `0.3.0`を新規 identity の現行sprint1版として受理しない
 
 未来の未作成 commit hash を捏造して sources へ書かない。

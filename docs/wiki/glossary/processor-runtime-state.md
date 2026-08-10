@@ -65,7 +65,7 @@ WorldEngine 実行中に保持するプロセッサ実行時状態（RNG サブ�
 
 ## 未解決事項
 
-該当なし。現在は`S1-SPEC-0.1.20` clarifier受入監査中。`Sprint1RunRuntimeState` production実装はclarifier accepted後のS01-008。
+該当なし。`S1-SPEC-0.1.20` は現行。`Sprint1RunRuntimeState` production実装はS01-008で**implemented / accepted**。
 
 ## 関連Wikiページ
 

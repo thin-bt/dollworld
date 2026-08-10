@@ -10,7 +10,7 @@ sources:
   - tag:sprint0-complete
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-08
+last_verified: 2026-08-11
 ---
 
 # Wiki更新履歴
@@ -20,6 +20,46 @@ last_verified: 2026-08-08
 このファイルは **Wiki全体（全Sprint共通）** の更新履歴だけを記録する。ゲーム仕様の変更履歴（[`docs/SPEC_CHANGELOG.md`](../SPEC_CHANGELOG.md)）とは別である。
 
 ## 履歴
+
+### 2026-08-11 — S01-008 受入完了status同期
+
+- 版番号は`S1-SPEC-0.1.20`のまま（仕様本文・コード・テストは変更しない）
+- S01-008を**implemented / accepted**へ同期（Wiki current-stateのみ）
+- S01-009はpending／未着手。Sprint 1全体は未完了
+- 過去のchangelog履歴にある「当時受入監査中」記述は歴史記録として維持
+
+### 2026-08-10 — S01-008 最終受入監査修正3（promotion equal-id／years=0 options）
+
+- 版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）
+- S01-008は引き続き**implemented / 受入監査中**（acceptedへ上げない）
+- provisionalSimulationIdとfinalSimulationIdの「必ず異なる」制約を削除（promotionはidentity確定境界）
+- `runSprint1Years`開始時に`legacyProcessors` validationを実施（years=0でもreserved ID reject）
+
+### 2026-08-10 — S01-008 受入監査修正2（legacyProcessors境界／reload全文bind）
+
+- 版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）
+- S01-008は引き続き**implemented / 受入監査中**（acceptedへ上げない）
+- `legacyProcessors`へSprint1 transactional adapter ID（`weekly-training`）を注入した場合はweekly adapter実行前にreject。`processorId` getter非実行
+- `runSprint1Years`はyears=0でも開始時に`validateSprint1RunSession`必須
+- rename前reloadでfixed7 `expectedContents` exact bindに加え、final-world／initial-world／events／run-metadata／validation-reportの独立semantic bindを強化
+- battle commit → week reset → fixed7 一本回帰を追加。`legacyProcessors`はWorldEngine補助hook専用と明記
+
+### 2026-08-10 — S01-008 受入監査修正1（session/structural/output projection）
+
+- 版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）
+- S01-008は引き続き**implemented / 受入監査中**（acceptedへ上げない）
+- `commitRunBattlePlan`でstored `structuralValidation`をhash materialへbind。descriptor-safe snapshot／hostile getter拒否
+- `validateSprint1RunSession`をinit／weekly／battle境界へ配線。`eventAllocationState.nextSequence === eventStream.length`等
+- provisional initial eventのsimulationId bind、initial-world sidecar投影ownerをcontextへ揃える
+- validation-report／rename前reloadがactual projectionを検証。非空BattleResult fixed7回帰
+
+### 2026-08-10 — S01-008 production実装完了（受入監査中）
+
+- 版番号は`S1-SPEC-0.1.20`のまま（0.1.21へ上げない）
+- S01-008を**implemented / 受入監査中**へ更新（accepted前）。S01-009はpending／未着手。Sprint 1全体は未完了
+- production実装: `createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter（legacy WorldProcessor非登録）／CLI `--sprint1-input`／fixed7 Sprint1 writers（run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）
+- fixtures: `apps/simulator/fixtures/sprint1/`
+- Wiki: S01-008／tasks index／sprint1／architecture（processing-flow／world-engine／output-contract／battle-lifecycle）／backlog／SPEC_PREPARATION_PLANを追随
 
 ### 2026-08-09 — S1-SPEC-0.1.20 受入監査修正5（battleResults store／final-world投影）
 

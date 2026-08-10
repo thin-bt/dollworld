@@ -3,7 +3,7 @@
  * (S1-SPEC-0.1.20 / S01-008). Types and invariants only — production facades are
  * not implemented here.
  */
-import type { EventEnvelope } from "../events/types.js";
+import type { Sprint1EventEnvelope } from "./event-envelope-sprint1.js";
 import type { SeededRngState } from "../rng.js";
 import type {
   WorldEngineState,
@@ -37,7 +37,7 @@ export type Sprint1RunRuntimeState = {
   matchIdGeneratorState: MatchIdGeneratorState;
   weeklyTrainingSidecars: WeeklyTrainingSidecarState;
   processorRuntimeStates: ProcessorRuntimeState;
-  eventStream: EventEnvelope[];
+  eventStream: Sprint1EventEnvelope[];
   eventAllocationState: EventAllocationState;
   battleResults: BattleResult[];
   battleResultWeekState: BattleResultWeekState;

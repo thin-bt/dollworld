@@ -236,6 +236,23 @@ export type {
   Sprint1RunContext,
   ValidateSprint1RunContextInput,
 } from "./sprint1/sprint1-run-context.js";
+export { validateSprint1RunSession } from "./sprint1/validate-sprint1-run-session.js";
+export {
+  CREATE_SPRINT1_RUN_SESSION_INPUT_KEYS,
+  createSprint1RunSession,
+  promoteProvisionalWorldSnapshot,
+} from "./sprint1/create-sprint1-run-session.js";
+export type {
+  CreateSprint1RunSessionDeps,
+  CreateSprint1RunSessionInput,
+  CreateSprint1RunSessionResult,
+  ProvisionalGenerationMeta,
+  Sprint1InitialWorldDocumentSnapshot,
+} from "./sprint1/create-sprint1-run-session.js";
+export { buildWeeklyTrainingPersonRecords } from "./sprint1/sprint1-person-sidecar-records.js";
+export { runSprint1WeeklyTrainingAdapter } from "./sprint1/weekly-training-adapter.js";
+export { runSprint1WeeklyStep, runSprint1Years } from "./sprint1/sprint1-weekly-step.js";
+export type { RunSprint1WeeklyStepOptions } from "./sprint1/sprint1-weekly-step.js";
 export {
   SPRINT1_TRANSACTIONAL_PROCESSOR_ADAPTER_PIPELINE,
   assertBattleResultWeekMatchesWorldDate,
@@ -254,6 +271,25 @@ export {
   validateEventAllocationState,
 } from "./sprint1/event-allocation-state.js";
 export type { EventAllocationState } from "./sprint1/event-allocation-state.js";
+export {
+  EVENT_ENVELOPE_SCHEMA_VERSION_SPRINT1,
+  SPRINT1_EVENT_ENVELOPE_SCHEMA_VERSION,
+  SPRINT1_EVENT_ENVELOPE_KEYS,
+  SPRINT1_EVENT_ENTITIES_KEYS,
+  allocateBattleEventCandidates,
+  allocateSprint1EventEnvelope,
+  allocateWeeklyTrainingEventCandidates,
+  promoteProvisionalEventStreamToSprint1,
+  promoteProvisionalEventToSprint1,
+  validateSprint1EventEnvelope,
+} from "./sprint1/event-envelope-sprint1.js";
+export type {
+  AllocateBattleEventCandidatesInput,
+  AllocateSprint1EventEnvelopeInput,
+  AllocateWeeklyTrainingEventCandidatesInput,
+  Sprint1EventEntities,
+  Sprint1EventEnvelope,
+} from "./sprint1/event-envelope-sprint1.js";
 export {
   BATTLE_RESULT_WEEK_STATE_KEYS,
   appendBattleResultToWeekState,
@@ -1025,6 +1061,12 @@ export type {
   RunBattleCommitPlanStructuralValidation,
 } from "./sprint1/run-battle-to-completion.js";
 export { convertBattleResultToWorldEffectCandidates } from "./sprint1/battle-result-world-effects.js";
+export {
+  commitRunBattlePlan,
+  computeExpectedWorldStateHash,
+  computeMatchesCompletedThisWorldWeekBeforeBattle,
+} from "./sprint1/commit-run-battle-plan.js";
+export type { CommitRunBattlePlanInput } from "./sprint1/commit-run-battle-plan.js";
 export type {
   BattleResultWorldEffectCandidates,
   WorldPersonBattleEffectCandidate,

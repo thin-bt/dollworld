@@ -8,7 +8,7 @@ sources:
   - docs/specs/03-event-envelope.md
   - tasks/S00-007.md
   - commit:7bf868e51027865fe73779ad2b21c7b83514b7af
-last_verified: 2026-08-01
+last_verified: 2026-08-10
 related:
   - simulation-core.md
   - sprint1-processing-flow.md
@@ -37,12 +37,15 @@ Sprint 0 では修行・戦闘・大会・結婚・出産・死亡 processor は
 
 ### Sprint 1（S1-SPEC-0.1.20）
 
-- production normal-week Sprint1 transactional adapter pipelineは`[weekly-training]`のみ（配線はS01-008）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない
-- `battle-simulation`はadapter pipelineへ登録しない。戦闘は明示的run／`commitRunBattlePlan` facade経由
+- production normal-week Sprint1 transactional adapter pipelineは`[weekly-training]`のみ（**S01-008でproduction実装済み**。`runSprint1WeeklyStep`がouter weekly transactionを担当）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない
+- `battle-simulation`はadapter pipelineへ登録しない。戦闘は明示的run／`commitRunBattlePlan` facade経由（**S01-008でproduction実装済み**）
 - World RNG／MatchIdGenerator／`eventStream`／`eventAllocationState`の正規ownerは`Sprint1RunRuntimeState`（オブジェクト自体はcheckpoint非永続）。`weeklyTrainingSidecars`はfinal-worldへ投影
 - `TrainingProcessorRuntimeState`は既存`ProcessorRuntimeState`経由
-- fresh Sprint 1 initialization promotion（provisional→final simulationId／initial events 0.2.0）はS01-008で実装。既存骨格（current-week phase／worldDate advance／year-start／aging）の順序は変更しない
-- S01-007はimplemented / accepted（commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中
+- fresh Sprint 1 initialization promotion（provisional→final simulationId／initial events 0.2.0）は**S01-008でproduction実装済み**（`createSprint1RunSession`）。既存骨格（current-week phase／worldDate advance／year-start／aging）の順序は変更しない
+- S01-007はimplemented / accepted（commit `a39e476`）。
+- S01-008はimplemented / accepted
+- S01-009はpending／未着手。Sprint 1全体は未完了。次の実装着手は S01-009
+- 実装順序: clarifier accepted → S01-008 → S01-009（S01-008まで完了）
 
 ## 関連する正本
 
@@ -56,6 +59,7 @@ Sprint 0 では修行・戦闘・大会・結婚・出産・死亡 processor は
 - `packages/simulation-core/src/world-engine/engine.ts`
 - `packages/simulation-core/src/world-engine/types.ts`
 - `packages/simulation-core/src/world-engine/processor-runtime.ts`
+- `packages/simulation-core/src/sprint1/create-sprint1-run-session.ts`／`sprint1-weekly-step.ts`／`weekly-training-adapter.ts`／`commit-run-battle-plan.ts`（S01-008）
 
 ## 関連するテスト
 

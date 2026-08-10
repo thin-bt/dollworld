@@ -9,6 +9,11 @@ import type {
   WorldDate,
   WorldEngineState,
 } from "@shared-world/simulation-core";
+import type {
+  BattleResult,
+  SimulationIdentity,
+  WeeklyTrainingSidecarState,
+} from "@shared-world/simulation-core";
 import type { FixedOutputFileName } from "./fixed-files.js";
 
 export type IsoUtcTimestamp = string;
@@ -41,6 +46,14 @@ export type RunMetadataDocument = {
   realEndedAt: IsoUtcTimestamp;
   termination: RunTerminationStatus;
   outputFiles: OutputFileListing[];
+};
+
+/** Sprint 1 new-run run-metadata.json (schemaVersion 0.4.0). */
+export type Sprint1RunMetadataDocument = RunMetadataDocument & {
+  schemaVersion: "0.4.0";
+  simulationIdentity: SimulationIdentity;
+  simulationIdentityHash: string;
+  eventEnvelopeSchemaVersion: "0.2.0";
 };
 
 export type BrokenReferenceViolation = {
@@ -108,6 +121,13 @@ export type FinalWorldDocument = {
   /** Last EventEnvelope.sequence in events.jsonl; null when no events. */
   finalEventSequence: number | null;
   referenceIntegrity: ReferenceIntegrityResult;
+};
+
+/** Sprint 1 new-run final-world.json (schemaVersion 0.3.0). */
+export type Sprint1FinalWorldDocument = Omit<FinalWorldDocument, "schemaVersion"> & {
+  schemaVersion: "0.3.0";
+  weeklyTrainingSidecars: WeeklyTrainingSidecarState;
+  battleResults: readonly BattleResult[];
 };
 
 export type ValidationCheckStatus = "passed" | "failed" | "not_performed";

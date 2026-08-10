@@ -40,9 +40,11 @@
 | S01-005 戦闘開始・BattleState生成 | **実装完了**（MatchId生成器・RunRuleSnapshot・開始トランザクション。WorldEngine登録はS01-008） |
 | S01-006 戦闘ターン解決 | **実装完了**（productionターンResolver・`movementChance` production・ActionLog完全検証。WorldEngine登録はS01-008） |
 | S01-007 戦闘終了・結果・ログ | **implemented / accepted**（受入完了commit `a39e476`。WorldEngine commitはS01-008） |
-| Sprint 1全体 | **未完了**（次はS01-008。S01-008〜009はpending） |
+| S01-008 WorldEngine・CLI・出力統合 | **implemented / 受入監査中**（`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers。受入監査完了前） |
+| S01-009 Sprint 1総合受入検証 | **pending**／未着手 |
+| Sprint 1全体 | **未完了**（S01-008受入監査中。S01-009未着手） |
 
-現在は `S1-SPEC-0.1.20` S01-008 integration contracts clarifier中。clarifier受入後に **S01-008**（WorldEngine・CLI・出力統合）を実装再開する。S01-001〜S01-007はimplemented／accepted（S01-007受入完了commit `a39e476`）。S01-009は未着手。Sprint 1全体は未完了。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数は実装済みであり、WorldEngine／CLI配線は **S01-008** で行う。
+**S01-008**（WorldEngine・CLI・出力統合）はproduction実装済みで**受入監査中**である。S01-001〜S01-007はimplemented／accepted（S01-007受入完了commit `a39e476`）。S01-009は未着手。Sprint 1全体は未完了。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数に加え、WorldEngine／CLI配線は **S01-008** で実装済み。
 
 Sprint 1実装時は、正本`SPEC-0.1.2`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述を参照する。
 

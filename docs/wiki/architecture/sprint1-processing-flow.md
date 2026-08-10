@@ -13,7 +13,7 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-08
+last_verified: 2026-08-10
 related:
   - battle-lifecycle.md
   - ../sprints/sprint1.md
@@ -64,7 +64,7 @@ World 人物を戦闘中に直接書き換えず、snapshot と結果経由で�
 
 ### 週間処理の入出力境界（S01-004実装済み）
 
-週間処理は WorldEngine から独立した純粋関数として実装されている。Sprint1 transactional processor adapter への配線は S01-008。production adapter ID／event `sourceProcessor` は `weekly-training`（`S1-SPEC-0.1.20`）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors` へは登録しない。
+週間処理は WorldEngine から独立した純粋関数として実装されている。Sprint1 transactional processor adapter への配線は **S01-008でproduction実装済み**（`runSprint1WeeklyStep`／`runSprint1WeeklyTrainingAdapter`）。production adapter ID／event `sourceProcessor` は `weekly-training`（`S1-SPEC-0.1.20`）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors` へは登録しない。
 
 ```text
 入力（検証前）
@@ -89,12 +89,12 @@ mutable runtime root と immutable context（runtime checkpoint vs projection �
 - `Sprint1RunContext`: `sprint1Config`／`techniqueCatalog`／`initialWeeklyTrainingSidecarSnapshot`／`simulationIdentity`(+hash)／`simulationId`／`runRuleSnapshot`(+hash)。外部`initialMatchIdGeneratorState`依存なし
 - 論理`Sprint1RunSession = { context, runtimeState }`。rollbackはruntimeのみ
 - weekly `TrainingProcessorRuntimeState`は`processorRuntimeStates.processorSpecificStates`（plain JSON deep-clone）
-- production `[weekly-training]` = Sprint1 transactional adapter pipeline（legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない。二重実行禁止）
+- production `[weekly-training]` = Sprint1 transactional adapter pipeline（legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない。二重実行禁止）。`runSprint1WeeklyStep` の `legacyProcessors` は年末集計などのWorldEngine補助hook専用であり、`weekly-training` を含むSprint1 adapter IDは拒否する
 - battle World RNG label `battle/world-rng`／weekly RNG label `processor/weekly-training`
 - fresh initialization promotion後: `eventStream = promoted initialEvents`、`nextSequence = promotedInitialEvents.length`、`battleResults = []`、`battleResultWeekState.results = []`
 - `battleResultWeekState.absoluteWeek === worldDate.absoluteWeek`必須。week.resultsは`battleResults` current-week suffixとcanonical一致必須
 - week advance成功時: week registryだけ`results=[]`へreset。`battleResults`は保持
-- battleはadapter pipeline外。`commitRunBattlePlan`配線はS01-008
+- battleはadapter pipeline外。`commitRunBattlePlan`配線は**S01-008でproduction実装済み**（`commit-run-battle-plan.ts`）
 - `matchesCompletedThisWorldWeekBeforeBattle`はweek registryのparticipant別completed件数（`battleResults.length`ではない。resolution_errorはcount+0）
 - `PersonTemporaryCondition` current正本はweekly sidecar。Personへfatigue等新field追加なし
 - `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`→initial-world 0.4.0投影、`weeklyTrainingSidecars`＋`battleResults`→final-world 0.3.0投影。fixed7 exactly 7 files
@@ -141,11 +141,14 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 
 ## 関連するコード
 
-- `packages/simulation-core/src/sprint1/`（S01-001〜006）
-- `packages/simulation-core/src/sprint1/process-weekly-training-week.ts`（週間Processor入口）
+- `packages/simulation-core/src/sprint1/`（S01-001〜008）
+- `packages/simulation-core/src/sprint1/create-sprint1-run-session.ts`（fresh initialization promotion）
+- `packages/simulation-core/src/sprint1/sprint1-weekly-step.ts`／`weekly-training-adapter.ts`（outer weekly transaction）
+- `packages/simulation-core/src/sprint1/commit-run-battle-plan.ts`（battle commit facade）
+- `packages/simulation-core/src/sprint1/process-weekly-training-week.ts`（週間Processor純関数入口）
 - `packages/simulation-core/src/sprint1/start-battle-transaction.ts`（戦闘開始入口、内部）
 - `packages/simulation-core/src/sprint1/prepare-battle-turn.ts`／`resolve-battle-turn.ts`／`default-battle-strategy.ts`
-- BattleResult（S01-007）はimplemented / accepted（commit `a39e476`）。WorldEngine登録（S01-008）は未実装。現在は`S1-SPEC-0.1.20` clarifier中
+- BattleResult（S01-007）はimplemented / accepted（commit `a39e476`）。WorldEngine／CLI統合（S01-008）はproduction実装済み（accepted）
 
 ## 関連するテスト
 
@@ -157,6 +160,9 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 - `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.12-contracts.test.ts`
 - `packages/simulation-core/src/sprint1-spec-0.1.20-s01-008-integration-contracts.test.ts`
+- `packages/simulation-core/src/sprint1-s01-008-initialization.test.ts`
+- `packages/simulation-core/src/sprint1-s01-008-weekly-step.test.ts`
+- `packages/simulation-core/src/sprint1-s01-008-commit-battle.test.ts`
 
 ## 関連する判断
 
@@ -164,7 +170,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 
 ## 未解決事項
 
-S01-008本体（WorldEngine／CLI配線）は未実装。現在は`S1-SPEC-0.1.20` clarifier受入監査中。順: clarifier accepted → S01-008 implementation → S01-009。
+S01-008は**implemented / accepted**。Sprint 1全体は未完了。次はS01-009（pending／未着手）。
 
 ## 関連Wikiページ
 

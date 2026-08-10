@@ -10,7 +10,7 @@ sources:
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-08
+last_verified: 2026-08-10
 ---
 
 # タスク索引
@@ -38,7 +38,10 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 ### Sprint 1（部分実装中・全体は未完了）
 
-正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.20`。Sprint 1全体は未完了。S01-001〜007 implemented / accepted（S01-007受入完了commit `a39e476`）。現在は0.1.20 clarifier中。clarifier受入後にS01-008実装再開（統合契約は0.1.20で固定済み・配線未着手）。S01-009はpending／未着手。
+正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.20`。Sprint 1全体は未完了。
+- S01-001〜008 implemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了）
+- S01-009 pending／未着手
+- 次の実装着手は S01-009
 
 共有型所有の要約（詳細は正本）:
 
@@ -58,10 +61,10 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 | S01-005 | [S01-005.md](S01-005.md) | implemented | S01-001、S01-002、S01-003 |
 | S01-006 | [S01-006.md](S01-006.md) | implemented | S01-005 |
 | S01-007 | [S01-007.md](S01-007.md) | accepted (`a39e476`) | S01-006 |
-| S01-008 | [S01-008.md](S01-008.md) | pending（0.1.20 clarifier中） | S01-004、S01-007 |
+| S01-008 | [S01-008.md](S01-008.md) | implemented / accepted | S01-004、S01-007 |
 | S01-009 | [S01-009.md](S01-009.md) | pending／未着手 | S01-008 |
 
-clarifier受入後の実装再開は S01-008。WorldEngineへの週間処理登録は S01-008。Sprint 1全体は未完了。BattleResultは S01-007で実装済み（accepted）。
+S01-008はproduction実装済み（`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers）で**accepted**。Sprint 1全体は未完了。次はS01-009。BattleResultは S01-007で実装済み（accepted）。
 
 ## 関連する正本
 
@@ -78,13 +81,16 @@ clarifier受入後の実装再開は S01-008。WorldEngineへの週間処理登�
 - S01-005: `packages/simulation-core/src/sprint1/match-id-generator.ts`／`battle-*.ts`／`run-rule-snapshot.ts`／`create-battle-state.ts`／`begin-battle.ts`／`start-battle-transaction.ts`
 - S01-006: `packages/simulation-core/src/sprint1/prepare-battle-turn.ts`／`resolve-battle-turn.ts`／`default-battle-strategy.ts`／`battle-turn-logs.ts`／`movement-chance.ts`／`battle-movement.ts` 等
 - S01-007: 実装済み（BattleResult／ログ／戦闘後効果）
-- S01-008以降: 未着手（WorldEngine／CLI）
+- S01-008: **implemented / accepted**（`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers）
+- fixtures: `apps/simulator/fixtures/sprint1/`
 
 ## 関連するテスト
 
 - `packages/simulation-core/src/sprint1-weekly-training.test.ts`（S01-004）
 - `packages/simulation-core/src/sprint1-battle-start.test.ts`（S01-005）
 - `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`（S01-006）
+- `packages/simulation-core/src/sprint1-s01-008-*.test.ts`（S01-008）
+- `apps/simulator/src/cli.sprint1.test.ts`／`apps/simulator/src/output/sprint1-output.test.ts`（S01-008 CLI／fixed7）
 
 ## 関連する判断
 

@@ -11,7 +11,7 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-08
+last_verified: 2026-08-10
 related:
   - sprint1-processing-flow.md
   - ../invariants/battle-start.md
@@ -39,7 +39,7 @@ related:
 - post-start execution abort（3 result kind維持／`BattleExecutionAbortError`／原子的abort／S01-008 commit禁止）は `S1-SPEC-0.1.19` で明文化済み
 - ターン解決（12）のproduction実装は**実装済み**（S01-006）
 - BattleResult（13）のproduction実装は**implemented / accepted**（S01-007受入完了commit `a39e476`）
-- Sprint 1全体は未完了。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開。S01-009未着手
+- Sprint 1全体は未完了。S01-008は**implemented / accepted**（`commitRunBattlePlan`／`battleResults` final-world投影 production実装済み）。S01-009 pending／未着手
 
 ### 主な段階
 
@@ -50,7 +50,7 @@ related:
 - 決着判定（戦闘不能、続行不能、降参、規定ターン到達時の判定勝ち等。詳細は 12・13）— ターン内候補までS01-006、最終BattleResultはS01-007で実装済み
 - BattleResult（13）— implemented / accepted（`a39e476`）
 - 概要ログ／詳細ログ（13）— implemented / accepted（`a39e476`）
-- 戦闘後の疲労・負傷等の効果（13）— implemented / accepted（`a39e476`）。WorldEngine commitはS01-008
+- 戦闘後の疲労・負傷等の効果（13）— implemented / accepted（`a39e476`）。WorldEngine commitはS01-008で**production実装済み**（`commitRunBattlePlan`）
 
 ### 決定性
 
@@ -77,13 +77,15 @@ RNG 消費順、丸め順、canonical 順などは正本の記述をそのまま
 - `packages/simulation-core/src/sprint1/battle-state.ts`／`battle-participant.ts`／`battle-started-event.ts`
 - `packages/simulation-core/src/sprint1/prepare-battle-turn.ts`／`resolve-battle-turn.ts`／`default-battle-strategy.ts`
 - `packages/simulation-core/src/sprint1/battle-turn-logs.ts`／`movement-chance.ts`／`battle-movement.ts`
-- BattleResult（S01-007）はimplemented / accepted（`a39e476`）。WorldEngine登録／`battleResults` final-world投影はS01-008（現在は`S1-SPEC-0.1.20` clarifier。run全体store契約は確定済み、production未実装）。
+- `packages/simulation-core/src/sprint1/commit-run-battle-plan.ts`（S01-008 production commit facade）
+- BattleResult（S01-007）はimplemented / accepted（`a39e476`）。WorldEngine登録／`battleResults` final-world投影はS01-008で**production実装済み**（accepted）。
 
 ## 関連するテスト
 
 - `packages/simulation-core/src/sprint1-battle-start.test.ts`（開始stage）
 - `packages/simulation-core/src/sprint1-battle-turn-resolution.test.ts`（ターン解決）
 - `packages/simulation-core/src/sprint1-battle-result.test.ts`（S01-007）
+- `packages/simulation-core/src/sprint1-s01-008-commit-battle.test.ts`（S01-008 commit facade）
 
 ## 関連する判断
 
@@ -91,7 +93,7 @@ RNG 消費順、丸め順、canonical 順などは正本の記述をそのまま
 
 ## 未解決事項
 
-該当なし。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開。Sprint 1全体は未完了。
+S01-008は**implemented / accepted**。Sprint 1全体は未完了。次はS01-009（pending／未着手）。
 
 ## 関連Wikiページ
 

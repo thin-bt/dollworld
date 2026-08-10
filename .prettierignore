@@ -8,3 +8,5 @@ package-lock.json
 **/dist/**
 **/node_modules/**
 /output/**
+/_handoff-artifacts/**
+_handoff-artifacts/**

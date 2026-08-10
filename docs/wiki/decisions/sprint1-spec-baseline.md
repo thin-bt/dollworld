@@ -55,8 +55,9 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 ### 現在の実装状態（別段落）
 
-- S01-001〜S01-007 はimplemented / accepted（S01-007受入完了commit `a39e476`）。現在は`S1-SPEC-0.1.20` clarifier中。clarifier受入後にS01-008実装再開
-- 次の実装着手は S01-008（統合契約は0.1.20で固定済み・配線未着手）
+- S01-001〜S01-008 はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了）
+- S01-009 pending／未着手。Sprint 1全体は未完了
+- 次の実装着手は S01-009（S01-008統合契約は0.1.20で固定済み・production実装済み）
 - Sprint 1 全体は未完了
 
 ## 関連する正本

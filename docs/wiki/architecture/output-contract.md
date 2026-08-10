@@ -8,7 +8,7 @@ sources:
   - tasks/S00-009.md
   - apps/simulator/src/output/fixed-files.ts
   - commit:4958ba8c841c9ad2aff00d62579e2863af54f099
-last_verified: 2026-08-09
+last_verified: 2026-08-10
 related:
   - ../invariants/fixed-seven-files.md
   - headless-cli.md
@@ -50,6 +50,7 @@ related:
 - `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。sidecarおよび`battleResults`（`detailedLog`含む全文）はfinal／initial worldへ投影
 - validation-report／same-seed比較はsidecar全文および`battleResults`全文を含む
 - Sprint 1ではBattleResult retention削除を実装しない
+- Sprint1 new-run fixed7 writersは**S01-008でproduction実装済み**（`buildAndWriteSprint1RunOutput`）。run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0
 
 厳密な検証は [../invariants/fixed-seven-files.md](../invariants/fixed-seven-files.md) を参照。
 
@@ -62,13 +63,17 @@ related:
 ## 関連するコード
 
 - `apps/simulator/src/output/fixed-files.ts`
-- `apps/simulator/src/output/build-run-output.ts`
+- `apps/simulator/src/output/build-run-output.ts`（Sprint 0）
+- `apps/simulator/src/output/build-sprint1-run-output.ts`（Sprint 1 fixed7 writers）
+- `apps/simulator/src/output/validation-report-sprint1.ts`／`sprint1-events-jsonl.ts`
 - `apps/simulator/src/output/atomic-write.ts`
+- `apps/simulator/fixtures/sprint1/`（検証用fixture）
 - `apps/simulator/src/sprint0-verification/fixed-seven-files.ts`
 
 ## 関連するテスト
 
 - `apps/simulator/src/output/output.test.ts`
+- `apps/simulator/src/output/sprint1-output.test.ts`
 - `apps/simulator/src/sprint0-verification/sprint0-verification.test.ts`
 
 ## 関連する判断

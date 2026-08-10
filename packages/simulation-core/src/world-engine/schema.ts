@@ -230,6 +230,7 @@ export const ALL_PERSON_KEYS: ReadonlySet<string> = new Set([
   "currentRank",
   "highestRank",
   "retirementRank",
+  "sprint1State",
 ]);
 
 export function allowedPersonKeys(lifeStatus: string, careerStatus: string): ReadonlySet<string> {
@@ -260,6 +261,8 @@ export function allowedPersonKeys(lifeStatus: string, careerStatus: string): Rea
   if (!(lifeStatus === "living" && careerStatus === "child")) {
     keys.add("lineageId");
   }
+
+  keys.add("sprint1State");
 
   return keys;
 }
