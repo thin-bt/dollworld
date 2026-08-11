@@ -65,15 +65,14 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 
 ### 実装状態
 
-- Sprint 1全体は**未完了**
-- S01-001〜S01-008はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了）
-- S01-009 **implemented / 受入監査中**
+- S01-001〜S01-009は**implemented / accepted**（S01-007受入完了commit `a39e476`。S01-008受入完了commit `7c47847`。S01-009受入完了commit `5616f5f`、2026-08-11 ChatGPT再監査）
+- Sprint 1: 全タスク受入完了。最終完了処理として clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成が残っている
 - 戦闘開始（11）・ターン解決（12）・BattleResult／戦闘後効果（13）は実装済み。WorldEngine／CLI本統合はS01-008でproduction実装済み（accepted）
 - `prepareBattleTurn`／`resolveBattleTurn`／`DefaultBattleStrategy`／`runBattleToCompletion`／`finalizeBattleResult`／`validateBattleResult` は実装済み。移動状態補正は `S1-SPEC-0.1.15`。`BattleActionLog.movementChance` productionは `S1-SPEC-0.1.16`。BattleResult決定契約は `S1-SPEC-0.1.18`。post-start execution abort契約は `S1-SPEC-0.1.19`。S01-008統合契約は `S1-SPEC-0.1.20`
 - 週間処理のSprint1 transactional adapter配線と戦闘の`commitRunBattlePlan`配線はS01-008で**production実装済み**（accepted）。legacy WorldProcessor配列へweekly-trainingを登録しない
-- 本Wikiの同期や `npm run check` の成功は、Sprint 1全体の実装完了を意味しない
+- 本Wikiの同期や `npm run check` の成功は、`sprint1-complete` tag 作成を意味しない
 - S01-009の実装前clarifierは確定済み。正規完了検証入口は`npm run verify:sprint1`、same-seed 100年×2、different-seed実体差、boundary seed、10／50／100／300年、weekly＋technique＋`official` battle（default strategy）統合、存命人口 target 600／2000／5000×1年population baseline、`verify:sprint0`回帰を総合する。verifierはexit 0/1・stale report防止・atomic completion reportを契約化。verification runは`output/sprint1-verification/runs/<run-key>/`へ分離し、battle入力はS01-008 accepted public helperを再利用する
-- S01-009 accepted後、clean masterで`verify:sprint1`を再実行して合格したcommitへ`Sprint 1`完了tag `sprint1-complete`を付ける
+- 最終完了処理: clean masterで`verify:sprint1`を再実行して合格したcommitへ`Sprint 1`完了tag `sprint1-complete`を付ける
 
 ### 実装タスク
 
@@ -127,7 +126,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 
 ## 未解決事項
 
-- S01-008は**implemented / accepted**。S01-009 **implemented / 受入監査中**。Sprint 1全体は未完了。次は受入監査→accepted→clean master `verify:sprint1`→`sprint1-complete`
+- S01-001〜S01-009は**implemented / accepted**。残作業は最終完了処理のみ: clean master `npm run verify:sprint1` → `sprint1-complete` tag 作成
 
 ## 関連Wikiページ
 

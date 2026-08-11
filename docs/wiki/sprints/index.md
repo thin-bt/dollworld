@@ -24,7 +24,7 @@ Sprint 0 と Sprint 1 を横断する Sprint 単位の索引。
 ## 現在確定している内容
 
 - [Sprint 0](sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprint1.md) — 仕様 `S1-SPEC-0.1.20`（全体実装は未完了、S01-008 accepted、次はS01-009）
+- [Sprint 1](sprint1.md) — 仕様 `S1-SPEC-0.1.20`（S01-001〜S01-009 implemented / accepted。残作業は clean master `verify:sprint1` と `sprint1-complete` tag 作成）
 
 ## 関連する正本
 

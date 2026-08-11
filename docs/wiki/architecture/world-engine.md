@@ -44,8 +44,8 @@ Sprint 0 では修行・戦闘・大会・結婚・出産・死亡 processor は
 - fresh Sprint 1 initialization promotion（provisional→final simulationId／initial events 0.2.0）は**S01-008でproduction実装済み**（`createSprint1RunSession`）。既存骨格（current-week phase／worldDate advance／year-start／aging）の順序は変更しない
 - S01-007はimplemented / accepted（commit `a39e476`）。
 - S01-008はimplemented / accepted
-- S01-009はpending／未着手。Sprint 1全体は未完了。次の実装着手は S01-009
-- 実装順序: clarifier accepted → S01-008 → S01-009（S01-008まで完了）
+- S01-009はimplemented / accepted（受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成
+- 実装順序（履歴）: clarifier accepted → S01-008 → S01-009（S01-001〜009まで完了）
 
 ## 関連する正本
 

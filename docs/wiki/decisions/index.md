@@ -34,7 +34,7 @@ Sprint 0・Sprint 1を横断する設計判断索引。正本は TECHNICAL_DECIS
 
 ## 関連するコード
 
-該当なし（判断の索引）。S01-001〜008はimplemented / accepted。現在の次タスクはS01-009（pending／未着手）。
+該当なし（判断の索引）。S01-001〜S01-009はimplemented / accepted（S01-009受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
 
 ## 関連するテスト
 

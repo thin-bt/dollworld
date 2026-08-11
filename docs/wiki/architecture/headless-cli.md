@@ -27,7 +27,7 @@ related:
 - Sprint 0 完了検証: `npm run verify:sprint0`
 - core は `node:crypto` を直接 import しない（Sha256 は CLI 側注入）
 - Sprint 1（`S1-SPEC-0.1.20`）: 新規optionは`--sprint1-input`のみ（`Sprint1CliInput` 0.1.0）。省略時はSprint 0挙動維持。S01-008でproduction配線済み／accepted
-- Sprint 1 完了検証: S01-009でルート`npm run verify:sprint1`を実装予定。simulation CLI optionは増やさず、verification entrypointを別scriptとする
+- Sprint 1 完了検証: S01-009でルート`npm run verify:sprint1`を実装済み（accepted）。simulation CLI optionは増やさず、verification entrypointを別scriptとする。残作業は clean master 再実行と `sprint1-complete` tag 作成
 
 ## 関連する正本
 

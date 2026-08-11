@@ -39,7 +39,7 @@ related:
 - post-start execution abort（3 result kind維持／`BattleExecutionAbortError`／原子的abort／S01-008 commit禁止）は `S1-SPEC-0.1.19` で明文化済み
 - ターン解決（12）のproduction実装は**実装済み**（S01-006）
 - BattleResult（13）のproduction実装は**implemented / accepted**（S01-007受入完了commit `a39e476`）
-- Sprint 1全体は未完了。S01-008は**implemented / accepted**（`commitRunBattlePlan`／`battleResults` final-world投影 production実装済み）。S01-009 pending／未着手
+- S01-008は**implemented / accepted**（`commitRunBattlePlan`／`battleResults` final-world投影 production実装済み）。S01-009はimplemented / accepted（受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成
 
 ### 主な段階
 
@@ -93,7 +93,7 @@ RNG 消費順、丸め順、canonical 順などは正本の記述をそのまま
 
 ## 未解決事項
 
-S01-008は**implemented / accepted**。Sprint 1全体は未完了。次はS01-009（pending／未着手）。
+S01-008／S01-009は**implemented / accepted**（S01-009受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
 
 ## 関連Wikiページ
 

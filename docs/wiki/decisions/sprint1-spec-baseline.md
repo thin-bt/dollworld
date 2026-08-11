@@ -55,10 +55,9 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 ### 現在の実装状態（別段落）
 
-- S01-001〜S01-008 はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了）
-- S01-009 pending／未着手。Sprint 1全体は未完了
-- 次の実装着手は S01-009（S01-008統合契約は0.1.20で固定済み・production実装済み）
-- Sprint 1 全体は未完了
+- S01-001〜S01-009 はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了。S01-009受入完了commit `5616f5f`、2026-08-11 ChatGPT再監査）
+- 残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成（tagは未作成）
+- `S1-SPEC-0.1.20` 維持（S01-008統合契約は固定済み・production実装済み）
 
 ## 関連する正本
 

@@ -23,7 +23,7 @@ Sprint 0・Sprint 1を横断する用語索引。定義の正本はミニ仕様�
 - [シミュレーション識別（simulationId / eventId 等）](simulation-identity.md)
 - [ProcessorRuntimeState](processor-runtime-state.md)
 
-### Sprint 1（S01-001〜008 implemented / accepted、S01-009 pending）
+### Sprint 1（S01-001〜009 implemented / accepted）
 
 - [能力と適性（AbilityKey／AptitudeKey）](abilities-and-aptitudes.md)
 - [技と熟練度](techniques-and-mastery.md)（0.1.14の使用回数契約を含む）
@@ -42,10 +42,10 @@ Sprint 0 用語に対応する実装:
 - `packages/simulation-core/src/world-date.ts`
 - `packages/simulation-core/src/ids.ts`
 
-Sprint 1（S01-001〜008）:
+Sprint 1（S01-001〜009）:
 
 - `packages/simulation-core/src/sprint1/`
-- `apps/simulator/`（S01-008 CLI／fixed7統合）
+- `apps/simulator/`（S01-008 CLI／fixed7統合、S01-009 `verify:sprint1`）
 
 ## 関連するテスト
 
@@ -56,8 +56,8 @@ Sprint 0 用語に対応するテスト:
 
 Sprint 1:
 
-- S01-001〜008のSprint 1 regression／integration tests
-- Sprint 1全体の完了ゲートはS01-009 `npm run verify:sprint1`（pending）
+- S01-001〜009のSprint 1 regression／integration／verification tests
+- Sprint 1全体の完了ゲートはS01-009 `npm run verify:sprint1`（implemented / accepted）。残作業は clean master 再実行と `sprint1-complete` tag 作成
 
 ## 関連する判断
 

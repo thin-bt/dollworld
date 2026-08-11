@@ -171,7 +171,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 
 ## 未解決事項
 
-S01-008は**implemented / accepted**。Sprint 1全体は未完了。次はS01-009（pending／未着手）。
+S01-008／S01-009は**implemented / accepted**（S01-009受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
 
 ## 関連Wikiページ
 

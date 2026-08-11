@@ -1,5 +1,10 @@
 # 変更履歴
 
+## 2026-08-11：S01-009 受入完了（status finalize・管理資料）
+- ChatGPT再監査（fix1）で S01-009 を **implemented / accepted** へ確定（受入完了commit `5616f5f`）。
+- current state: S01-001〜S01-009 implemented / accepted。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成（tagは未作成）。
+- `S1-SPEC-0.1.20` 非bump。本エントリはstatus反映のみ（ゲーム仕様・wire shape・RNG・balanceの変更ではない）。
+
 ## 2026-08-11：S01-009 Sprint 1総合受入検証 clarification（管理資料）
 - 追加監査で`verify:sprint1`のsub-gate順序を固定し、`npm run wiki:check`／`git diff --check HEAD`を独立commandとして明記。script起動方式は既存`verify:sprint0`のbuild／Node patternを踏襲し、新runner依存追加を禁止。
 - 追加監査でverification `runs/<run-key>/`は`runCli`のoutputRootであり、fixed7は既存layoutの`<run-key>/<runId>/`に置くことを明記。runId階層のflatten禁止、各run-key成功時exactly 1 runId directoryを固定。
@@ -8,7 +13,7 @@
 - 再監査: weekly-training event actorを`EventEnvelope.entities.personIds` exact 1件へ固定。Sprint0 `performanceWarnings` wire型はS01-009で再定義せずaccepted report型／validatorを再利用。集約可能なfailureは`overallPassed=false` report必須。population performanceは600→2000→5000逐次child、same-seed run-metadataは非決定exact 3 fieldだけ除外したproduction canonical比較、`Math.random`はcall expressionのみtoken-aware scanへ固定。
 S01-008受入完了後、S01-009を実装時再判断なしで開始できるよう、Sprint 1総合verificationの実行入口・検証matrix・completion report・clean-tree完了手順を管理資料へ明文化した。ゲーム仕様・wire shape・RNG・balanceの変更ではなく、`S1-SPEC-0.1.20`は非bump。
 
-- current state: S01-001〜008 implemented / accepted（S01-008受入完了commit `7c47847`）、S01-009 pending／未着手、Sprint 1全体は未完了
+- current state（当時・clarifier時点）: S01-001〜008 implemented / accepted（S01-008受入完了commit `7c47847`）、S01-009 pending／未着手、Sprint 1全体は未完了
 - 正規入口`npm run verify:sprint1`、completion report `output/sprint1-verification/sprint1-completion-report.json`（verification schema `0.1.0`）
 - same-seed 12345・100年×2、different-seed 12345 vs 54321の実体差、boundary seed 0／4294967295各1年×2、10／50／100／300年profile
 - integrated scenarioはweekly→official participant自身の技状態更新event→更新済みPersonのbattle source反映→`official` battle（production `default_strategy`）→commit→次週registry reset→fixed7。自動battle scheduler／scripted actionによる結果固定は禁止

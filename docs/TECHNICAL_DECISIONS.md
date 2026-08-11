@@ -104,7 +104,7 @@ TypeScript 7は、採用するtypescript-eslint 8.65.0の公式対応範囲外�
 - identity/canonical検証のsidecar単一値mutationはPersonId昇順先頭entryの`motivationFactor`をrange内で±1するだけとし、key-order testは値・配列順を変えない。production `Math.random` scanはsimulation-core／simulator production sourceを対象としtests／verification-only sourceを除外する。comment／string literalの文字列一致はfailureにせず、実行コード上のcall expressionだけをAST／token-awareに判定する。
 - `verify:sprint1`はexit 0=`overallPassed=true` report正常生成、exit 1=functional／harness failure。集約可能なfailureでは`overallPassed=false` reportを必ずatomic writeし、report write/read-back自体のfailureだけreport不在exit 1を許す。前回passed reportのstale残存を防ぎ、completion reportは一時file→rename→再読込validationする。
 - required gateを前提failureで実行できない場合は`blocked`としてfunctional failureへ集約し、黙ってskipしない。
-- S01-009受入中はdirty reportを許容するが、最終`Sprint 1` tag前はverification前後ともclean treeを必須とする。`_handoff-artifacts/`等のuntracked artifactはrepository外へ退避／削除し、tag通過目的のignore追加で隠さない。
+- S01-009受入中はdirty reportを許容していたが、受入は完了済み（commit `5616f5f`）。最終`Sprint 1` tag前はverification前後ともclean treeを必須とする。`_handoff-artifacts/`等のuntracked artifactはrepository外へ退避／削除し、tag通過目的のignore追加で隠さない。
 - completion reportのSHA-256はreport生成・read-back validation後のfile bytesを外部計算し、JSON本文へ自己hashを埋め込まない。`sprint1-complete`既存tagをforce moveせず、別commitを指す場合は停止して確認する。
 - verification用helper／reportは新しいゲーム仕様・public simulation API・実行時依存を追加する根拠にしない。
 

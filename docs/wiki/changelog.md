@@ -15,10 +15,16 @@ last_verified: 2026-08-11
 
 # Wiki更新履歴
 
+## 2026-08-11 — S01-009 受入完了（status finalize）
+- ChatGPT再監査（fix1）で S01-009 を **implemented / accepted** へ確定（受入完了commit `5616f5f`）。
+- 受入根拠: fix1再監査 ACCEPTED／`verify:sprint1` overallPassed=true・functionalFailureCount=0／43-path patch・files exact一致／trusted session公開blocker解消。
+- S01-001〜S01-009はすべて accepted。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
+- `S1-SPEC-0.1.20`維持。本エントリはstatus反映のみ（新仕様変更ではない）。
+
 ## 2026-08-11 — S01-009 fix1（trusted week observer narrow observation）
 - `runSprint1Years` の week observer が trusted draft `Sprint1RunSession` を公開しないよう修正。frozen narrow observation（worldDate／eventCountCumulative／appendedEvents）のみ。
 - observer throw は ValidationResult failure へ変換。caller session root 不変。true mid-year failure atomicity と completion report validator／corruption regressions を強化。
-- S01-009は引き続き **implemented / 受入監査中**。`S1-SPEC-0.1.20`維持。acceptedへ変更しない。
+- （当時）S01-009は **implemented / 受入監査中**。`S1-SPEC-0.1.20`維持。acceptedへ変更しない。
 
 ## 2026-08-11 — S01-009 population performance clarifier（years=1／存命人口 target）
 - Sprint1 population performanceを**存命人口 target** 600／2000／5000 × **years=1** のbaseline measurementへ更新。
