@@ -94,7 +94,7 @@ S01-003でカタログ／意味validation／習得条件／熟練度参照を実
 
 ## 未解決事項
 
-正式な production 技一覧は 09 後続事項。RunRuleSnapshot 接続は S01-005（実装済み）。ターン解決での使用回数更新は S01-006（実装済み）。WorldEngine接続は S01-008（accepted）。S01-001〜S01-009は accepted。残作業は clean master `verify:sprint1` と `sprint1-complete` tag 作成。
+正式な production 技一覧は 09 後続事項。RunRuleSnapshot 接続は S01-005（実装済み）。ターン解決での使用回数更新は S01-006（実装済み）。WorldEngine接続は S01-008（accepted）。S01-001〜S01-009は accepted。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 関連Wikiページ
 

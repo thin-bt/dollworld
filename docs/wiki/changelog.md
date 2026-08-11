@@ -10,10 +10,17 @@ sources:
   - tag:sprint0-complete
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-11
+last_verified: 2026-08-12
 ---
 
 # Wiki更新履歴
+
+## 2026-08-12 — Sprint 1 completion gate完了
+- Sprint 1: **COMPLETE**（S01-001〜S01-009 accepted）。
+- clean master final verify: PASSED on `5a80268`（repo-external clone）。
+- completion tag: `sprint1-complete` (annotated) → `5a80268`（tagは動かさない）。
+- S01-009実装commit `5616f5f`、受入status docs commit `5a80268`。
+- 本エントリは tag 作成後の post-completion status synchronization（`S1-SPEC-0.1.20`維持。新仕様変更ではない）。
 
 ## 2026-08-11 — S01-009 受入完了（status finalize）
 - ChatGPT再監査（fix1）で S01-009 を **implemented / accepted** へ確定（受入完了commit `5616f5f`）。

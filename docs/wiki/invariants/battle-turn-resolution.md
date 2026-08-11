@@ -23,7 +23,7 @@ related:
 
 12・14（および関連する 09・11）を根拠とするターン解決の索引。正本にない式の簡略化・再構成は禁止する。
 
-S01-006 productionターンResolverは**実装済み**。`S1-SPEC-0.1.16` の`movementChance`はproduction実装済み。`S1-SPEC-0.1.17` の`sourceSnapshotHash`常時検証と`sourceSnapshot`＋`BattleDetailedLog` replay validator（**意味再計算済み**／`battleSeed`連続RNG）も実装済み。BattleResultはS01-007でimplemented / accepted（commit `a39e476`）。本ページはターン解決の索引である。S01-008／S01-009は**implemented / accepted**（S01-009受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
+S01-006 productionターンResolverは**実装済み**。`S1-SPEC-0.1.16` の`movementChance`はproduction実装済み。`S1-SPEC-0.1.17` の`sourceSnapshotHash`常時検証と`sourceSnapshot`＋`BattleDetailedLog` replay validator（**意味再計算済み**／`battleSeed`連続RNG）も実装済み。BattleResultはS01-007でimplemented / accepted（commit `a39e476`）。本ページはターン解決の索引である。S01-008／S01-009は**implemented / accepted**（S01-009実装commit `5616f5f`、status docs `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 現在確定している内容
 
@@ -150,7 +150,7 @@ unknown_technique | unlearned_technique | requirements_not_met
 
 ## 未解決事項
 
-該当なし。BattleResult（S01-007）はimplemented / accepted（commit `a39e476`）。S01-008／S01-009はimplemented / accepted。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
+該当なし。BattleResult（S01-007）はimplemented / accepted（commit `a39e476`）。S01-008／S01-009はimplemented / accepted。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 関連Wikiページ
 

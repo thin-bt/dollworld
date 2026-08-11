@@ -27,7 +27,7 @@ related:
 このWikiは、確定した仕様・設計判断・不変条件・タスク履歴を横断参照するための**説明・索引**です。正本ではありません。実装や仕様判断の根拠には使わないでください。
 
 Sprint 0 基点: タグ `sprint0-complete`（commit `504fa3cc16346dd0c6480e8328e42518e68215d3`）。  
-Sprint 1 仕様現行版: `S1-SPEC-0.1.20`（`0.1.11` 確定 commit `2800d3b959e575f57660c27b344507dd0e38ddb6`、`0.1.19` はpost-start abort、`0.1.20` はS01-008 integration contracts）。S01-001〜S01-009は implemented / accepted（S01-009受入完了commit `5616f5f`）。残作業は clean master `verify:sprint1` と `sprint1-complete` tag 作成。
+Sprint 1 仕様現行版: `S1-SPEC-0.1.20`（`0.1.11` 確定 commit `2800d3b959e575f57660c27b344507dd0e38ddb6`、`0.1.19` はpost-start abort、`0.1.20` はS01-008 integration contracts）。S01-001〜S01-009は implemented / accepted（S01-009実装commit `5616f5f`、受入status docs `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 正本の優先順位
 
@@ -70,13 +70,13 @@ Sprint 1 仕様現行版: `S1-SPEC-0.1.20`（`0.1.11` 確定 commit `2800d3b959e
 ## タスク別リンク
 
 - [Sprint 0／Sprint 1 タスク索引](tasks/index.md)
-- S01-001〜S01-009 implemented / accepted（S01-007 `a39e476`、S01-008 `7c47847`、S01-009 `5616f5f`）
-- 残作業: clean master `verify:sprint1` → `sprint1-complete` tag
+- S01-001〜S01-009 implemented / accepted（S01-007 `a39e476`、S01-008 `7c47847`、S01-009 `5616f5f`／status `5a80268`）
+- Sprint 1: **COMPLETE**（`sprint1-complete` → `5a80268`）
 
 ## Sprint別リンク
 
 - [Sprint 0](sprints/sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprints/sprint1.md) — 仕様 `S1-SPEC-0.1.20`（全タスク受入完了、最終clean verify／tag待ち）
+- [Sprint 1](sprints/sprint1.md) — **COMPLETE**（`S1-SPEC-0.1.20`、`sprint1-complete` → `5a80268`）
 
 ## その他
 

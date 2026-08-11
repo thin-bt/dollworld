@@ -22,7 +22,7 @@ last_verified: 2026-08-08
 ## 現在確定している内容
 
 - Sprint 0（タグ `sprint0-complete`）の説明・索引ページが存在する
-- Sprint 1 仕様 `S1-SPEC-0.1.20` の説明・索引を収録する（S01-001〜S01-009 implemented / accepted。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成）
+- Sprint 1 仕様 `S1-SPEC-0.1.20` の説明・索引を収録する（S01-001〜S01-009 implemented / accepted。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない））
 
 ## Sprint 1入口
 

@@ -37,8 +37,8 @@ AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、
 - [ターン解決](battle-turn-resolution.md)（0.1.14のreplacementReason／script／use-count契約、0.1.15の移動状態補正契約、0.1.16のmovementChance契約、0.1.17のsourceSnapshot baseline契約、詳細ログ履歴契約を含む）
 - [戦闘結果・ログ](battle-result-and-log.md)
 
-Sprint 1 不変条件を既存の Sprint 0 自動テストで検証済みとは扱わない。S01-001〜009はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了。S01-009受入完了commit `5616f5f`）。
-残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
+Sprint 1 不変条件を既存の Sprint 0 自動テストで検証済みとは扱わない。S01-001〜009はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了。S01-009実装commit `5616f5f`、status docs `5a80268`）。
+Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 関連する正本
 

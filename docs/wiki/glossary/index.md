@@ -57,7 +57,7 @@ Sprint 0 用語に対応するテスト:
 Sprint 1:
 
 - S01-001〜009のSprint 1 regression／integration／verification tests
-- Sprint 1全体の完了ゲートはS01-009 `npm run verify:sprint1`（implemented / accepted）。残作業は clean master 再実行と `sprint1-complete` tag 作成
+- Sprint 1全体の完了ゲートはS01-009 `npm run verify:sprint1`（implemented / accepted）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
 
 ## 関連する判断
 

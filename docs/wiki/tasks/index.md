@@ -36,11 +36,11 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 | S00-009 | [S00-009.md](S00-009.md) | `4958ba8c841c9ad2aff00d62579e2863af54f099` |
 | S00-010 | [S00-010.md](S00-010.md) | `19161dcaa932753e07e2333d65ea464915ad85aa` / `504fa3cc16346dd0c6480e8328e42518e68215d3` |
 
-### Sprint 1（全タスク受入完了・最終完了処理待ち）
+### Sprint 1（**COMPLETE**）
 
 正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.20`。
-- S01-001〜S01-009 **implemented / accepted**（S01-007受入完了commit `a39e476`。S01-008受入完了commit `7c47847`。S01-009受入完了commit `5616f5f`）
-- 残作業: clean master `npm run verify:sprint1` → `sprint1-complete` tag 作成
+- S01-001〜S01-009 **implemented / accepted**（S01-007受入完了commit `a39e476`。S01-008受入完了commit `7c47847`。S01-009実装commit `5616f5f`、受入status docs commit `5a80268`）
+- Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
 
 共有型所有の要約（詳細は正本）:
 
@@ -63,7 +63,7 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 | S01-008 | [S01-008.md](S01-008.md) | implemented / accepted | S01-004、S01-007 |
 | S01-009 | [S01-009.md](S01-009.md) | implemented / accepted (`5616f5f`) | S01-008 |
 
-S01-001〜S01-009は**implemented / accepted**。Sprint 1全タスク受入完了。残作業は clean master `verify:sprint1` と `sprint1-complete` tag 作成。
+S01-001〜S01-009は**implemented / accepted**。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 関連する正本
 

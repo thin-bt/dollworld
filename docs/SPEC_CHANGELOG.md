@@ -1,8 +1,14 @@
 # 変更履歴
 
+## 2026-08-12：Sprint 1 completion gate完了（管理資料・status sync）
+- Sprint 1: **COMPLETE**（S01-001〜S01-009 accepted）。
+- clean master final verify: PASSED on `5a80268`（repo-external clone）。
+- completion tag: `sprint1-complete` (annotated) → `5a80268`（tagは動かさない）。
+- S01-009実装commit `5616f5f`、受入status docs commit `5a80268`。本エントリは tag 作成後の post-completion status synchronization（`S1-SPEC-0.1.20` 非bump。ゲーム仕様・wire shape・RNG・balanceの変更ではない）。
+
 ## 2026-08-11：S01-009 受入完了（status finalize・管理資料）
 - ChatGPT再監査（fix1）で S01-009 を **implemented / accepted** へ確定（受入完了commit `5616f5f`）。
-- current state: S01-001〜S01-009 implemented / accepted。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成（tagは未作成）。
+- current state（当時）: S01-001〜S01-009 implemented / accepted。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成（tagは未作成）。
 - `S1-SPEC-0.1.20` 非bump。本エントリはstatus反映のみ（ゲーム仕様・wire shape・RNG・balanceの変更ではない）。
 
 ## 2026-08-11：S01-009 Sprint 1総合受入検証 clarification（管理資料）

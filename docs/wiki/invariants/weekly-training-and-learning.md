@@ -98,7 +98,7 @@ S01-004の週間Planner・progress／mastery実更新・RNG・訓練イベント
 
 ## 未解決事項
 
-EventEnvelope化とSprint1 transactional weekly adapter配線はS01-008でproduction実装済み（accepted）。S01-009はimplemented / accepted（受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
+EventEnvelope化とSprint1 transactional weekly adapter配線はS01-008でproduction実装済み（accepted）。S01-009はimplemented / accepted（実装commit `5616f5f`、status docs `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 関連Wikiページ
 

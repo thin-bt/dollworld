@@ -42,9 +42,9 @@
 | S01-007 戦闘終了・結果・ログ | **implemented / accepted**（受入完了commit `a39e476`。World commitはS01-008でproduction実装済み） |
 | S01-008 WorldEngine・CLI・出力統合 | **implemented / accepted**（受入完了commit `7c47847`。`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers） |
 | S01-009 Sprint 1総合受入検証 | **implemented / accepted**（受入完了commit `5616f5f`、2026-08-11 ChatGPT再監査。population performanceは存命人口 target×1年baseline） |
-| Sprint 1全体 | 全タスク受入完了。最終完了処理として clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成が残っている |
+| Sprint 1全体 | **COMPLETE**（S01-001〜S01-009 accepted）。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない） |
 
-**S01-008**（WorldEngine・CLI・出力統合）はproduction実装・受入完了済み（commit `7c47847`）。S01-001〜S01-009はimplemented／accepted（S01-009受入完了commit `5616f5f`）。残作業は最終clean master verifyと`sprint1-complete` tag作成。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数に加え、WorldEngine／CLI配線は **S01-008** で実装済み。
+**S01-008**（WorldEngine・CLI・出力統合）はproduction実装・受入完了済み（commit `7c47847`）。S01-001〜S01-009はimplemented／accepted（S01-009実装commit `5616f5f`、受入status docs commit `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数に加え、WorldEngine／CLI配線は **S01-008** で実装済み。
 
 Sprint 1実装時は、正本`SPEC-0.1.2`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述を参照する。
 

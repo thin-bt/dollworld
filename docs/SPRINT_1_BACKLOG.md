@@ -7,7 +7,7 @@
 - `S1-SPEC-0.1.20`統合契約確定commit：`d28d666`
 - 実装状態：
   - S01-001〜S01-009 **implemented / accepted**（S01-007受入完了commit `a39e476`。S01-008受入完了commit `7c47847`。S01-009受入完了commit `5616f5f`、2026-08-11 ChatGPT再監査）
-  - Sprint 1: 全タスク受入完了。最終完了処理として clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成が残っている
+  - Sprint 1: **COMPLETE**（S01-001〜S01-009 accepted）。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
 - `S1-SPEC-0.1.20`はS01-008 integration contracts clarification（`weekly-training` adapter ID／production adapter pipeline`[weekly-training]`／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／`InitialWeeklyTrainingSidecarSnapshot`／SimulationIdentity `0.4.0`＋`initialWeeklyTrainingSidecarHash`／CLI `--sprint1-input`／run-metadata `0.4.0`／initial-world `0.4.0`／final-world `0.3.0`）。BattleState schema `0.6.0`。先行clarificationとして`S1-SPEC-0.1.19` post-start abort、`S1-SPEC-0.1.18` BattleResult決定契約、`S1-SPEC-0.1.17` sourceSnapshot baselineがある
 - 実装順序の正本: S01-008 accepted → S01-009 accepted → Sprint 1 clean-tree完了検証 → `sprint1-complete`
 

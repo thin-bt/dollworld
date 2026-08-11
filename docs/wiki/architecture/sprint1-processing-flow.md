@@ -171,7 +171,7 @@ PreparedBattleTurn（ターン開始スナップショット／canonical hash）
 
 ## 未解決事項
 
-S01-008／S01-009は**implemented / accepted**（S01-009受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。
+S01-008／S01-009は**implemented / accepted**（S01-009実装commit `5616f5f`、status docs `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 関連Wikiページ
 

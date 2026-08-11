@@ -14,7 +14,7 @@ last_verified: 2026-08-11
 
 ## 概要
 
-Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実装済み配置と責務分割、Sprint 1はS01-001〜S01-009がimplemented / accepted（S01-009受入完了commit `5616f5f`）。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成。詳細はTECHNICAL_DECISIONS・正式ミニ仕様・コードを正とする。
+Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実装済み配置と責務分割、Sprint 1はS01-001〜S01-009がimplemented / accepted（S01-009実装commit `5616f5f`、status docs `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。詳細はTECHNICAL_DECISIONS・正式ミニ仕様・コードを正とする。
 
 ## 現在確定している内容
 
@@ -31,7 +31,7 @@ Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実�
 - [Sprint 1処理の流れ](sprint1-processing-flow.md)
 - [戦闘ライフサイクル](battle-lifecycle.md)
 
-週間処理・戦闘・WorldEngine／CLI／fixed7統合はS01-004〜008でproduction実装・受入済み。S01-009総合受入検証もaccepted。残作業は clean master `npm run verify:sprint1` と `sprint1-complete` tag 作成（tagは未作成）。
+週間処理・戦闘・WorldEngine／CLI／fixed7統合はS01-004〜008でproduction実装・受入済み。S01-009総合受入検証もaccepted。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。
 
 ## 関連する正本
 
@@ -57,7 +57,7 @@ Sprint 0 の各パッケージ Vitest テスト（詳細は下位ページ）。
 Sprint 1:
 
 - S01-001〜008の`packages/simulation-core`／`apps/simulator` regression・integration tests
-- 総合完了ゲートはS01-009 `npm run verify:sprint1`（implemented / accepted）。残作業は clean master 再実行と `sprint1-complete` tag 作成
+- 総合完了ゲートはS01-009 `npm run verify:sprint1`（implemented / accepted）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
 
 ## 関連する判断
 
