@@ -20,6 +20,8 @@ related:
 
 Sprint 0 性能目標と、最終 `verify:sprint0` 完了レポートの測定結果。合否は機能失敗とは分離される。
 
+**範囲:** 本ページはSprint 0専用。S01-009 Sprint 1 population performance（存命人口 target 600／2000／5000 × years=1 baseline）へ、下記30秒／120秒／measure-only thresholdを流用しない。Sprint 1はtiming aloneでwarning／failureにせず、Sprint 0 warningはcompletion reportへimportのみする。
+
 ## 現在確定している内容
 
 ### 警告基準（バックログ）

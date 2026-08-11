@@ -132,7 +132,7 @@ manifest不整合時は生成中止。
 
 `validationTargets`：人口差、壊れた参照、同シード一致、異シード差異。
 
-`performanceTargets`：600人・100年30秒、2,000人・100年120秒を警告基準、5,000人は計測のみ。性能超過はSprint 0の機能失敗にしない。
+`performanceTargets`：600人・100年30秒、2,000人・100年120秒を警告基準、5,000人は計測のみ。性能超過はSprint 0の機能失敗にしない。本節の数値は**Sprint 0**契約である。S01-009 Sprint 1 population performance（存命人口 target×1年baseline）へ同じthresholdを適用しない。
 
 ## 11. 設定ハッシュ
 
@@ -370,6 +370,8 @@ adapterはrootを直接変更せず、validated clone／transaction draftから�
 10. 全World／person／sidecar／runtime／event validation
 11. worldDateが次週へ進んだなら`battleResultWeekState`をnew week／`results=[]`へreset（同じouter commit）。**`battleResults`は変更しない**（過去BattleResultを週resetで削除しない）。worldDateだけ進んでregistryが旧週のまま／registryだけ先行resetは禁止。weekly failure時は`battleResults`／`battleResultWeekState`とも旧値維持
 12. 全部成功時だけSprint1RunRuntimeStateを1回置換。failure時は旧root完全維持
+
+public `runSprint1WeeklyStep` および battle／create／fixed7 の untrusted 境界は上記どおり full session validation を維持する。`runSprint1Years` の multi-week production loop のみ validated-session trust boundary を使える: 開始時 full session validation 1回、各週は変更 state／appended event suffix の transition-local validation、終了時 full session validation 1回。unchanged validated historical event prefix および pure weekly で不変の global `battleResults` を毎週 full rescan する必要はない（validation semantics の緩和ではない）。optional week observer は trusted draft session を公開せず、frozen narrow observation（worldDate／eventCountCumulative／当該週 appendedEvents）のみを渡す。
 
 最終成功時のglobal Event Stream順:
 

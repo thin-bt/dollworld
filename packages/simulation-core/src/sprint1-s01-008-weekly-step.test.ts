@@ -27,15 +27,18 @@ import {
   runBattleToCompletion,
   runSprint1WeeklyStep,
   runSprint1Years,
+  toCanonicalJson,
   validateInitialWorldConfig,
   validateTechniqueDefinition,
   type InitialWorldConfig,
   type Person,
   type PersonId,
+  type Sprint1EventEnvelope,
   type Sprint1RunSession,
   type ValidationResult,
   type WorldProcessor,
 } from "./index.js";
+import { setSprint1YearsValidationHooksForTests } from "./sprint1/sprint1-weekly-step.js";
 import { cloneBaselineConfig } from "./test-fixtures/baseline-config.fixture.js";
 import {
   createNodeSha256Provider,
@@ -696,10 +699,202 @@ describe("runSprint1Years", () => {
     expect(toCanonicalSnapshot(valid)).toBe(validBefore);
   });
 
-  it("advances 48 weeks per year via runSprint1WeeklyStep", () => {
+  it("advances 48 weeks per year", () => {
     const session = buildFreshSession(6100);
     const afterOneYear = expectOk(runSprint1Years(session, 1, sha256Provider));
     expect(afterOneYear.runtimeState.worldState.worldDate.absoluteWeek).toBe(48);
     expect(afterOneYear.runtimeState.worldState.worldDate.year).toBe(2);
+  }, 60_000);
+
+  it("matches 48 public weekly steps for one year (canonical equivalence)", () => {
+    const seed = 6201;
+    const yearsSession = buildFreshSession(seed);
+    const afterYears = expectOk(runSprint1Years(yearsSession, 1, sha256Provider));
+
+    let weekly = buildFreshSession(seed);
+    for (let week = 0; week < 48; week += 1) {
+      weekly = expectOk(runSprint1WeeklyStep(weekly, sha256Provider));
+    }
+
+    expect(toCanonicalJson(afterYears.context)).toBe(toCanonicalJson(weekly.context));
+    expect(toCanonicalJson(afterYears.runtimeState.worldState)).toBe(
+      toCanonicalJson(weekly.runtimeState.worldState),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.weeklyTrainingSidecars)).toBe(
+      toCanonicalJson(weekly.runtimeState.weeklyTrainingSidecars),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.processorRuntimeStates)).toBe(
+      toCanonicalJson(weekly.runtimeState.processorRuntimeStates),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.eventStream)).toBe(
+      toCanonicalJson(weekly.runtimeState.eventStream),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.eventAllocationState)).toBe(
+      toCanonicalJson(weekly.runtimeState.eventAllocationState),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.battleResults)).toBe(
+      toCanonicalJson(weekly.runtimeState.battleResults),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.battleResultWeekState)).toBe(
+      toCanonicalJson(weekly.runtimeState.battleResultWeekState),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.worldRngState)).toBe(
+      toCanonicalJson(weekly.runtimeState.worldRngState),
+    );
+    expect(toCanonicalJson(afterYears.runtimeState.matchIdGeneratorState)).toBe(
+      toCanonicalJson(weekly.runtimeState.matchIdGeneratorState),
+    );
+  }, 120_000);
+
+  it("keeps full-session validation O(1) across multi-week years", () => {
+    const session = buildFreshSession(6301);
+    let fullSessionValidations = 0;
+    let transitionEventValidations = 0;
+    setSprint1YearsValidationHooksForTests({
+      onFullSessionValidation: () => {
+        fullSessionValidations += 1;
+      },
+      onTransitionEventEnvelopeValidation: () => {
+        transitionEventValidations += 1;
+      },
+    });
+    try {
+      const afterTwoYears = expectOk(runSprint1Years(session, 2, sha256Provider));
+      // start + final only (not 2 * weeks)
+      expect(fullSessionValidations).toBe(2);
+      expect(transitionEventValidations).toBe(
+        afterTwoYears.runtimeState.eventStream.length - session.runtimeState.eventStream.length,
+      );
+      // Must stay far below the old public-weekly pattern (1 + 2*96).
+      expect(fullSessionValidations).toBeLessThan(10);
+    } finally {
+      setSprint1YearsValidationHooksForTests(null);
+    }
+  }, 120_000);
+
+  it("does not partially commit on reserved weekly-training preflight failure (caller root unchanged)", () => {
+    const session = buildFreshSession(6401);
+    const before = toCanonicalSnapshot(session);
+    const reserved: WorldProcessor = {
+      processorId: WEEKLY_TRAINING_PROCESSOR_ID,
+      process: (input) => input.state,
+    };
+    // Invalid legacyProcessors fail before any week mutation path commits.
+    const failed = runSprint1Years(session, 1, sha256Provider, {
+      legacyProcessors: [reserved],
+    });
+    expect(failed.ok).toBe(false);
+    expect(toCanonicalSnapshot(session)).toBe(before);
+  });
+
+  it("does not partially commit on true mid-year failure after successful weeks", () => {
+    const session = buildFreshSession(6402);
+    const before = toCanonicalSnapshot(session);
+    let processCalls = 0;
+    const midYearFail: WorldProcessor = {
+      processorId: "test-mid-year-fail",
+      process: (input) => {
+        processCalls += 1;
+        // First three weeks succeed; fail on the fourth trusted week.
+        if (processCalls > 3) {
+          throw new Error("intentional mid-year failure");
+        }
+        return input.state;
+      },
+    };
+    const failed = runSprint1Years(session, 1, sha256Provider, {
+      legacyProcessors: [midYearFail],
+    });
+    expect(failed.ok).toBe(false);
+    expect(processCalls).toBeGreaterThan(3);
+    expect(toCanonicalSnapshot(session)).toBe(before);
+  }, 60_000);
+
+  it("exposes only frozen narrow week observations (no session mutation port)", () => {
+    const session = buildFreshSession(6403);
+    const withoutObserver = expectOk(runSprint1Years(session, 1, sha256Provider));
+    const observations: Array<{
+      keys: string[];
+      frozenRoot: boolean;
+      frozenWorldDate: boolean;
+      frozenAppended: boolean;
+      eventCountCumulative: number;
+      appendedLength: number;
+      absoluteWeek: number;
+    }> = [];
+    const withObserver = expectOk(
+      runSprint1Years(session, 1, sha256Provider, {
+        onAfterValidatedWeek: (observation) => {
+          observations.push({
+            keys: Object.keys(observation).sort(),
+            frozenRoot: Object.isFrozen(observation),
+            frozenWorldDate: Object.isFrozen(observation.worldDate),
+            frozenAppended: Object.isFrozen(observation.appendedEvents),
+            eventCountCumulative: observation.eventCountCumulative,
+            appendedLength: observation.appendedEvents.length,
+            absoluteWeek: observation.worldDate.absoluteWeek,
+          });
+          expect(observation).not.toHaveProperty("runtimeState");
+          expect(observation).not.toHaveProperty("context");
+          expect(observation).not.toHaveProperty("weeklyTrainingSidecars");
+          expect(observation).not.toHaveProperty("battleResults");
+          expect(observation).not.toHaveProperty("eventStream");
+          expect(observation).not.toHaveProperty("processorRuntimeStates");
+          // Observation must reject mutation (frozen).
+          expect(() => {
+            (observation as { eventCountCumulative: number }).eventCountCumulative = -1;
+          }).toThrow();
+          expect(() => {
+            (observation.worldDate as { absoluteWeek: number }).absoluteWeek = -1;
+          }).toThrow();
+          expect(() => {
+            (observation.appendedEvents as Sprint1EventEnvelope[]).push(
+              observation.appendedEvents[0]!,
+            );
+          }).toThrow();
+        },
+      }),
+    );
+    expect(observations.length).toBe(48);
+    expect(observations.every((entry) => entry.frozenRoot)).toBe(true);
+    expect(observations.every((entry) => entry.frozenWorldDate)).toBe(true);
+    expect(observations.every((entry) => entry.frozenAppended)).toBe(true);
+    expect(
+      observations.every(
+        (entry) => entry.keys.join(",") === "appendedEvents,eventCountCumulative,worldDate",
+      ),
+    ).toBe(true);
+    expect(observations[0]!.absoluteWeek).toBe(1);
+    expect(observations[47]!.absoluteWeek).toBe(48);
+    expect(observations[47]!.eventCountCumulative).toBe(
+      withObserver.runtimeState.eventStream.length,
+    );
+    expect(toCanonicalJson(withObserver.runtimeState.worldState)).toBe(
+      toCanonicalJson(withoutObserver.runtimeState.worldState),
+    );
+    expect(toCanonicalJson(withObserver.runtimeState.eventStream)).toBe(
+      toCanonicalJson(withoutObserver.runtimeState.eventStream),
+    );
+  }, 120_000);
+
+  it("converts week observer throw into ValidationResult without mutating caller root", () => {
+    const session = buildFreshSession(6404);
+    const before = toCanonicalSnapshot(session);
+    let calls = 0;
+    const failed = runSprint1Years(session, 1, sha256Provider, {
+      onAfterValidatedWeek: () => {
+        calls += 1;
+        if (calls >= 2) {
+          throw new Error("observer boom");
+        }
+      },
+    });
+    expect(failed.ok).toBe(false);
+    if (failed.ok) {
+      throw new Error("expected failure");
+    }
+    expect(calls).toBe(2);
+    expect(failed.issues.some((issue) => issue.path === "/onAfterValidatedWeek")).toBe(true);
+    expect(toCanonicalSnapshot(session)).toBe(before);
   }, 60_000);
 });

@@ -41,10 +41,10 @@
 | S01-006 戦闘ターン解決 | **implemented / accepted**（productionターンResolver・`movementChance`・ActionLog完全検証。battle commit配線はS01-008でproduction実装済み） |
 | S01-007 戦闘終了・結果・ログ | **implemented / accepted**（受入完了commit `a39e476`。World commitはS01-008でproduction実装済み） |
 | S01-008 WorldEngine・CLI・出力統合 | **implemented / accepted**（受入完了commit `7c47847`。`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers） |
-| S01-009 Sprint 1総合受入検証 | **pending**／未着手（実装前clarifier確定。`verify:sprint1`／長期・性能・統合シナリオ・completion report契約定義済み） |
-| Sprint 1全体 | **未完了**（S01-008 accepted。S01-009 pending／未着手） |
+| S01-009 Sprint 1総合受入検証 | **implemented**／受入監査中（population performanceは存命人口 target×1年baselineへclarifier更新。`verify:sprint1`未再開） |
+| Sprint 1全体 | **未完了**（S01-008 accepted。S01-009 implemented／受入監査中） |
 
-**S01-008**（WorldEngine・CLI・出力統合）はproduction実装・受入完了済み（commit `7c47847`）。S01-001〜S01-008はimplemented／accepted。S01-009は実装前clarifier確定・未着手。Sprint 1全体は未完了。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数に加え、WorldEngine／CLI配線は **S01-008** で実装済み。
+**S01-008**（WorldEngine・CLI・出力統合）はproduction実装・受入完了済み（commit `7c47847`）。S01-001〜S01-008はimplemented／accepted。S01-009はverification実装済み・受入監査中。Sprint 1全体は未完了。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数に加え、WorldEngine／CLI配線は **S01-008** で実装済み。
 
 Sprint 1実装時は、正本`SPEC-0.1.2`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述を参照する。
 

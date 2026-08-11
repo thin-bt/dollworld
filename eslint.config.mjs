@@ -14,6 +14,7 @@ export default defineConfig(
       "config/**",
       "package-lock.json",
       "apps/simulator/scripts/**",
+      "_handoff-artifacts/**",
     ],
   },
   eslint.configs.recommended,

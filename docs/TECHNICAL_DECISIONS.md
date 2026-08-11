@@ -71,6 +71,11 @@ TypeScript 7は、採用するtypescript-eslint 8.65.0の公式対応範囲外�
 - `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`はinitial-world 0.4.0へ、`weeklyTrainingSidecars`および`battleResults`はfinal-world 0.3.0へ投影する。fixed7は exactly 7 files（`battle-results.json`禁止）。
 - `battleResults`はrun全体commit順canonical store。`BattleResultWeekState`は同週count専用。week resetでglobal storeを削除しない。
 - `processorSpecificStates.specificState`はplain JSONのみとし、WorldEngine validate／clone／export／restoreはdescriptor-safe deep cloneする（nested alias禁止）。
+- Sprint1 validation境界（S01-008 post-acceptance performance fix）:
+  - public／untrusted session境界（`createSprint1RunSession` final、`runSprint1WeeklyStep` pre/post、`commitRunBattlePlan` pre/post、fixed7 semantic）は full `validateSprint1RunSession` を維持する。
+  - multi-week production loop（`runSprint1Years` および CLI yearly capture がこれを使用）は validated-session trust boundary を使用できる。開始時に session／`legacyProcessors` を full validation し、各週は transition-local validation（変更 state／appended event suffix）のみ、終了時に full session validation を必須とする。
+  - unchanged validated historical `eventStream` prefix および pure weekly で変更しない global `battleResults` を毎週 full rescan する必要はない。validation semantics を弱めるものではない。
+  - `runSprint1Years` の optional week observer は trusted draft `Sprint1RunSession`／runtime owner／historical eventStream を公開しない。渡してよいのは frozen narrow observation（`worldDate`／`eventCountCumulative`／当該週の validated appendedEvents suffix）のみ。observer throw は ValidationResult failure へ変換し、caller session root は不変。
 
 
 ## 4.2 Sprint 1完了検証（S01-009）
@@ -83,13 +88,13 @@ TypeScript 7は、採用するtypescript-eslint 8.65.0の公式対応範囲外�
 - run分離はaccepted `runCli(argv, { outputRoot })`のprogrammatic optionを利用してよく、`--output-root`等のpublic CLI argv optionを追加しない。same-seed 2runはfresh invocation＋別output rootを必須とするがOS processまでは要求しない。population performanceのみSprint0方式の独立子processを維持する。
 - 長期・性能検証は通常`npm test`へ暗黙追加せず、`verify:sprint1`から明示実行する。
 - verification seed matrixは`baseSeed=12345`／`alternateSeed=54321`。same-seedはbase seed 100年×2、different-seedは12345 vs 54321を100年、boundary seedは0／4294967295各2回の1年run。年数profileは10／50／100／300年（base seed）。
-- Sprint 1人口別性能はSprint 0と同じ600／2000／5000人・100年を使用し、全profile seedは12345へ固定する。600=30秒、2000=120秒をwarning基準、5000はmeasure onlyとする。性能超過だけでfunctional failureにしない。5000のmeasure onlyはthresholdなしの意味で、required profile自体はfunctional成功時`passed`とする。
+- Sprint 1人口別性能は**存命人口 target** 600／2000／5000 × **years=1** のbaseline measurementとする（seed=12345固定、600→2000→5000逐次child）。`WorldState.persons.length`とのexact一致は要求しない。Sprint 0の30秒／120秒／5000 measure-only thresholdをSprint 1へ流用しない。elapsedSeconds aloneではfailure／warningにしない。長期100年耐久はtiny fixtureのsame-seed／year profilesで維持する。
 - performance sidecar factoryのtemplate値はaccepted `apps/simulator/fixtures/sprint1/sprint1-input.json`のvalidated initial sidecar entriesをPersonId Unicode昇順に見た先頭entryへ固定し、各performance PersonIdでは`personId`だけ差し替える。performance専用balance値／production defaultを作らない。
-- Sprint 1 performance threshold超過warningは`VerificationIssue.code=SPRINT1_PERFORMANCE_WARNING`、`scope=performance/<population>`へ固定し、messageにpopulation／years／actualSeconds／warningSecondsを含める。
+- Sprint1独自の`SPRINT1_PERFORMANCE_WARNING`／30秒／120秒thresholdは置かない。Sprint 0 completion reportからのperformance warning import（`SPRINT0_PERFORMANCE_WARNING`）は維持する。
 - population performanceの子プロセス分離・timer／maxRSS測定境界はSprint 0 verifier方式を再利用し、600→2000→5000の順で1 childずつ順次実行する。performance worker同士を並列実行しない。
 - Sprint 1 performance用sidecar生成はverification fixture factoryに限定し、production default／fallbackへ流用しない。
 - `verify:sprint1`は`npm run check`、独立`npm run wiki:check`、`git diff --check HEAD`相当、`npm run verify:sprint0`を総合sub-gateへ含め、各command resultをreportへ保存する。Sprint 0のperformance warningだけではSprint 1をfailureにしない。
-- `verify:sprint1`は自身をsub-gateとして再帰実行しない。Sprint 0 completion reportはaccepted正規path `output/sprint0-verification/sprint0-completion-report.json`だけを読み、filesystem探索で別reportを選ばない。accepted reportの`warningCount`＋`performanceWarnings`を正本fieldとし、存在しない`warnings`配列を前提にしない。Sprint0 verification領域のaccepted report型／validatorを再利用してsource wire型を再定義せず、validated performance warning message件数と`warningCount`を一致確認する。各source warning messageをtop-level Sprint 1 `warnings`へexactly 1件ずつimportし、Sprint 1 performance warningと合わせて`warningCount`へ反映する。
+- `verify:sprint1`は自身をsub-gateとして再帰実行しない。Sprint 0 completion reportはaccepted正規path `output/sprint0-verification/sprint0-completion-report.json`だけを読み、filesystem探索で別reportを選ばない。accepted reportの`warningCount`＋`performanceWarnings`を正本fieldとし、存在しない`warnings`配列を前提にしない。Sprint0 verification領域のaccepted report型／validatorを再利用してsource wire型を再定義せず、validated performance warning message件数と`warningCount`を一致確認する。各source warning messageをtop-level Sprint 1 `warnings`へexactly 1件ずつimportし、`warningCount`へ反映する。
 - S01-009 accepted後はmaster上のclean treeで`verify:sprint1`を再実行し、`overallPassed=true`、`functionalFailureCount=0`、`workingTreeDirty=false`、reportの`gitCommit`=HEADを確認してから`Sprint 1`完了tag `sprint1-complete`を付ける。official verifierはGit worktree内のHEAD解決を必須とし、HEAD不明をnull fallbackでpassさせない。`verify:sprint1`自身はtagを作成・移動・削除せず、tagは受入後の明示的finalization操作とする。
 - same-seed比較は05仕様の決定性除外規則を正とする。run-metadataはexisting schema validation後、exact `runId`／`realStartedAt`／`realEndedAt`だけを除外し、残りをproduction `toCanonicalJson`で比較する。S01-008に独立production comparator APIは存在しないため、S01-009の比較helperは`apps/simulator` verification内部に置き、simulation-coreへ公開しない。
 - integrated battleは`official`＋production `default_strategy`を使用し、scripted actionsや自動battle schedulerで結果を固定しない。

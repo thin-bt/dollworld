@@ -40,8 +40,8 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.20`。Sprint 1全体は未完了。
 - S01-001〜008 implemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了）
-- S01-009 pending／未着手
-- 次の実装着手は S01-009
+- S01-009 **implemented / 受入監査中**
+- 次は受入監査→accepted（まだ Sprint 1 complete ではない）
 
 共有型所有の要約（詳細は正本）:
 
@@ -62,9 +62,9 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 | S01-006 | [S01-006.md](S01-006.md) | implemented | S01-005 |
 | S01-007 | [S01-007.md](S01-007.md) | accepted (`a39e476`) | S01-006 |
 | S01-008 | [S01-008.md](S01-008.md) | implemented / accepted | S01-004、S01-007 |
-| S01-009 | [S01-009.md](S01-009.md) | pending／未着手 | S01-008 |
+| S01-009 | [S01-009.md](S01-009.md) | implemented / 受入監査中 | S01-008 |
 
-S01-008はproduction実装済み（`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers）で**accepted**。Sprint 1全体は未完了。次はS01-009。BattleResultは S01-007で実装済み（accepted）。
+S01-008はproduction実装済み（`createSprint1RunSession`／`runSprint1WeeklyStep`／`runSprint1Years`／`commitRunBattlePlan`／weekly-training adapter／CLI `--sprint1-input`／fixed7 Sprint1 writers）で**accepted**。S01-009はverification実装済み（受入監査中）。Sprint 1全体は未完了。
 
 ## 関連する正本
 

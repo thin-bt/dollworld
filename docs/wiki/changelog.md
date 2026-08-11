@@ -15,6 +15,29 @@ last_verified: 2026-08-11
 
 # Wiki更新履歴
 
+## 2026-08-11 — S01-009 fix1（trusted week observer narrow observation）
+- `runSprint1Years` の week observer が trusted draft `Sprint1RunSession` を公開しないよう修正。frozen narrow observation（worldDate／eventCountCumulative／appendedEvents）のみ。
+- observer throw は ValidationResult failure へ変換。caller session root 不変。true mid-year failure atomicity と completion report validator／corruption regressions を強化。
+- S01-009は引き続き **implemented / 受入監査中**。`S1-SPEC-0.1.20`維持。acceptedへ変更しない。
+
+## 2026-08-11 — S01-009 population performance clarifier（years=1／存命人口 target）
+- Sprint1 population performanceを**存命人口 target** 600／2000／5000 × **years=1** のbaseline measurementへ更新。
+- Sprint0の30秒／120秒／5000 measure-only thresholdをSprint1へ流用しない契約を明記。elapsed aloneではfailure／warningにしない。
+- `SPRINT1_PERFORMANCE_WARNING`を削除。Sprint0 warning importは維持。
+- 長期機能検証（same-seed 100年×2、year profiles 10／50／100／300等）は変更せず。
+- diagnostic evidence（hotfix後）: tiny 100y ≈88.1s／events=104845；population 1y living 600/2000/5000 → totalPersons 800/2667/6667、elapsed ≈40.9s/163.1s/725.9s。正式completion reportへはコピーせず、official `verify:sprint1`再計測待ち。
+- S01-009は引き続き **implemented / 受入監査中**。`S1-SPEC-0.1.20`維持。
+
+## 2026-08-11 — S01-008 post-acceptance weekly validation performance hotfix
+- S01-009 verificationで発見した `runSprint1Years` の毎週 full session validation（event history 再scan）による長期性能欠陥を修正。
+- public `runSprint1WeeklyStep`／battle／create／fixed7 の full validation は維持。`runSprint1Years` のみ validated-session trust boundary（開始／終了 full、各週 transition-local）。
+- S01-008は引き続き **implemented / accepted**（statusをpendingへ戻さない）。`S1-SPEC-0.1.20`維持。S01-009は **implemented / 受入監査中** のまま。
+
+## 2026-08-11 — S01-009 verification実装
+- S01-009を**implemented / 受入監査中**へ更新（まだacceptedではない）。
+- `npm run verify:sprint1`／`output/sprint1-verification/sprint1-completion-report.json`（schema `0.1.0`）を実装。
+- Sprint 1全体は未完了。`S1-SPEC-0.1.20`維持。`sprint1-complete` tagは未作成。
+
 ## 2026-08-11 — S01-009実装前clarifier
 - 追加監査でpopulation performance用sidecar templateをaccepted tiny `sprint1-input.json`のPersonId昇順先頭validated entryへ固定し、各generated PersonIdでは`personId`だけ差し替える契約を追加。performance専用balance値の発明を禁止。
 - 追加監査でintegrated scenarioのfixed7をS01-008 accepted `buildAndWriteSprint1RunOutput`＋`evaluateReferenceIntegrity`／run-key→runId layoutへ固定。Sprint0回帰report読込先を`output/sprint0-verification/sprint0-completion-report.json`へ固定し、必須diff gate表記を`git diff --check HEAD`へ統一。

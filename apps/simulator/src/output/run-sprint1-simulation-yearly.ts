@@ -1,5 +1,5 @@
 import {
-  runSprint1WeeklyStep,
+  runSprint1Years,
   type Sha256Provider,
   type Sprint1EventEnvelope,
   type Sprint1RunSession,
@@ -22,22 +22,15 @@ export type Sprint1SimulationWithYearlyResult = {
   finalIntegrity: ReferenceIntegrityResult;
 };
 
-function countEventsForYear(events: readonly Sprint1EventEnvelope[], worldYear: number): number {
-  let count = 0;
-  for (const event of events) {
-    if (event.worldDate.year === worldYear) {
-      count += 1;
-    }
-  }
-  return count;
-}
-
 /**
  * Advance a Sprint1 session by `years * 48` weeks, capturing year-end statistics
  * after legacy WorldEngine processors on March week 4 and before calendar year-start.
  *
- * Injects {@link createYearEndCaptureProcessor} via runSprint1WeeklyStep legacyProcessors
- * only (weekly-training stays outside legacy WorldProcessor registration).
+ * Uses {@link runSprint1Years} validated-session trust boundary with
+ * {@link createYearEndCaptureProcessor} as a legacyProcessors hook only
+ * (weekly-training stays outside legacy WorldProcessor registration).
+ * Year-end rows accumulate event counts from narrow week observations
+ * (never the trusted draft Sprint1RunSession).
  */
 export function runSprint1SimulationWithYearlyCapture(input: {
   initialSession: Sprint1RunSession;
@@ -83,58 +76,57 @@ export function runSprint1SimulationWithYearlyCaptureResult(input: {
     };
   }
 
-  let session = input.initialSession;
-  const yearEnds: Sprint1YearEndCapture[] = [];
-  let weeksExecuted = 0;
-
-  for (let weekIndex = 0; weekIndex < totalWeeks; weekIndex += 1) {
-    const captureSink = { snapshots: [] as Sprint1RunSession["runtimeState"]["worldState"][] };
-    const step = runSprint1WeeklyStep(session, input.sha256Provider, {
-      legacyProcessors: [createYearEndCaptureProcessor(captureSink)],
-    });
-    if (!step.ok) {
-      return step;
-    }
-    session = step.value;
-    weeksExecuted += 1;
-
-    if (captureSink.snapshots.length === 0) {
-      continue;
-    }
-    if (captureSink.snapshots.length !== 1) {
-      return {
-        ok: false,
-        issues: [
-          {
-            path: "/yearEndCapture",
-            message: `expected at most one year-end snapshot per week, got ${String(captureSink.snapshots.length)}`,
-            actual: captureSink.snapshots.length,
-            expected: "0 or 1",
-          },
-        ],
-      };
-    }
-
-    const yearEndState = captureSink.snapshots[0]!;
-    const worldYear = yearEndState.worldDate.year;
-    const allEvents = session.runtimeState.eventStream;
-    const eventCountThisYear = countEventsForYear(allEvents, worldYear);
-    const eventCountCumulative = allEvents.length;
-    const integrity = evaluateReferenceIntegrity(yearEndState);
-    const row: YearlyStatisticsRow = aggregateYearlyStatisticsRow({
-      yearEndState,
-      integrity,
-      eventCountThisYear,
-      eventCountCumulative,
-    });
-
-    yearEnds.push({
-      worldYear,
-      state: yearEndState,
-      integrity,
-      row,
-    });
+  const eventCountByYear = new Map<number, number>();
+  for (const event of input.initialSession.runtimeState.eventStream) {
+    const year = event.worldDate.year;
+    eventCountByYear.set(year, (eventCountByYear.get(year) ?? 0) + 1);
   }
+
+  const captureSink = {
+    snapshots: [] as Sprint1RunSession["runtimeState"]["worldState"][],
+  };
+  const yearEnds: Sprint1YearEndCapture[] = [];
+  let processedCaptures = 0;
+
+  const yearsResult = runSprint1Years(input.initialSession, input.years, input.sha256Provider, {
+    legacyProcessors: [createYearEndCaptureProcessor(captureSink)],
+    onAfterValidatedWeek: (observation) => {
+      for (const event of observation.appendedEvents) {
+        const year = event.worldDate.year;
+        eventCountByYear.set(year, (eventCountByYear.get(year) ?? 0) + 1);
+      }
+      if (captureSink.snapshots.length === processedCaptures) {
+        return;
+      }
+      if (captureSink.snapshots.length !== processedCaptures + 1) {
+        throw new Error(
+          `expected at most one year-end snapshot per week, got ${String(captureSink.snapshots.length - processedCaptures)}`,
+        );
+      }
+      const yearEndState = captureSink.snapshots[processedCaptures]!;
+      processedCaptures += 1;
+      const worldYear = yearEndState.worldDate.year;
+      const eventCountThisYear = eventCountByYear.get(worldYear) ?? 0;
+      const eventCountCumulative = observation.eventCountCumulative;
+      const integrity = evaluateReferenceIntegrity(yearEndState);
+      const row: YearlyStatisticsRow = aggregateYearlyStatisticsRow({
+        yearEndState,
+        integrity,
+        eventCountThisYear,
+        eventCountCumulative,
+      });
+      yearEnds.push({
+        worldYear,
+        state: yearEndState,
+        integrity,
+        row,
+      });
+    },
+  });
+  if (!yearsResult.ok) {
+    return yearsResult;
+  }
+  const session = yearsResult.value;
 
   if (yearEnds.length !== input.years) {
     return {
@@ -156,7 +148,7 @@ export function runSprint1SimulationWithYearlyCaptureResult(input: {
       finalSession: session,
       events: session.runtimeState.eventStream,
       yearEnds,
-      weeksExecuted,
+      weeksExecuted: totalWeeks,
       finalIntegrity: evaluateReferenceIntegrity(session.runtimeState.worldState),
     },
   };

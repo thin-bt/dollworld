@@ -8,7 +8,7 @@
 - 実装状態：
   - S01-001〜S01-007 **implemented / accepted**（S01-007受入完了commit `a39e476`）
   - S01-008 **implemented / accepted**（WorldEngine・CLI・出力統合production実装済み・受入完了commit `7c47847`）
-  - S01-009 **pending**／未着手。Sprint 1全体は未完了
+  - S01-009 **implemented / 受入監査中**。Sprint 1全体は未完了
 - `S1-SPEC-0.1.20`はS01-008 integration contracts clarification（`weekly-training` adapter ID／production adapter pipeline`[weekly-training]`／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／`InitialWeeklyTrainingSidecarSnapshot`／SimulationIdentity `0.4.0`＋`initialWeeklyTrainingSidecarHash`／CLI `--sprint1-input`／run-metadata `0.4.0`／initial-world `0.4.0`／final-world `0.3.0`）。BattleState schema `0.6.0`。先行clarificationとして`S1-SPEC-0.1.19` post-start abort、`S1-SPEC-0.1.18` BattleResult決定契約、`S1-SPEC-0.1.17` sourceSnapshot baselineがある
 - 実装順序の正本: S01-008 accepted → S01-009 → Sprint 1 clean-tree完了検証 → `sprint1-complete`
 
@@ -1278,33 +1278,56 @@ same-seed second runも独立にこの検証を行う。
 
 ### Sprint 1人口別性能
 
-Sprint 0の警告基準を**同じ数値でSprint 1にも適用**する。全population profileのrun seedは`performanceSeed=12345`（`baseSeed`と同じ）へ固定する。population間でseedを変えず、同一profile再実行でも同じseedを使う。
+Sprint 1 population performanceは**baseline measurement**とする。`600`／`2000`／`5000`は**存命人口 target**（`targetLivingPopulation`）であり、`WorldState.persons.length`とのexact一致を要求しない。初期World生成では死亡済み祖先もWorld Personとして残るため、既存Sprint 0 scaled-config規則どおり例えば600 living targetでは`actualLivingPopulation=600`・`totalPersonCount=800`となり得る。`sidecarCount`は既存Sprint1 contractどおりtotal World Person集合とexact 1:1。
 
-| population profile | years | warningSeconds | 扱い |
+Sprint 0 accepted `performanceTargets`（600人100年30秒／2000人100年120秒／5000計測のみ）をSprint 1へ流用しない。Sprint 0自身の`npm run verify:sprint0`契約は不変。Sprint 1 completion reportへのSprint 0 performance warning import契約は維持する。
+
+| targetLivingPopulation | years | seed | 扱い |
 |---:|---:|---:|---|
-| 600 | 100 | 30 | 超過warning |
-| 2000 | 100 | 120 | 超過warning |
-| 5000 | 100 | なし | measure only |
+| 600 | 1 | 12345 | required baseline |
+| 2000 | 1 | 12345 | required baseline |
+| 5000 | 1 | 12345 | required baseline |
 
-性能超過だけで`overallPassed=false`にしない。
-600／2000 profileがwarningSecondsを超過した場合はprofileごとにtop-level `warnings`へ1件の`VerificationIssue`を追加する。codeは`SPRINT1_PERFORMANCE_WARNING`、scopeは`performance/<population>`（例:`performance/600`）、messageにはpopulation／years／actualSeconds／warningSecondsを含める。対応`performanceProfiles` nested resultにも測定値／threshold／warning状態を保持する。5000 profileはthresholdなしのため遅さだけではwarning issueを作らない。
+全profileのrun seedは`performanceSeed=12345`（`baseSeed`と同じ）へ固定する。population間でseedを変えず、同一profile再実行でも同じseedを使う。実行順は**600→2000→5000**の逐次独立child process。並列禁止。
 
-- 各population profileはSprint 0同様、独立子プロセスで計測する。resource contentionで計測値を歪めないよう**600→2000→5000の順に1 child processずつ順次実行**し、population performance worker同士を並列実行しない
+elapsedSecondsが大きいことだけを理由にfailureまたはwarningへしない。Sprint1独自の`SPRINT1_PERFORMANCE_WARNING`および30秒／120秒thresholdは置かない。将来baseline蓄積後に別途thresholdを確定するまで恣意的な新thresholdを発明しない。5000だけ特別なmeasure-only statusにはしない。3profileともrequired。functional成功=`passed`、functional失敗=`failed`、前提gate failureで未実行=`blocked`。
+
+各profileの合格条件（すべて必須）:
+
+- child process exit 0
+- `yearsExecuted=1`（`weeksExecuted=48`）
+- `actualLivingPopulation === targetLivingPopulation`
+- World Person生成成功
+- sidecar exact 1:1（`sidecarCount === totalPersonCount`）
+- final `validateSprint1RunSession`成功
+- event sequence／allocator invariant成功
+- year-end processing成功（既存production annual boundaryまで通過）
+- runtime exceptionなし
+- OOMなし
+
+測定・記録する最低限field（completion report `performanceProfiles`）:
+
+- `seed`／`years`／`targetLivingPopulation`／`actualLivingPopulation`／`totalPersonCount`／`sidecarCount`
+- `elapsedSeconds`／`maxRssKilobytes`／`eventCount`／`exitCode`
+- validation overall result／`finalWorldDate`
+- `status`／`functionalPassed`／`detail`
+
+実装上の固定事項:
+
+- 各population profileはSprint 0同様、独立子プロセスで計測する
 - timer／maxRSS等の測定境界は既存Sprint 0 population performance workerの方式を再利用し、Sprint 1だけ別定義へしない
-- Sprint 1 profileではproductionのSprint1RunSession＋weekly pathを100年実行する
+- Sprint 1 profileではproductionのSprint1RunSession＋weekly／yearly pathを**1年**実行する（長期100年耐久はtiny fixtureのsame-seed／year profilesで別途検証し、population performance短縮で代替しない）
 - battle schedulerはないためperformance profileで自動battleを追加しない
-- 5000人は閾値なしのmeasure only。これはthreshold warning判定を行わない意味であり、required performance profile自体のstatusはfunctional validity成功時`passed`、失敗時`failed`、前提failure時`blocked`とする。`not_performed`にしない
-- 各profileはtimingだけでなくfunctional validityも必須。session作成成功、正確に4,800週、final `validateSprint1RunSession`成功、World／sidecar 1:1、Event sequence／allocator invariant成功を確認する。これらのfailureはperformance warningではなくfunctional failure
 - performance profileでは自動battleを発生させないため`battleResults`は空でよい。空であること自体をSprint 1 battle未検証の根拠にはせず、battleは統合シナリオで別途検証する
 
 Sprint 1ではsidecarがWorld Person集合とexact 1:1必須のため、performance harnessだけにverification fixture factoryを置いてよい。手順:
 
-1. Sprint 0 performance profileと同じpopulation config生成規則を再利用する
+1. Sprint 0 performance profileと同じpopulation config生成規則を再利用する（存命人口 targetに対する死亡済み祖先を含むtotal Person数を正とする）
 2. 測定開始前に、`performanceSeed=12345`でそのprofileのgenerated World PersonId集合を得る。測定対象production sessionも同じprofile config／同じseedを使用する
 3. S01-008 accepted `apps/simulator/fixtures/sprint1/sprint1-input.json`を既存validatorで読み、その`initialWeeklyTrainingSidecar.entries`のPersonId Unicode昇順先頭entryをverification用canonical templateとする。templateはvalidated deep cloneし、各performance PersonIdについて**`personId`だけを対象PersonIdへ置換**して、その他field（growthProfile／growthPotential／remainders／temporaryCondition／motivationFactor／plannerContext／target contexts／teacherFactorKey／discipleCount）はtemplate値をそのまま保持する。そこから全PersonId分の`InitialWeeklyTrainingSidecarSnapshot`をPersonId昇順に構築する。別のperformance専用balance値を発明しない
 4. existing validatorで1:1／schema／rangeを検証する
 5. production performance session生成後、実際のinitial World PersonId集合とfactoryが作成したsidecar PersonId集合がexact 1:1であることを再確認する
-6. fixture準備のための事前World生成／sidecar構築時間はpopulation runの測定時間へ含めない。ただし測定対象のproduction session自身が行うfresh world生成・21-step初期化・100年weekly処理は測定時間に含める
+6. fixture準備のための事前World生成／sidecar構築時間はpopulation runの測定時間へ含めない。ただし測定対象のproduction session自身が行うfresh world生成・21-step初期化・1年weekly／year-end処理は測定時間に含める
 
 このfactoryはverification/test専用。production CLI／simulation-coreから暗黙defaultとして呼ばない。`motivationFactor=10000`等の本番fallbackを復活させない。
 
@@ -1334,7 +1357,7 @@ functionalFailureCount=0
 をSprint 1のfunctional gateとする。
 
 Sprint 0のperformance warningはSprint 1 functional failureへ昇格させない。warningとしてそのまま記録する。
-accepted Sprint 0 completion reportのwarning正本fieldは`warningCount`と`performanceWarnings`であり、存在しない`warnings`配列を前提にしない。S01-009側で`performanceWarnings`のwire型を再定義せず、**既存`apps/simulator/src/sprint0-verification/completion-report.ts`のaccepted report型／validator（または同領域の正規reader）を正本として再利用**する。validated reportから得たperformance warning message件数と`warningCount`の一致を必須とし、不一致・source型不正はSprint 0 regression／verification harness failure。validated `performanceWarnings`に含まれる各warning messageをSprint 1 completion report top-level `warnings`へexactly 1件ずつimportし、`VerificationIssue`は`code=SPRINT0_PERFORMANCE_WARNING`、`message=source warning message`、`scope=sprint0Regression/performance`とする。nested `sprint0Regression`にはsource `warningCount`とvalidated `performanceWarnings`全文を保持する。したがってSprint 1 top-level `warningCount`にはSprint 1自身のperformance warningとSprint 0からimportしたperformance warningの双方を含める。同じsource warningを二重importしない。
+accepted Sprint 0 completion reportのwarning正本fieldは`warningCount`と`performanceWarnings`であり、存在しない`warnings`配列を前提にしない。S01-009側で`performanceWarnings`のwire型を再定義せず、**既存`apps/simulator/src/sprint0-verification/completion-report.ts`のaccepted report型／validator（または同領域の正規reader）を正本として再利用**する。validated reportから得たperformance warning message件数と`warningCount`の一致を必須とし、不一致・source型不正はSprint 0 regression／verification harness failure。validated `performanceWarnings`に含まれる各warning messageをSprint 1 completion report top-level `warnings`へexactly 1件ずつimportし、`VerificationIssue`は`code=SPRINT0_PERFORMANCE_WARNING`、`message=source warning message`、`scope=sprint0Regression/performance`とする。nested `sprint0Regression`にはsource `warningCount`とvalidated `performanceWarnings`全文を保持する。したがってSprint 1 top-level `warningCount`にはSprint 0からimportしたperformance warningを含める（Sprint1独自のtiming threshold warningは置かない）。同じsource warningを二重importしない。
 
 ### Sprint1 completion report
 
@@ -1377,11 +1400,11 @@ VerificationStatus = passed | failed | not_performed | blocked
 - `blocked`: prerequisite failure等でrequired gateを安全に実行できない。`failures`へ最低1件対応issueを追加
 - `not_performed`: 仕様上もともと非必須と明記された計測だけ。required gateへ使用禁止
 
-status適用を次に固定する。boundary seedの**必須1年run**、10／50／100／300年のyear profile、600／2000／5000人performance profileはいずれもrequired gateなので、正常実行時は`passed`、不合格は`failed`、前提failureで未実行なら`blocked`とする。5000人の`measure only`は「threshold判定なし」という意味であり、profile自体を`not_performed`にしない。`not_performed`を使用してよいのはboundary seedの100年長期performance、year profile個別maxRSS等、本文で明示的に非実施としたsub-measurementだけ。
+status適用を次に固定する。boundary seedの**必須1年run**、10／50／100／300年のyear profile、存命人口 target 600／2000／5000のperformance profile（各years=1）はいずれもrequired gateなので、正常実行時は`passed`、不合格は`failed`、前提failureで未実行なら`blocked`とする。`not_performed`を使用してよいのはboundary seedの100年長期performance、year profile個別maxRSS等、本文で明示的に非実施としたsub-measurementだけ。
 
 `failures`／`warnings`の各要素は最低限`code`／`message`／`scope`を持つ。`functionalFailureCount = failures.length`、`warningCount = warnings.length`。required nested resultに`failed`／`blocked`が1件でもあるのに対応failure issueがないreportをinvalidとする。
 
-report内matrix順序は固定する。`boundarySeeds`は`0`→`4294967295`、`yearProfiles`は`10`→`50`→`100`→`300`、`performanceProfiles`は`600`→`2000`→`5000`。`failures`／`warnings`もverifierの固定gate順・各matrix順で集約し、child process完了順やfilesystem列挙順へ依存させない。
+report内matrix順序は固定する。`boundarySeeds`は`0`→`4294967295`、`yearProfiles`は`10`→`50`→`100`→`300`、`performanceProfiles`は`targetLivingPopulation` `600`→`2000`→`5000`。`failures`／`warnings`もverifierの固定gate順・各matrix順で集約し、child process完了順やfilesystem列挙順へ依存させない。
 
 `check`は最低限`npmCheck`／`wikiCheck`／`diffCheck`の各command、exit code、pass-failを保持する。diff gateはS01-009受入中のstaged差分も検査できるよう`git diff --check HEAD`相当を正とし、clean-tree最終runでは当然差分0を確認する。`sprint0Regression`は`npm run verify:sprint0`のexit codeと読み込んだSprint0 completion reportの`overallPassed`／`functionalFailureCount`／`warningCount`／`performanceWarnings`全文を保持する。Sprint0 performance warningは上記どおりtop-level `warnings`へ1件ずつimportする。
 
@@ -1389,7 +1412,7 @@ report内matrix順序は固定する。`boundarySeeds`は`0`→`4294967295`、`y
 overallPassed = functionalFailureCount === 0
 ```
 
-performance threshold超過、Sprint 0から引き継いだperformance warning、`workingTreeDirty=true`だけではfunctional failureにしない。
+Sprint 0から引き継いだperformance warning、`workingTreeDirty=true`、およびSprint1 population baselineのelapsedSecondsの大きさだけではfunctional failureにしない。
 
 verification harness自体の例外、必要fixture生成失敗、必須command失敗、必須run missing、report生成失敗はfunctional failure。
 
@@ -1440,7 +1463,7 @@ sprint1-complete
 - 戦闘開始・ターン解決・戦闘結果・ログ
 - fixed7／不変条件
 - 10／50／100／300年長期実行
-- 600／2000／5000人性能計測
+- 600／2000／5000存命人口 target×1年のpopulation baseline計測
 - Sprint 0総合回帰
 
 ### 実装対象外
@@ -1503,7 +1526,7 @@ simulation-coreの新規public APIは原則なし。verification内部helperは`
 - runtime RNG checkpoint比較＋S01-004〜007 RNG regression
 - identity／hash／canonical
 - fixed7／不変条件／semantic reload
-- Sprint 1人口別性能600／2000／5000
+- Sprint 1人口別性能（存命人口 target 600／2000／5000 × years=1 baseline）
 - `npm run verify:sprint0`
 - `npm run check`
 - `npm run wiki:check`
@@ -1514,7 +1537,7 @@ simulation-coreの新規public APIは原則なし。verification内部helperは`
 
 - 本バックログの固定完了条件を満たす
 - `verify:sprint1` completion reportが`overallPassed=true`／`functionalFailureCount=0`
-- performance超過だけはwarning扱い
+- Sprint1 population baselineのelapsedSecondsだけではfailure／warningにしない（Sprint0からimportしたperformance warningは従来どおりwarning）
 - same-seed second runを含む全機能runを独立検証済み
 - integrated scenarioでweekly／technique／battle／BattleResult／week reset／fixed7を一続きに検証済み
 - Sprint 0 completion verifierがpass
@@ -1532,7 +1555,7 @@ simulation-coreの新規public APIは原則なし。verification内部helperは`
 - integrated scenarioのevent／BattleResult／RNG checkpoint結果
 - identity／canonical／hash結果
 - fixed7検証結果
-- 600／2000／5000性能値とwarning
+- 600／2000／5000存命人口 target×1年 baseline（living／totalPersons／sidecar／elapsed／RSS／events）
 - Sprint 0 regression completion result
 - `npm run check`／wiki／diff-check
 - Sprint1 completion report path／SHA-256

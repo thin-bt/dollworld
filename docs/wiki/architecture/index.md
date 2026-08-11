@@ -14,7 +14,7 @@ last_verified: 2026-08-11
 
 ## 概要
 
-Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実装済み配置と責務分割、Sprint 1はS01-001〜008がimplemented / acceptedで、現在はS01-009総合受入検証がpending。詳細はTECHNICAL_DECISIONS・正式ミニ仕様・コードを正とする。
+Sprint 0・Sprint 1を横断するアーキテクチャ索引。Sprint 0は実装済み配置と責務分割、Sprint 1はS01-001〜008がimplemented / acceptedで、S01-009総合受入検証はimplemented / 受入監査中。詳細はTECHNICAL_DECISIONS・正式ミニ仕様・コードを正とする。
 
 ## 現在確定している内容
 
@@ -57,7 +57,7 @@ Sprint 0 の各パッケージ Vitest テスト（詳細は下位ページ）。
 Sprint 1:
 
 - S01-001〜008の`packages/simulation-core`／`apps/simulator` regression・integration tests
-- 現在の総合完了ゲートはS01-009 `npm run verify:sprint1`（未実装／pending）
+- 現在の総合完了ゲートはS01-009 `npm run verify:sprint1`（implemented / 受入監査中）
 
 ## 関連する判断
 

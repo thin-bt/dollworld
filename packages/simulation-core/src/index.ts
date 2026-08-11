@@ -252,7 +252,11 @@ export type {
 export { buildWeeklyTrainingPersonRecords } from "./sprint1/sprint1-person-sidecar-records.js";
 export { runSprint1WeeklyTrainingAdapter } from "./sprint1/weekly-training-adapter.js";
 export { runSprint1WeeklyStep, runSprint1Years } from "./sprint1/sprint1-weekly-step.js";
-export type { RunSprint1WeeklyStepOptions } from "./sprint1/sprint1-weekly-step.js";
+export type {
+  RunSprint1ValidatedWeekObservation,
+  RunSprint1WeeklyStepOptions,
+  RunSprint1YearsOptions,
+} from "./sprint1/sprint1-weekly-step.js";
 export {
   SPRINT1_TRANSACTIONAL_PROCESSOR_ADAPTER_PIPELINE,
   assertBattleResultWeekMatchesWorldDate,

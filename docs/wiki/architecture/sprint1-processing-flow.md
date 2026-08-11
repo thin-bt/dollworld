@@ -90,6 +90,7 @@ mutable runtime root と immutable context（runtime checkpoint vs projection �
 - 論理`Sprint1RunSession = { context, runtimeState }`。rollbackはruntimeのみ
 - weekly `TrainingProcessorRuntimeState`は`processorRuntimeStates.processorSpecificStates`（plain JSON deep-clone）
 - production `[weekly-training]` = Sprint1 transactional adapter pipeline（legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない。二重実行禁止）。`runSprint1WeeklyStep` の `legacyProcessors` は年末集計などのWorldEngine補助hook専用であり、`weekly-training` を含むSprint1 adapter IDは拒否する
+- public／untrusted session境界は full `validateSprint1RunSession`。`runSprint1Years` の multi-week loop は validated-session trust boundary（開始／終了 full validation、各週は変更 state／appended event suffix のみ）。historical event prefix の毎週 full rescan は不要（semantics 非緩和）。week observer は trusted draft session を公開せず frozen narrow observation のみ
 - battle World RNG label `battle/world-rng`／weekly RNG label `processor/weekly-training`
 - fresh initialization promotion後: `eventStream = promoted initialEvents`、`nextSequence = promotedInitialEvents.length`、`battleResults = []`、`battleResultWeekState.results = []`
 - `battleResultWeekState.absoluteWeek === worldDate.absoluteWeek`必須。week.resultsは`battleResults` current-week suffixとcanonical一致必須
