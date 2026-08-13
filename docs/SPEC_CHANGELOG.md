@@ -1,5 +1,16 @@
 # 変更履歴
 
+### 2026-08-13 — T03-A current authority synchronization（nonbump）
+
+- `SPEC-0.1.3` / `S0-SPEC-0.1.6` / `S1-SPEC-0.1.21`を維持する。T03-Aはaccepted Sprint 0 / Sprint 1 / T01 CAL-JAN実態への本文同期であり、ゲーム挙動、balance、wire shape、schemaVersion、configVersion、canonical JSON、hash、RNG契約を変更しない。
+- `docs/SPEC.md`で、ゲーム全体の将来設計と現行accepted runtimeの境界を明示。現行通常週間pipelineは`weekly-training`のみ、`WeeklyAction`は`train_stat / learn_technique / practice_technique / rest / inactive`、battleは明示的facade、T01年初enabled処理はprevious-year finalize / mass-aging / age-qualificationであることを現行bindingとして同期。
+- 週間修行8種類の企画表は将来を含むゲーム全体設計として維持し、現行Sprint 1の疲労delta `+8 / +7 / +6 / -18`、restのcondition/currentMental/injury回復、`inactive`非更新との混同を解消。独学係数0.40、独自技研究、自律`teach`等はSprint 1 current runtimeへ先行適用しない。
+- 戦闘の現行bindingを11〜14仕様へ同期。basic action priority、命中・damage・movement・guard/evade/focus_mind、TechniquePowerBandとconsumptionClassの分離、RunRuleSnapshot 0.5.0、予約actionTraits非実行、Sprint 1ではretention削除を行わないことを明示。
+- `techniqueBalance.powerBands.small / standard / advanced / secret`を独立したTechniquePowerBand labelとして明確化。`TechniqueConsumptionClass`／`learningTier`からpowerを推測せず、`basicAttack`は4帯の連続性・重複validation対象外とする。configのshape・値・version・hashは非変更。
+- `10-training-and-learning.md`の後続Sprint事項へ、週間行動としての模擬戦・合同修行、間合い・精神訓練、独自技研究のSprint 1対象外境界を明示。
+- Wiki governanceで`last_verified`を「current claimをlisted source authorityへ最後に照合した日」と定義し、mtime/commit日時との機械一致を要求しない。Wikiはlive task-progress authorityではないことも明示。
+- Web/API/MySQL、大会自動運営、恋愛・結婚・出産、独自技生成等の本文は将来設計として保持し、現行実装済みと読み替えない。
+
 ### 2026-08-12 — CAL-JAN-SYNC 0.2.7 acceptance applicability clarification
 
 - `SPEC-0.1.3` / `S0-SPEC-0.1.6` / `S1-SPEC-0.1.21`を維持。wire/schema version追加変更なし。

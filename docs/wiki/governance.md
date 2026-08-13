@@ -8,7 +8,7 @@ sources:
   - docs/AI_DEVELOPMENT_RULES.md
   - docs/SPEC.md
   - tag:sprint0-complete
-last_verified: 2026-08-01
+last_verified: 2026-08-13
 ---
 
 # Wiki運用規則
@@ -32,6 +32,21 @@ last_verified: 2026-08-01
 - Wiki更新は仕様確定または実装 commit 後に行う
 - 推測による補完は禁止する
 - 情報が無い項目は「確認できる記録なし」または「該当なし」とする
+
+### `last_verified` の意味
+
+- `last_verified` は、そのページの**currentな記述**をfront matterの`sources`に示した正本・履歴アンカーへ最後に照合した日を表す
+- ファイルのmtime、Drive更新日時、Git commit日時と一致させるための欄ではない
+- currentな仕様・実装状態・不変条件の記述を変更する場合は、同じ変更で関連sourceを再確認し、`last_verified`をその確認日へ更新する
+- 表記・リンク・整形だけの変更、または明示的な履歴情報だけを追記する変更は、それ自体を理由に`last_verified`を更新しない
+- `last_verified`を機械的なmtime比較で検査しない。意味上の再確認を伴わない日付更新は禁止する
+
+### 進行状態の所有
+
+- Wikiはliveなtask進行状態の正本ではない
+- 現在進行中のtask、着手可能工程、blocker、Cursorの実行中lock等は、dollworldのproject coordination / audit workflow側の正本を確認する
+- Wikiに記載するtask statusは、accepted commitやcompletion snapshot等を説明するcurrentまたはhistorical情報とし、live coordination状態を上書きしない
+- Wiki内に過去時点の`pending` / `implemented` / `accepted`等が履歴として残る場合は、その時点・commit・Sprint等の文脈を明示する
 
 ### 矛盾時
 

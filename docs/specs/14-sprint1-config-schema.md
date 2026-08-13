@@ -401,6 +401,9 @@ techniqueBalance
     standard: 36..55
     advanced: 56..75
     secret: 76..100
+
+`powerBands.small / standard / advanced / secret` は **TechniquePowerBand上のlabel** であり、`TechniqueConsumptionClass`または`learningTier`ではない。TechniquePowerBandは説明上の区分名で、新しい保存field・公開型・config keyではない。同名キーがあっても対応関係を推測しない。`TechniqueDefinition.power`は技データの明示値を使用する。`basicAttack`は4つの連続した技威力帯の外にある単一参照値であり、`basicAttack=20`と`small.min=20`は帯同士の重複として扱わない。この意味明確化では設定shape・既定値・schemaVersion・configVersion・canonical JSON・configHashを変更しない。
+
 - basicAttackProfiles:
     unarmed:
       primaryStats: [strength, skill]
@@ -720,7 +723,7 @@ postEffects
 - schemaVersionは`0.2.0`、初期configVersionは`sprint1-balance-0.2.0`
 - schemaVersion、configVersion空文字不可
 - 未知キー拒否
-- 帯に隙間・重複なし
+- `small → standard → advanced → secret` の4つのTechniquePowerBandに隙間・重複なし。`basicAttack`はこの帯検査の対象外
 - technique consumptionClassとactionBaseの4キーが完全一致
 - min <= max
 - penalty／reductionキーは非負の大きさとして保持し、式側で減算する。負係数を設定へ保存しない
@@ -748,7 +751,7 @@ postEffects
 - 各必須キー欠落拒否
 - 未知キー拒否
 - 数値範囲外拒否
-- 帯の隙間・重複拒否
+- `small → standard → advanced → secret` の4つのTechniquePowerBandの隙間・重複拒否。`basicAttack`は当該検査対象外
 - 既定値fixtureのcanonical JSON固定
 - 同configVersion内容差異拒否
 - 版レジストリの初期値、用途別version上げ条件

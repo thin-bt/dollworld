@@ -3,11 +3,25 @@
 - 仕様バージョン：`SPEC-0.1.3`
 - Sprint 0ミニ仕様バージョン：`S0-SPEC-0.1.6`
 - Sprint 1ミニ仕様バージョン：`S1-SPEC-0.1.21`
-- 最終整合性監査日：2026-08-01
+- 最終整合性監査日：2026-08-13
 
 > **このMarkdownを企画・仕様の正本とする。** 以後の変更は本ファイルへ追記・修正し、Word/PDFは必要時に本ファイルから生成する。
 >
-> 更新日：2026年8月1日
+> 更新日：2026年8月13日
+
+
+## 現行実装同期（T03-A / 2026-08-13）
+
+本節は、企画全体の将来設計と、現在Git正本で実装・受入済みの範囲を混同しないための現行bindingである。T03-Aは既存のゲーム挙動・balance・wire schemaを変更せず、`SPEC-0.1.3` / `S0-SPEC-0.1.6` / `S1-SPEC-0.1.21`を維持したまま、Sprint 0 / Sprint 1 / T01 CAL-JANのaccepted実態へ本文を同期する。
+
+- 現行accepted基準は `master` のT01 commit `196fe783a5700f79c3a1eba80668a35c09223393`。
+- Sprint 0 / Sprint 1はCOMPLETE。現行new-runは設定年初月第1週開始（既定1月）、`SimulationIdentity` / `RunRuleSnapshot`は0.5.0、固定7出力を維持する。
+- 現行Sprint 1の通常週間adapter pipelineは`weekly-training` 1件だけで、`WeeklyAction`は`train_stat | learn_technique | practice_technique | rest | inactive`。`inactive`はdeceased / waiting / stoppedの非更新状態であり能動行動ではない。
+- 戦闘はSprint 1でBattleState生成、turn解決、BattleResult、戦後effects、replay/validation、WorldEngine/CLI/fixed7への統合まで実装済み。ただし自動大会編成・大会日程・昇格処理から自動起動されるものではなく、明示的battle facadeから実行する。
+- T01の年初runtimeで現在enabledなのはprevious-year finalize、mass-aging、age-qualification。結婚・出産・家系更新・大会日程・年間ランキング等の将来processorは未実装で、現行T01では副作用を持たない。
+- 大会運営、恋愛・結婚・出産、独自技生成、師匠の自律的な教授行動、Web/API/MySQL永続化など、本書に定義済みでも現行Sprint 1/T01に未実装の事項は将来設計として保持する。本文中の将来設計値を、現行runtimeの既定値として読み替えない。
+- 現行実装の詳細bindingは`docs/specs/*.md`の同一現行版と本書内の「現行Sprint 1 binding」節を併読する。将来設計と現行bindingが併記される場合、現行runtimeについては「現行Sprint 1 binding」とミニ仕様の具体契約を使用する。
+
 
 
 # 1. 企画概要
@@ -307,7 +321,9 @@ interface HereditaryValue {
 
 ## 週間修行と技術成長の暫定値
 
-以下は最初の長期シミュレーションを動かすための暫定値とする。能力値・適性・技熟練度はいずれも0〜100を前提とし、係数は設定ファイルから変更できるようにする。
+以下8種類はゲーム全体で想定する週間修行カタログの暫定設計である。能力値・適性・技熟練度はいずれも0〜100を前提とし、係数は設定ファイルから変更できるようにする。
+
+**現行Sprint 1 runtimeはこの8種類をそのまま実装していない。** 現行の週間処理は後述「現行Sprint 1週間行動binding」の4能動行動＋`inactive`へ縮約している。以下の表は後続Sprintで行動種類を拡張する際の企画値として保持し、現行Sprint 1の疲労・回復・成長値へ直接使用しない。
 
 ### 週間修行の種類
 
@@ -321,6 +337,38 @@ interface HereditaryValue {
 | 間合い・精神訓練 | 速度・技量・精神のうち主対象に0.06、関連対象に0.02 | +4 | 接近、離脱、回避、精神管理を伸ばす。 |
 | 独自技研究 | 独自技研究値を基礎1.0、使用元技熟練度に0.3 | +7 | 派生技・複合技・独自技の開発を進める。 |
 | 休養 | 能力成長なし。疲労-20、軽傷回復を促進 | -20 | 疲労・負傷が高い人物ほど選択しやすい。 |
+
+
+#### 現行Sprint 1週間行動binding
+
+現行`WeeklyAction`は次のとおり。
+
+```text
+WeeklyAction =
+  train_stat
+  | learn_technique
+  | practice_technique
+  | rest
+  | inactive
+```
+
+- `train_stat`: 対象基礎能力1つを訓練。能力訓練1回の基礎成長は`500 milliPoints`（`1000 milliPoints = 表面能力値1`）で、08仕様の固定小数点・BasisPoints契約で処理する。
+- `learn_technique`: 重点習得中の未習得技を練習する。
+- `practice_technique`: 習得済み技1件を専用反復する。
+- `rest`: 能力成長を行わず、一時状態の回復を行う。
+- `inactive`: `deceased` / `waiting` / `stopped`。能動行動ではなく、人物を完全に非更新とする。
+
+現行Sprint 1の週次一時状態deltaは次を正とする。
+
+| 現行WeeklyAction | fatigue delta | その他 |
+|---|---:|---|
+| `train_stat` | +8 | condition変更なし |
+| `learn_technique` | +7 | condition変更なし |
+| `practice_technique` | +6 | condition変更なし |
+| `rest` | -18 | condition +2、currentMental +20、injury -5（各上限・下限clamp） |
+| `inactive` | 0 | fatigue / injury / condition / confidence / currentMentalを全て非更新 |
+
+上記は`docs/specs/08-character-growth.md`、`10-training-and-learning.md`、`14-sprint1-config-schema.md`の現行bindingである。ゲーム全体の8種類表にある`+6/+8/+5/+5/+12/+4/+7/-20`は現行Sprint 1 runtime既定値ではない。T03-Aではbalance値・config・hashを変更しない。
 
 基礎成長値はそのまま能力へ加算せず、次の係数を掛ける。
 
@@ -350,7 +398,7 @@ interface HereditaryValue {
 | 意欲・調子係数 | 0.80〜1.15。性格、勝敗、師匠との関係、現在の調子で変化する。 |
 | 乱数係数 | 0.90〜1.10。必ずシード付き乱数を使用する。 |
 
-この暫定値では、一般的な人物が年間30〜36週程度を修行へ使った場合、重点能力は若年期から全盛期にかけて年1.5〜4程度伸びる想定とする。高い素質・優れた師匠・低い現在値が重なった場合はこれを上回り、能力75以降は伸びが明確に鈍化する。
+この年間成長幅はゲーム全体のbalance目標であり、現行Sprint 1の受入保証値ではない。現行Sprint 1の能力成長は`500 milliPoints`基礎値と08／14仕様の係数・固定小数点契約を正とし、長期実測後に企画目標との差を調整する。
 
 ### 技の習得進捗
 
@@ -379,14 +427,18 @@ interface HereditaryValue {
 - 系統適性係数は0.60〜1.40、必要能力充足係数は0.70〜1.20、学習特性係数は0.70〜1.30とする。
 - 師匠伝達係数は0.70〜1.30とし、師匠自身の技熟練度・指導能力・説明適性から算出する。
 - 師弟相性係数は0.80〜1.20とする。
-- 師匠なしの独学は0.40倍とし、前提技を習得済みで、実戦・記録・観察などから技の構造を知っている場合に限る。
+- 師匠なしの独学係数0.40は後続Sprint予約値とする。現行Sprint 1は独学の知識源生成・独学候補を実装せず、週間習得計算へ0.40を使用しない。
 - 必要進捗へ到達しても、必要適性・必要能力・前提技を満たさない場合は習得完了せず、進捗を保持したまま条件待ちとする。
 - 習得後の技熟練度は、専用反復で基礎1.5／週、通常修行で0.5／週、公式戦での使用成功で0.2、失敗でも0.1上昇する。
 - 技熟練度の上昇には現在値係数を掛け、熟練度80以降は大きく鈍化させる。
 
 ### 師匠が教える技の決定
 
-師匠は4週ごと、または新規入門・技習得完了時に、各門下生へ次に教える技を再評価する。師匠が技を教えられる最低熟練度は、基礎技40、標準技55、上級技70、奥義・秘伝85とする。
+以下の教授方針・再評価・教授優先度はゲーム全体の設計目標である。現行Sprint 1では師匠自身が明示的な`teach`行動を選ぶ仕組み、4週ごとの教授方針再評価、教授拒否、指導人数配分をまだ実装しない。
+
+現行Sprint 1の教授可否は、週開始snapshotに存在する有効な師弟関係と、師匠自身の対象技習得済み状態・`teachingProficiencyRequired`充足だけから決定する静的`teacherCanTeach`参照である。候補選択は週間Plannerが行い、師匠の週間行動を消費しない。詳細は09・10仕様を正とする。
+
+将来の教授判断では、師匠は4週ごと、または新規入門・技習得完了時に、各門下生へ次に教える技を再評価する。師匠が技を教えられる最低熟練度は、基礎技40、標準技55、上級技70、奥義・秘伝85を企画上の目安とする。
 
 教える候補は、前提条件を満たす師匠所持技から次の評価で選ぶ。
 
@@ -411,7 +463,9 @@ interface HereditaryValue {
 - 資格のない親による一時指導は、基礎鍛錬と基礎技までを原則とし、上級技・奥義の正式な伝承は行えない。
 - 門下生側が現在の技を習得しきれていない場合、師匠は新技より熟練度向上を優先できる。
 
-### 独自技の発生
+### 独自技の発生（後続Sprint設計）
+
+**現行Sprint 1では独自技研究を`WeeklyAction`に含めず、研究値蓄積・派生技生成・新技生成を実行しない。** 09仕様の後続Sprint事項として保持する。以下は後続実装時のゲーム全体設計である。
 
 独自技は毎週の単純な低確率抽選ではなく、人物ごと・系統ごとに「独自技研究値」を蓄積して発生させる。AIが独自技研究を選ぶのは、既存技が本人の能力・間合い・戦闘スタイルに合わない、同じ弱点で敗戦を重ねた、特定技を極めた、複数系統を高水準で扱う、師匠へ反発しているなどの理由がある場合とする。
 
@@ -841,6 +895,8 @@ interface HereditaryValue {
 ## 戦闘処理と詳細ログ
 リアルタイム操作型バトルにはしないが、勝敗を一度の抽選だけで決めるのではなく、内部では複数の行動・攻防・間合い変化を順番に処理する。技、間合い、精神消費、適性、熟練度などはこの内部処理へ実際に使用し、その結果を構造化された詳細戦闘ログとして保存する。
 
+この節にはゲーム全体の戦闘設計と現行Sprint 1の具体bindingを併記する。`反撃`、`暴発`、`同時発動`、`interception`、`interrupt`、`defenseBreak`等の後続拡張語が全体設計側に現れても、現行Sprint 1で実行することを意味しない。現行runtimeの行動・RNG・数式・ログ契約は、本節の「現行Sprint 1」記述と11〜14仕様を正とする。
+
 ### 戦闘処理の基本単位
 1. 開始時の距離・構え・現在精神力・疲労・負傷などを確定する。
 2. 各人物AIが現在の間合い、相手の状態、使用可能な技、精神残量、性格から行動を選ぶ。
@@ -848,7 +904,7 @@ interface HereditaryValue {
 4. 優先技以外の行動は、速度を中心とした行動順評価によって処理順を決める。
 5. 接近・後退・間合い維持などの位置変化を処理する。
 6. 選択技が現在の間合いで使用可能かを判定する。
-7. 命中、回避、防御、反撃、発動安定性、不発・暴発などを判定する。
+7. 命中、回避、防御、発動安定性、不発などを判定する。反撃・暴発等はゲーム全体の後続拡張であり、現行Sprint 1では実行しない。
 8. 耐久・疲労・精神力・負傷・優勢状況などの試合状態を更新する。
 9. 決着条件を満たすまでターンを繰り返す。
 10. 規定ターン以内に決着しない場合は判定によって勝敗を確定する。
@@ -953,7 +1009,7 @@ interface HereditaryValue {
 6. 戦闘不能、続行不能、降参、規定ターン到達を確認する。
 7. 行動結果と判定理由を詳細戦闘ログへ保存する。
 
-先行側の攻撃などで後攻側が戦闘不能または続行不能になった場合、後攻側の未実行行動は中止する。ただし、同時発動属性を持つ技や、被弾時に成立する反撃技は例外として処理できるようにする。
+先行側の攻撃などで後攻側が戦闘不能または続行不能になった場合、後攻側の未実行行動は`no_action`として中止ログを残し、効果・RNG消費・消耗を発生させない。現行Sprint 1では`simultaneous` / `counterOnHit` / `interception` / `interrupt` / `defenseBreak`を実行せず、いずれかがtrueの技データを拒否する。同時発動・被弾反撃等は後続Sprintで導入する。
 
 ### 戦闘数値の暫定設定
 
@@ -980,14 +1036,25 @@ interface HereditaryValue {
 | `0` | 通常 | 通常攻撃、一般技、接近、防御など |
 | `-1` | 後発 | 大技、長い詠唱、溜めを必要とする技 |
 
+
+現行Sprint 1の基本行動priorityは`basic_attack=0`、`basic_defense=0`、`evade=+2`、`approach=0`、`retreat=0`、`focus_mind=0`、`surrender=+2`。技は`TechniqueDefinition.priority`を使用する。
+
 同優先度内の行動順評価は、暫定的に次の要素で決める。
 
 ```text
+consumptionPerformanceFactor
+= 試合内消耗帯のperformanceFactor
+
+調子・疲労・負傷補正
+= condition * 0.25
+- fatigue * 0.10
+- injury * 0.15
+
 行動順評価
-＝ 速度
-＋ 技・行動固有の速度補正（-20〜+20）
-＋ 調子・疲労・負傷補正
-＋ シード付き乱数（-5〜+5）
+= speed * consumptionPerformanceFactor
++ 技・行動固有の速度補正（-20〜+20）
++ 調子・疲労・負傷補正
++ seededRandom(-5..5)
 ```
 
 #### 命中率
@@ -995,15 +1062,23 @@ interface HereditaryValue {
 技ごとに基本命中率を持たせ、最終命中率は5〜95％へ収める。
 
 ```text
+effectiveAttackerSkill
+= attackerSkill * attackerConsumptionPerformanceFactor
+
+effectiveDefenderSpeed
+= defenderSpeed * defenderConsumptionPerformanceFactor
+
 最終命中率（％）
-＝ 技の基本命中率
-＋（攻撃側の技量－防御側の速度）×0.35
-＋（技熟練度－50）×0.20
-＋（系統適性－50）×0.10
-＋ 間合い補正
-＋ 状態補正
-－ 回避行動補正
+= 技の基本命中率
++ (effectiveAttackerSkill - effectiveDefenderSpeed) * 0.35
++ (技熟練度 - 50) * 0.20
++ (系統適性 - 50) * 0.10
++ 間合い補正
++ 状態補正
+- 回避行動補正
 ```
+
+現行Sprint 1の状態補正は`condition * 0.25 - fatigue * 0.10 - injury * 0.15 + nextHitModifier`。basis pointsで計算後に`floor`して整数％へ変換し、5..95へclampする。
 
 | **項目** | **暫定値** |
 |----------|------------|
@@ -1019,52 +1094,88 @@ interface HereditaryValue {
 
 技威力は技データに設定し、暫定的に次の範囲を使う。
 
-| **技区分** | **技威力の目安** | **精神消費の目安** | **試合内消耗** |
-|------------|------------------|--------------------|----------------|
-| 通常攻撃 | 8〜12 | 0 | +2 |
-| 小技 | 15〜25 | 5〜10 | +3 |
-| 中技 | 30〜45 | 12〜20 | +5 |
-| 大技 | 50〜70 | 25〜35 | +8 |
-| 奥義・特殊技 | 75〜100 | 40〜60 | +12 |
+現行Sprint 1では、技の`power`と試合内消耗区分を別概念として扱う。
+
+| **TechniquePowerBand（現行config上のlabel）** | **power** |
+|---|---:|
+| `basicAttack` | 20（帯ではなく基本攻撃の単一参照値） |
+| `small` | 20..35 |
+| `standard` | 36..55 |
+| `advanced` | 56..75 |
+| `secret` | 76..100 |
+
+`small / standard / advanced / secret`は**TechniquePowerBandのlabel**であり、`TechniqueConsumptionClass`（small / medium / large / ultimate）でも`learningTier`（basic / standard / advanced / secret）でもない。TechniquePowerBandは説明上の区分名で、新しい保存field・公開型・config keyではない。`TechniqueDefinition.power`は技データに明示し、どちらの分類からも推測しない。`basicAttack=20`は4帯の連続性・重複validation対象外である。
+
+試合内消耗は別に、基本攻撃+2、`consumptionClass=small` +3、medium +5、large +8、ultimate +12とする。精神消費量は各技の`mentalCost`を使用し、power bandまたはconsumptionClassから自動導出しない。
+
+現行Sprint 1のダメージ式:
 
 ```text
-基礎ダメージ
-＝ 技威力
-＋ 参照能力×0.25
-＋ 技熟練度×0.10
-＋ 系統適性×0.05
-－（相手の体力×0.15＋相手の技量×0.05）
+PrimaryStatValue
+= primaryStatsの表面能力値の平均
+
+AttackValue
+= PrimaryStatValue
+* (0.70 + domainAptitude / 250)
+* (0.80 + mastery / 500)
+
+defenderConditionModifier
+= defenderCondition * 0.10
+- defenderFatigue * 0.05
+- defenderInjury * 0.10
+
+DefenseValue
+= defenderStamina * 0.45
++ defenderSkill * 0.20
++ defenderConditionModifier
+
+RawDamage
+= techniquePower * 0.35
++ AttackValue * 0.25
+- DefenseValue * 0.20
+
+Damage
+= max(1, floor(RawDamage * seededRandom(0.90..1.10)))
 ```
 
-最終ダメージには、間合い、調子、疲労、防御、特殊効果、90〜110％のシード付き乱数補正を適用し、命中時の最低ダメージは1とする。複数能力を参照する技は、技データ側に参照比率を持たせる。
+ダメージ乱数は命中時だけ1回消費し、miss時は消費しない。基本攻撃も各系統`BasicAttackProfile.power=20`を使い、個別TechniqueDefinitionとしてカタログへ混在させない。
 
 #### 接近・離脱の成功率
 
-相手が妨害していない場合の基本成功率は90％とする。接近と離脱が競合した場合や、追撃・迎撃を受ける場合は次の対抗判定を使う。
+現行Sprint 1の通常`approach` / `retreat`は1段階移動で、未定義の`movementAptitude`を新設しない。被弾判定と移動判定は分離し、行動可能なままなら被弾後の最新battle-local状態で移動判定を行う。
 
 ```text
-移動成功率（％）
-＝ 60
-＋（行動側の速度－相手の速度）×0.40
-＋（行動側の技量－相手の技量）×0.20
-＋ 技・特性・間合い補正
+MoverBaseScore
+= moverSpeed * moverConsumptionPerformanceFactor * 0.50
++ moverSkill * moverConsumptionPerformanceFactor * 0.30
++ moverStateModifier
++ 5
+
+OpponentBaseScore
+= opponentSpeed * opponentConsumptionPerformanceFactor * 0.50
++ opponentSkill * opponentConsumptionPerformanceFactor * 0.30
++ opponentStateModifier
++ opponentPreferredRangeControlBonus
++ opposingMovementBonus
++ guardingRangeControlBonus
+
+movementRoll = seededRandomInteger(-10..10)
+moveSucceeded = MoverBaseScore + movementRoll >= OpponentBaseScore
 ```
 
-- 対抗判定時の成功率は20〜90％へ収める。
-- 移動前に最大耐久の15％以上のダメージを受けた場合は成功率を25ポイント下げる。
-- 移動前に最大耐久の30％以上のダメージを受けた場合は、原則として移動を中断する。
-- 被弾判定と移動判定は分離し、軽い被弾を受けながら接近・離脱に成功する結果を認める。
+補正既定値は、相手のpreferred range control +5、逆向き移動競合 +10、先行guardingによるrange control +5。`movementChance`は-10..10の21整数値から事前に成功個数を数えて`floor(successfulRollCount * 100 / 21)`で算出し、RNGを消費しない。実判定の`movementRoll`だけ1回消費する。
 
 #### 防御・回避・精神回復
 
-| **行動** | **暫定効果** |
+| **行動** | **現行Sprint 1効果** |
 |----------|--------------|
-| 防御 | 通常攻撃・小技のダメージを45％軽減、中技を30％軽減、大技を15％軽減する。負傷発生率を半減する。 |
-| 防御崩しを受けた防御 | 軽減率を半分にする。強い防御崩しでは軽減を無効化できる。 |
-| 回避優先 | 相手の最終命中率を30ポイント下げる。回避失敗時は受けるダメージを10％増加させる。 |
-| 精神を整える | `15 + 精神×0.10`を回復する。最大精神力を超えない。 |
-| 精神回復中に軽く被弾 | 最大耐久の10％未満なら回復量を半減する。 |
-| 精神回復中に大きく被弾 | 最大耐久の10％以上なら回復を中断する。 |
+| 防御 | basic_attack / smallは`normalDamage * 0.55`、mediumは0.60、largeは0.70、ultimateは0.80へfloor軽減。最終ダメージ下限1。負傷率は加算補正後に0.50倍。 |
+| 防御中の技後間合い変化 | basic_attack / small 70％、medium 60％、large 45％、ultimate 30％で阻止判定。 |
+| 防御崩し | `defenseBreak`は予約actionTraitでありSprint 1ではtrue入力を拒否。現行防御へ追加の防御崩し補正を適用しない。 |
+| 回避優先 | 先に`evade`が成立した場合、同ターン後続攻撃の最終命中率を30ポイント下げる。回避失敗時の別個の+10％damage倍率は現行Sprint 1に置かない。 |
+| 精神を整える | `baseRecovery = max(1, floor(maxMental * 0.10))`。即時回復せずターン終了まで保留。 |
+| 精神回復中に1以上20％未満被弾 | `floor(baseRecovery * 0.50)`、次Hit/Activation補正は各+1。 |
+| 精神回復中に20％以上被弾 | 回復0、次Hit/Activation補正0。被ダメージ0なら全回復候補、次Hit/Activation補正は各+3。 |
 
 #### 試合内消耗と継続疲労
 
@@ -1143,6 +1254,8 @@ interface HereditaryValue {
 - 性格だけで固定行動にせず、耐久、精神、負傷、消耗、間合い、期待命中、期待ダメージと合わせて採点する。
 
 ### 戦闘ルールスナップショットと再現性
+現行Sprint 1/T01 new-runでは`RunRuleSnapshot.schemaVersion=0.5.0`を使用し、SimulationIdentity、WorldCalendar、year-start processor manifest、Sprint1Config、TechniqueCatalog等のrun固定材料をhashでbindする。各BattleState / BattleResultは完全設定・完全カタログを試合ごとに複製せず、run snapshot hashと必要なidentity/refを保持する。
+
 - 戦闘開始時に、その戦闘で使用する設定版、技データ版、技データhash、参加者が参照する技定義、基本攻撃定義を固定する。
 - 戦闘中に外部の可変技データや設定を再読込しない。
 - 過去戦闘の結果・詳細ログは、開始時に固定したルールとseedから再計算できる。
@@ -1178,7 +1291,8 @@ interface HereditaryValue {
 - 通常大会の詳細戦闘ログは、**直近4世界年分を保持する仮仕様**とする。保持期間は運営設定で1〜10年の範囲から変更可能にする。
 - 最高位大会、各大会の決勝、歴史的記録が発生した対戦などの**重要対戦の詳細戦闘ログは100世界年保持**する。
 - 保持期間を過ぎた詳細ログは削除または集約し、対戦結果・対戦概要・戦績・記録は残す。
-- Sprint 1では保持期限による削除処理を実装しない。commit済みBattleResult全文（詳細戦闘ログ含む）は`final-world.json`トップレベル`battleResults`へ保存する（ミニ仕様05・13／S1-SPEC-0.1.21）。- 同じシードと同じ試合開始状態から、同じ詳細ログを再生成できることをテスト要件とする。ただし、保持期間経過後の閲覧用再生成を保証するかは、試合開始状態の保存容量を検証して決める。
+- Sprint 1では保持期限による削除処理を実装しない。commit済みBattleResult全文（詳細戦闘ログ含む）は`final-world.json`トップレベル`battleResults`へ保存する（ミニ仕様05・13／S1-SPEC-0.1.21）。
+- 同じシードと同じ試合開始状態から、同じ詳細ログを再生成できることをテスト要件とする。ただし、保持期間経過後の閲覧用再生成を保証するかは、試合開始状態の保存容量を検証して決める。
 
 ### 詳細戦闘ログに保持する情報（仮）
 | **項目** | **内容** |
@@ -1187,7 +1301,7 @@ interface HereditaryValue {
 | 行動順 | 行動番号、局面、行動者、対象者 |
 | 間合い | 行動前後の距離区分、接近・後退・維持の結果 |
 | 技 | 技ID、系統、熟練度、必要間合い、精神消費、選択理由 |
-| 判定 | 命中・回避・防御・反撃・発動・不発・暴発と、その補正理由 |
+| 判定 | 命中・回避・防御・発動・不発と、その補正理由。反撃・暴発・自傷・対象誤認は現行Sprint 1では生成せず、後続Sprint予約 |
 | 状態変化 | 耐久、疲労、精神力、負傷、調子、優勢状況の前後値 |
 | 結果 | 決着理由、勝者、勝因、重要行動、試合後への影響 |
 
@@ -1210,6 +1324,8 @@ interface HereditaryValue {
 
 # 7. Webアプリの技術構成
 ## 基本構成
+以下はWebアプリ完成形の技術構成候補である。**現行accepted範囲はheadless `apps/simulator` と純粋TypeScript `packages/simulation-core`が中心で、観察用Web/API/MySQL永続化はまだ実装していない。** `apps/web` / `apps/api` / MySQLを現行実装済みと読み替えない。
+
 | **領域**         | **採用候補**                   | **役割**                                                       |
 |------------------|--------------------------------|----------------------------------------------------------------|
 | フロントエンド   | React + TypeScript + Vite      | 観察画面、人物作成、検索、家系図、ニュース                     |
@@ -1299,7 +1415,12 @@ interface HereditaryValue {
 
 始祖データには、申請した通算世界週、参加予定世界年、実際に参加を開始した世界年・月・週を記録する。参加待機中は大会・訓練・加齢などを処理せず、ランキングや世界人物一覧にも含めない。
 
-## 世界進行の処理順（仮）
+## 世界進行の処理順（全体設計＋現行binding）
+
+以下の12段階はゲーム全体の目標処理順であり、未実装の後続processorを含む。
+
+**現行T01/Sprint 1 binding**では、設定年初月へのcalendar transition時に、enabled年初処理`previous-year-finalize` → `mass-aging` → `age-qualification`をexact-onceで実行する。結婚・出産・家系更新・大会日程・年間ランキング等の将来processorは未実装で副作用を持たない。通常週間adapter pipelineは`weekly-training`のみで、battleはpipeline外の明示的battle facadeから実行する。したがって、以下3〜12の将来設計を現行runtimeで自動実行済みと解釈しない。
+
 1.  世界日時を1週間進める。第4週の次は翌月第1週、設定年初月の直前月第4週の次は翌世界年の設定年初月第1週とする（既定：12月第4週の次は翌世界年1月第1週）。
 
 2.  設定年初月第1週の場合、年初処理を実行する。まず、その年より前に出生した、存命かつ活動中の人物の年齢を一斉に1歳加算し、8歳の入門資格、16歳到達時の正式デビューと共通ランク定義の最低ランク付与、18歳の引退資格、42歳到達時の強制引退を更新する。waiting・stopped・deceasedは加齢しない。参加待機中のユーザー始祖を一斉に活動中へ変更する。
@@ -1330,6 +1451,15 @@ interface HereditaryValue {
 
 # 9. 実装段階と初期版の範囲
 ## 第1段階：単独シミュレーション
+この一覧は第1段階の**完成目標**を示す。2026-08-13時点のaccepted実装状況は次のとおり。
+
+| 状態 | 現行範囲 |
+|---|---|
+| 実装・受入済み | 週/月/年暦、設定年初月、Seeded RNG、ID/人物/家系・血縁・婚姻・師弟の基礎データ、WorldEngine、headless CLI、固定7出力、Sprint 1人物状態、4能動週間行動＋inactive、技カタログ/習得/熟練、1対1戦闘開始・turn解決・BattleResult・戦後effects・replay/validation、T01のprevious-year finalize / mass-aging / age-qualification |
+| 未実装・後続 | 自動大会日程・試合編成・大会順位・昇格/王者管理、週間行動としての模擬戦・間合い/精神訓練・独自技研究、独自技生成、師匠の自律`teach`行動/教授拒否、恋愛・年初結婚・出産・家系所属更新processor、新規死亡processor、ログretention削除、観察Web/API/MySQL永続化 |
+
+以下の箇条書きに未実装項目が含まれていても、それは第1段階の完成目標であり、現行accepted runtimeの機能一覧ではない。
+
 - 1週単位、1か月4週、1年48週の世界暦と、全人物を設定年初月第1週生まれに統一した、存命かつ活動中の人物への年初一斉加齢
 
 - 人物生成、年齢、基礎能力6項目、3系統適性、成長特性、性格、シード付き乱数
@@ -1418,7 +1548,7 @@ interface HereditaryValue {
 - 継承は血統と師系の二本柱とする。
 
 - 正式な流派師匠になれるのは、引退後かつ一定以上の公式成績を収めた人物に限る。門下人数に固定上限は設けないが、多数を受け持つほど指導効率を低下させ、各師匠が自律的に受入上限を設定する。
-- 週間修行の基礎成長値と各種係数、技の4段階の習得進捗、師匠の教授評価、研究値蓄積による独自技生成を暫定設定とする。具体値は長期シミュレーションで調整する。
+- 週間修行のゲーム全体カタログ、技の4段階の習得進捗、師匠の教授評価、研究値蓄積による独自技生成を暫定設計として保持する。現行Sprint 1 runtimeは`train_stat / learn_technique / practice_technique / rest`（＋非更新`inactive`）までを実装し、独自技研究・自律`teach`等は後続Sprintへ送る。具体値は長期シミュレーションで調整する。
 
 - 親は師匠資格の有無にかかわらず直下の実子へ0〜7歳まで幼少期の影響を与えられる。8歳以降は、特別な理由がない限り、師匠資格を持つ親の門下へ所属する。正式な師匠が見つからない場合は親が一時的に指導する。
 
@@ -1455,7 +1585,7 @@ interface HereditaryValue {
 | ランク仕様       | 共通ランク制と4大会区分、降格なし、A到達以降をA・S共通のオープンクラスとする方針は確定。F〜S・最高位の名称は仮仕様として維持し、各昇格条件、S認定条件、総合戦王者・限定戦王者の認定方法を決める。 |
 | 最高位大会周期   | 世界王者を決める最高位大会を毎年開催するか、4年に1回開催するかを決める。出場資格、周期内実績の集計方法、王者の在位・表記方法も合わせて決める。 |
 | 大会形式         | 総当たり・トーナメントの採用は確定。参加人数、総当たりの勝点・同率順位、トーナメントのシード・敗者復活、通常大会の開催頻度を決める。       |
-| 戦闘処理         | 速度を中心とした行動順、優先技による割込み、4段階の間合い、基本行動8種類（降参・続行不能を含む）、各行動の基本効果、ダメージ・戦闘不能・判定評価の構造を暫定決定。最大20ターン、基礎最大耐久`100+体力`、最大精神力`50+精神`、試合開始時の精神引継ぎ、優先度+2〜-1、命中・ダメージ・精神消費・試合内消耗0〜100・防御・回避・負傷・判定配点の暫定値を設定済み。識別子は`MatchId`。限定戦補正と実測後の係数調整を行う。対戦結果・概要は永久保存、通常詳細ログは仮に直近4年（1〜10年で設定可）、重要対戦は100年保持とする。 |
+| 戦闘処理         | Sprint 1で1対1の開始・turn解決・BattleResult・戦後effects・replay/validationまで実装済み。最大20ターン、基礎最大耐久`100+体力`、最大精神力`50+精神`、試合開始時の精神引継ぎ、優先度+2〜-1、4段階間合い、命中・damage・精神消費・試合内消耗・防御・回避・負傷・判定の現行式は本書と11〜14仕様の現行bindingを使用する。識別子は`MatchId`。予約actionTraits（同時発動・反撃・割込み・防御崩し等）はSprint 1で実行しない。限定戦補正と実測後の係数調整を後続で行う。対戦結果・概要は永久保存方針、通常詳細ログは仮に直近4年（1〜10年で設定可）、重要対戦は100年保持方針だが、Sprint 1ではretention削除を実装しない。 |
 | 人物投入         | 始祖は世界年の初めに一斉参加すること、システム生成人物の命名候補と再現方式は確定。初期ポイント、外見作成、ユーザー始祖名の自由入力・禁止語・重複ルール、申請締切、待機中の表示、ユーザー間の公平性を決める。 |
 | 人口設計         | 家系・個人出生率を持つ基本方式は確定。初期NPC数、出生率の初期分布、死亡率、家系断絶、人口上限、人口補正の開始条件を決める。                    |
 | 結婚・出産       | 年初に年1回判定し、引退済み恋人同士は自動結婚、非恋人婚は個人相性と家系間関係で評価、婚外子と従兄妹婚を認める。家系基準出生率・個人出生率・年齢補正・初子ボーナスの具体値、出産間隔、再婚条件を決める。 |

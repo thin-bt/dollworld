@@ -258,6 +258,17 @@ RangeShiftAfterUse = none | approach_one | retreat_one
 
 この区分値は `techniqueBalance.powerBands` として設定化し、ロジックへ直書きしない。
 
+#### 5.1.1 `powerBands` labelの意味（T03-A current clarification）
+
+`techniqueBalance.powerBands` の `small / standard / advanced / secret` は、技威力の範囲を表す **TechniquePowerBand上のlabel** とする。TechniquePowerBandはこの意味区分の説明名であり、新しい保存field・公開型・config keyを追加しない。
+
+- `TechniqueConsumptionClass = small | medium | large | ultimate` とは別概念であり、同名の `small` から対応関係を推測しない。
+- `learningTier = basic | standard | advanced | secret` とも別概念であり、同名の `standard / advanced / secret` から対応関係を推測しない。
+- `TechniqueDefinition.power` は各技データに明示する。`consumptionClass`または`learningTier`から自動導出しない。
+- `basicAttack` は基本攻撃の単一参照値を同じ設定オブジェクトに保持するためのキーで、`small → standard → advanced → secret` の4つの連続した技威力帯には含めない。
+- したがって既定値 `basicAttack=20` と `small=20..35` の20重複は、技威力帯同士の重複ではない。
+- このclarificationは既存configのキー、値、schemaVersion、configVersion、canonical JSON、configHashを変更しない。
+
 ## 6. 人物側の技状態
 
 ```text
