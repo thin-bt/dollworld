@@ -17,20 +17,20 @@
 
 | ミニ仕様 | 状態 |
 |---|---|
-| 08 人物能力・成長 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
-| 09 技データ・習得 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
-| 10 週間行動・訓練・習得処理 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
-| 11 戦闘開始状態 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
-| 12 戦闘ターン解決 | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
-| 13 戦闘終了・結果・ログ | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
-| 14 Sprint 1共通設定スキーマ | 作成・受入監査済み（`S1-SPEC-0.1.20`） |
+| 08 人物能力・成長 | 作成・受入監査済み（`S1-SPEC-0.1.21`） |
+| 09 技データ・習得 | 作成・受入監査済み（`S1-SPEC-0.1.21`） |
+| 10 週間行動・訓練・習得処理 | 作成・受入監査済み（`S1-SPEC-0.1.21`） |
+| 11 戦闘開始状態 | 作成・受入監査済み（`S1-SPEC-0.1.21`） |
+| 12 戦闘ターン解決 | 作成・受入監査済み（`S1-SPEC-0.1.21`） |
+| 13 戦闘終了・結果・ログ | 作成・受入監査済み（`S1-SPEC-0.1.21`） |
+| 14 Sprint 1共通設定スキーマ | 作成・受入監査済み（`S1-SPEC-0.1.21`） |
 
 ### Sprint 1準備状況
 
 | 項目 | 状態 |
 |---|---|
-| 正本`SPEC-0.1.2` | 確定 |
-| ミニ仕様08〜14（`S1-SPEC-0.1.20`） | 仕様定義済み・受入監査済み（S01-008 integration contractsを`S1-SPEC-0.1.20`、post-start execution abortを`S1-SPEC-0.1.19`、BattleResult決定的契約を`S1-SPEC-0.1.18`で明文化。戦闘開始`sourceSnapshot` baselineは`S1-SPEC-0.1.17`、`BattleActionLog.movementChance`は`S1-SPEC-0.1.16`、移動状態補正は`S1-SPEC-0.1.15`、ターン入力契約は`S1-SPEC-0.1.14`、MatchId generator契約は`S1-SPEC-0.1.13`、週間処理契約は`S1-SPEC-0.1.12`で明文化済み） |
+| 正本`SPEC-0.1.3` | CAL-JAN同期後current |
+| ミニ仕様08〜14（`S1-SPEC-0.1.21`） | 仕様定義済み・受入監査済み（S01-008 integration contractsを`S1-SPEC-0.1.20`、post-start execution abortを`S1-SPEC-0.1.19`、BattleResult決定的契約を`S1-SPEC-0.1.18`で明文化。戦闘開始`sourceSnapshot` baselineは`S1-SPEC-0.1.17`、`BattleActionLog.movementChance`は`S1-SPEC-0.1.16`、移動状態補正は`S1-SPEC-0.1.15`、ターン入力契約は`S1-SPEC-0.1.14`、MatchId generator契約は`S1-SPEC-0.1.13`、週間処理契約は`S1-SPEC-0.1.12`で明文化済み） |
 | LLM Wiki同期 | 同期済み |
 | 実装バックログ | 定義済み（`docs/SPRINT_1_BACKLOG.md`、S01-001〜S01-009） |
 | S01-001 ドメイン型・設定基盤 | **実装完了**（master統合済み） |
@@ -44,9 +44,9 @@
 | S01-009 Sprint 1総合受入検証 | **implemented / accepted**（受入完了commit `5616f5f`、2026-08-11 ChatGPT再監査。population performanceは存命人口 target×1年baseline） |
 | Sprint 1全体 | **COMPLETE**（S01-001〜S01-009 accepted）。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない） |
 
-**S01-008**（WorldEngine・CLI・出力統合）はproduction実装・受入完了済み（commit `7c47847`）。S01-001〜S01-009はimplemented／accepted（S01-009実装commit `5616f5f`、受入status docs commit `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数に加え、WorldEngine／CLI配線は **S01-008** で実装済み。
+**S01-008**（WorldEngine・CLI・出力統合）はproduction実装・受入完了済み（commit `7c47847`）。S01-001〜S01-009はimplemented／accepted（S01-009実装commit `5616f5f`、受入status docs commit `5a80268`）。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）。S01-008時点の統合契約は `S1-SPEC-0.1.20` で明文化済み（`weekly-training` adapter／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。CAL-JAN同期後のcurrent new-run契約は `SPEC-0.1.3`／`S0-SPEC-0.1.6`／`S1-SPEC-0.1.21`、SimulationIdentity 0.5.0、RunRuleSnapshot 0.5.0、run-metadata 0.5.0、initial-world 0.5.0、final-world 0.3.0。post-start execution abort契約は `S1-SPEC-0.1.19`、BattleResult決定的契約は `S1-SPEC-0.1.18`。S01-004〜007の純粋関数に加え、WorldEngine／CLI配線は **S01-008** で実装済み。
 
-Sprint 1実装時は、正本`SPEC-0.1.2`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述を参照する。
+CAL-JAN同期後のcurrent参照は、正本`SPEC-0.1.3`、本表の08〜14、`docs/SPRINT_1_BACKLOG.md`、および00／02／03／05／07へのSprint 1統合記述とする。`SPRINT_1_BACKLOG.md`内のpre-CAL-JAN仕様版はSprint 1完了時の受入履歴として扱う。
 
 ## Sprint 2前
 

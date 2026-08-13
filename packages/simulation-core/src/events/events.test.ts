@@ -20,6 +20,7 @@ import {
   createValidationFailedEvent,
   createWorldDate,
   createWorldStartedEvent,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   eventIdFromSequence,
   eventsToJsonl,
   stepWeeks,
@@ -86,7 +87,7 @@ describe("eventIdFromSequence", () => {
 });
 
 describe("initialization factories", () => {
-  it("creates world.started at world year 1 April week 1 without year_started", () => {
+  it("creates world.started at world year 1 January week 1 without year_started", () => {
     const event = createWorldStartedEvent({
       simulationId,
       sequence: 0,
@@ -97,7 +98,7 @@ describe("initialization factories", () => {
     expect(event.origin).toBe("initialization");
     expect(event.schemaVersion).toBe(EVENT_ENVELOPE_SCHEMA_VERSION);
     expect(event.eventId).toBe("event_000000001");
-    expect(event.worldDate).toEqual(createInitialWorldDate());
+    expect(event.worldDate).toEqual(createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG));
     expect(event.entities).toEqual({
       personIds: [],
       familyIds: [],
@@ -143,10 +144,10 @@ describe("convertWorldCalendarTransitions", () => {
     expect(events[0]?.eventType).toBe("world.year_stats_finalized");
     expect(events[0]?.payload).toEqual({ worldYear: 1 });
     expect(events[0]?.worldDate).toEqual({
-      year: 1,
-      month: 3,
-      weekOfMonth: 4,
-      absoluteWeek: 47,
+      year: 2,
+      month: 1,
+      weekOfMonth: 1,
+      absoluteWeek: 48,
     });
     expect(events[0]?.entities).toEqual({
       personIds: [],
@@ -230,21 +231,27 @@ describe("convertWorldCalendarTransitions", () => {
     convertWorldCalendarTransitions({
       transitions,
       simulationId,
-      worldDate: createWorldDate({ year: 2, month: 4, weekOfMonth: 1 }),
+      worldDate: createWorldDate(
+        { year: 2, month: 1, weekOfMonth: 1 },
+        DEFAULT_WORLD_CALENDAR_CONFIG,
+      ),
       startSequence: 0,
     });
     expect(transitions).toEqual(snapshot);
   });
 
-  it("rejects non-April week 1 for year-start derived events", () => {
+  it("rejects non-January week 1 for year-start derived events", () => {
     expect(() =>
       convertWorldCalendarTransitions({
         transitions: [{ kind: "year_started", worldYear: 2 }],
         simulationId,
-        worldDate: createWorldDate({ year: 2, month: 5, weekOfMonth: 1 }),
+        worldDate: createWorldDate(
+          { year: 2, month: 5, weekOfMonth: 1 },
+          DEFAULT_WORLD_CALENDAR_CONFIG,
+        ),
         startSequence: 0,
       }),
-    ).toThrow(/April week 1/);
+    ).toThrow(/world-year start week/);
   });
 
   it("is deterministic for the same input", () => {
@@ -455,10 +462,10 @@ describe("factory fixed origin and worldDate", () => {
     sourceProcessor: "test",
   };
 
-  it("locks initialization factories to year 1 April week 1 and initialization origin", () => {
+  it("locks initialization factories to year 1 January week 1 and initialization origin", () => {
     const started = createWorldStartedEvent({ ...common, sequence: 0 });
     expect(started.origin).toBe("initialization");
-    expect(started.worldDate).toEqual(createInitialWorldDate());
+    expect(started.worldDate).toEqual(createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG));
 
     const lineage = createLineageInitializedEvent({
       ...common,
@@ -467,7 +474,7 @@ describe("factory fixed origin and worldDate", () => {
     });
     expect(lineage.eventType).toBe("lineage.initialized");
     expect(lineage.origin).toBe("initialization");
-    expect(lineage.worldDate).toEqual(createInitialWorldDate());
+    expect(lineage.worldDate).toEqual(createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG));
 
     const relationship = createRelationshipInitializedEvent({
       ...common,
@@ -479,7 +486,10 @@ describe("factory fixed origin and worldDate", () => {
   });
 
   it("locks simulation.completed and validation.failed origins", () => {
-    const date = createWorldDate({ year: 2, month: 4, weekOfMonth: 1 });
+    const date = createWorldDate(
+      { year: 2, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     const completed = createSimulationCompletedEvent({
       ...common,
       sequence: 0,
@@ -527,7 +537,10 @@ describe("factory fixed origin and worldDate", () => {
       }),
     ).toThrow(/importance/);
 
-    const date = createWorldDate({ year: 2, month: 4, weekOfMonth: 1 });
+    const date = createWorldDate(
+      { year: 2, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     expect(() =>
       createSimulationCompletedEvent({
         simulationId,
@@ -585,7 +598,10 @@ describe("validateEventEnvelope strict checks", () => {
   });
 
   it("rejects invalid ranks, career statuses, and person.aged in May", () => {
-    const april = createWorldDate({ year: 2, month: 4, weekOfMonth: 1 });
+    const january = createWorldDate(
+      { year: 2, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     const aged: EventEnvelope = {
       schemaVersion: EVENT_ENVELOPE_SCHEMA_VERSION,
       eventId: eventIdFromSequence(0),
@@ -595,7 +611,10 @@ describe("validateEventEnvelope strict checks", () => {
       importance: "minor",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: createWorldDate({ year: 2, month: 5, weekOfMonth: 1 }),
+      worldDate: createWorldDate(
+        { year: 2, month: 5, weekOfMonth: 1 },
+        DEFAULT_WORLD_CALENDAR_CONFIG,
+      ),
       entities: {
         personIds: [asPersonId("person_000001")],
         familyIds: [],
@@ -609,7 +628,7 @@ describe("validateEventEnvelope strict checks", () => {
         worldYear: 2,
       },
     };
-    expect(() => validateEventEnvelope(aged)).toThrow(/April week 1/);
+    expect(() => validateEventEnvelope(aged)).toThrow(/world-year start week/);
 
     const debut: EventEnvelope = {
       schemaVersion: EVENT_ENVELOPE_SCHEMA_VERSION,
@@ -620,7 +639,7 @@ describe("validateEventEnvelope strict checks", () => {
       importance: "normal",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: april,
+      worldDate: january,
       entities: {
         personIds: [asPersonId("person_000001")],
         familyIds: [],
@@ -644,7 +663,7 @@ describe("validateEventEnvelope strict checks", () => {
       importance: "normal",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: april,
+      worldDate: january,
       entities: {
         personIds: [asPersonId("person_000001")],
         familyIds: [],
@@ -669,7 +688,10 @@ describe("validateEventEnvelope strict checks", () => {
       importance: "normal",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: createWorldDate({ year: 1, month: 3, weekOfMonth: 4 }),
+      worldDate: createWorldDate(
+        { year: 2, month: 1, weekOfMonth: 1 },
+        DEFAULT_WORLD_CALENDAR_CONFIG,
+      ),
       entities: {
         personIds: [],
         familyIds: [],
@@ -704,7 +726,10 @@ describe("validateEventEnvelope strict checks", () => {
   });
 
   it("rejects person events with zero or multiple personIds", () => {
-    const april = createWorldDate({ year: 2, month: 4, weekOfMonth: 1 });
+    const january = createWorldDate(
+      { year: 2, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     const aged: EventEnvelope = {
       schemaVersion: EVENT_ENVELOPE_SCHEMA_VERSION,
       eventId: eventIdFromSequence(0),
@@ -714,7 +739,7 @@ describe("validateEventEnvelope strict checks", () => {
       importance: "minor",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: april,
+      worldDate: january,
       entities: {
         personIds: [],
         familyIds: [],
@@ -822,7 +847,10 @@ describe("validateEventEnvelope strict checks", () => {
 
 describe("convertWorldCalendarTransitions consistency", () => {
   it("rejects year_started / person_aged worldYear mismatches and bad age math", () => {
-    const worldDate = createWorldDate({ year: 2, month: 4, weekOfMonth: 1 });
+    const worldDate = createWorldDate(
+      { year: 2, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     expect(() =>
       convertWorldCalendarTransitions({
         transitions: [{ kind: "year_started", worldYear: 3 }],
@@ -877,7 +905,10 @@ describe("convertWorldCalendarTransitions consistency", () => {
           { kind: "year_started", worldYear: 2 },
         ],
         simulationId,
-        worldDate: createWorldDate({ year: 2, month: 4, weekOfMonth: 1 }),
+        worldDate: createWorldDate(
+          { year: 2, month: 1, weekOfMonth: 1 },
+          DEFAULT_WORLD_CALENDAR_CONFIG,
+        ),
         startSequence: Number.MAX_SAFE_INTEGER,
       }),
     ).toThrow(/safe integer/);
@@ -910,7 +941,10 @@ describe("payload plain-object and key rules", () => {
   });
 
   it("rejects missing required keys and extra keys per event type via JSONL too", () => {
-    const april = createWorldDate({ year: 2, month: 4, weekOfMonth: 1 });
+    const january = createWorldDate(
+      { year: 2, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     const agedBase: EventEnvelope = {
       schemaVersion: EVENT_ENVELOPE_SCHEMA_VERSION,
       eventId: eventIdFromSequence(0),
@@ -920,7 +954,7 @@ describe("payload plain-object and key rules", () => {
       importance: "minor",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: april,
+      worldDate: january,
       entities: {
         personIds: [asPersonId("person_000001")],
         familyIds: [],
@@ -951,7 +985,10 @@ describe("payload plain-object and key rules", () => {
       importance: "normal",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: createWorldDate({ year: 1, month: 3, weekOfMonth: 4 }),
+      worldDate: createWorldDate(
+        { year: 2, month: 1, weekOfMonth: 1 },
+        DEFAULT_WORLD_CALENDAR_CONFIG,
+      ),
       entities: {
         personIds: [],
         familyIds: [],
@@ -967,7 +1004,7 @@ describe("payload plain-object and key rules", () => {
 });
 
 describe("world.year_started from world year 2", () => {
-  it("rejects year-1 envelopes and transitions, allows year 2 April week 1", () => {
+  it("rejects year-1 envelopes and transitions, allows year 2 January week 1", () => {
     const year1: EventEnvelope = {
       schemaVersion: EVENT_ENVELOPE_SCHEMA_VERSION,
       eventId: eventIdFromSequence(0),
@@ -977,7 +1014,7 @@ describe("world.year_started from world year 2", () => {
       importance: "normal",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: createInitialWorldDate(),
+      worldDate: createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG),
       entities: {
         personIds: [],
         familyIds: [],
@@ -992,7 +1029,7 @@ describe("world.year_started from world year 2", () => {
       convertWorldCalendarTransitions({
         transitions: [{ kind: "year_started", worldYear: 1 }],
         simulationId,
-        worldDate: createInitialWorldDate(),
+        worldDate: createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG),
         startSequence: 0,
       }),
     ).toThrow(/>= 2/);
@@ -1000,7 +1037,10 @@ describe("world.year_started from world year 2", () => {
     const events = convertWorldCalendarTransitions({
       transitions: [{ kind: "year_started", worldYear: 2 }],
       simulationId,
-      worldDate: createWorldDate({ year: 2, month: 4, weekOfMonth: 1 }),
+      worldDate: createWorldDate(
+        { year: 2, month: 1, weekOfMonth: 1 },
+        DEFAULT_WORLD_CALENDAR_CONFIG,
+      ),
       startSequence: 0,
     });
     expect(events[0]?.eventType).toBe("world.year_started");
@@ -1009,34 +1049,43 @@ describe("world.year_started from world year 2", () => {
 });
 
 describe("year_stats_finalized post-step WorldDate alignment", () => {
-  it("allows Y=1 with post-step year 2 April week 1 and rejects mismatches", () => {
+  it("allows Y=1 with post-step year 2 January week 1 and rejects mismatches", () => {
     const ok = convertWorldCalendarTransitions({
       transitions: [{ kind: "year_stats_finalized", worldYear: 1 }],
       simulationId,
-      worldDate: createWorldDate({ year: 2, month: 4, weekOfMonth: 1 }),
+      worldDate: createWorldDate(
+        { year: 2, month: 1, weekOfMonth: 1 },
+        DEFAULT_WORLD_CALENDAR_CONFIG,
+      ),
       startSequence: 0,
     });
     expect(ok[0]?.worldDate).toEqual({
-      year: 1,
-      month: 3,
-      weekOfMonth: 4,
-      absoluteWeek: 47,
+      year: 2,
+      month: 1,
+      weekOfMonth: 1,
+      absoluteWeek: 48,
     });
 
     expect(() =>
       convertWorldCalendarTransitions({
         transitions: [{ kind: "year_stats_finalized", worldYear: 1 }],
         simulationId,
-        worldDate: createWorldDate({ year: 99, month: 5, weekOfMonth: 1 }),
+        worldDate: createWorldDate(
+          { year: 99, month: 5, weekOfMonth: 1 },
+          DEFAULT_WORLD_CALENDAR_CONFIG,
+        ),
         startSequence: 0,
       }),
-    ).toThrow(/April week 1/);
+    ).toThrow(/world-year start week/);
 
     expect(() =>
       convertWorldCalendarTransitions({
         transitions: [{ kind: "year_stats_finalized", worldYear: 1 }],
         simulationId,
-        worldDate: createWorldDate({ year: 3, month: 4, weekOfMonth: 1 }),
+        worldDate: createWorldDate(
+          { year: 3, month: 1, weekOfMonth: 1 },
+          DEFAULT_WORLD_CALENDAR_CONFIG,
+        ),
         startSequence: 0,
       }),
     ).toThrow(/worldYear \+ 1/);
@@ -1045,7 +1094,10 @@ describe("year_stats_finalized post-step WorldDate alignment", () => {
       convertWorldCalendarTransitions({
         transitions: [{ kind: "year_stats_finalized", worldYear: Number.MAX_SAFE_INTEGER }],
         simulationId,
-        worldDate: createWorldDate({ year: 2, month: 4, weekOfMonth: 1 }),
+        worldDate: createWorldDate(
+          { year: 2, month: 1, weekOfMonth: 1 },
+          DEFAULT_WORLD_CALENDAR_CONFIG,
+        ),
         startSequence: 0,
       }),
     ).toThrow(/safe integer/);
@@ -1054,7 +1106,10 @@ describe("year_stats_finalized post-step WorldDate alignment", () => {
 
 describe("person.debuted MINIMUM_RANK", () => {
   it("allows MINIMUM_RANK and rejects other ranks on envelope and transition", () => {
-    const april = createWorldDate({ year: 2, month: 4, weekOfMonth: 1 });
+    const january = createWorldDate(
+      { year: 2, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     const ok: EventEnvelope = {
       schemaVersion: EVENT_ENVELOPE_SCHEMA_VERSION,
       eventId: eventIdFromSequence(0),
@@ -1064,7 +1119,7 @@ describe("person.debuted MINIMUM_RANK", () => {
       importance: "normal",
       origin: "simulation",
       sourceProcessor: "world-calendar",
-      worldDate: april,
+      worldDate: january,
       entities: {
         personIds: [asPersonId("person_000001")],
         familyIds: [],
@@ -1102,7 +1157,7 @@ describe("person.debuted MINIMUM_RANK", () => {
           },
         ],
         simulationId,
-        worldDate: april,
+        worldDate: january,
         startSequence: 0,
       }),
     ).toThrow(/MINIMUM_RANK/);

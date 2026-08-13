@@ -9,7 +9,7 @@ sources:
   - tag:sprint0-complete
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:3b313a5ea690351d062e751bc724e5530b835872
-last_verified: 2026-08-08
+last_verified: 2026-08-12
 related:
   - sprint0.md
   - sprint1.md
@@ -24,7 +24,7 @@ Sprint 0 と Sprint 1 を横断する Sprint 単位の索引。
 ## 現在確定している内容
 
 - [Sprint 0](sprint0.md) — 完了（`sprint0-complete`）
-- [Sprint 1](sprint1.md) — 仕様 `S1-SPEC-0.1.20`（S01-001〜S01-009 implemented / accepted。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`）
+- [Sprint 1](sprint1.md) — Sprint 1 現行統合仕様: `S1-SPEC-0.1.21`（完成snapshot `sprint1-complete` → `5a80268` は履歴アンカーとして不変）
 
 ## 関連する正本
 

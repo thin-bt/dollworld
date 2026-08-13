@@ -561,9 +561,9 @@ function validateMeta(config: InitialWorldConfig, snapshot: InitialWorldSnapshot
   if (snapshot.worldId !== FIXED_WORLD_ID) {
     fail("worldId must be world_000001", { actual: snapshot.worldId });
   }
-  const expectedDate = createInitialWorldDate();
+  const expectedDate = createInitialWorldDate(config.worldCalendar);
   if (!isSameWorldDate(snapshot.worldDate, expectedDate)) {
-    fail("worldDate must be year 1 April week 1", {
+    fail("worldDate must equal yearStartDate(1, config.worldCalendar)", {
       year: snapshot.worldDate.year,
       month: snapshot.worldDate.month,
       weekOfMonth: snapshot.worldDate.weekOfMonth,

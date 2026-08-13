@@ -1,8 +1,11 @@
+import type { WorldCalendarConfig } from "../config/types.js";
 import type { SimulationId } from "../ids.js";
 import {
   createInitialWorldDate,
-  createWorldDate,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   validateWorldDate,
+  weeksPerWorldYear,
+  yearStartDate,
   type WorldDate,
 } from "../world-date.js";
 import { assertNonNegativeSafeInteger, eventIdFromSequence } from "./event-id.js";
@@ -64,7 +67,7 @@ function buildBase(
   worldDate: WorldDate,
 ): Omit<EventEnvelope, "eventType" | "payload"> {
   assertFactoryCommon(input);
-  validateWorldDate(worldDate);
+  validateWorldDate(worldDate, DEFAULT_WORLD_CALENDAR_CONFIG);
   return {
     schemaVersion: EVENT_ENVELOPE_SCHEMA_VERSION,
     eventId: eventIdFromSequence(input.sequence),
@@ -87,7 +90,7 @@ export function createWorldStartedEvent(
   input: EventFactoryCommon & { payload?: WorldStartedPayload },
 ): EventEnvelope {
   return finalize({
-    ...buildBase(input, "initialization", createInitialWorldDate()),
+    ...buildBase(input, "initialization", createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG)),
     eventType: "world.started",
     payload: input.payload ?? {},
   });
@@ -98,7 +101,7 @@ export function createFamilyInitializedEvent(
 ): EventEnvelope {
   assertNonEmptyString(input.payload.familyId, "payload.familyId");
   return finalize({
-    ...buildBase(input, "initialization", createInitialWorldDate()),
+    ...buildBase(input, "initialization", createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG)),
     eventType: "family.initialized",
     entities: {
       ...emptyEventEntities(),
@@ -113,7 +116,7 @@ export function createLineageInitializedEvent(
 ): EventEnvelope {
   assertNonEmptyString(input.payload.lineageId, "payload.lineageId");
   return finalize({
-    ...buildBase(input, "initialization", createInitialWorldDate()),
+    ...buildBase(input, "initialization", createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG)),
     eventType: "lineage.initialized",
     entities: {
       ...emptyEventEntities(),
@@ -128,7 +131,7 @@ export function createPersonInitializedEvent(
 ): EventEnvelope {
   assertNonEmptyString(input.payload.personId, "payload.personId");
   return finalize({
-    ...buildBase(input, "initialization", createInitialWorldDate()),
+    ...buildBase(input, "initialization", createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG)),
     eventType: "person.initialized",
     entities: {
       ...emptyEventEntities(),
@@ -143,7 +146,7 @@ export function createRelationshipInitializedEvent(
 ): EventEnvelope {
   assertNonEmptyString(input.payload.relationshipId, "payload.relationshipId");
   return finalize({
-    ...buildBase(input, "initialization", createInitialWorldDate()),
+    ...buildBase(input, "initialization", createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG)),
     eventType: "relationship.initialized",
     entities: {
       ...emptyEventEntities(),
@@ -156,7 +159,7 @@ export function createRelationshipInitializedEvent(
 export function createSimulationCompletedEvent(
   input: SimulationCompletedFactoryInput,
 ): EventEnvelope {
-  validateWorldDate(input.worldDate);
+  validateWorldDate(input.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG);
   const payload = input.payload ?? {};
   if (payload.finalAbsoluteWeek !== undefined) {
     assertNonNegativeSafeInteger(payload.finalAbsoluteWeek, "finalAbsoluteWeek");
@@ -174,7 +177,7 @@ export function createSimulationCompletedEvent(
 }
 
 export function createValidationFailedEvent(input: ValidationFailedFactoryInput): EventEnvelope {
-  validateWorldDate(input.worldDate);
+  validateWorldDate(input.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG);
   assertNonEmptyString(input.payload.reason, "payload.reason");
   return finalize({
     ...buildBase(input, "validation", input.worldDate),
@@ -183,20 +186,27 @@ export function createValidationFailedEvent(input: ValidationFailedFactoryInput)
   });
 }
 
-export function createWorldDateForYearStatsFinalized(worldYear: number): WorldDate {
+/**
+ * WorldDate for year_stats_finalized EventEnvelope (CAL-JAN 0.2.4):
+ * committed new-year start week (= yearStartDate(worldYear + 1)).
+ * CSV year-end absoluteWeek remains `worldYear * weeksPerWorldYear - 1` separately.
+ */
+export function createWorldDateForYearStatsFinalized(
+  worldYear: number,
+  config: WorldCalendarConfig = DEFAULT_WORLD_CALENDAR_CONFIG,
+): WorldDate {
   if (!Number.isSafeInteger(worldYear) || worldYear < 1) {
     throw new Error(`worldYear must be a safe integer >= 1 (got ${String(worldYear)})`);
   }
-  const absoluteWeek = worldYear * 48 - 1;
-  if (!Number.isSafeInteger(absoluteWeek) || absoluteWeek < 0) {
-    throw new Error(
-      `absoluteWeek must be a non-negative safe integer (got ${String(absoluteWeek)})`,
-    );
+  const nextYear = worldYear + 1;
+  if (!Number.isSafeInteger(nextYear)) {
+    throw new Error(`worldYear + 1 must be a safe integer (got ${String(nextYear)})`);
   }
-  const date = createWorldDate({ year: worldYear, month: 3, weekOfMonth: 4 });
-  if (date.absoluteWeek !== absoluteWeek) {
+  const date = yearStartDate(nextYear, config);
+  const expectedAbsolute = weeksPerWorldYear(config) * worldYear;
+  if (date.absoluteWeek !== expectedAbsolute) {
     throw new Error(
-      `year-stats WorldDate absoluteWeek mismatch: expected ${String(absoluteWeek)}, got ${String(date.absoluteWeek)}`,
+      `year-stats WorldDate absoluteWeek mismatch: expected ${String(expectedAbsolute)}, got ${String(date.absoluteWeek)}`,
     );
   }
   return date;

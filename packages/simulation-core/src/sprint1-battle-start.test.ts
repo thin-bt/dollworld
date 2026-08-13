@@ -25,6 +25,7 @@ import {
   BATTLE_TERMINAL_REASONS,
   DEFAULT_BATTLE_STRATEGY_ID,
   DEFAULT_BATTLE_STRATEGY_VERSION,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   MAIN_SPEC_VERSION_FOR_IDENTITY,
   MATCH_ID_FORMAT_PATTERN,
   MATCH_ID_GENERATOR_STATE_KEYS,
@@ -41,10 +42,12 @@ import {
   adaptBattleProfile,
   asMatchId,
   asTechniqueId,
+  computeActiveYearStartProcessorManifestHash,
   computeMatchIdGeneratorStateHash,
   computeSimulationIdentityHash,
   computeTechniqueCatalogHash,
   createBattleRulesSnapshotRef,
+  createDefaultActiveYearStartProcessorManifest,
   createDefaultStrategyActionSourceIdentity,
   createInitialMatchIdGeneratorState,
   createNeutralBattleDecisionProfile,
@@ -209,12 +212,21 @@ const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(sprint1Config)
 const techniqueCatalogHash = expectOk(
   computeTechniqueCatalogHash(techniqueDefinitions, sha256Provider),
 );
+const defaultYearStartManifest = createDefaultActiveYearStartProcessorManifest();
+const worldCalendarConfigHash = sha256Provider.hashUtf8(
+  toCanonicalJson(DEFAULT_WORLD_CALENDAR_CONFIG),
+);
+const yearStartProcessorManifestHash = expectOk(
+  computeActiveYearStartProcessorManifestHash(defaultYearStartManifest, sha256Provider),
+);
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 20260807,
     initialWorldConfigHash: "a".repeat(64),
+    worldCalendarConfigHash,
+    yearStartProcessorManifestHash,
     sprint1ConfigHash,
     techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -251,6 +263,8 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
       simulationIdentity: simulationIdentity(),
       simulationIdentityHash,
       initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+      worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+      yearStartProcessorManifest: defaultYearStartManifest,
       sprint1Config,
       techniqueCatalogDataVersion: "techniques-0.1.0",
       techniqueDefinitions,
@@ -259,7 +273,10 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
   ),
 );
 
-const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+const worldDate = createWorldDate(
+  { year: 21, month: 4, weekOfMonth: 1 },
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+);
 
 const knownTechniqueIdsForTests = new Set(
   runRuleSnapshot.techniqueDefinitions.map((definition) => definition.techniqueId),
@@ -431,8 +448,8 @@ function startInput(overrides: Record<string, unknown> = {}) {
 
 describe("S01-005 version registry", () => {
   it("publishes the S01-005 schema versions and fixed strategy identifiers", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
-    expect(RUN_RULE_SNAPSHOT_SCHEMA_VERSION).toBe("0.4.0");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
+    expect(RUN_RULE_SNAPSHOT_SCHEMA_VERSION).toBe("0.5.0");
     expect(BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION).toBe("0.1.0");
     expect(BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION).toBe("0.1.0");
     expect(START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION).toBe("0.1.0");
@@ -820,26 +837,32 @@ describe("battle participant derivation (11 §5 / §6 / §7)", () => {
     }
   });
 
-  it("requires currentAge to match the April week 1 derivation from worldDate and birthYear", () => {
+  it("requires currentAge to match the January week 1 derivation from worldDate and birthYear", () => {
     expect(
       validateBattleParticipant(participantInput({ currentAge: 21 }), context, sha256Provider).ok,
     ).toBe(false);
 
-    const marchWeek4 = createWorldDate({ year: 21, month: 3, weekOfMonth: 4 });
+    const decemberWeek4 = createWorldDate(
+      { year: 21, month: 12, weekOfMonth: 4 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     const stillTwenty = expectOk(
       validateBattleParticipant(
         participantInput({ currentAge: 20 }),
-        { ...context, worldDate: marchWeek4 },
+        { ...context, worldDate: decemberWeek4 },
         sha256Provider,
       ),
     );
     expect(stillTwenty.ageAtBattle).toBe(20);
 
-    const aprilWeek1NextYear = createWorldDate({ year: 22, month: 4, weekOfMonth: 1 });
+    const januaryWeek1NextYear = createWorldDate(
+      { year: 22, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     const nowTwentyOne = expectOk(
       validateBattleParticipant(
         participantInput({ currentAge: 21 }),
-        { ...context, worldDate: aprilWeek1NextYear },
+        { ...context, worldDate: januaryWeek1NextYear },
         sha256Provider,
       ),
     );
@@ -997,7 +1020,10 @@ describe("battle participant derivation (11 §5 / §6 / §7)", () => {
 
     const olderContext = {
       ...context,
-      worldDate: createWorldDate({ year: 20, month: 4, weekOfMonth: 1 }),
+      worldDate: createWorldDate(
+        { year: 20, month: 4, weekOfMonth: 1 },
+        DEFAULT_WORLD_CALENDAR_CONFIG,
+      ),
     };
     const older = expectOk(
       validateBattleParticipant(participantInput({ currentAge: 19 }), olderContext, sha256Provider),
@@ -1865,6 +1891,8 @@ describe("S01-005 acceptance audit fixes", () => {
           },
           simulationIdentityHash,
           initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+          worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+          yearStartProcessorManifest: defaultYearStartManifest,
           sprint1Config,
           techniqueCatalogDataVersion: "techniques-0.1.0",
           techniqueDefinitions,
@@ -1886,6 +1914,8 @@ describe("S01-005 acceptance audit fixes", () => {
           simulationIdentity: identity,
           simulationIdentityHash,
           initialMatchIdGeneratorState: wrongGenerator,
+          worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+          yearStartProcessorManifest: defaultYearStartManifest,
           sprint1Config,
           techniqueCatalogDataVersion: "techniques-0.1.0",
           techniqueDefinitions,
@@ -2530,6 +2560,8 @@ describe("S01-005 RunRuleSnapshot composite structure-first boundary", () => {
       simulationIdentity: identity,
       simulationIdentityHash,
       initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+      worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+      yearStartProcessorManifest: defaultYearStartManifest,
       sprint1Config,
       techniqueCatalogDataVersion: "techniques-0.1.0",
       techniqueDefinitions,

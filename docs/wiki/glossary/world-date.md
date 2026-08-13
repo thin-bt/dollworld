@@ -7,7 +7,7 @@ sources:
   - docs/specs/01-world-calendar.md
   - docs/specs/00-domain-glossary.md
   - docs/SPEC.md
-last_verified: 2026-08-01
+last_verified: 2026-08-12
 related:
   - ../invariants/calendar.md
   - ../architecture/world-engine.md
@@ -24,12 +24,12 @@ related:
 正本（ミニ仕様 01・SPEC）に従う要点:
 
 - 最小単位は1週
-- 1か月は4週、1年は48週
-- 年は4月第1週から翌年3月第4週
-- 開始は世界1年4月第1週
+- 1か月は4週、1年は48週（12か月）
+- 年は設定年初月第1週から直前月第4週（既定：1月第1週〜12月第4週）
+- 開始は世界1年・設定年初月第1週（既定1月）、absoluteWeek=0
 - 通算世界週（absolute week）を保持する
-- 全人物は4月第1週生まれとして扱い、個人誕生日フィールドはない
-- 年初（4月第1週）に一斉加齢する
+- 全人物は設定年初月第1週生まれとして扱い、個人誕生日フィールドはない
+- 年初（設定年初月第1週）に一斉加齢する。4月は通常月
 
 詳細・境界値は正本を確認すること。
 

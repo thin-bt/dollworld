@@ -17,10 +17,23 @@ import type {
   SimulationConfig,
   TechniqueFocusWeights,
   ValidationTargetsConfig,
-  WorldConfig,
+  WorldCalendarConfig,
 } from "./types.js";
 
-const CONFIG_SCHEMA_VERSION = "0.2.3";
+const CONFIG_SCHEMA_VERSION = "0.3.0";
+
+/** Legacy calendar/world fields rejected on InitialWorldConfig 0.3.0 new-run input. */
+const LEGACY_WORLD_FIELD_NAMES = [
+  "startYear",
+  "startMonth",
+  "startWeekOfMonth",
+  "monthsPerYear",
+  "birthMonth",
+  "birthWeekOfMonth",
+  "birthWeekOfApril",
+  "yearEndMonth",
+  "world",
+] as const;
 
 const FIXED_AGE_BANDS = [
   { minAge: 0, maxAge: 7 },
@@ -33,7 +46,7 @@ const ROOT_KEYS = [
   "schemaVersion",
   "profileId",
   "purpose",
-  "world",
+  "worldCalendar",
   "population",
   "history",
   "relationships",
@@ -46,14 +59,11 @@ const ROOT_KEYS = [
   "performanceTargets",
 ] as const;
 
-const WORLD_KEYS = [
-  "startYear",
-  "startMonth",
-  "startWeekOfMonth",
+const WORLD_CALENDAR_KEYS = [
+  "monthsPerWorldYear",
   "weeksPerMonth",
-  "monthsPerYear",
-  "birthMonth",
-  "birthWeekOfMonth",
+  "worldYearStartMonth",
+  "worldYearStartWeek",
 ] as const;
 
 const POPULATION_KEYS = [
@@ -145,17 +155,26 @@ const RANGE_KEYS = ["min", "max"] as const;
 /** Absolute tolerance for techniqueFocusWeights summing to 1 (spec leaves epsilon unspecified). */
 const TECHNIQUE_WEIGHT_SUM_TOLERANCE = 1e-12;
 
-const FIXED_WORLD: WorldConfig = {
-  startYear: 1,
-  startMonth: 4,
-  startWeekOfMonth: 1,
+const FIXED_WORLD_CALENDAR_PARTIAL = {
+  monthsPerWorldYear: 12,
   weeksPerMonth: 4,
-  monthsPerYear: 12,
-  birthMonth: 4,
-  birthWeekOfMonth: 1,
-};
+  worldYearStartWeek: 1,
+} as const;
 
 const UINT32_MAX = 4294967295;
+
+/**
+ * Validate a standalone WorldCalendarConfig (CAL-JAN / InitialWorldConfig 0.3.0).
+ * Path prefixes use `/worldCalendar/...` for consistency with InitialWorldConfig.
+ */
+export function validateWorldCalendarConfig(input: unknown): ValidationResult<WorldCalendarConfig> {
+  const issues: ValidationIssue[] = [];
+  const parsed = parseWorldCalendar(input, issues);
+  if (parsed === undefined || issues.length > 0) {
+    return failure(issues);
+  }
+  return success(parsed);
+}
 
 export function validateInitialWorldConfig(input: unknown): ValidationResult<InitialWorldConfig> {
   const issues: ValidationIssue[] = [];
@@ -172,6 +191,7 @@ export function validateInitialWorldConfig(input: unknown): ValidationResult<Ini
   }
 
   rejectUnknownKeys(input, ROOT_KEYS, "", issues);
+  rejectLegacyWorldFields(input, issues);
 
   const schemaVersion = requireNonEmptyTrimmedString(input, "schemaVersion", "", issues);
   if (schemaVersion !== undefined && schemaVersion !== CONFIG_SCHEMA_VERSION) {
@@ -185,7 +205,7 @@ export function validateInitialWorldConfig(input: unknown): ValidationResult<Ini
   const profileId = requireNonEmptyTrimmedString(input, "profileId", "", issues);
   const purpose = requireNonEmptyTrimmedString(input, "purpose", "", issues);
 
-  const world = parseWorld(input["world"], issues);
+  const worldCalendar = parseWorldCalendar(input["worldCalendar"], issues);
   const population = parsePopulation(input["population"], issues);
   const history = parseHistory(input["history"], issues);
   const relationships = parseRelationships(input["relationships"], issues);
@@ -215,7 +235,7 @@ export function validateInitialWorldConfig(input: unknown): ValidationResult<Ini
     schemaVersion: CONFIG_SCHEMA_VERSION,
     profileId: profileId!,
     purpose: purpose!,
-    world: world!,
+    worldCalendar: worldCalendar!,
     population: population!,
     history: history!,
     relationships: relationships!,
@@ -229,43 +249,116 @@ export function validateInitialWorldConfig(input: unknown): ValidationResult<Ini
   });
 }
 
-function parseWorld(value: unknown, issues: ValidationIssue[]): WorldConfig | undefined {
+function rejectLegacyWorldFields(input: Record<string, unknown>, issues: ValidationIssue[]): void {
+  for (const key of LEGACY_WORLD_FIELD_NAMES) {
+    if (Object.prototype.hasOwnProperty.call(input, key)) {
+      issues.push({
+        path: `/${key}`,
+        message: `legacy field "${key}" is not allowed on InitialWorldConfig 0.3.0`,
+        actual: input[key],
+        expected: "absent (use worldCalendar)",
+      });
+    }
+  }
+}
+
+function parseWorldCalendar(
+  value: unknown,
+  issues: ValidationIssue[],
+): WorldCalendarConfig | undefined {
   if (!isPlainObject(value)) {
     issues.push({
-      path: "/world",
-      message: "world must be an object",
+      path: "/worldCalendar",
+      message: "worldCalendar must be an object",
       actual: value,
       expected: "object",
     });
     return undefined;
   }
 
-  rejectUnknownKeys(value, WORLD_KEYS, "/world", issues);
-
-  const world: Partial<WorldConfig> = {};
-  let ok = true;
-  for (const key of WORLD_KEYS) {
-    const path = `/world/${key}`;
-    const num = requireInteger(value, key, "/world", issues);
-    if (num === undefined) {
-      ok = false;
+  rejectUnknownKeys(value, WORLD_CALENDAR_KEYS, "/worldCalendar", issues);
+  for (const key of LEGACY_WORLD_FIELD_NAMES) {
+    if (key === "world") {
       continue;
     }
-    const expected = FIXED_WORLD[key];
-    if (num !== expected) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
       issues.push({
-        path,
-        message: `${key} must equal fixed world value`,
-        actual: num,
-        expected: String(expected),
+        path: `/worldCalendar/${key}`,
+        message: `legacy field "${key}" is not allowed inside worldCalendar`,
+        actual: value[key],
+        expected: "absent",
       });
-      ok = false;
-      continue;
     }
-    world[key] = num;
   }
 
-  return ok ? (world as WorldConfig) : undefined;
+  let ok = true;
+  const monthsPerWorldYear = requireInteger(value, "monthsPerWorldYear", "/worldCalendar", issues);
+  if (monthsPerWorldYear === undefined) {
+    ok = false;
+  } else if (monthsPerWorldYear !== FIXED_WORLD_CALENDAR_PARTIAL.monthsPerWorldYear) {
+    issues.push({
+      path: "/worldCalendar/monthsPerWorldYear",
+      message: "monthsPerWorldYear must equal 12",
+      actual: monthsPerWorldYear,
+      expected: "12",
+    });
+    ok = false;
+  }
+
+  const weeksPerMonth = requireInteger(value, "weeksPerMonth", "/worldCalendar", issues);
+  if (weeksPerMonth === undefined) {
+    ok = false;
+  } else if (weeksPerMonth !== FIXED_WORLD_CALENDAR_PARTIAL.weeksPerMonth) {
+    issues.push({
+      path: "/worldCalendar/weeksPerMonth",
+      message: "weeksPerMonth must equal 4",
+      actual: weeksPerMonth,
+      expected: "4",
+    });
+    ok = false;
+  }
+
+  const worldYearStartWeek = requireInteger(value, "worldYearStartWeek", "/worldCalendar", issues);
+  if (worldYearStartWeek === undefined) {
+    ok = false;
+  } else if (worldYearStartWeek !== FIXED_WORLD_CALENDAR_PARTIAL.worldYearStartWeek) {
+    issues.push({
+      path: "/worldCalendar/worldYearStartWeek",
+      message: "worldYearStartWeek must equal 1",
+      actual: worldYearStartWeek,
+      expected: "1",
+    });
+    ok = false;
+  }
+
+  const worldYearStartMonth = requireInteger(
+    value,
+    "worldYearStartMonth",
+    "/worldCalendar",
+    issues,
+  );
+  if (worldYearStartMonth === undefined) {
+    ok = false;
+  } else if (worldYearStartMonth < 1 || worldYearStartMonth > 12) {
+    issues.push({
+      path: "/worldCalendar/worldYearStartMonth",
+      message: "worldYearStartMonth must be an integer 1..12",
+      actual: worldYearStartMonth,
+      expected: "1..12",
+    });
+    ok = false;
+  }
+
+  if (!ok) {
+    return undefined;
+  }
+
+  return {
+    monthsPerWorldYear: 12,
+    weeksPerMonth: 4,
+    worldYearStartMonth: worldYearStartMonth!,
+    worldYearStartWeek: 1,
+  };
 }
 
 function parsePopulation(value: unknown, issues: ValidationIssue[]): PopulationConfig | undefined {

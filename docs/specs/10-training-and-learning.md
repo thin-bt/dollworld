@@ -1,6 +1,6 @@
 # 10 週間行動・訓練・習得処理仕様
 
-- 仕様版: `S1-SPEC-0.1.20`
+- 仕様版: `S1-SPEC-0.1.21`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 週次行動選択、能力訓練、技習得、休養、処理順
 - 非対象: 大会日程、師匠選択、恋愛、結婚、出産
@@ -73,7 +73,7 @@ InitialWeeklyTrainingSidecarEntry
 - `processWeeklyTrainingWeek`成功後、`result.personRecords[].person`をWorld Personへ戻し、person以外（personId／growthProfile／growthPotential／statGrowthRemainders／temporaryCondition／motivationFactor／plannerContext／statTargetContext／techniqueTargetContexts／teacherFactorKey／discipleCount）をcurrent `WeeklyTrainingSidecarState`へ戻す。result側field欠落を前週値で補完せずfailure。
 - sidecar stateは同じweek transactionに含め、任一failure時はrollbackする（battle failure時もcurrent sidecar非変更）。
 - S01-008時点ではsidecar contextをWorld relationshipsから独自に再導出しない。入力された正規sidecarを正本とする。
-- `initialWeeklyTrainingSidecarHash = SHA-256(canonicalJson(validated snapshot))`をSimulationIdentity 0.4.0へbindする（02仕様）。current sidecarが週ごとに変わってもidentity／hash／simulationId／initialWeeklyTrainingSidecarHashは再計算しない。
+- `initialWeeklyTrainingSidecarHash = SHA-256(canonicalJson(validated snapshot))`をSimulationIdentity 0.5.0へbindする（02仕様）。current sidecarが週ごとに変わってもidentity／hash／simulationId／initialWeeklyTrainingSidecarHashは再計算しない。
 
 ## 1.3 Sprint1RunRuntimeState／Sprint1RunContext（runtime root／context）
 
@@ -139,10 +139,10 @@ BattleResultWeekState 0.1.0
 
 - owner field名は`processorRuntimeStates`（既存`ProcessorRuntimeState` collection）
 - exact型: `{ processorOrder: string[]; rngStates: { processorId; state: SeededRngState }[]; processorSpecificStates?: { processorId; specificState }[] }`（`packages/simulation-core/src/world-engine/types.ts`）
-- Sprint 0互換: `processorSpecificStates`省略可または`[]`。Sprint 1 fresh／run adapterだけがweekly-training specific state exact 1件を要求。resume時missingはreject（欠落を勝手にinitial化しない）
-- weekly-trainingについて`processorId = "weekly-training"` entryをexact 1件持つ
-- RNG label: `WEEKLY_TRAINING_PROCESSOR_RNG_SEED_LABEL = "processor/weekly-training"`（WorldEngine `createInitialRuntime`の`world-engine/processor/${id}`とは別。Sprint1 freshは本labelを使う）
-- `TrainingProcessorRuntimeState`は`processorSpecificStates`のweekly-training entryの`specificState`として保持する。初期値は必ず`createInitialTrainingProcessorRuntimeState()`
+- Sprint 0／legacy互換: `processorSpecificStates`省略可または`[]`／weekly-trainingのみ。CAL-JAN新規runはexact 2件をこの順で必須: `{ processorId: "weekly-training", specificState: TrainingProcessorRuntimeState }`、`{ processorId: "world-year-start", specificState: WorldYearStartRuntimeState }`。欠落・重複・余分・未知はreject。resume／restoreは欠落entryを捏造しない
+- normal-week adapter pipelineは`["weekly-training"]`のまま。`WORLD_YEAR_START_PROCESSOR_ID = "world-year-start"`は通常週間adapterではなく、`processorOrder`／`rngStates`へ追加しない
+- weekly-training RNG label: `WEEKLY_TRAINING_PROCESSOR_RNG_SEED_LABEL = "processor/weekly-training"`（変更なし。WorldEngine `createInitialRuntime`の`world-engine/processor/${id}`とは別）。year-startに新規暗黙RNG streamを作らない
+- `TrainingProcessorRuntimeState`は`processorSpecificStates`のweekly-training entryの`specificState`として保持する。初期値は必ず`createInitialTrainingProcessorRuntimeState()`。`WorldYearStartRuntimeState`は同配列のworld-year-start entryへ1回だけ格納する
 - `specificState`はplain JSON valueのみ（null／boolean／string／finite number／dense array／plain object）。validate／clone／export／restoreはdescriptor-safe deep cloneでsourceとnested参照を共有しない（getter実行禁止／structuredClone単独信用禁止）
 - `processWeeklyTrainingWeek`成功時: `result.runtimeState`／`result.rngState`を同entryへ同じweek transactionでcommit。後段failure時はTrainingProcessorRuntimeState／weekly RNG／World／sidecar／eventStream／eventAllocationState／worldDateを全部同時rollback。rngStateだけ先行commitしない
 

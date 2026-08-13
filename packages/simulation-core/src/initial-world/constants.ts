@@ -2,7 +2,7 @@
 export const INITIAL_WORLD_SNAPSHOT_SCHEMA_VERSION = "0.1.0" as const;
 
 export const SIMULATION_SPEC_VERSION = "SPEC-0.1.1" as const;
-export const S0_SPEC_VERSION = "S0-SPEC-0.1.5" as const;
+export const S0_SPEC_VERSION = "S0-SPEC-0.1.6" as const;
 
 export const INITIAL_WORLD_SOURCE_PROCESSOR = "initial-world-generation" as const;
 

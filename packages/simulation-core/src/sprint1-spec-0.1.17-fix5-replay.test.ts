@@ -10,6 +10,7 @@ import {
   BATTLE_PROFILE_ADAPTER_VERSION,
   BATTLE_STATE_SCHEMA_VERSION,
   DEFAULT_BATTLE_STRATEGY_VERSION,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   MAIN_SPEC_VERSION_FOR_IDENTITY,
   MATCH_ID_GENERATOR_VERSION,
   MATCH_ID_NAMESPACE,
@@ -18,9 +19,11 @@ import {
   battleActionScriptToCanonicalScript,
   buildFixedBasicDefenseBattleActionScript,
   computeActionScriptHash,
+  computeActiveYearStartProcessorManifestHash,
   computeSimulationIdentityHash,
   computeTechniqueCatalogHash,
   createBattleParticipantReplayBaseline,
+  createDefaultActiveYearStartProcessorManifest,
   createInitialMatchIdGeneratorState,
   createRunRuleSnapshot,
   createScriptedActionsSourceIdentity,
@@ -150,12 +153,21 @@ const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(sprint1Config)
 const techniqueCatalogHash = expectOk(
   computeTechniqueCatalogHash(techniqueDefinitions, sha256Provider),
 );
+const defaultYearStartManifest = createDefaultActiveYearStartProcessorManifest();
+const worldCalendarConfigHash = sha256Provider.hashUtf8(
+  toCanonicalJson(DEFAULT_WORLD_CALENDAR_CONFIG),
+);
+const yearStartProcessorManifestHash = expectOk(
+  computeActiveYearStartProcessorManifestHash(defaultYearStartManifest, sha256Provider),
+);
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 20260808,
     initialWorldConfigHash: "a".repeat(64),
+    worldCalendarConfigHash,
+    yearStartProcessorManifestHash,
     sprint1ConfigHash,
     techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -189,6 +201,8 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
           namespace: MATCH_ID_NAMESPACE,
         }),
       ),
+      worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+      yearStartProcessorManifest: defaultYearStartManifest,
       sprint1Config,
       techniqueCatalogDataVersion: "techniques-0.1.0",
       techniqueDefinitions,
@@ -197,7 +211,10 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
   ),
 );
 
-const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+const worldDate = createWorldDate(
+  { year: 21, month: 4, weekOfMonth: 1 },
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+);
 const fixedDefenseScript = buildFixedBasicDefenseBattleActionScript(20);
 const fixedDefenseCanonical = battleActionScriptToCanonicalScript(fixedDefenseScript);
 const fixedDefenseIdentity = expectOk(
@@ -344,7 +361,7 @@ function withLogs(state: BattleState, actionLogs: BattleState["detailedLog"]["ac
 
 describe("S01-006 fix5 always-on sourceSnapshotHash", () => {
   it("publishes S1-SPEC-0.1.20 / BattleState 0.6.0", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
   });
 
@@ -1835,6 +1852,8 @@ describe("S01-006 fix5 fix2 evasion/defense/injury boundary replay", () => {
               namespace: MATCH_ID_NAMESPACE,
             }),
           ),
+          worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+          yearStartProcessorManifest: defaultYearStartManifest,
           sprint1Config: customConfig,
           techniqueCatalogDataVersion: "techniques-0.1.0",
           techniqueDefinitions,

@@ -23,6 +23,7 @@ import {
   type Sha256Provider,
   type Sprint1EventEnvelope,
   type Sprint1RunSession,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
 } from "@shared-world/simulation-core";
 import { mkdirSync, readFileSync, rmSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -223,11 +224,14 @@ function normalizeOfficialBattleCalendar(
   // require birthYear>=1 and age=worldYear-birthYear. Verification-only temporal
   // normalization keeps personIds/technique actor bind and official ages intact.
   const targetYear = 50;
-  const worldDate = createWorldDate({
-    year: targetYear,
-    month: session.runtimeState.worldState.worldDate.month,
-    weekOfMonth: session.runtimeState.worldState.worldDate.weekOfMonth,
-  });
+  const worldDate = createWorldDate(
+    {
+      year: targetYear,
+      month: session.runtimeState.worldState.worldDate.month,
+      weekOfMonth: session.runtimeState.worldState.worldDate.weekOfMonth,
+    },
+    DEFAULT_WORLD_CALENDAR_CONFIG,
+  );
   const persons = session.runtimeState.worldState.persons.map((person) => {
     const age = person.currentAge;
     if (person.lifeStatus !== "living" || age === null || age === undefined) {

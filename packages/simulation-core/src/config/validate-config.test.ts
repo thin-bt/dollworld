@@ -14,7 +14,8 @@ describe("validateInitialWorldConfig", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.population.totalLiving).toBe(600);
-      expect(result.value.schemaVersion).toBe("0.2.3");
+      expect(result.value.schemaVersion).toBe("0.3.0");
+      expect(result.value.worldCalendar.worldYearStartMonth).toBe(1);
     }
   });
 
@@ -202,11 +203,27 @@ describe("validateInitialWorldConfig", () => {
     }
   });
 
-  it("rejects birthWeekOfMonth other than 1", () => {
-    const config = cloneBaselineConfig();
-    config.world.birthWeekOfMonth = 2;
+  it("rejects legacy world fields on InitialWorldConfig 0.3.0", () => {
+    const config = cloneBaselineConfig() as Record<string, unknown>;
+    config["world"] = {
+      startYear: 1,
+      startMonth: 4,
+      startWeekOfMonth: 1,
+      weeksPerMonth: 4,
+      monthsPerYear: 12,
+      birthMonth: 4,
+      birthWeekOfMonth: 2,
+    };
     const result = validateInitialWorldConfig(config);
     expect(result.ok).toBe(false);
+  });
+
+  it("rejects invalid worldYearStartMonth", () => {
+    const config = cloneBaselineConfig();
+    config.worldCalendar.worldYearStartMonth = 0;
+    expect(validateInitialWorldConfig(config).ok).toBe(false);
+    config.worldCalendar.worldYearStartMonth = 13;
+    expect(validateInitialWorldConfig(config).ok).toBe(false);
   });
 
   it("rejects out-of-range or non-integer seeds and wrong RNG names", () => {
@@ -330,7 +347,7 @@ describe("configHash contract", () => {
       purpose: validated.value.purpose,
       schemaVersion: validated.value.schemaVersion,
       profileId: validated.value.profileId,
-      world: validated.value.world,
+      worldCalendar: validated.value.worldCalendar,
       population: validated.value.population,
       history: validated.value.history,
       relationships: validated.value.relationships,

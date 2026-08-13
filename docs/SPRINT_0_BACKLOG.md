@@ -40,7 +40,7 @@ npm run simulate -- --years 100 --seed 12345 --config config/initial-world.confi
 ## Sprint 0で実装する状態変化
 
 - 1週進行
-- 4月第1週の年度開始
+- 設定年初月第1週の年度開始（既定1月。CAL-JAN／SPEC-0.1.3）
 - 全対象人物の一斉加齢
 - 8・16・18歳の資格更新
 - 42歳の強制引退

@@ -40,6 +40,8 @@ const ROOT_KEYS = [
   "schemaVersion",
   "seed",
   "initialWorldConfigHash",
+  "worldCalendarConfigHash",
+  "yearStartProcessorManifestHash",
   "sprint1ConfigHash",
   "techniqueCatalogHash",
   "initialWeeklyTrainingSidecarHash",
@@ -238,6 +240,13 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     });
   }
   const initialWorldConfigHash = requireHashHex(object, "initialWorldConfigHash", "", issues);
+  const worldCalendarConfigHash = requireHashHex(object, "worldCalendarConfigHash", "", issues);
+  const yearStartProcessorManifestHash = requireHashHex(
+    object,
+    "yearStartProcessorManifestHash",
+    "",
+    issues,
+  );
   const sprint1ConfigHash = requireHashHex(object, "sprint1ConfigHash", "", issues);
   const techniqueCatalogHash = requireHashHex(object, "techniqueCatalogHash", "", issues);
   const initialWeeklyTrainingSidecarHash = requireHashHex(
@@ -294,6 +303,8 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     schemaVersion === undefined ||
     seed === undefined ||
     initialWorldConfigHash === undefined ||
+    worldCalendarConfigHash === undefined ||
+    yearStartProcessorManifestHash === undefined ||
     sprint1ConfigHash === undefined ||
     techniqueCatalogHash === undefined ||
     initialWeeklyTrainingSidecarHash === undefined ||
@@ -314,6 +325,8 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     schemaVersion,
     seed,
     initialWorldConfigHash,
+    worldCalendarConfigHash,
+    yearStartProcessorManifestHash,
     sprint1ConfigHash,
     techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash,

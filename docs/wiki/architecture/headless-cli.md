@@ -8,7 +8,7 @@ sources:
   - tasks/S00-008.md
   - package.json
   - commit:2ac55e400a3374e7f41e0c009259439e672f1008
-last_verified: 2026-08-01
+last_verified: 2026-08-12
 related:
   - output-contract.md
   - world-engine.md
@@ -26,7 +26,7 @@ related:
 - 代表コマンド: `npm run simulate -- --years 100 --seed 12345 --config config/initial-world.config.json`
 - Sprint 0 完了検証: `npm run verify:sprint0`
 - core は `node:crypto` を直接 import しない（Sha256 は CLI 側注入）
-- Sprint 1（`S1-SPEC-0.1.20`）: 新規optionは`--sprint1-input`のみ（`Sprint1CliInput` 0.1.0）。省略時はSprint 0挙動維持。S01-008でproduction配線済み／accepted
+- Sprint 1 current（`S1-SPEC-0.1.21`）: CLI optionは引き続き `--sprint1-input` のみ。これはS01-008／`S1-SPEC-0.1.20`でproduction配線された契約であり、CAL-JAN `0.1.21` はCLI optionを追加せず、暦・identity・出力schema bindingを更新する。
 - Sprint 1 完了検証: S01-009でルート`npm run verify:sprint1`を実装済み（accepted）。simulation CLI optionは増やさず、verification entrypointを別scriptとする。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
 
 ## 関連する正本

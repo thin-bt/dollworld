@@ -56,7 +56,7 @@ describe("sprint0 long-horizon verification", () => {
       expect(profile!.csvRows).toBe(row.rows);
       expect(profile!.finalWorldDate).toEqual({
         year: row.years + 1,
-        month: 4,
+        month: 1,
         weekOfMonth: 1,
         absoluteWeek: row.absoluteWeek,
       });

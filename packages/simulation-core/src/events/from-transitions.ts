@@ -1,9 +1,14 @@
+import type { WorldCalendarConfig } from "../config/types.js";
 import { MINIMUM_RANK } from "../enums.js";
 import type { SimulationId } from "../ids.js";
 import type { WorldCalendarTransition } from "../world-calendar.js";
-import { isAprilWeek1, validateWorldDate, type WorldDate } from "../world-date.js";
+import {
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+  isWorldYearStartWeek,
+  validateWorldDate,
+  type WorldDate,
+} from "../world-date.js";
 import { assertNonNegativeSafeInteger, eventIdFromSequence } from "./event-id.js";
-import { createWorldDateForYearStatsFinalized } from "./factories.js";
 import {
   EVENT_ENVELOPE_SCHEMA_VERSION,
   emptyEventEntities,
@@ -18,6 +23,8 @@ export type ConvertWorldCalendarTransitionsInput = {
   /** World date after the week step that produced these transitions. */
   worldDate: WorldDate;
   startSequence: number;
+  /** Calendar used for year-start week checks (defaults to Jan start). */
+  worldCalendar?: WorldCalendarConfig;
 };
 
 /**
@@ -28,7 +35,8 @@ export function convertWorldCalendarTransitions(
   input: ConvertWorldCalendarTransitionsInput,
 ): EventEnvelope[] {
   assertNonNegativeSafeInteger(input.startSequence, "startSequence");
-  validateWorldDate(input.worldDate);
+  const worldCalendar = input.worldCalendar ?? DEFAULT_WORLD_CALENDAR_CONFIG;
+  validateWorldDate(input.worldDate, worldCalendar);
   if (typeof input.simulationId !== "string" || input.simulationId.length === 0) {
     throw new Error("simulationId must be a non-empty string");
   }
@@ -47,13 +55,14 @@ export function convertWorldCalendarTransitions(
   let sequence = input.startSequence;
 
   for (const transition of transitions) {
-    assertTransitionMatchesWorldDate(transition, input.worldDate);
+    assertTransitionMatchesWorldDate(transition, input.worldDate, worldCalendar);
     const event = transitionToEvent(transition, {
       simulationId: input.simulationId,
       sequence,
       worldDate: input.worldDate,
+      worldCalendar,
     });
-    validateEventEnvelope(event);
+    validateEventEnvelope(event, undefined, worldCalendar);
     events.push(event);
     sequence += 1;
   }
@@ -64,6 +73,7 @@ export function convertWorldCalendarTransitions(
 function assertTransitionMatchesWorldDate(
   transition: WorldCalendarTransition,
   worldDate: WorldDate,
+  worldCalendar: WorldCalendarConfig,
 ): void {
   switch (transition.kind) {
     case "year_stats_finalized": {
@@ -78,9 +88,9 @@ function assertTransitionMatchesWorldDate(
           `year_stats_finalized.worldYear + 1 must be a safe integer (got ${String(y + 1)})`,
         );
       }
-      if (!isAprilWeek1(worldDate)) {
+      if (!isWorldYearStartWeek(worldDate, worldCalendar)) {
         throw new Error(
-          "year_stats_finalized requires post-step worldDate to be April week 1 of the next year",
+          "year_stats_finalized requires post-step worldDate to be configured world-year start week",
         );
       }
       if (worldDate.year !== y + 1) {
@@ -126,6 +136,7 @@ type TransitionContext = {
   simulationId: SimulationId;
   sequence: number;
   worldDate: WorldDate;
+  worldCalendar: WorldCalendarConfig;
 };
 
 function transitionToEvent(
@@ -143,18 +154,19 @@ function transitionToEvent(
 
   switch (transition.kind) {
     case "year_stats_finalized": {
-      const worldDate = createWorldDateForYearStatsFinalized(transition.worldYear);
+      // CAL-JAN 0.2.4: event worldDate is the committed new-year start week.
+      assertWorldYearStartWeek(ctx.worldDate, ctx.worldCalendar);
       return {
         ...base,
         eventType: "world.year_stats_finalized",
         importance: "normal",
-        worldDate,
+        worldDate: ctx.worldDate,
         entities: emptyEventEntities(),
         payload: { worldYear: transition.worldYear },
       };
     }
     case "year_started": {
-      assertAprilWeek1(ctx.worldDate);
+      assertWorldYearStartWeek(ctx.worldDate, ctx.worldCalendar);
       return {
         ...base,
         eventType: "world.year_started",
@@ -165,7 +177,7 @@ function transitionToEvent(
       };
     }
     case "person_aged": {
-      assertAprilWeek1(ctx.worldDate);
+      assertWorldYearStartWeek(ctx.worldDate, ctx.worldCalendar);
       return {
         ...base,
         eventType: "person.aged",
@@ -184,7 +196,7 @@ function transitionToEvent(
       };
     }
     case "career_status_changed": {
-      assertAprilWeek1(ctx.worldDate);
+      assertWorldYearStartWeek(ctx.worldDate, ctx.worldCalendar);
       return {
         ...base,
         eventType: "person.career_status_changed",
@@ -201,7 +213,7 @@ function transitionToEvent(
       };
     }
     case "person_debuted": {
-      assertAprilWeek1(ctx.worldDate);
+      assertWorldYearStartWeek(ctx.worldDate, ctx.worldCalendar);
       const previous = transition.previousCareerStatus;
       if (previous !== "child" && previous !== "trainee") {
         throw new Error(
@@ -229,7 +241,7 @@ function transitionToEvent(
       };
     }
     case "person_force_retired": {
-      assertAprilWeek1(ctx.worldDate);
+      assertWorldYearStartWeek(ctx.worldDate, ctx.worldCalendar);
       return {
         ...base,
         eventType: "person.force_retired",
@@ -250,10 +262,10 @@ function transitionToEvent(
   }
 }
 
-function assertAprilWeek1(worldDate: WorldDate): void {
-  if (!isAprilWeek1(worldDate)) {
+function assertWorldYearStartWeek(worldDate: WorldDate, worldCalendar: WorldCalendarConfig): void {
+  if (!isWorldYearStartWeek(worldDate, worldCalendar)) {
     throw new Error(
-      `year-start derived events require April week 1 worldDate (got ${worldDate.year}-${worldDate.month}-W${worldDate.weekOfMonth})`,
+      `year-start derived events require configured world-year start week (got ${worldDate.year}-${worldDate.month}-W${worldDate.weekOfMonth})`,
     );
   }
 }

@@ -13,8 +13,8 @@ export { BATTLE_RANGES, TECHNIQUE_CATEGORIES };
 
 export const SPRINT1_CONFIG_SCHEMA_VERSION = "0.2.0" as const;
 export const SPRINT1_CONFIG_VERSION_DEFAULT = "sprint1-balance-0.2.0" as const;
-export const SIMULATION_IDENTITY_SCHEMA_VERSION = "0.4.0" as const;
-export const S1_SPEC_VERSION = "S1-SPEC-0.1.20" as const;
+export const SIMULATION_IDENTITY_SCHEMA_VERSION = "0.5.0" as const;
+export const S1_SPEC_VERSION = "S1-SPEC-0.1.21" as const;
 
 /**
  * Production Sprint1 transactional processor adapter ID and
@@ -59,13 +59,13 @@ export const WEEKLY_TRAINING_PROCESSOR_RNG_SEED_LABEL = "processor/weekly-traini
  * Sprint 1 new-run `run-metadata.json` document schemaVersion after SimulationIdentity 0.4.0
  * nested wire-shape change (05 / S1-SPEC-0.1.20).
  */
-export const RUN_METADATA_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.4.0" as const;
+export const RUN_METADATA_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.5.0" as const;
 
 /**
- * Sprint 1 new-run `initial-world.json` document schemaVersion (S1-SPEC-0.1.20 fix4).
- * Adds top-level `initialWeeklyTrainingSidecarSnapshot` (0.3.0 → 0.4.0).
+ * Sprint 1 new-run `initial-world.json` document schemaVersion (CAL-JAN / S1-SPEC-0.1.21).
+ * Outer document tracks SimulationIdentity 0.5.0 / RunRuleSnapshot 0.5.0.
  */
-export const INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.4.0" as const;
+export const INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.5.0" as const;
 
 /**
  * Sprint 1 new-run `final-world.json` document schemaVersion (S1-SPEC-0.1.20).
@@ -75,7 +75,7 @@ export const INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.4.0" as const;
  */
 export const FINAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1 = "0.3.0" as const;
 
-export const MAIN_SPEC_VERSION_FOR_IDENTITY = "SPEC-0.1.2" as const;
+export const MAIN_SPEC_VERSION_FOR_IDENTITY = "SPEC-0.1.3" as const;
 /** Must equal the Sprint 0 S0_SPEC_VERSION registry entry (00/02/14 mini-specs). */
 export const S0_SPEC_VERSION_FOR_IDENTITY: typeof S0_SPEC_VERSION = S0_SPEC_VERSION;
 export const CANONICAL_JSON_VERSION = "canonical-json-v1" as const;
@@ -90,7 +90,7 @@ export const DEFAULT_BATTLE_STRATEGY_VERSION = "default-battle-strategy-0.1.0" a
 export const DEFAULT_BATTLE_STRATEGY_ID = "default-battle-strategy" as const;
 export const BATTLE_ACTION_SCRIPT_FORMAT_VERSION = "battle-action-script-0.1.0" as const;
 export const BATTLE_ACTION_SOURCE_IDENTITY_SCHEMA_VERSION = "0.1.0" as const;
-export const RUN_RULE_SNAPSHOT_SCHEMA_VERSION = "0.4.0" as const;
+export const RUN_RULE_SNAPSHOT_SCHEMA_VERSION = "0.5.0" as const;
 export const BATTLE_RULES_SNAPSHOT_REF_SCHEMA_VERSION = "0.1.0" as const;
 export const START_BATTLE_RUNTIME_TRANSITION_SCHEMA_VERSION = "0.1.0" as const;
 export const BATTLE_STATE_SCHEMA_VERSION = "0.6.0" as const;

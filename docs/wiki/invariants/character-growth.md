@@ -33,7 +33,7 @@ related:
 - `techniqueStates` は dense・TechniqueId 昇順・重複なし。focus は配列内参照必須
 - 初期化adapterは RNG／イベントなし。二重初期化拒否
 - 初期化adapterは `cloneWorldEngineState` で世界全体を検証し、raw Person spread／getter 実行をしない
-- 初期化adapterは fresh initial date（1年4月第1週・absoluteWeek=0）のみ受理。途中worldは拒否し日時を巻き戻さない
+- 初期化adapterは fresh initial date（世界1年・設定年初月第1週・absoluteWeek=0、既定1月）のみ受理。途中worldは拒否し日時を巻き戻さない
 - `[Sprint 1暫定]` の調整可能値を正本ゲームルールへ昇格させない
 - Sprint 0 人物型との互換を維持し、既存公開型を独自別名へ差し替えない（08）
 

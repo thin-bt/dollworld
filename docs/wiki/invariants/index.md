@@ -8,7 +8,7 @@ sources:
   - docs/SPRINT_0_BACKLOG.md
   - tasks/S00-010.md
   - commit:3b313a5ea690351d062e751bc724e5530b835872
-last_verified: 2026-08-08
+last_verified: 2026-08-12
 ---
 
 # 不変条件索引
@@ -29,7 +29,7 @@ Sprint 0・Sprint 1を横断する不変条件索引。正本はミニ仕様で�
 
 AI開発ルールに列挙される Sprint 0 不変条件の例: 年齢非負、死亡者非処理、16歳未満ランクなし、42歳以上引退、参照整合、親子・師弟循環なし、同一シード一致。詳細は正本と検証器を確認すること。
 
-### Sprint 1（`S1-SPEC-0.1.20` で確定した仕様不変条件。S01-001〜009 implemented / accepted）
+### Sprint 1（current integrated spec `S1-SPEC-0.1.21`。0.1.20以前で確定した不変条件を保持し、CAL-JANの暦・identity bindingを追加）
 
 - [人物成長](character-growth.md)
 - [週間訓練・習得](weekly-training-and-learning.md)

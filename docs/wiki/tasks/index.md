@@ -38,7 +38,7 @@ Sprint 0・Sprint 1のタスク説明ページへの索引。正本はそれぞ�
 
 ### Sprint 1（**COMPLETE**）
 
-正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。仕様版 `S1-SPEC-0.1.20`。
+正本: [`docs/SPRINT_1_BACKLOG.md`](../../SPRINT_1_BACKLOG.md)。CAL-JAN同期後のcurrent new-run契約は `S1-SPEC-0.1.21`。各S01 taskページに残る `S1-SPEC-0.1.20` はSprint 1完了時の受入履歴として扱う。
 - S01-001〜S01-009 **implemented / accepted**（S01-007受入完了commit `a39e476`。S01-008受入完了commit `7c47847`。S01-009実装commit `5616f5f`、受入status docs commit `5a80268`）
 - Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
 

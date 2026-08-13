@@ -24,7 +24,7 @@ sources:
   - commit:3b313a5ea690351d062e751bc724e5530b835872
   - commit:60d5b6b821983b047debd51bccc43389d363f953
   - commit:7c478477a978726d2e740fe20dff1b2cd48e9f68
-last_verified: 2026-08-11
+last_verified: 2026-08-12
 related:
   - ../glossary/abilities-and-aptitudes.md
   - ../glossary/techniques-and-mastery.md
@@ -39,7 +39,7 @@ related:
 
 ## 概要
 
-Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0.1.2`。`S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`。`0.1.12` は週間処理契約のclarificationであり、Sprint1Config balance／hashは不変。`0.1.13` は MatchId generator契約の明文化である。`0.1.14` は戦闘ターン入力契約（replacementReason／battle-action-script／技使用回数）の明文化である。`0.1.15` は移動状態補正（`moverStateModifier`／`opponentStateModifier`）の明文化である。`0.1.16` は`BattleActionLog.movementChance`の明文化である。`0.1.17` は戦闘開始`sourceSnapshot` baselineの明文化である（BattleState schema `0.6.0`）。`0.1.18` はBattleResult決定的契約clarificationである。`0.1.19` はpost-start execution abort契約clarificationである。`0.1.20` はS01-008 integration contracts clarificationである（`weekly-training` adapter／`Sprint1RunRuntimeState`／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）。
+Sprint 1 の現行統合仕様は `S1-SPEC-0.1.21`、正本版は `SPEC-0.1.3` である。`S1-SPEC-0.1.11`〜`0.1.20` の各clarificationとS01-001〜S01-009のaccepted履歴は変更しない。`S1-SPEC-0.1.20` はS01-008 integration contracts（`weekly-training` adapter／`Sprint1RunRuntimeState`／sidecar identity／`--sprint1-input`／SimulationIdentity 0.4.0／run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0）の履歴版であり、`S1-SPEC-0.1.21` はSprint 1完成後のCAL-JAN共通暦同期を反映した現行new-run bindingである。
 
 本ページは説明・索引である。実装や仕様判断の根拠には使わない。正本と矛盾する場合は正本を優先する。
 
@@ -47,8 +47,8 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 
 ### 仕様状態
 
-- ミニ仕様版: `S1-SPEC-0.1.20`
-- 正本版: `SPEC-0.1.2`
+- ミニ仕様版: `S1-SPEC-0.1.21`
+- 正本版: `SPEC-0.1.3`
 - `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - 08〜14 は作成・受入監査済み（[`docs/SPEC_PREPARATION_PLAN.md`](../../SPEC_PREPARATION_PLAN.md)）
 
@@ -61,7 +61,7 @@ Sprint 1 の仕様は `S1-SPEC-0.1.20` が現行である。正本版は `SPEC-0
 - ターン解決（12, 14）
 - 決着・結果・戦闘ログ（13, 14）
 - Sprint1Config（14）
-- SimulationIdentity 拡張（00, 02, 05, 14）— schemaVersion `0.4.0`／`initialWeeklyTrainingSidecarHash`
+- SimulationIdentity 拡張（00, 02, 05, 14）— current new-run schemaVersion `0.5.0`。0.4.0-eraの必須材料に加え `worldCalendarConfigHash` と `yearStartProcessorManifestHash` を必須保持する。`RunRuleSnapshot` は `0.5.0`、run-metadata／initial-world outer documentは `0.5.0`、final-worldは `0.3.0` を維持する。
 
 ### 実装状態
 

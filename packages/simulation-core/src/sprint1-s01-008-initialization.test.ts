@@ -22,6 +22,7 @@ import {
   createDefaultSprint1ConfigInput,
   createSeededRng,
   createSprint1RunSession,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   deriveSeed,
   generateInitialWorld,
   promoteProvisionalEventStreamToSprint1,
@@ -263,7 +264,7 @@ describe("createSprint1RunSession fresh initialization", () => {
     expect(result.initialWorldSnapshotForOutput.simulationId).toBe(
       result.session.context.simulationId,
     );
-    expect(result.initialWorldSnapshotForOutput.schemaVersion).toBe("0.4.0");
+    expect(result.initialWorldSnapshotForOutput.schemaVersion).toBe("0.5.0");
     expect(result.initialWorldSnapshotForOutput.runRuleSnapshotHash).toBe(
       result.session.context.runRuleSnapshotHash,
     );
@@ -456,6 +457,7 @@ describe("promoteProvisionalWorldSnapshot / equal provisional and final ids", ()
         world: generated.snapshot,
         provisionalSimulationId: sharedId,
         finalSimulationId: sharedId,
+        worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
       }),
     );
     expect(promoted.simulationId).toBe(sharedId);
@@ -472,6 +474,7 @@ describe("promoteProvisionalWorldSnapshot / equal provisional and final ids", ()
       },
       provisionalSimulationId: generated.snapshot.simulationId,
       finalSimulationId: generated.snapshot.simulationId,
+      worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
     });
     expect(result.ok).toBe(false);
   });

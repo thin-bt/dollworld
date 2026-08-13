@@ -10,7 +10,6 @@ import {
   computeNameDataHash,
   createSeededRng,
   isLivingPerson,
-  isMarchWeek4,
   toCanonicalJson,
   validateEventEnvelope,
   validateEventSequence,
@@ -21,6 +20,8 @@ import {
   type InitialWorldSnapshot,
   type WorldEngineState,
   type WorldProcessor,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+  isWorldYearEndWeek,
 } from "@shared-world/simulation-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { EXIT_RUNTIME_ERROR, EXIT_SUCCESS, EXIT_USAGE_ERROR, runCli } from "../cli.js";
@@ -488,7 +489,7 @@ describe("performance document", () => {
 });
 
 describe("year-end boundary and event attribution", () => {
-  it("captures post-processor March-week-4 state and attributes cross-year events", () => {
+  it("captures post-processor December-week-4 state and attributes cross-year events", () => {
     const sha256 = createNodeSha256Provider();
     const configJson = JSON.parse(
       readFileSync(join(REPO_ROOT, BASELINE_CONFIG), "utf8"),
@@ -519,9 +520,9 @@ describe("year-end boundary and event attribution", () => {
     });
 
     const markerProcessor: WorldProcessor = {
-      processorId: "test/march-week4-marker",
+      processorId: "test/december-week4-marker",
       process({ state }) {
-        if (!isMarchWeek4(state.worldDate)) {
+        if (!isWorldYearEndWeek(state.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG)) {
           return state;
         }
         let marked = false;
@@ -550,7 +551,7 @@ describe("year-end boundary and event attribution", () => {
     expect(simulation.yearEnds).toHaveLength(2);
     expect(simulation.yearEnds[0]?.state.worldDate).toEqual({
       year: 1,
-      month: 3,
+      month: 12,
       weekOfMonth: 4,
       absoluteWeek: 47,
     });
@@ -560,11 +561,11 @@ describe("year-end boundary and event attribution", () => {
     expect(year1Marked).toBeDefined();
     expect(simulation.finalState.worldDate).toEqual({
       year: 3,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 96,
     });
-    // Year-start ages advanced; marker name from year-2 March week 4 persists.
+    // Year-start ages advanced; marker name from year-2 December week 4 persists.
     const year2Marked = simulation.finalState.persons.find(
       (p) => isLivingPerson(p) && p.givenName === "Y2Marked",
     );
@@ -640,7 +641,7 @@ describe("S00-009 fixed seven-file output", () => {
     expect(() => validateWorldEngineState(finalWorldToEngineState(finalWorld))).not.toThrow();
     expect(finalWorld.worldDate).toEqual({
       year: 2,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 48,
     });
@@ -650,7 +651,7 @@ describe("S00-009 fixed seven-file output", () => {
     expect(csv.headers).toEqual([...YEARLY_STATISTICS_COLUMNS]);
     expect(csv.rows).toHaveLength(1);
     expect(csv.rows[0]?.["worldYear"]).toBe("1");
-    expect(csv.rows[0]?.["absoluteWeek"]).toBe("48");
+    expect(csv.rows[0]?.["absoluteWeek"]).toBe("47");
     assertCsvLivingInvariants(csv.rows[0]!);
     for (const row of csv.rows) {
       for (const column of YEARLY_STATISTICS_COLUMNS) {
@@ -693,7 +694,7 @@ describe("S00-009 fixed seven-file output", () => {
     }
   }, 60_000);
 
-  it("runs 100 years with 100 CSV rows, invariants, and final date year 101 April week 1", () => {
+  it("runs 100 years with 100 CSV rows, invariants, and final date year 101 January week 1", () => {
     const dir = makeTempDir();
     const outputRoot = join(dir, "output");
     const { runDirectory } = runSimulate({ years: 100, seed: 12345, outputRoot });
@@ -702,11 +703,11 @@ describe("S00-009 fixed seven-file output", () => {
     expect(csv.rows).toHaveLength(100);
     expect(csv.rows[0]?.["worldYear"]).toBe("1");
     expect(csv.rows[99]?.["worldYear"]).toBe("100");
-    expect(csv.rows[99]?.["absoluteWeek"]).toBe("4800");
+    expect(csv.rows[99]?.["absoluteWeek"]).toBe("4799");
     let previousCumulative = 0;
     for (let i = 0; i < 100; i += 1) {
       expect(csv.rows[i]?.["worldYear"]).toBe(String(i + 1));
-      expect(csv.rows[i]?.["absoluteWeek"]).toBe(String((i + 1) * 48));
+      expect(csv.rows[i]?.["absoluteWeek"]).toBe(String((i + 1) * 48 - 1));
       assertCsvLivingInvariants(csv.rows[i]!);
       const cumulative = Number(csv.rows[i]!["eventCountCumulative"]);
       expect(cumulative).toBeGreaterThanOrEqual(previousCumulative);
@@ -719,7 +720,7 @@ describe("S00-009 fixed seven-file output", () => {
     const finalWorld = parseJsonLf(contents["final-world.json"]!) as FinalWorldDocument;
     expect(finalWorld.worldDate).toEqual({
       year: 101,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 4800,
     });
@@ -737,11 +738,11 @@ describe("S00-009 fixed seven-file output", () => {
     const contents = loadRunDirectory(runDirectory);
     const csv = parseYearlyStatisticsCsv(contents["yearly-statistics.csv"]!);
     expect(csv.rows).toHaveLength(300);
-    expect(csv.rows[299]?.["absoluteWeek"]).toBe("14400");
+    expect(csv.rows[299]?.["absoluteWeek"]).toBe("14399");
     const finalWorld = parseJsonLf(contents["final-world.json"]!) as FinalWorldDocument;
     expect(finalWorld.worldDate).toEqual({
       year: 301,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 14400,
     });

@@ -13,7 +13,7 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
   - commit:60d5b6b821983b047debd51bccc43389d363f953
-last_verified: 2026-08-10
+last_verified: 2026-08-12
 related:
   - battle-lifecycle.md
   - ../sprints/sprint1.md
@@ -64,7 +64,7 @@ World 人物を戦闘中に直接書き換えず、snapshot と結果経由で�
 
 ### 週間処理の入出力境界（S01-004実装済み）
 
-週間処理は WorldEngine から独立した純粋関数として実装されている。Sprint1 transactional processor adapter への配線は **S01-008でproduction実装済み**（`runSprint1WeeklyStep`／`runSprint1WeeklyTrainingAdapter`）。production adapter ID／event `sourceProcessor` は `weekly-training`（`S1-SPEC-0.1.20`）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors` へは登録しない。
+週間処理は WorldEngine から独立した純粋関数として実装されている。Sprint1 transactional processor adapter への配線は **S01-008でproduction実装済み**（`runSprint1WeeklyStep`／`runSprint1WeeklyTrainingAdapter`）。production adapter ID／event `sourceProcessor` は `weekly-training`（S01-008／`S1-SPEC-0.1.20`で導入し、current `S1-SPEC-0.1.21`でも維持）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors` へは登録しない。
 
 ```text
 入力（検証前）
@@ -81,7 +81,7 @@ RuntimeState累積・出力凍結
 
 `rngState`はdescriptor-safeな`validateSeededRngState`通過後にだけimportする。正本10・14がルールを定義していない入力値（planner context score、師匠推薦度、styleMatch、相性など）は sidecar として adapter から受け取り、処理側で導出しない。S01-008では`InitialWeeklyTrainingSidecarSnapshot`をCLIから受け取り、`Sprint1RunRuntimeState.weeklyTrainingSidecars`が所有する。missing sidecarのneutral defaultは禁止。
 
-### Sprint1RunRuntimeState／Sprint1RunContext（S1-SPEC-0.1.20／S01-008）
+### Sprint1RunRuntimeState／Sprint1RunContext（current S1-SPEC-0.1.21。S01-008 foundation + CAL-JAN binding）
 
 mutable runtime root と immutable context（runtime checkpoint vs projection を区別）:
 
@@ -98,7 +98,8 @@ mutable runtime root と immutable context（runtime checkpoint vs projection �
 - battleはadapter pipeline外。`commitRunBattlePlan`配線は**S01-008でproduction実装済み**（`commit-run-battle-plan.ts`）
 - `matchesCompletedThisWorldWeekBeforeBattle`はweek registryのparticipant別completed件数（`battleResults.length`ではない。resolution_errorはcount+0）
 - `PersonTemporaryCondition` current正本はweekly sidecar。Personへfatigue等新field追加なし
-- `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`→initial-world 0.4.0投影、`weeklyTrainingSidecars`＋`battleResults`→final-world 0.3.0投影。fixed7 exactly 7 files
+- `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。`initialWeeklyTrainingSidecarSnapshot`→initial-world `0.5.0`投影、`weeklyTrainingSidecars`＋`battleResults`→final-world 0.3.0投影。fixed7 exactly 7 files
+CAL-JAN後は `processorSpecificStates` に `weekly-training` と `world-year-start` のexact 2 componentを保持し、RunRuleSnapshot／SimulationIdentity current schemaは `0.5.0`。
 
 ### 戦闘開始の入出力境界（S01-005実装済み）
 

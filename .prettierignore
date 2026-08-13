@@ -10,3 +10,5 @@ package-lock.json
 /output/**
 /_handoff-artifacts/**
 _handoff-artifacts/**
+# Immutable historical CAL-JAN legacy fixtures (byte-identical SHA evidence)
+packages/simulation-core/src/test-fixtures/cal-jan-legacy/**

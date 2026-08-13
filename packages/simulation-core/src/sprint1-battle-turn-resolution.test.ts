@@ -16,6 +16,7 @@ import {
   BATTLE_PROFILE_ADAPTER_VERSION,
   BATTLE_STATE_SCHEMA_VERSION,
   DEFAULT_BATTLE_STRATEGY_VERSION,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   FIXED_BASIC_DEFENSE_ACTION_SCRIPT_BYTE_LENGTH,
   FIXED_BASIC_DEFENSE_ACTION_SCRIPT_SHA256,
   MAIN_SPEC_VERSION_FOR_IDENTITY,
@@ -28,6 +29,7 @@ import {
   buildFixedBasicDefenseBattleActionScript,
   computeActionOrderScoreWithoutRandom,
   computeActionScriptHash,
+  computeActiveYearStartProcessorManifestHash,
   computeBattleStateCanonicalHash,
   computeHitChancePercent,
   computeMovementChance,
@@ -37,6 +39,7 @@ import {
   computeTechniqueCatalogHash,
   consumptionPerformanceFactor,
   createBattleParticipantReplayBaseline,
+  createDefaultActiveYearStartProcessorManifest,
   createDefaultStrategyActionSourceIdentity,
   createInitialMatchIdGeneratorState,
   createScriptedActionsSourceIdentity,
@@ -238,12 +241,21 @@ const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(sprint1Config)
 const techniqueCatalogHash = expectOk(
   computeTechniqueCatalogHash(baseTechniqueDefinitions, sha256Provider),
 );
+const defaultYearStartManifest = createDefaultActiveYearStartProcessorManifest();
+const worldCalendarConfigHash = sha256Provider.hashUtf8(
+  toCanonicalJson(DEFAULT_WORLD_CALENDAR_CONFIG),
+);
+const yearStartProcessorManifestHash = expectOk(
+  computeActiveYearStartProcessorManifestHash(defaultYearStartManifest, sha256Provider),
+);
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 20260807,
     initialWorldConfigHash: "a".repeat(64),
+    worldCalendarConfigHash,
+    yearStartProcessorManifestHash,
     sprint1ConfigHash,
     techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -280,6 +292,8 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
       simulationIdentity: simulationIdentity(),
       simulationIdentityHash,
       initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+      worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+      yearStartProcessorManifest: defaultYearStartManifest,
       sprint1Config,
       techniqueCatalogDataVersion: "techniques-0.1.0",
       techniqueDefinitions: baseTechniqueDefinitions,
@@ -288,7 +302,10 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
   ),
 );
 
-const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+const worldDate = createWorldDate(
+  { year: 21, month: 4, weekOfMonth: 1 },
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+);
 
 function techniqueState(techniqueId: string, acquiredAbsoluteWeek: number | null) {
   return {
@@ -964,6 +981,8 @@ describe("S01-006 reserved actionTraits", () => {
           simulationIdentity: identity,
           simulationIdentityHash: idHash,
           initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+          worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+          yearStartProcessorManifest: defaultYearStartManifest,
           sprint1Config,
           techniqueCatalogDataVersion: "techniques-0.1.0",
           techniqueDefinitions: hostileDefs,
@@ -1799,7 +1818,7 @@ describe("S01-006 performance band edges", () => {
 
 describe("S01-006 schema version lock", () => {
   it("publishes S1-SPEC-0.1.20 and BattleState schema 0.6.0", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
     expect(baseInProgress.schemaVersion).toBe(BATTLE_STATE_SCHEMA_VERSION);
   });
@@ -2348,6 +2367,8 @@ describe("S01-006 fix2 injury/rangeShift RNG order", () => {
         simulationIdentity: shiftIdentity,
         simulationIdentityHash: shiftIdentityHash,
         initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+        worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+        yearStartProcessorManifest: defaultYearStartManifest,
         sprint1Config,
         techniqueCatalogDataVersion: "techniques-0.1.0",
         techniqueDefinitions: shiftCatalog,

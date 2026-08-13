@@ -93,9 +93,11 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
     };
   })();
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 12345,
     initialWorldConfigHash: hex,
+    worldCalendarConfigHash: "a".repeat(64),
+    yearStartProcessorManifestHash: "a".repeat(64),
     sprint1ConfigHash: sprint1ConfigHashResult.value,
     techniqueCatalogHash: hex,
     initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -118,7 +120,7 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
 describe("S1-SPEC-0.1.12 SimulationIdentity / config hash", () => {
   it("publishes weekly-training clarification contracts under the current Sprint 1 registry", () => {
     // Registry is S1-SPEC-0.1.17 after movementChance clarification; weekly formulas remain.
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
   });
 
   it("accepts a new Sprint 1 identity with the current registry version", () => {
@@ -612,7 +614,8 @@ describe("S1-SPEC-0.1.12 wiki state guards", () => {
       "utf8",
     );
     expect(contradictions).toContain("S1-SPEC-0.1.11` 確定 commit");
-    expect(contradictions).toContain("S1-SPEC-0.1.12");
+    expect(contradictions).toContain("S1-SPEC-0.1.21");
+    expect(contradictions).toContain("pre-CAL-JAN完成snapshotは `S1-SPEC-0.1.20`");
     expect(contradictions).not.toMatch(/確定仕様 `S1-SPEC-0\.1\.12`（commit `2800d3b/);
     expect(contradictions).not.toContain("Sprint 1 実装は未着手");
   });

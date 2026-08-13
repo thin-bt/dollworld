@@ -1,11 +1,12 @@
 /**
- * World calendar date and absolute-week conversions (01 mini-spec).
+ * World calendar date and absolute-week conversions (01 mini-spec / CAL-JAN-SYNC).
  * Uses no host Date / wall-clock APIs.
+ * Month progression and year boundaries are derived from WorldCalendarConfig.
  */
 
-export const WORLD_MONTH_ORDER = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3] as const;
+import type { WorldCalendarConfig } from "./config/types.js";
 
-export type WorldMonth = (typeof WORLD_MONTH_ORDER)[number];
+export type WorldMonth = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type WeekOfMonth = 1 | 2 | 3 | 4;
 
 export type WorldDate = {
@@ -15,35 +16,108 @@ export type WorldDate = {
   absoluteWeek: number;
 };
 
-const WEEKS_PER_YEAR = 48;
-const WEEKS_PER_MONTH = 4;
+/** Default new-run calendar (CAL-JAN): year starts in January week 1. */
+export const DEFAULT_WORLD_CALENDAR_CONFIG: WorldCalendarConfig = {
+  monthsPerWorldYear: 12,
+  weeksPerMonth: 4,
+  worldYearStartMonth: 1,
+  worldYearStartWeek: 1,
+};
 
-export function createInitialWorldDate(): WorldDate {
-  return createWorldDate({ year: 1, month: 4, weekOfMonth: 1 });
+/**
+ * Chronological month order within a world year, starting at config.worldYearStartMonth.
+ * Default config → [1,2,3,4,5,6,7,8,9,10,11,12].
+ */
+export function worldMonthOrder(config: WorldCalendarConfig): readonly WorldMonth[] {
+  assertWorldCalendarConfig(config);
+  const order: WorldMonth[] = [];
+  for (let offset = 0; offset < config.monthsPerWorldYear; offset += 1) {
+    order.push(calendarMonthFromOffset(offset, config));
+  }
+  return order;
 }
 
-export function createWorldDate(input: {
-  year: number;
-  month: number;
-  weekOfMonth: number;
-}): WorldDate {
-  return fromAbsoluteWeek(toAbsoluteWeek(input.year, input.month, input.weekOfMonth));
+/**
+ * @deprecated Use {@link worldMonthOrder} with a validated WorldCalendarConfig.
+ * Kept only as the default-January order alias for migration; not April-based.
+ */
+export const WORLD_MONTH_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+
+export function monthOffsetFromYearStart(month: number, config: WorldCalendarConfig): number {
+  assertWorldCalendarConfig(config);
+  assertSafeInteger(month, "month");
+  if (!isWorldMonth(month)) {
+    throw new Error(`month must be a valid calendar month 1..12 (got ${String(month)})`);
+  }
+  return (
+    (month - config.worldYearStartMonth + config.monthsPerWorldYear) % config.monthsPerWorldYear
+  );
 }
 
-export function validateWorldDate(date: WorldDate): void {
+export function calendarMonthFromOffset(offset: number, config: WorldCalendarConfig): WorldMonth {
+  assertWorldCalendarConfig(config);
+  assertSafeInteger(offset, "offset");
+  if (offset < 0 || offset >= config.monthsPerWorldYear) {
+    throw new Error(
+      `offset must be 0..${String(config.monthsPerWorldYear - 1)} (got ${String(offset)})`,
+    );
+  }
+  const month = ((config.worldYearStartMonth - 1 + offset) % config.monthsPerWorldYear) + 1;
+  return month as WorldMonth;
+}
+
+export function weeksPerWorldYear(config: WorldCalendarConfig): number {
+  assertWorldCalendarConfig(config);
+  const weeks = config.monthsPerWorldYear * config.weeksPerMonth;
+  assertSafeInteger(weeks, "weeksPerWorldYear");
+  return weeks;
+}
+
+export function yearStartDate(worldYear: number, config: WorldCalendarConfig): WorldDate {
+  assertWorldCalendarConfig(config);
+  return createWorldDate(
+    {
+      year: worldYear,
+      month: config.worldYearStartMonth,
+      weekOfMonth: config.worldYearStartWeek,
+    },
+    config,
+  );
+}
+
+export function createInitialWorldDate(config: WorldCalendarConfig): WorldDate {
+  return yearStartDate(1, config);
+}
+
+export function createWorldDate(
+  input: {
+    year: number;
+    month: number;
+    weekOfMonth: number;
+  },
+  config: WorldCalendarConfig,
+): WorldDate {
+  return fromAbsoluteWeek(
+    toAbsoluteWeek(input.year, input.month, input.weekOfMonth, config),
+    config,
+  );
+}
+
+export function validateWorldDate(date: WorldDate, config: WorldCalendarConfig): void {
+  assertWorldCalendarConfig(config);
   assertSafeInteger(date.absoluteWeek, "absoluteWeek");
   if (date.absoluteWeek < 0) {
     throw new Error(`absoluteWeek must be >= 0 (got ${String(date.absoluteWeek)})`);
   }
 
-  const expected = toAbsoluteWeek(date.year, date.month, date.weekOfMonth);
+  const expected = toAbsoluteWeek(date.year, date.month, date.weekOfMonth, config);
   if (date.absoluteWeek !== expected) {
     throw new Error(
       `WorldDate fields are inconsistent: absoluteWeek=${String(date.absoluteWeek)} expected ${String(expected)}`,
     );
   }
 
-  const roundTrip = fromAbsoluteWeek(date.absoluteWeek);
+  const roundTrip = fromAbsoluteWeek(date.absoluteWeek, config);
   if (
     roundTrip.year !== date.year ||
     roundTrip.month !== date.month ||
@@ -53,7 +127,13 @@ export function validateWorldDate(date: WorldDate): void {
   }
 }
 
-export function toAbsoluteWeek(year: number, month: number, weekOfMonth: number): number {
+export function toAbsoluteWeek(
+  year: number,
+  month: number,
+  weekOfMonth: number,
+  config: WorldCalendarConfig,
+): number {
+  assertWorldCalendarConfig(config);
   assertSafeInteger(year, "year");
   if (year < 1) {
     throw new Error(`year must be >= 1 (got ${String(year)})`);
@@ -67,9 +147,13 @@ export function toAbsoluteWeek(year: number, month: number, weekOfMonth: number)
     throw new Error(`weekOfMonth must be 1..4 (got ${String(weekOfMonth)})`);
   }
 
-  const monthIndex = WORLD_MONTH_ORDER.indexOf(month);
-  const absoluteWeek =
-    (year - 1) * WEEKS_PER_YEAR + monthIndex * WEEKS_PER_MONTH + (weekOfMonth - 1);
+  const monthOffset = monthOffsetFromYearStart(month, config);
+  const weeksYear = weeksPerWorldYear(config);
+  const yearTerm = (year - 1) * weeksYear;
+  assertSafeInteger(yearTerm, "absoluteWeek");
+  const monthTerm = monthOffset * config.weeksPerMonth;
+  assertSafeInteger(monthTerm, "absoluteWeek");
+  const absoluteWeek = yearTerm + monthTerm + (weekOfMonth - 1);
   assertSafeInteger(absoluteWeek, "absoluteWeek");
   if (absoluteWeek < 0) {
     throw new Error(`absoluteWeek must be >= 0 (got ${String(absoluteWeek)})`);
@@ -77,17 +161,19 @@ export function toAbsoluteWeek(year: number, month: number, weekOfMonth: number)
   return absoluteWeek;
 }
 
-export function fromAbsoluteWeek(absoluteWeek: number): WorldDate {
+export function fromAbsoluteWeek(absoluteWeek: number, config: WorldCalendarConfig): WorldDate {
+  assertWorldCalendarConfig(config);
   assertSafeInteger(absoluteWeek, "absoluteWeek");
   if (absoluteWeek < 0) {
     throw new Error(`absoluteWeek must be >= 0 (got ${String(absoluteWeek)})`);
   }
 
-  const year = Math.floor(absoluteWeek / WEEKS_PER_YEAR) + 1;
-  const rem = absoluteWeek % WEEKS_PER_YEAR;
-  const monthIndex = Math.floor(rem / WEEKS_PER_MONTH);
-  const weekOfMonth = ((rem % WEEKS_PER_MONTH) + 1) as WeekOfMonth;
-  const month = WORLD_MONTH_ORDER[monthIndex]!;
+  const weeksYear = weeksPerWorldYear(config);
+  const year = Math.floor(absoluteWeek / weeksYear) + 1;
+  const rem = absoluteWeek % weeksYear;
+  const monthOffset = Math.floor(rem / config.weeksPerMonth);
+  const weekOfMonth = ((rem % config.weeksPerMonth) + 1) as WeekOfMonth;
+  const month = calendarMonthFromOffset(monthOffset, config);
   return {
     year,
     month,
@@ -96,38 +182,73 @@ export function fromAbsoluteWeek(absoluteWeek: number): WorldDate {
   };
 }
 
-export function advanceOneWeek(date: WorldDate): WorldDate {
-  validateWorldDate(date);
-  return fromAbsoluteWeek(date.absoluteWeek + 1);
+export function advanceOneWeek(date: WorldDate, config: WorldCalendarConfig): WorldDate {
+  validateWorldDate(date, config);
+  const nextAbsolute = date.absoluteWeek + 1;
+  assertSafeInteger(nextAbsolute, "absoluteWeek");
+  return fromAbsoluteWeek(nextAbsolute, config);
 }
 
-export function advanceWeeks(date: WorldDate, weeks: number): WorldDate {
-  validateWorldDate(date);
+export function advanceWeeks(
+  date: WorldDate,
+  weeks: number,
+  config: WorldCalendarConfig,
+): WorldDate {
+  validateWorldDate(date, config);
   assertSafeInteger(weeks, "weeks");
   if (weeks < 0) {
     throw new Error(`weeks must be >= 0 (got ${String(weeks)})`);
   }
   const nextAbsolute = date.absoluteWeek + weeks;
   assertSafeInteger(nextAbsolute, "absoluteWeek");
-  return fromAbsoluteWeek(nextAbsolute);
+  return fromAbsoluteWeek(nextAbsolute, config);
 }
 
 export function isSameWorldDate(a: WorldDate, b: WorldDate): boolean {
-  validateWorldDate(a);
-  validateWorldDate(b);
   return a.absoluteWeek === b.absoluteWeek;
 }
 
-export function isMarchWeek4(date: WorldDate): boolean {
-  return date.month === 3 && date.weekOfMonth === 4;
+/** True when date is the configured world-year start month week 1. */
+export function isWorldYearStartWeek(date: WorldDate, config: WorldCalendarConfig): boolean {
+  assertWorldCalendarConfig(config);
+  return (
+    date.month === config.worldYearStartMonth && date.weekOfMonth === config.worldYearStartWeek
+  );
 }
 
-export function isAprilWeek1(date: WorldDate): boolean {
-  return date.month === 4 && date.weekOfMonth === 1;
+/**
+ * True when date is the final week of a world year
+ * (week 4 of the month immediately before worldYearStartMonth).
+ */
+export function isWorldYearEndWeek(date: WorldDate, config: WorldCalendarConfig): boolean {
+  assertWorldCalendarConfig(config);
+  const endMonth = previousCalendarMonth(config.worldYearStartMonth, config);
+  return date.month === endMonth && date.weekOfMonth === config.weeksPerMonth;
+}
+
+function previousCalendarMonth(month: number, config: WorldCalendarConfig): WorldMonth {
+  const prev = month === 1 ? config.monthsPerWorldYear : month - 1;
+  return prev as WorldMonth;
+}
+
+export function assertWorldCalendarConfig(config: WorldCalendarConfig): void {
+  if (
+    config.monthsPerWorldYear !== 12 ||
+    config.weeksPerMonth !== 4 ||
+    config.worldYearStartWeek !== 1
+  ) {
+    throw new Error("WorldCalendarConfig fixed fields must be months=12, weeks=4, startWeek=1");
+  }
+  assertSafeInteger(config.worldYearStartMonth, "worldYearStartMonth");
+  if (config.worldYearStartMonth < 1 || config.worldYearStartMonth > 12) {
+    throw new Error(
+      `worldYearStartMonth must be 1..12 (got ${String(config.worldYearStartMonth)})`,
+    );
+  }
 }
 
 function isWorldMonth(value: number): value is WorldMonth {
-  return (WORLD_MONTH_ORDER as readonly number[]).includes(value);
+  return Number.isSafeInteger(value) && value >= 1 && value <= 12;
 }
 
 function isWeekOfMonth(value: number): value is WeekOfMonth {

@@ -4,7 +4,8 @@
  * revalidate). Does not reimplement a weaker person validator or spread raw
  * unknown Person records.
  *
- * Fresh-run gate: worldDate must equal createInitialWorldDate()
+ * Fresh-run gate: worldDate must equal createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG)
+ * (world year 1 configured start week).
  * (year=1, month=4, weekOfMonth=1, absoluteWeek=0). Valid mid-run / checkpoint
  * worlds are rejected without rewinding dates or reassigning IDs.
  *
@@ -17,7 +18,11 @@ import type { Person } from "../domain.js";
 import type { InitialWorldSnapshot } from "../initial-world/types.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
-import { createInitialWorldDate, type WorldDate } from "../world-date.js";
+import {
+  createInitialWorldDate,
+  type WorldDate,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+} from "../world-date.js";
 import { clonePerson, cloneWorldEngineState } from "../world-engine/clone.js";
 import { WorldEngineError } from "../world-engine/errors.js";
 import type { WorldEngineState } from "../world-engine/types.js";
@@ -57,7 +62,7 @@ function withSprint1State(person: Person, sprint1State: Sprint1PersonState): Per
 }
 
 function requireFreshInitialWorldDate(worldDate: WorldDate): ValidationIssue[] {
-  const expected = createInitialWorldDate();
+  const expected = createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG);
   const issues: ValidationIssue[] = [];
   const fields = ["year", "month", "weekOfMonth", "absoluteWeek"] as const;
   for (const field of fields) {
@@ -65,7 +70,7 @@ function requireFreshInitialWorldDate(worldDate: WorldDate): ValidationIssue[] {
       issues.push({
         path: `/worldDate/${field}`,
         message:
-          "attachSprint1PersonStateToInitialWorld accepts only fresh initial-world date (year 1 April week 1, absoluteWeek 0)",
+          "attachSprint1PersonStateToInitialWorld accepts only fresh initial-world date (year 1 start week, absoluteWeek 0)",
         actual: worldDate[field],
         expected: String(expected[field]),
       });

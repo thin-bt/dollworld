@@ -33,11 +33,12 @@ export type {
   SimulationConfig,
   TechniqueFocusWeights,
   ValidationTargetsConfig,
-  WorldConfig,
+  WorldCalendarConfig,
 } from "./config/types.js";
 export {
   allocateByLargestRemainder,
   validateInitialWorldConfig,
+  validateWorldCalendarConfig,
 } from "./config/validate-config.js";
 
 export type {
@@ -97,8 +98,11 @@ export type {
   YearStatsFinalizedTransition,
 } from "./world-calendar.js";
 export {
+  applyAgeQualification,
+  applyMassAging,
   applyYearStart,
   createInitialWorldCalendarState,
+  selectMassAgingTargetPersonIds,
   stepOneWeek,
   stepWeeks,
 } from "./world-calendar.js";
@@ -106,16 +110,22 @@ export {
 export type { WeekOfMonth, WorldDate, WorldMonth } from "./world-date.js";
 export {
   WORLD_MONTH_ORDER,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   advanceOneWeek,
   advanceWeeks,
+  calendarMonthFromOffset,
   createInitialWorldDate,
   createWorldDate,
   fromAbsoluteWeek,
-  isAprilWeek1,
-  isMarchWeek4,
   isSameWorldDate,
+  isWorldYearEndWeek,
+  isWorldYearStartWeek,
+  monthOffsetFromYearStart,
   toAbsoluteWeek,
   validateWorldDate,
+  weeksPerWorldYear,
+  worldMonthOrder,
+  yearStartDate,
 } from "./world-date.js";
 
 export type {
@@ -719,6 +729,90 @@ export {
   validateRunRuleSnapshotAgainstIdentity,
 } from "./sprint1/run-rule-snapshot.js";
 export type { CreateRunRuleSnapshotInput, RunRuleSnapshot } from "./sprint1/run-rule-snapshot.js";
+export {
+  ACTIVE_YEAR_START_PROCESSOR_MANIFEST_SCHEMA_VERSION,
+  WORLD_YEAR_START_PROCESSOR_ID,
+  YEAR_START_PROCESSOR_SLOTS,
+  computeActiveYearStartProcessorManifestHash,
+  createDefaultActiveYearStartProcessorManifest,
+  validateActiveYearStartProcessorManifest,
+} from "./sprint1/active-year-start-processor-manifest.js";
+export type {
+  ActiveYearStartProcessorManifest,
+  ActiveYearStartProcessorManifestEntry,
+  YearStartImplementationStatus,
+  YearStartProcessorSlot,
+} from "./sprint1/active-year-start-processor-manifest.js";
+export {
+  WORLD_YEAR_START_RECEIPT_SCHEMA_VERSION,
+  WORLD_YEAR_START_RUNTIME_STATE_SCHEMA_VERSION,
+  WORLD_YEAR_START_TRANSACTION_AGGREGATE_SCHEMA_VERSION,
+  cloneWorldYearStartRuntimeState,
+  computeWorldYearStartTransactionAggregateHash,
+  createInitialWorldYearStartRuntimeState,
+  validateWorldYearStartReceipt,
+  validateWorldYearStartRuntimeState,
+  validateWorldYearStartTransactionAggregate,
+} from "./sprint1/world-year-start-runtime-state.js";
+export type {
+  WorldYearStartReceipt,
+  WorldYearStartRuntimeState,
+  WorldYearStartTransactionAggregate,
+} from "./sprint1/world-year-start-runtime-state.js";
+export {
+  computeLegacySimulationIdentityV040Hash,
+  createSimulationIdFromLegacyIdentityV040Hash,
+  LEGACY_S1_SPEC_VERSION_0_4_0,
+  LEGACY_SIMULATION_IDENTITY_SCHEMA_VERSION_0_4_0,
+  validateLegacySimulationIdentityV040,
+} from "./sprint1/legacy-simulation-identity-0.4.0.js";
+export type { LegacySimulationIdentityV040 } from "./sprint1/legacy-simulation-identity-0.4.0.js";
+export {
+  YEAR_START_SENTINEL_HASH,
+  replaceWorldYearStartRuntimeState,
+  runWorldYearStartPhase,
+  sealWorldYearStartReceiptHashes,
+} from "./sprint1/year-start-phase.js";
+export type {
+  YearStartPhaseHashContext,
+  YearStartPhaseInput,
+  YearStartPhaseResult,
+} from "./sprint1/year-start-phase.js";
+export {
+  createDefaultYearStartProcessorRegistry,
+  invokeYearStartProcessorsViaRegistry,
+  validateRegistryAgainstManifest,
+} from "./sprint1/year-start-processor-registry.js";
+export type {
+  YearStartExecutionPlan,
+  YearStartProcessorCallable,
+  YearStartProcessorExecutionState,
+  YearStartProcessorRegistry,
+  YearStartProcessorRegistryEntry,
+} from "./sprint1/year-start-processor-registry.js";
+export {
+  classifyYearStartEventPair,
+  listYearStartEventPairClassifications,
+  validateYearStartReceiptEventProvenance,
+} from "./sprint1/year-start-event-provenance.js";
+export type {
+  YearStartEventPairClassification,
+  YearStartEventPairPhase,
+} from "./sprint1/year-start-event-provenance.js";
+export {
+  YEAR_START_AGGREGATE_SENTINEL_HASH,
+  buildWorldYearStartTransactionAggregate,
+  computeEventAllocationStateHash,
+  computeEventStreamHash,
+  computeIdGeneratorStatesHash,
+  computeProcessorRuntimeStateHash,
+  computeWorldStateComponentHash,
+  finalizePostTransactionAggregateHash,
+} from "./sprint1/year-start-aggregate.js";
+export type {
+  YearStartAggregateComponentInput,
+  YearStartAggregateHashes,
+} from "./sprint1/year-start-aggregate.js";
 export {
   BATTLE_RULES_SNAPSHOT_REF_KEYS,
   cloneBattleRulesSnapshotRef,

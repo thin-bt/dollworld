@@ -8,7 +8,7 @@ sources:
   - tasks/S00-009.md
   - apps/simulator/src/output/fixed-files.ts
   - commit:4958ba8c841c9ad2aff00d62579e2863af54f099
-last_verified: 2026-08-10
+last_verified: 2026-08-12
 related:
   - ../invariants/fixed-seven-files.md
   - headless-cli.md
@@ -36,21 +36,21 @@ related:
 - 途中失敗時に不完全な最終ディレクトリを残さない（atomic 書込）
 - 100年実行で CSV は世界年1〜100の100行
 
-### Sprint 1 new-run 文書schema（S1-SPEC-0.1.20）
+### Sprint 1 current new-run 文書schema（S1-SPEC-0.1.21）
 
 | 文書 | schemaVersion | 備考 |
 |---|---|---|
-| `run-metadata.json` | `0.4.0` | SimulationIdentity 0.4.0 |
-| `initial-world.json` | `0.4.0` | トップレベル`initialWeeklyTrainingSidecarSnapshot`投影 |
-| `final-world.json` | `0.3.0` | トップレベル`weeklyTrainingSidecars`＋`battleResults`投影（0.4.0非bump） |
-| `RunRuleSnapshot` | `0.4.0` | 非bump |
-| `EventEnvelope` | `0.2.0` | events.jsonl（`battle.started`／`battle.finished`のみ。turn詳細非複製） |
+| `run-metadata.json` | `0.5.0` | SimulationIdentity `0.5.0`。`worldCalendarConfigHash`／`yearStartProcessorManifestHash`を含むcurrent identityを保持 |
+| `initial-world.json` | `0.5.0` | `initialWeeklyTrainingSidecarSnapshot`投影を維持し、current SimulationIdentity／RunRuleSnapshot `0.5.0`と整合 |
+| `final-world.json` | `0.3.0` | `weeklyTrainingSidecars`＋`battleResults`投影。field shape非変更のため0.3.0維持 |
+| `RunRuleSnapshot` | `0.5.0` | `worldCalendar`本文＋hash、`ActiveYearStartProcessorManifest`本文＋hashをexactに保持 |
+| `EventEnvelope` | `0.2.0` | events.jsonl。field shape非変更のため0.2.0維持 |
 
 - fixed7は exactly 7 files（`sidecar.json`／`battle-results.json`禁止）
-- `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。sidecarおよび`battleResults`（`detailedLog`含む全文）はfinal／initial worldへ投影
+- `Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。sidecarおよび`battleResults`（`detailedLog`含む全文）はfinal／initial worldへ既存契約どおり投影する
 - validation-report／same-seed比較はsidecar全文および`battleResults`全文を含む
 - Sprint 1ではBattleResult retention削除を実装しない
-- Sprint1 new-run fixed7 writersは**S01-008でproduction実装済み**（`buildAndWriteSprint1RunOutput`）。run-metadata 0.4.0／initial-world 0.4.0／final-world 0.3.0
+- Sprint1 new-run fixed7 writersはS01-008でproduction実装済み。CAL-JAN後のcurrent writer versionは run-metadata `0.5.0`／initial-world `0.5.0`／final-world `0.3.0`
 
 厳密な検証は [../invariants/fixed-seven-files.md](../invariants/fixed-seven-files.md) を参照。
 

@@ -102,4 +102,9 @@ export type RunWorldOneWeekInput = {
   processors: readonly WorldProcessor[];
   startSequence: number;
   processorRuntimeState?: ProcessorRuntimeState;
+  /**
+   * When true, run legacy processors only and do not advance the calendar.
+   * Used after Sprint1 year-start phase already advanced absoluteWeek by 1.
+   */
+  skipCalendarStep?: boolean;
 };

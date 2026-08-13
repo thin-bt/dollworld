@@ -19,7 +19,7 @@
 
 ## Sprint 1タスク
 
-仕様版はすべて `S1-SPEC-0.1.20`。タスク定義の正本は `docs/SPRINT_1_BACKLOG.md`。
+CAL-JAN同期後のcurrent Sprint 1統合仕様版は `S1-SPEC-0.1.21`。各S01 taskの受入履歴は当時の仕様版（最終pre-CAL-JANは`S1-SPEC-0.1.20`）を保持する。タスク定義の正本は `docs/SPRINT_1_BACKLOG.md`。
 
 | タスク | ミニ仕様 | 正本の主な参照見出し |
 |---|---|---|

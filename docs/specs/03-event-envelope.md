@@ -1,6 +1,6 @@
 # 03 構造化イベント共通形式ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.5`
+- ミニ仕様バージョン：`S0-SPEC-0.1.6`
 
 ## 1. 目的
 
@@ -48,24 +48,24 @@ Sprint 1以降の新規出力ではEventEnvelopeの`schemaVersion`を`0.2.0`へ�
 ## 4. 日時・初期履歴
 
 - worldDateはyear、month、weekOfMonth、absoluteWeek。
-- 初期履歴は世界1年4月第1週に`origin=initialization`として登録。
+- 初期履歴は世界1年・設定年初月第1週（既定1月）に`origin=initialization`として登録。
 - 初期状態は年初処理反映済みのため、世界1年の`world.year_started`は生成しない。
 - 死亡済み祖先の過去の出生・死亡を再演しない。
 - 過去年は人物レコードとpayloadの実績要約で保持。
-- 出生イベントpayloadへ`birthWeekOfApril`、`birthMonth`、`birthWeek`または同義フィールドを出力しない。出生時点はEventEnvelope本体の`worldDate`で表す。新規の出生イベントは4月第1週にだけ生成する。
+- 出生イベントpayloadへ`birthWeekOfApril`、`birthMonth`、`birthWeek`または同義フィールドを出力しない。出生時点はEventEnvelope本体の`worldDate`で表す。新規の出生イベントは設定年初月第1週にだけ生成する（既定1月。出産processor自体はT01未実装）。
 
 ## 5. Sprint 0イベント
 
 | eventType | 用途 |
 |---|---|
 | `world.started` | 初期世界開始 |
-| `world.year_stats_finalized` | 完了した世界年の3月第4週終了時の年次統計確定 |
-| `world.year_started` | 世界2年以降の4月第1週 |
+| `world.year_stats_finalized` | 完了した世界年の設定年初月直前月第4週終了時の年次統計確定（既定12月） |
+| `world.year_started` | 世界2年以降の設定年初月第1週（既定1月） |
 | `family.initialized` | 初期家系登録 |
 | `lineage.initialized` | 初期流派登録 |
 | `person.initialized` | 初期人物・死亡済み祖先登録 |
 | `relationship.initialized` | 初期関係登録 |
-| `person.aged` | 4月第1週の年初一斉加齢 |
+| `person.aged` | 設定年初月第1週の年初一斉加齢（既定1月） |
 | `person.career_status_changed` | 年齢段階変更 |
 | `person.debuted` | 16歳到達時の正式デビューと初期ランク付与 |
 | `person.force_retired` | 42歳到達 |
@@ -90,8 +90,8 @@ payload：
 ```
 
 - `entities`の必須配列はすべて空配列。
-- `worldDate`は完了した世界年の3月第4週。
-- `worldYear`がYのとき：`year=Y`、`month=3`、`weekOfMonth=4`、`absoluteWeek=Y*48-1`。
+- `worldDate`は完了した世界年の設定年初月直前月第4週（既定12月）。
+- `worldYear`がYのとき：`year=Y`、`month=設定年初月の直前月`（既定12）、`weekOfMonth=4`、`absoluteWeek=Y*48-1`。
 - 年境界では遷移順を維持し、`world.year_stats_finalized` → `world.year_started` → 人物イベントの順とする。
 
 ## 6. payload
@@ -260,7 +260,7 @@ Sprint 1 new runでは、`generateInitialWorld`が返すprovisional initialEvent
 5. sequenceの欠番・重複を検出。
 6. 存在しない関連IDを検出。
 7. 現実時刻が変わっても決定的列は不変。
-8. 加齢イベントは4月第1週だけ。
+8. 加齢イベントは設定年初月第1週だけ（既定1月）。
 9. 初期イベントに`world.year_started`を含めない。
 
 ## 10. 対象外

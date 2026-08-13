@@ -23,6 +23,7 @@ import {
   createSeededRng,
   createSprint1RunSession,
   createWorldDate,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   generateInitialWorld,
   runBattleToCompletion,
   runSprint1WeeklyStep,
@@ -251,7 +252,10 @@ function prepareBattleSession(seed: number): {
   personB: PersonId;
 } {
   const initial = buildFreshSession(seed);
-  const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+  const worldDate = createWorldDate(
+    { year: 21, month: 4, weekOfMonth: 1 },
+    DEFAULT_WORLD_CALENDAR_CONFIG,
+  );
   let persons = initial.runtimeState.worldState.persons.map((person) => {
     if (person.lifeStatus !== "living" || person.currentAge === null) return person;
     const currentAge = worldDate.year - person.birthYear;

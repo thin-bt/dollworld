@@ -145,7 +145,7 @@ export type Sprint0RegressionSection = {
 export type Sprint1CompletionReport = {
   schemaVersion: "0.1.0";
   sprint: "sprint1";
-  specVersion: "S1-SPEC-0.1.20";
+  specVersion: "S1-SPEC-0.1.21";
   generatedAtUtc: string;
   gitCommit: string;
   workingTreeDirty: boolean;

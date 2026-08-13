@@ -1,11 +1,12 @@
 import {
+  cloneWorldEngineState,
   runSprint1Years,
   type Sha256Provider,
   type Sprint1EventEnvelope,
   type Sprint1RunSession,
   type ValidationResult,
 } from "@shared-world/simulation-core";
-import { createYearEndCaptureProcessor, type YearEndCapture } from "./run-simulation-yearly.js";
+import type { YearEndCapture } from "./run-simulation-yearly.js";
 import { aggregateYearlyStatisticsRow, type YearlyStatisticsRow } from "./yearly-statistics.js";
 import { evaluateReferenceIntegrity } from "./world-integrity.js";
 import type { ReferenceIntegrityResult } from "./types.js";
@@ -24,13 +25,11 @@ export type Sprint1SimulationWithYearlyResult = {
 
 /**
  * Advance a Sprint1 session by `years * 48` weeks, capturing year-end statistics
- * after legacy WorldEngine processors on March week 4 and before calendar year-start.
+ * on the configured world-year end week immediately before the year-start phase.
  *
  * Uses {@link runSprint1Years} validated-session trust boundary with
- * {@link createYearEndCaptureProcessor} as a legacyProcessors hook only
- * (weekly-training stays outside legacy WorldProcessor registration).
- * Year-end rows accumulate event counts from narrow week observations
- * (never the trusted draft Sprint1RunSession).
+ * `onBeforeYearStartPhase` (not legacy WorldProcessor registration) so capture
+ * runs while the draft is still on the year-end week.
  */
 export function runSprint1SimulationWithYearlyCapture(input: {
   initialSession: Sprint1RunSession;
@@ -82,43 +81,53 @@ export function runSprint1SimulationWithYearlyCaptureResult(input: {
     eventCountByYear.set(year, (eventCountByYear.get(year) ?? 0) + 1);
   }
 
-  const captureSink = {
-    snapshots: [] as Sprint1RunSession["runtimeState"]["worldState"][],
-  };
+  const pendingYearEnds: Sprint1YearEndCapture[] = [];
   const yearEnds: Sprint1YearEndCapture[] = [];
-  let processedCaptures = 0;
 
   const yearsResult = runSprint1Years(input.initialSession, input.years, input.sha256Provider, {
-    legacyProcessors: [createYearEndCaptureProcessor(captureSink)],
+    onBeforeYearStartPhase: (worldState) => {
+      const yearEndState = cloneWorldEngineState(worldState);
+      const worldYear = yearEndState.worldDate.year;
+      const integrity = evaluateReferenceIntegrity(yearEndState);
+      pendingYearEnds.push({
+        worldYear,
+        state: yearEndState,
+        integrity,
+        // row filled after the week commits with cumulative event counts
+        row: aggregateYearlyStatisticsRow({
+          yearEndState,
+          integrity,
+          eventCountThisYear: 0,
+          eventCountCumulative: 0,
+        }),
+      });
+    },
     onAfterValidatedWeek: (observation) => {
       for (const event of observation.appendedEvents) {
         const year = event.worldDate.year;
         eventCountByYear.set(year, (eventCountByYear.get(year) ?? 0) + 1);
       }
-      if (captureSink.snapshots.length === processedCaptures) {
+      if (pendingYearEnds.length === 0) {
         return;
       }
-      if (captureSink.snapshots.length !== processedCaptures + 1) {
+      if (pendingYearEnds.length !== 1) {
         throw new Error(
-          `expected at most one year-end snapshot per week, got ${String(captureSink.snapshots.length - processedCaptures)}`,
+          `expected at most one pending year-end capture per week, got ${String(pendingYearEnds.length)}`,
         );
       }
-      const yearEndState = captureSink.snapshots[processedCaptures]!;
-      processedCaptures += 1;
-      const worldYear = yearEndState.worldDate.year;
-      const eventCountThisYear = eventCountByYear.get(worldYear) ?? 0;
+      const pending = pendingYearEnds.pop()!;
+      const eventCountThisYear = eventCountByYear.get(pending.worldYear) ?? 0;
       const eventCountCumulative = observation.eventCountCumulative;
-      const integrity = evaluateReferenceIntegrity(yearEndState);
       const row: YearlyStatisticsRow = aggregateYearlyStatisticsRow({
-        yearEndState,
-        integrity,
+        yearEndState: pending.state,
+        integrity: pending.integrity,
         eventCountThisYear,
         eventCountCumulative,
       });
       yearEnds.push({
-        worldYear,
-        state: yearEndState,
-        integrity,
+        worldYear: pending.worldYear,
+        state: pending.state,
+        integrity: pending.integrity,
         row,
       });
     },

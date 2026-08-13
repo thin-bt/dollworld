@@ -1,5 +1,29 @@
 # 変更履歴
 
+### 2026-08-12 — CAL-JAN-SYNC 0.2.7 acceptance applicability clarification
+
+- `SPEC-0.1.3` / `S0-SPEC-0.1.6` / `S1-SPEC-0.1.21`を維持。wire/schema version追加変更なし。
+- 年初processor runtime registry、enabled processor exact-one invocation、not_implemented zero-side-effect証明をT01受入必須として明確化。
+- founder_activation等の未実装featureは先行実装せず、feature固有受入subclauseをzero-side-effect条件付き証跡へ分離。
+- canonical checkpoint/load/resume surfaceが不存在の場合、T01で保存形式・公開APIを発明せずabsence evidenceを残し、surface導入ownerへ受入rowを引き継ぐ。
+- yearly-statistics.csvの`absoluteWeek`は対象世界年最終週 `Y * weeksPerWorldYear - 1`を維持し、年初確定eventのcommit日時と区別する。
+- CAL-IMPACT-025はaccepted commit SHA生成後のtask completion-stageで最終MATCHEDにする。
+
+## 2026-08-12：T01 CAL-JAN（SPEC-0.1.3／S0-SPEC-0.1.6／S1-SPEC-0.1.21）
+
+新規runの世界年初を既定1月第1週へ同期し、年初月を `InitialWorldConfig.worldCalendar.worldYearStartMonth`（1..12）でrun作成時のみ設定可能とした。4月は通常月。年初処理・共通出生・一斉加齢・年次統計境界は同じ設定年初月へ一括追従する。人物別誕生月／週／日は引き続き保持しない。
+
+- 版: `SPEC-0.1.3`、`S0-SPEC-0.1.6`、`S1-SPEC-0.1.21`
+- `InitialWorldConfig` `0.3.0`（`worldCalendar` strict 4 field）。legacy `startMonth`／`birthMonth` 等は新規schemaで拒否
+- `SimulationIdentity`／`RunRuleSnapshot` `0.5.0`（`worldCalendarConfigHash`／`yearStartProcessorManifestHash` 必須）。legacy 0.4.0 field setは不変
+- `RunMetadataDocument`／`InitialWorldOutputDocument` `0.5.0`。`FinalWorldOutputDocument` `0.3.0`・EventEnvelope `0.2.0`・BattleState `0.6.0`・BattleResult `0.5.0`は維持
+- CAL-JAN新規runの`processorSpecificStates` exact 2件（`weekly-training`→`world-year-start`）。`world-year-start`はnormal-week pipeline外
+- `runYears(N)=N*48`週。既定100年最終日は世界101年1月第1週、年次統計100行。fixed7は exactly 7 files
+- 結婚・出産・大会日程・年間ランキング等の将来processorはT01で実装しない（設計意図のまま）
+- 限定戦候補月の絶対月例は年初月と独立（自動rotationしない）
+
+旧4月年初のchangelog／完了タスク本文は歴史記録として維持する。
+
 ## 2026-08-12：Sprint 1 completion gate完了（管理資料・status sync）
 - Sprint 1: **COMPLETE**（S01-001〜S01-009 accepted）。
 - clean master final verify: PASSED on `5a80268`（repo-external clone）。

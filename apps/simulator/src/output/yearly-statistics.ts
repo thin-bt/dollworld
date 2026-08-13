@@ -45,7 +45,7 @@ export type YearlyStatisticsColumn = (typeof YEARLY_STATISTICS_COLUMNS)[number];
 
 export type YearlyStatisticsRow = {
   worldYear: number;
-  /** Weeks completed through this year end (= worldYear * 48). */
+  /** Target-year terminal week (= worldYear * 48 - 1). Event worldDate stays next-year start. */
   absoluteWeek: number;
   livingCount: number;
   deceasedRecordCount: number;
@@ -269,7 +269,9 @@ export function aggregateYearlyStatisticsRow(input: {
 
   return {
     worldYear,
-    absoluteWeek: worldYear * WEEKS_PER_YEAR,
+    // Target-year terminal week (CAL-JAN-029): Y * weeksPerWorldYear - 1.
+    // year_stats_finalized EventEnvelope worldDate remains next-year start.
+    absoluteWeek: worldYear * WEEKS_PER_YEAR - 1,
     livingCount,
     deceasedRecordCount,
     age0To7,

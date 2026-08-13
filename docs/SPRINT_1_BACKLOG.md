@@ -10,6 +10,7 @@
   - Sprint 1: **COMPLETE**（S01-001〜S01-009 accepted）。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
 - `S1-SPEC-0.1.20`はS01-008 integration contracts clarification（`weekly-training` adapter ID／production adapter pipeline`[weekly-training]`／`Sprint1RunRuntimeState`＋`eventStream`／`EventAllocationState`／fresh initialization promotion／`InitialWeeklyTrainingSidecarSnapshot`／SimulationIdentity `0.4.0`＋`initialWeeklyTrainingSidecarHash`／CLI `--sprint1-input`／run-metadata `0.4.0`／initial-world `0.4.0`／final-world `0.3.0`）。BattleState schema `0.6.0`。先行clarificationとして`S1-SPEC-0.1.19` post-start abort、`S1-SPEC-0.1.18` BattleResult決定契約、`S1-SPEC-0.1.17` sourceSnapshot baselineがある
 - 実装順序の正本: S01-008 accepted → S01-009 accepted → Sprint 1 clean-tree完了検証 → `sprint1-complete`
+- CAL-JAN履歴注記: 本バックログ内の`SPEC-0.1.2`／`S0-SPEC-0.1.5`／`S1-SPEC-0.1.20`、SimulationIdentity 0.4.0、run-metadata 0.4.0、initial-world 0.4.0等のtask-specific記述はSprint 1完了時の受入履歴として維持する。CAL-JAN同期後のcurrent new-run bindingは`SPEC-0.1.3`／`S0-SPEC-0.1.6`／`S1-SPEC-0.1.21`、SimulationIdentity 0.5.0、RunRuleSnapshot 0.5.0、run-metadata 0.5.0、initial-world 0.5.0、final-world 0.3.0であり、歴史本文をcurrent値へ一括置換しない。
 
 ## 目的
 
@@ -1107,7 +1108,7 @@ performanceSeed = baseSeed  // 12345
 - `validation-report.overallPassed=true`
 - 100年=4,800週
 - `yearly-statistics.csv`は100行（header除く）
-- final日時は世界101年4月第1週
+- final日時は世界101年1月第1週（CAL-JAN既定年初。歴史的S01-009受入当時は4月契約だったが、現行契約はSPEC-0.1.3／S1-SPEC-0.1.21）
 - EventEnvelope sequence連続
 - SimulationIdentity／RunRuleSnapshot／sidecar／BattleResult validation成功
 
@@ -1191,7 +1192,7 @@ tiny fixture、baseSeedで次をproduction Sprint 1 CLI実行する。
 必須:
 
 - years × 48週を正確に実行
-- final日時 = 世界`years + 1`年4月第1週
+- final日時 = 世界`years + 1`年・設定年初月第1週（既定1月。CAL-JAN／SPEC-0.1.3）
 - yearly-statistics行数 = years
 - fixed7 exactly 7
 - validation-report success

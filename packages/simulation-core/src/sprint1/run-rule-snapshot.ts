@@ -10,11 +10,18 @@
  * except the hash itself, so a snapshot can never certify its own digest.
  */
 import { toCanonicalJson } from "../canonical-json.js";
+import { validateWorldCalendarConfig } from "../config/validate-config.js";
+import type { WorldCalendarConfig } from "../config/types.js";
 import { asSimulationId } from "../ids.js";
 import type { SimulationId } from "../ids.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
+import {
+  computeActiveYearStartProcessorManifestHash,
+  validateActiveYearStartProcessorManifest,
+  type ActiveYearStartProcessorManifest,
+} from "./active-year-start-processor-manifest.js";
 import {
   BATTLE_PROFILE_ADAPTER_VERSION,
   DEFAULT_BATTLE_STRATEGY_VERSION,
@@ -52,6 +59,10 @@ export const RUN_RULE_SNAPSHOT_HASH_INPUT_KEYS = [
   "schemaVersion",
   "simulationId",
   "simulationIdentityHash",
+  "worldCalendar",
+  "worldCalendarConfigHash",
+  "yearStartProcessorManifest",
+  "yearStartProcessorManifestHash",
   "battleProfileAdapterVersion",
   "matchIdGeneratorVersion",
   "initialMatchIdGeneratorStateHash",
@@ -73,6 +84,10 @@ export type RunRuleSnapshot = {
   schemaVersion: typeof RUN_RULE_SNAPSHOT_SCHEMA_VERSION;
   simulationId: SimulationId;
   simulationIdentityHash: string;
+  worldCalendar: WorldCalendarConfig;
+  worldCalendarConfigHash: string;
+  yearStartProcessorManifest: ActiveYearStartProcessorManifest;
+  yearStartProcessorManifestHash: string;
   battleProfileAdapterVersion: typeof BATTLE_PROFILE_ADAPTER_VERSION;
   matchIdGeneratorVersion: typeof MATCH_ID_GENERATOR_VERSION;
   initialMatchIdGeneratorStateHash: string;
@@ -93,6 +108,8 @@ export type CreateRunRuleSnapshotInput = {
   simulationIdentity: unknown;
   simulationIdentityHash: unknown;
   initialMatchIdGeneratorState: unknown;
+  worldCalendar: unknown;
+  yearStartProcessorManifest: unknown;
   sprint1Config: unknown;
   techniqueCatalogDataVersion: unknown;
   techniqueDefinitions: unknown;
@@ -102,6 +119,8 @@ export const CREATE_RUN_RULE_SNAPSHOT_INPUT_KEYS = [
   "simulationIdentity",
   "simulationIdentityHash",
   "initialMatchIdGeneratorState",
+  "worldCalendar",
+  "yearStartProcessorManifest",
   "sprint1Config",
   "techniqueCatalogDataVersion",
   "techniqueDefinitions",
@@ -174,6 +193,10 @@ export function buildRunRuleSnapshotHashInput(snapshot: RunRuleSnapshot): RunRul
     schemaVersion: snapshot.schemaVersion,
     simulationId: snapshot.simulationId,
     simulationIdentityHash: snapshot.simulationIdentityHash,
+    worldCalendar: snapshot.worldCalendar,
+    worldCalendarConfigHash: snapshot.worldCalendarConfigHash,
+    yearStartProcessorManifest: snapshot.yearStartProcessorManifest,
+    yearStartProcessorManifestHash: snapshot.yearStartProcessorManifestHash,
     battleProfileAdapterVersion: snapshot.battleProfileAdapterVersion,
     matchIdGeneratorVersion: snapshot.matchIdGeneratorVersion,
     initialMatchIdGeneratorStateHash: snapshot.initialMatchIdGeneratorStateHash,
@@ -229,6 +252,38 @@ export function preflightRunRuleSnapshotStructure(
   );
   const simulationIdText = requireNonEmptyTrimmedString(object, "simulationId", "", issues);
   const simulationIdentityHash = requireHashHex(object, "simulationIdentityHash", issues);
+
+  let worldCalendar: WorldCalendarConfig | undefined;
+  const calendarResult = validateWorldCalendarConfig(object["worldCalendar"]);
+  if (!calendarResult.ok) {
+    for (const issue of calendarResult.issues) {
+      issues.push({
+        ...issue,
+        path: issue.path.startsWith("/worldCalendar") ? issue.path : `/worldCalendar${issue.path}`,
+      });
+    }
+  } else {
+    worldCalendar = calendarResult.value;
+  }
+  const worldCalendarConfigHash = requireHashHex(object, "worldCalendarConfigHash", issues);
+
+  let yearStartProcessorManifest: ActiveYearStartProcessorManifest | undefined;
+  const manifestResult = validateActiveYearStartProcessorManifest(
+    object["yearStartProcessorManifest"],
+  );
+  if (!manifestResult.ok) {
+    for (const issue of manifestResult.issues) {
+      issues.push({ ...issue, path: `/yearStartProcessorManifest${issue.path}` });
+    }
+  } else {
+    yearStartProcessorManifest = manifestResult.value;
+  }
+  const yearStartProcessorManifestHash = requireHashHex(
+    object,
+    "yearStartProcessorManifestHash",
+    issues,
+  );
+
   const battleProfileAdapterVersion = requireLiteralString(
     object,
     "battleProfileAdapterVersion",
@@ -291,6 +346,10 @@ export function preflightRunRuleSnapshotStructure(
     schemaVersion === undefined ||
     simulationIdText === undefined ||
     simulationIdentityHash === undefined ||
+    worldCalendar === undefined ||
+    worldCalendarConfigHash === undefined ||
+    yearStartProcessorManifest === undefined ||
+    yearStartProcessorManifestHash === undefined ||
     battleProfileAdapterVersion === undefined ||
     matchIdGeneratorVersion === undefined ||
     initialMatchIdGeneratorStateHash === undefined ||
@@ -379,6 +438,10 @@ export function preflightRunRuleSnapshotStructure(
     schemaVersion,
     simulationId: asSimulationId(simulationIdText),
     simulationIdentityHash,
+    worldCalendar,
+    worldCalendarConfigHash,
+    yearStartProcessorManifest,
+    yearStartProcessorManifestHash,
     battleProfileAdapterVersion,
     matchIdGeneratorVersion,
     initialMatchIdGeneratorStateHash,
@@ -404,6 +467,41 @@ export function verifyRunRuleSnapshotHashes(
   provider: Sha256Provider,
 ): ValidationResult<RunRuleSnapshot> {
   const issues: ValidationIssue[] = [];
+
+  const computedCalendarHashResult = safeHashUtf8(
+    provider,
+    toCanonicalJson(snapshot.worldCalendar),
+    "/worldCalendarConfigHash",
+  );
+  if (!computedCalendarHashResult.ok) {
+    return failure(computedCalendarHashResult.issues);
+  }
+  if (computedCalendarHashResult.value !== snapshot.worldCalendarConfigHash) {
+    issues.push({
+      path: "/worldCalendarConfigHash",
+      message:
+        "worldCalendarConfigHash must equal the SHA-256 of the canonical WorldCalendarConfig",
+      actual: snapshot.worldCalendarConfigHash,
+      expected: computedCalendarHashResult.value,
+    });
+  }
+
+  const computedManifestHash = computeActiveYearStartProcessorManifestHash(
+    snapshot.yearStartProcessorManifest,
+    provider,
+  );
+  if (!computedManifestHash.ok) {
+    return failure(computedManifestHash.issues);
+  }
+  if (computedManifestHash.value !== snapshot.yearStartProcessorManifestHash) {
+    issues.push({
+      path: "/yearStartProcessorManifestHash",
+      message:
+        "yearStartProcessorManifestHash must equal the SHA-256 of the canonical ActiveYearStartProcessorManifest",
+      actual: snapshot.yearStartProcessorManifestHash,
+      expected: computedManifestHash.value,
+    });
+  }
 
   const computedConfigHashResult = safeHashUtf8(
     provider,
@@ -591,6 +689,18 @@ export function validateRunRuleSnapshotAgainstIdentity(
 
   const checks: Array<{ path: string; actual: string; expected: string; message: string }> = [
     {
+      path: "/worldCalendarConfigHash",
+      actual: snapshot.value.worldCalendarConfigHash,
+      expected: identity.value.worldCalendarConfigHash,
+      message: "worldCalendarConfigHash must match SimulationIdentity",
+    },
+    {
+      path: "/yearStartProcessorManifestHash",
+      actual: snapshot.value.yearStartProcessorManifestHash,
+      expected: identity.value.yearStartProcessorManifestHash,
+      message: "yearStartProcessorManifestHash must match SimulationIdentity",
+    },
+    {
       path: "/battleProfileAdapterVersion",
       actual: snapshot.value.battleProfileAdapterVersion,
       expected: identity.value.battleProfileAdapterVersion,
@@ -714,6 +824,30 @@ export function createRunRuleSnapshot(
     );
   }
 
+  const calendarResult = validateWorldCalendarConfig(object["worldCalendar"]);
+  if (!calendarResult.ok) {
+    return failure(
+      calendarResult.issues.map((issue) => ({
+        ...issue,
+        path: issue.path.startsWith("/worldCalendar") ? issue.path : `/worldCalendar${issue.path}`,
+      })),
+    );
+  }
+  const worldCalendar = calendarResult.value;
+
+  const manifestResult = validateActiveYearStartProcessorManifest(
+    object["yearStartProcessorManifest"],
+  );
+  if (!manifestResult.ok) {
+    return failure(
+      manifestResult.issues.map((issue) => ({
+        ...issue,
+        path: `/yearStartProcessorManifest${issue.path}`,
+      })),
+    );
+  }
+  const yearStartProcessorManifest = manifestResult.value;
+
   const configResult = validateNormalizedSprint1Config(object["sprint1Config"]);
   if (!configResult.ok) {
     return failure(
@@ -817,6 +951,46 @@ export function createRunRuleSnapshot(
     ]);
   }
 
+  const worldCalendarConfigHashResult = safeHashUtf8(
+    provider,
+    toCanonicalJson(worldCalendar),
+    "/worldCalendarConfigHash",
+  );
+  if (!worldCalendarConfigHashResult.ok) {
+    return failure(worldCalendarConfigHashResult.issues);
+  }
+  if (worldCalendarConfigHashResult.value !== identity.value.worldCalendarConfigHash) {
+    return failure([
+      {
+        path: "/worldCalendar",
+        message: "WorldCalendarConfig hash must equal SimulationIdentity.worldCalendarConfigHash",
+        actual: worldCalendarConfigHashResult.value,
+        expected: identity.value.worldCalendarConfigHash,
+      },
+    ]);
+  }
+
+  const yearStartProcessorManifestHashResult = computeActiveYearStartProcessorManifestHash(
+    yearStartProcessorManifest,
+    provider,
+  );
+  if (!yearStartProcessorManifestHashResult.ok) {
+    return failure(yearStartProcessorManifestHashResult.issues);
+  }
+  if (
+    yearStartProcessorManifestHashResult.value !== identity.value.yearStartProcessorManifestHash
+  ) {
+    return failure([
+      {
+        path: "/yearStartProcessorManifest",
+        message:
+          "ActiveYearStartProcessorManifest hash must equal SimulationIdentity.yearStartProcessorManifestHash",
+        actual: yearStartProcessorManifestHashResult.value,
+        expected: identity.value.yearStartProcessorManifestHash,
+      },
+    ]);
+  }
+
   const sprint1ConfigHashResult = safeHashUtf8(
     provider,
     toCanonicalJson(sprint1Config),
@@ -860,6 +1034,10 @@ export function createRunRuleSnapshot(
     schemaVersion: RUN_RULE_SNAPSHOT_SCHEMA_VERSION,
     simulationId: createSimulationIdFromIdentityHash(declaredHash),
     simulationIdentityHash: declaredHash,
+    worldCalendar,
+    worldCalendarConfigHash: worldCalendarConfigHashResult.value,
+    yearStartProcessorManifest,
+    yearStartProcessorManifestHash: yearStartProcessorManifestHashResult.value,
     battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
     matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
     initialMatchIdGeneratorStateHash: identity.value.initialMatchIdGeneratorStateHash,

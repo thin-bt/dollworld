@@ -27,7 +27,7 @@ export const SPRINT1_PERFORMANCE_PROFILES = [
 
 export const SPRINT1_COMPLETION_REPORT_SCHEMA_VERSION = "0.1.0" as const;
 export const SPRINT1_COMPLETION_REPORT_FILE_NAME = "sprint1-completion-report.json" as const;
-export const SPRINT1_SPEC_VERSION = "S1-SPEC-0.1.20" as const;
+export const SPRINT1_SPEC_VERSION = "S1-SPEC-0.1.21" as const;
 export const SPRINT1_VERIFICATION_SPRINT = "sprint1" as const;
 
 export const SPRINT1_FIXTURE_CONFIG_RELATIVE =

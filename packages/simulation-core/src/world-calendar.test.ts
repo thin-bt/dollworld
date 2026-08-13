@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   ABILITY_KEYS,
   APTITUDE_KEYS,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   MINIMUM_RANK,
   RANK_ORDER,
   applyYearStart,
@@ -125,10 +126,10 @@ describe("MINIMUM_RANK", () => {
 });
 
 describe("initial world calendar boundary", () => {
-  it("does not age or emit year_started at world year 1 April week 1", () => {
+  it("does not age or emit year_started at world year 1 January week 1", () => {
     const child = livingChild({ personId: asPersonId("person_000001"), currentAge: 5 });
     const state = createInitialWorldCalendarState([child]);
-    expect(state.worldDate).toEqual({ year: 1, month: 4, weekOfMonth: 1, absoluteWeek: 0 });
+    expect(state.worldDate).toEqual({ year: 1, month: 1, weekOfMonth: 1, absoluteWeek: 0 });
     expect((state.persons[0] as LivingChildPerson).currentAge).toBe(5);
 
     const stepped = stepOneWeek(state);
@@ -137,12 +138,12 @@ describe("initial world calendar boundary", () => {
     expect(countByKind(stepped.transitions, "year_stats_finalized")).toBe(0);
   });
 
-  it("first mass aging is world year 2 April week 1 after 48 steps", () => {
+  it("first mass aging is world year 2 January week 1 after 48 steps", () => {
     const child = livingChild({ personId: asPersonId("person_000001"), currentAge: 5 });
     const initial = createInitialWorldCalendarState([child]);
     const result = stepWeeks(initial, 48);
 
-    expect(result.state.worldDate).toEqual({ year: 2, month: 4, weekOfMonth: 1, absoluteWeek: 48 });
+    expect(result.state.worldDate).toEqual({ year: 2, month: 1, weekOfMonth: 1, absoluteWeek: 48 });
     expect(countByKind(result.transitions, "year_started")).toBe(1);
     expect(result.transitions.some((t) => t.kind === "year_started" && t.worldYear === 2)).toBe(
       true,
@@ -167,7 +168,7 @@ describe("aging", () => {
     }
   });
 
-  it("ages all eligible persons by 1 at world year 2 April week 1", () => {
+  it("ages all eligible persons by 1 at world year 2 January week 1", () => {
     const persons: Person[] = [
       livingChild({ personId: asPersonId("person_000001"), currentAge: 3 }),
       livingTrainee({ personId: asPersonId("person_000002"), currentAge: 10 }),
@@ -497,14 +498,14 @@ describe("age eligibility", () => {
 });
 
 describe("long-run 100 years", () => {
-  it("runs 4800 steps to world year 101 April week 1 after year-start", () => {
+  it("runs 4800 steps to world year 101 January week 1 after year-start", () => {
     const person = livingChild({ personId: asPersonId("person_000001"), currentAge: 0 });
     const initial = createInitialWorldCalendarState([person]);
     const result = stepWeeks(initial, 4800);
 
     expect(result.state.worldDate).toEqual({
       year: 101,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 4800,
     });
@@ -576,7 +577,10 @@ describe("transition purity and typing", () => {
   });
 
   it("can construct dates without relying on host Date", () => {
-    const date = createWorldDate({ year: 5, month: 12, weekOfMonth: 3 });
+    const date = createWorldDate(
+      { year: 5, month: 12, weekOfMonth: 3 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     expect(date.year).toBe(5);
     expect(typeof Date).toBe("function");
   });

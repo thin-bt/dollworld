@@ -42,6 +42,7 @@ type ParsedRunInput = {
   weeks: number;
   startSequence: number;
   processorRuntimeState?: ProcessorRuntimeState;
+  skipCalendarStep?: boolean;
 };
 
 /**
@@ -151,6 +152,17 @@ function parseRunOneWeekInput(input: unknown): ParsedRunInput {
     });
     if (runtime !== undefined) {
       parsed.processorRuntimeState = runtime as ProcessorRuntimeState;
+    }
+    const skipCalendar = readOptionalEnumerableDataProperty(input, "skipCalendarStep", {
+      field: "skipCalendarStep",
+    });
+    if (skipCalendar !== undefined) {
+      if (typeof skipCalendar !== "boolean") {
+        throw new WorldEngineError("skipCalendarStep must be a boolean", {
+          field: "skipCalendarStep",
+        });
+      }
+      parsed.skipCalendarStep = skipCalendar;
     }
     return parsed;
   } catch (error) {
@@ -329,17 +341,27 @@ function executeWorldWeeks(input: ParsedRunInput): WorldEngineRunResult {
     }
 
     let calendarResult;
-    try {
-      calendarResult = stepOneWeek({
-        worldDate: state.worldDate,
-        persons: state.persons,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new WorldEngineError(`calendar step failed: ${message}`, {
-        ...weekContext,
-        detail: message,
-      });
+    if (input.skipCalendarStep) {
+      calendarResult = {
+        state: {
+          worldDate: state.worldDate,
+          persons: state.persons,
+        },
+        transitions: [] as ReturnType<typeof stepOneWeek>["transitions"],
+      };
+    } else {
+      try {
+        calendarResult = stepOneWeek({
+          worldDate: state.worldDate,
+          persons: state.persons,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new WorldEngineError(`calendar step failed: ${message}`, {
+          ...weekContext,
+          detail: message,
+        });
+      }
     }
 
     const nextSequenceCandidate = sequence + calendarResult.transitions.length;

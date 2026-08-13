@@ -427,9 +427,11 @@ describe("SimulationIdentity", () => {
     }
     const hex = "a".repeat(64);
     return {
-      schemaVersion: "0.4.0",
+      schemaVersion: "0.5.0",
       seed: 12345,
       initialWorldConfigHash: hex,
+      worldCalendarConfigHash: "a".repeat(64),
+      yearStartProcessorManifestHash: "a".repeat(64),
       sprint1ConfigHash: sprint1ConfigHashResult.value,
       techniqueCatalogHash: hex,
       initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -533,9 +535,11 @@ describe("S01-001 acceptance negative probes", () => {
     }
     const hex = "a".repeat(64);
     return {
-      schemaVersion: "0.4.0",
+      schemaVersion: "0.5.0",
       seed: 12345,
       initialWorldConfigHash: hex,
+      worldCalendarConfigHash: "a".repeat(64),
+      yearStartProcessorManifestHash: "a".repeat(64),
       sprint1ConfigHash: sprint1ConfigHashResult.value,
       techniqueCatalogHash: hex,
       initialWeeklyTrainingSidecarHash: "c".repeat(64),

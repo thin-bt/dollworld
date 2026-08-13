@@ -8,7 +8,7 @@ import {
   SIMULATION_SPEC_VERSION,
 } from "../initial-world/constants.js";
 import { RNG_ALGORITHM_VERSION } from "../rng.js";
-import { validateWorldDate, type WorldDate } from "../world-date.js";
+import { DEFAULT_WORLD_CALENDAR_CONFIG, validateWorldDate, type WorldDate } from "../world-date.js";
 import { WorldEngineError } from "./errors.js";
 import { isTrustedDeepFrozen } from "./freeze.js";
 import type { WorldEngineState } from "./types.js";
@@ -754,7 +754,7 @@ function validateWorldEngineStateInternal(state: unknown): asserts state is Worl
     }
     const worldYear = date.year;
     try {
-      validateWorldDate(date as WorldDate);
+      validateWorldDate(date as WorldDate, DEFAULT_WORLD_CALENDAR_CONFIG);
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
       throw new WorldEngineError("invalid worldDate", { field: "worldDate", detail });

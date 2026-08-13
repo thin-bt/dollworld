@@ -9,6 +9,7 @@ import {
   createWorldEngineState,
   createSeededRng,
   deriveSeed,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   fromAbsoluteWeek,
   generateInitialWorld,
   importSeededRng,
@@ -158,7 +159,7 @@ describe("world-engine", () => {
     expect(result.state.worldDate.absoluteWeek).toBe(state.worldDate.absoluteWeek + 1);
   });
 
-  it("48 weeks reaches year 2 April week 1", () => {
+  it("48 weeks reaches year 2 January week 1", () => {
     const result = runWorldWeeks({
       state: freshState(),
       processors: [],
@@ -167,13 +168,13 @@ describe("world-engine", () => {
     });
     expect(result.state.worldDate).toMatchObject({
       year: 2,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 48,
     });
   });
 
-  it("4800 weeks reaches year 101 April week 1 absoluteWeek 4800", () => {
+  it("4800 weeks reaches year 101 January week 1 absoluteWeek 4800", () => {
     const result = runWorldWeeks({
       state: freshState(),
       processors: [],
@@ -182,7 +183,7 @@ describe("world-engine", () => {
     });
     expect(result.state.worldDate).toMatchObject({
       year: 101,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 4800,
     });
@@ -278,7 +279,10 @@ describe("world-engine", () => {
         process({ state }) {
           return {
             ...state,
-            worldDate: fromAbsoluteWeek(state.worldDate.absoluteWeek + 1),
+            worldDate: fromAbsoluteWeek(
+              state.worldDate.absoluteWeek + 1,
+              DEFAULT_WORLD_CALENDAR_CONFIG,
+            ),
           };
         },
       },
@@ -529,7 +533,7 @@ describe("world-engine", () => {
     expect(result.weeksExecuted).toBe(4800);
     expect(result.state.worldDate).toMatchObject({
       year: 101,
-      month: 4,
+      month: 1,
       weekOfMonth: 1,
       absoluteWeek: 4800,
     });
@@ -537,12 +541,10 @@ describe("world-engine", () => {
     expect(result.yearStatsFinalizedNotices.map((n) => n.worldYear)).toEqual(
       Array.from({ length: 100 }, (_, i) => i + 1),
     );
-    expect(result.yearStatsFinalizedNotices.every((n) => n.worldDate.month === 3)).toBe(true);
-    expect(result.yearStatsFinalizedNotices.every((n) => n.worldDate.weekOfMonth === 4)).toBe(true);
+    expect(result.yearStatsFinalizedNotices.every((n) => n.worldDate.month === 1)).toBe(true);
+    expect(result.yearStatsFinalizedNotices.every((n) => n.worldDate.weekOfMonth === 1)).toBe(true);
     expect(
-      result.yearStatsFinalizedNotices.every(
-        (n) => n.worldDate.absoluteWeek === n.worldYear * 48 - 1,
-      ),
+      result.yearStatsFinalizedNotices.every((n) => n.worldDate.absoluteWeek === n.worldYear * 48),
     ).toBe(true);
     expect(result.yearStatsFinalizedNotices.some((n) => n.worldYear === 101)).toBe(false);
 
@@ -835,7 +837,7 @@ describe("world-engine audit guards", () => {
     const base = freshState();
     const emptyBoundaryState: WorldEngineState = {
       ...base,
-      worldDate: fromAbsoluteWeek(47),
+      worldDate: fromAbsoluteWeek(47, DEFAULT_WORLD_CALENDAR_CONFIG),
       persons: [],
       families: [],
       lineages: [],
@@ -854,7 +856,7 @@ describe("world-engine audit guards", () => {
     const base = freshState();
     const emptyBoundaryState: WorldEngineState = {
       ...base,
-      worldDate: fromAbsoluteWeek(47),
+      worldDate: fromAbsoluteWeek(47, DEFAULT_WORLD_CALENDAR_CONFIG),
       persons: [],
       families: [],
       lineages: [],

@@ -35,7 +35,7 @@ import {
 } from "../ids.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
-import { validateWorldDate, type WorldDate } from "../world-date.js";
+import { validateWorldDate, type WorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
 import type { BattleFinishedEventCandidate } from "./battle-finished-event.js";
 import { BATTLE_SIMULATION_SOURCE_PROCESSOR } from "./battle-started-event.js";
 import type { BattleStartedEventCandidate } from "./battle-started-event.js";
@@ -227,7 +227,7 @@ function parseWorldDate(
     absoluteWeek,
   } as WorldDate;
   try {
-    validateWorldDate(worldDate);
+    validateWorldDate(worldDate, DEFAULT_WORLD_CALENDAR_CONFIG);
   } catch (error) {
     issues.push(issueFromThrownError(path, error));
     return undefined;
@@ -549,7 +549,7 @@ export function allocateSprint1EventEnvelope(
 
   let worldDate: WorldDate | undefined;
   try {
-    validateWorldDate(input.worldDate);
+    validateWorldDate(input.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG);
     worldDate = input.worldDate;
   } catch (error) {
     issues.push(issueFromThrownError("/worldDate", error));
@@ -716,7 +716,7 @@ export function allocateWeeklyTrainingEventCandidates(
   }
   let worldDate: WorldDate | undefined;
   try {
-    validateWorldDate(input.worldDate);
+    validateWorldDate(input.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG);
     worldDate = input.worldDate;
   } catch (error) {
     issues.push(issueFromThrownError("/worldDate", error));

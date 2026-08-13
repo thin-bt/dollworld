@@ -14,7 +14,7 @@ sources:
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:259a219d29b626c4678e5b248b8a8453861797f9
   - commit:3b313a5ea690351d062e751bc724e5530b835872
-last_verified: 2026-08-08
+last_verified: 2026-08-12
 ---
 
 # 矛盾記録
@@ -29,11 +29,11 @@ Wiki作成・更新時に発見した、正本・コード・テスト間の矛�
 
 - Sprint 0 の確定実装・正本（`sprint0-complete`）
 - Sprint 1 の `S1-SPEC-0.1.11` 確定 commit は `2800d3b959e575f57660c27b344507dd0e38ddb6`
-- Sprint 1 の現行仕様は `S1-SPEC-0.1.20`（S01-008 integration contracts clarification）。`S1-SPEC-0.1.19` はpost-start abort、`S1-SPEC-0.1.18` はBattleResult決定的契約、`S1-SPEC-0.1.17` は戦闘開始`sourceSnapshot` baseline明文化（BattleState schema `0.6.0`）として履歴。`2800d3b...` を `S1-SPEC-0.1.12`〜`S1-SPEC-0.1.20` の内容 commit として扱わない
+- Sprint 1 のpre-CAL-JAN完成snapshotは `S1-SPEC-0.1.20`。CAL-JAN-SYNC適用後の新規run契約は `S1-SPEC-0.1.21` であり、`S1-SPEC-0.1.20`／SimulationIdentity `0.4.0`は既存run・履歴参照用のpre-CAL-JAN契約として内容を変更しない。
 - 実装状態: S01-001〜S01-009 implemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了commit `7c47847`。S01-009受入完了commit `5616f5f`、2026-08-11 ChatGPT再監査）
 - S01-008は**implemented / accepted**（WorldEngine／CLI本統合 production実装済み）
-- Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
-- コード側 `S1_SPEC_VERSION`／SimulationIdentity レジストリは `S1-SPEC-0.1.20`、SimulationIdentity schemaVersionは `0.4.0`、`BattleState.schemaVersion`は `0.6.0`。旧`S1-SPEC-0.1.19`／identity `0.3.0`を新規 identity の現行sprint1版として受理しない
+- Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。CAL-JAN-SYNCはこのcompletion snapshot後の共通暦同期であり、completion tagは動かさない。
+- CAL-JAN-SYNC新規runのコード側 `S1_SPEC_VERSION` は `S1-SPEC-0.1.21`、SimulationIdentity schemaVersionは `0.5.0`、RunRuleSnapshot schemaVersionは `0.5.0`、RunMetadataDocument／InitialWorldOutputDocumentは `0.5.0`。`BattleState.schemaVersion=0.6.0`、`BattleResult.schemaVersion=0.5.0`、FinalWorldOutputDocument `0.3.0`はfield shapeを変えない限り維持する。
 
 未来の未作成 commit hash を捏造して sources へ書かない。
 

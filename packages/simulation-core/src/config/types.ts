@@ -13,14 +13,15 @@ export type NumericRange = {
   max: number;
 };
 
-export type WorldConfig = {
-  startYear: number;
-  startMonth: number;
-  startWeekOfMonth: number;
-  weeksPerMonth: number;
-  monthsPerYear: number;
-  birthMonth: number;
-  birthWeekOfMonth: number;
+/**
+ * InitialWorldConfig 0.3.0 calendar input (CAL-JAN-SYNC).
+ * Exact 4 fields; no startYear / birthMonth / legacy month fields.
+ */
+export type WorldCalendarConfig = {
+  monthsPerWorldYear: 12;
+  weeksPerMonth: 4;
+  worldYearStartMonth: number;
+  worldYearStartWeek: 1;
 };
 
 export type PopulationConfig = {
@@ -113,7 +114,7 @@ export type InitialWorldConfig = {
   schemaVersion: string;
   profileId: string;
   purpose: string;
-  world: WorldConfig;
+  worldCalendar: WorldCalendarConfig;
   population: PopulationConfig;
   history: HistoryConfig;
   relationships: RelationshipsConfig;

@@ -1,6 +1,6 @@
 # 14 Sprint 1共通設定スキーマ付録
 
-- 仕様版: `S1-SPEC-0.1.20`
+- 仕様版: `S1-SPEC-0.1.21`
 - 状態: 08〜13が参照する型付き設定の固定構造
 - 対象: 成長、週間Planner、技習得、戦闘、戦闘後効果
 - 非対象: 初期世界生成設定、正式技一覧、大会設定
@@ -48,19 +48,19 @@ Sprint1ConfigIdentity
 
 | 対象 | 初期値 | 変更条件 |
 |---|---|---|
-| SimulationIdentity.schemaVersion | `0.4.0` | `initialWeeklyTrainingSidecarHash`を含むsimulation identity入力構造変更 |
+| SimulationIdentity.schemaVersion | `0.5.0` | `worldCalendarConfigHash`／`yearStartProcessorManifestHash`を必須追加（legacy 0.4.0 field setは不変） |
 | Sprint1Config.schemaVersion | `0.2.0` | 年齢帯キーを正本の42歳強制引退境界へ統一した設定JSON構造 |
 | Sprint1Config.configVersion | `sprint1-balance-0.2.0` | 42歳以上の成長係数0と年齢帯キー変更を含む係数・既定値 |
 | TechniqueDefinition.schemaVersion | `0.1.0` | 技定義構造変更 |
 | TechniqueCatalog.dataVersion | `techniques-0.1.0` | 正式技データ内容変更 |
 | InitialWeeklyTrainingSidecarSnapshot.schemaVersion | `0.1.0` | 週間訓練sidecar外部入力スナップショット |
 | Sprint1CliInput.schemaVersion | `0.1.0` | CLI `--sprint1-input` 集約入力 |
-| RunMetadataDocument.schemaVersion | `0.4.0` | nested SimulationIdentity 0.4.0を含むrun-metadata.json構造変更 |
-| InitialWorldOutputDocument.schemaVersion | `0.4.0` | initial-world.json構造変更（トップレベル`initialWeeklyTrainingSidecarSnapshot`追加） |
+| RunMetadataDocument.schemaVersion | `0.5.0` | nested SimulationIdentity 0.5.0を含むrun-metadata.json構造変更 |
+| InitialWorldOutputDocument.schemaVersion | `0.5.0` | initial-world.json構造変更（RunRuleSnapshot 0.5.0＋calendar／year-start bind） |
 | FinalWorldOutputDocument.schemaVersion | `0.3.0` | final-world.json構造変更（トップレベル`weeklyTrainingSidecars`＋`battleResults`追加） |
 | Sprint1PersonState.sprint1StateSchemaVersion | `0.1.0` | currentMental・技状態・習得focusの人物追加状態 |
 | BattleReplayBundle.schemaVersion | `0.1.0` | 監査用自己完結replay bundle |
-| RunRuleSnapshot.schemaVersion | `0.4.0` | adapter／MatchId generator／DefaultBattleStrategy版を含むrun snapshot構造 |
+| RunRuleSnapshot.schemaVersion | `0.5.0` | `worldCalendar`／`yearStartProcessorManifest`／各hashを必須追加（legacy 0.4.0 field setは不変） |
 | BattleRulesSnapshotRef.schemaVersion | `0.1.0` | 戦闘ルール参照hash入力構造 |
 | BattleActionSourceIdentity.schemaVersion | `0.1.0` | Strategy／scripted actionsの決定性identity |
 | StartBattleRuntimeTransition.schemaVersion | `0.1.0` | World RNG／MatchIdGeneratorStateの未commit遷移 |
@@ -70,6 +70,10 @@ Sprint1ConfigIdentity
 | BattleResult.schemaVersion | `0.5.0` | summaryLogHashと両ActionSourceIdentityを含む戦闘結果構造 |
 | EventEnvelope.schemaVersion | `0.2.0` | 共通イベント構造変更 |
 | TrainingProcessorRuntimeState.schemaVersion | `0.1.0` | 週間訓練Processorの再開・集計状態 |
+| WorldYearStartRuntimeState.schemaVersion | `0.1.0` | 年初phase runtime（`processorSpecificStates`物理owner） |
+| WorldYearStartReceipt.schemaVersion | `0.1.0` | 年初transaction receipt |
+| WorldYearStartTransactionAggregate.schemaVersion | `0.1.0` | 年初transaction集約 |
+| ActiveYearStartProcessorManifest.schemaVersion | `0.1.0` | 年初processor manifest |
 | EventAllocationState.schemaVersion | `0.1.0` | Sprint1RunRuntimeStateのglobal event sequence allocator（runtime-only） |
 | BattleResultWeekState.schemaVersion | `0.1.0` | 同週確定BattleResult registry（runtime-only） |
 
@@ -85,11 +89,11 @@ Sprint1ConfigIdentity
 - MatchId文字列形式は `match_<12桁の0埋め10進数>`。seedはID文字列へ混ぜず、state hash／SimulationIdentity bindingへだけ使用する。
 - `defaultBattleStrategyVersion` とDefaultBattleStrategyの初期`strategyVersion`は `default-battle-strategy-0.1.0` とする。
 - ScriptedActionSourceの初期`scriptFormatVersion`は `battle-action-script-0.1.0` とする。完全JSON構造・turns規則・canonicalScript／actionScriptHash・両side bindingは12仕様§2.1を正本とする。`scriptFormatVersion`文字列自体は本版でも変更しない。
-- Sprint 1仕様版（SimulationIdentity.specVersions.sprint1）の現行値は `S1-SPEC-0.1.20` とする。旧`S1-SPEC-0.1.19`およびSimulationIdentity schemaVersion `0.3.0`を新規runの現行Sprint 1 identityとして受理しない。
+- 正本仕様版（SimulationIdentity.specVersions.main）の現行値は `SPEC-0.1.3`、Sprint 0は `S0-SPEC-0.1.6`、Sprint 1仕様版（SimulationIdentity.specVersions.sprint1）の現行値は `S1-SPEC-0.1.21` とする。旧`S1-SPEC-0.1.20`／`0.1.19`およびSimulationIdentity schemaVersion `0.4.0`／`0.3.0`を新規runの現行Sprint 1 identityとして受理しない。
 - 週間訓練production processor literalは`weekly-training`（`WEEKLY_TRAINING_PROCESSOR_ID`）。Sprint1 transactional processor adapter IDおよび週間由来`EventEnvelope.sourceProcessor`と同一literal（10・03仕様）。既存`WorldProcessor` interfaceは変更しない。production配列`[weekly-training]`はSprint1 transactional adapter pipelineのみを意味し、legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない（二重実行禁止）。
-- Sprint 1 production normal-week adapter pipelineは`[weekly-training]`のみ。`battle-simulation`は配列へ登録しない。
+- Sprint 1 production normal-week adapter pipelineは`[weekly-training]`のみ。`battle-simulation`は配列へ登録しない。`WORLD_YEAR_START_PROCESSOR_ID = "world-year-start"`はnormal-week pipeline／`processorOrder`／`rngStates`／legacy WorldProcessorへ追加しない。
 - battle World RNG labelは`battle/world-rng`、weekly-training processor RNG labelは`processor/weekly-training`（10仕様）。SimulationIdentityへlabel fieldは追加しない。
-- `BattleResultWeekState`／`eventAllocationState`／`worldRngState`／`matchIdGeneratorState`／`processorRuntimeStates.processorSpecificStates`はruntime-only。`specificState`はplain JSON deep-clone。`Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。一方`initialWeeklyTrainingSidecarSnapshot`はinitial-world 0.4.0へ、`weeklyTrainingSidecars`および`battleResults`はfinal-world 0.3.0へ投影する。fixed7は exactly 7 files（`battle-results.json`禁止）。
+- `BattleResultWeekState`／`eventAllocationState`／`worldRngState`／`matchIdGeneratorState`／`processorRuntimeStates.processorSpecificStates`はruntime-only。CAL-JAN新規runの`processorSpecificStates`はexact 2件（`weekly-training`→`world-year-start`順）。`specificState`はplain JSON deep-clone。年開始runtimeはここに1回だけ格納し、Sprint1RunRuntimeStateトップレベル新fieldやWorldState／event／UIへ複製しない。`Sprint1RunRuntimeState`オブジェクト自体はcheckpoint非永続。一方`initialWeeklyTrainingSidecarSnapshot`はinitial-world 0.5.0へ、`weeklyTrainingSidecars`および`battleResults`はfinal-world 0.3.0へ投影する。fixed7は exactly 7 files（`battle-results.json`／`year-start.json`禁止）。
 - immutable `Sprint1RunContext`（`initialWeeklyTrainingSidecarSnapshot`含む）／`WeeklyTrainingSidecarState`／`battleResults`／`battleResultWeekState.absoluteWeek === worldDate.absoluteWeek`／week suffix invariantは10・02仕様。context validationは外部`initialMatchIdGeneratorState`依存を持たない。
 - `InitialWeeklyTrainingSidecarSnapshot`／`Sprint1CliInput`の初期schemaVersionはいずれも`0.1.0`。CLI新規optionは`--sprint1-input`のみ（TECHNICAL_DECISIONS）。
 - `SimulationIdentity.initialWeeklyTrainingSidecarHash`は検証済みsidecarのcanonical JSON SHA-256。RunRuleSnapshotへsidecar全文や同hash fieldを直接追加しない。

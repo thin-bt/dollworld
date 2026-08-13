@@ -11,6 +11,7 @@ import {
   BATTLE_RESULT_KEYS,
   BATTLE_RESULT_SCHEMA_VERSION,
   DEFAULT_BATTLE_STRATEGY_VERSION,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   MAIN_SPEC_VERSION_FOR_IDENTITY,
   MATCH_ID_GENERATOR_VERSION,
   MATCH_ID_NAMESPACE,
@@ -22,6 +23,7 @@ import {
   battleActionScriptToCanonicalScript,
   buildBattleSummaryLog,
   computeActionScriptHash,
+  computeActiveYearStartProcessorManifestHash,
   computeFinalStateHash,
   computeJudgeScoreBreakdown,
   computePostProcessContextHash,
@@ -31,6 +33,7 @@ import {
   computeTechniqueCatalogHash,
   convertBattleResultToWorldEffectCandidates,
   createInitialMatchIdGeneratorState,
+  createDefaultActiveYearStartProcessorManifest,
   createScriptedActionsSourceIdentity,
   createSeededRng,
   createWorldDate,
@@ -189,12 +192,21 @@ const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(sprint1Config)
 const techniqueCatalogHash = expectOk(
   computeTechniqueCatalogHash(baseTechniqueDefinitions, sha256Provider),
 );
+const defaultYearStartManifest = createDefaultActiveYearStartProcessorManifest();
+const worldCalendarConfigHash = sha256Provider.hashUtf8(
+  toCanonicalJson(DEFAULT_WORLD_CALENDAR_CONFIG),
+);
+const yearStartProcessorManifestHash = expectOk(
+  computeActiveYearStartProcessorManifestHash(defaultYearStartManifest, sha256Provider),
+);
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 20260807,
     initialWorldConfigHash: "a".repeat(64),
+    worldCalendarConfigHash,
+    yearStartProcessorManifestHash,
     sprint1ConfigHash,
     techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -231,6 +243,8 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
       simulationIdentity: simulationIdentity(),
       simulationIdentityHash,
       initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+      worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+      yearStartProcessorManifest: defaultYearStartManifest,
       sprint1Config,
       techniqueCatalogDataVersion: "techniques-0.1.0",
       techniqueDefinitions: baseTechniqueDefinitions,
@@ -239,7 +253,10 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
   ),
 );
 
-const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+const worldDate = createWorldDate(
+  { year: 21, month: 4, weekOfMonth: 1 },
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+);
 
 function techniqueState(
   techniqueId: string,
@@ -425,7 +442,7 @@ describe("S01-007 BattleResult production", () => {
   it("publishes BattleResult schemaVersion 0.5.0 and finished event type", () => {
     expect(BATTLE_RESULT_SCHEMA_VERSION).toBe("0.5.0");
     expect(BATTLE_FINISHED_EVENT_TYPE).toBe("battle.finished");
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
   });
 
   it("completes knockout with winner/loser, effects, finished candidate, world conversion", () => {
@@ -1404,7 +1421,10 @@ describe("S01-007 BattleResult production", () => {
         reasonIncludes: "/worldDate",
         mutate: (r) => ({
           ...r,
-          worldDate: createWorldDate({ year: 99, month: 1, weekOfMonth: 1 }),
+          worldDate: createWorldDate(
+            { year: 99, month: 1, weekOfMonth: 1 },
+            DEFAULT_WORLD_CALENDAR_CONFIG,
+          ),
         }),
       },
       {
@@ -1774,7 +1794,10 @@ describe("S01-007 BattleResult production", () => {
     );
 
     const worldDateTampered = structuredClone(plan.eventCandidates[0]!);
-    worldDateTampered.worldDate = createWorldDate({ year: 99, month: 1, weekOfMonth: 1 });
+    worldDateTampered.worldDate = createWorldDate(
+      { year: 99, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    );
     worldDateTampered.payload.worldDate = worldDateTampered.worldDate;
     assertStructureReject(
       "worldDate",

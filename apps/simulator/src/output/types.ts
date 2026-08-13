@@ -48,9 +48,9 @@ export type RunMetadataDocument = {
   outputFiles: OutputFileListing[];
 };
 
-/** Sprint 1 new-run run-metadata.json (schemaVersion 0.4.0). */
+/** Sprint 1 new-run run-metadata.json (schemaVersion 0.5.0). */
 export type Sprint1RunMetadataDocument = RunMetadataDocument & {
-  schemaVersion: "0.4.0";
+  schemaVersion: "0.5.0";
   simulationIdentity: SimulationIdentity;
   simulationIdentityHash: string;
   eventEnvelopeSchemaVersion: "0.2.0";

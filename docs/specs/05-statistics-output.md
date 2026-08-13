@@ -1,6 +1,6 @@
 # 05 長期実行・統計・出力ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.5`
+- ミニ仕様バージョン：`S0-SPEC-0.1.6`
 
 ## 1. 目的
 
@@ -43,16 +43,16 @@ Sprint 0の必須内容:
 - 正常／異常終了
 - 7ファイルの一覧
 
-Sprint 1以降の新規runでは文書`schemaVersion`を`0.4.0`とし、次を追加する（nested `SimulationIdentity` wire shapeが0.4.0へ変わったためbump）。
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.5.0`とし、次を追加する（nested `SimulationIdentity` wire shapeが0.5.0へ変わったためbump）。
 
 ```text
-- schemaVersion: "0.4.0"
-- simulationIdentity: SimulationIdentity  // schemaVersion "0.4.0"
+- schemaVersion: "0.5.0"
+- simulationIdentity: SimulationIdentity  // schemaVersion "0.5.0"
 - simulationIdentityHash: string
 - eventEnvelopeSchemaVersion: "0.2.0"
 ```
 
-- `simulationIdentity`は02ミニ仕様の`SimulationIdentity` 0.4.0全文（`initialWeeklyTrainingSidecarHash`を含む）。
+- `simulationIdentity`は02ミニ仕様の`SimulationIdentity` 0.5.0全文（`initialWeeklyTrainingSidecarHash`／`worldCalendarConfigHash`／`yearStartProcessorManifestHash`を含む）。
 - `simulationIdentityHash`は全文から再計算一致必須。
 - `simulationId`は02ミニ仕様に従ってidentity hashから生成する。
 - executionId、現実時刻、性能情報、CLI path／mtimeはidentityへ含めない。
@@ -61,13 +61,13 @@ Sprint 1以降の新規runでは文書`schemaVersion`を`0.4.0`とし、次を�
 
 ## 5. `initial-world.json`
 
-初期世界スナップショット全文とgenerationSummaryを保持する。世界1年4月第1週、年初処理反映済み。再読込・不変条件検証可能であること。
+初期世界スナップショット全文とgenerationSummaryを保持する。世界1年・設定年初月第1週（既定1月）、年初処理反映済み。再読込・不変条件検証可能であること。
 
-Sprint 1以降の新規runでは文書`schemaVersion`を`0.4.0`とし、トップレベルへ完全な`runRuleSnapshot`と`initialWeeklyTrainingSidecarSnapshot`を保存する。
+Sprint 1以降の新規runでは文書`schemaVersion`を`0.5.0`とし、トップレベルへ完全な`runRuleSnapshot`（0.5.0）と`initialWeeklyTrainingSidecarSnapshot`を保存する。
 
 ```text
-- schemaVersion: "0.4.0"
-- runRuleSnapshot: RunRuleSnapshot
+- schemaVersion: "0.5.0"
+- runRuleSnapshot: RunRuleSnapshot  // schemaVersion "0.5.0"（worldCalendar／yearStartProcessorManifest／各hash必須）
 - initialWeeklyTrainingSidecarSnapshot: InitialWeeklyTrainingSidecarSnapshot  // schemaVersion "0.1.0"
 - persons[*].sprint1StateSchemaVersion: "0.1.0"
 - persons[*].currentMental
@@ -84,7 +84,7 @@ Sprint 1以降の新規runでは文書`schemaVersion`を`0.4.0`とし、トッ�
 - replayまたは詳細戦闘ログの再読込時は、同じrunの`initial-world.json.runRuleSnapshot`を参照する。
 - run内に戦闘が0件でもRunRuleSnapshotを保存する。
 - 同一SimulationIdentityではRunRuleSnapshot全文とhashが一致する。
-- `run-rule-snapshot.json`／`sidecar.json`等の8ファイル目を追加しない。
+- `run-rule-snapshot.json`／`sidecar.json`／`year-start.json`／receiptファイル等の8ファイル目を追加しない。fixed7は exactly 7 files。
 
 ## 6. `final-world.json`
 
@@ -95,7 +95,7 @@ Sprint 1以降の新規runでは文書`schemaVersion`を`0.4.0`とし、トッ�
 - configHash、seed、simulationId
 - 参照整合性結果
 
-100年実行時は4,800週後、世界101年4月第1週。
+100年実行時は4,800週後、世界101年1月第1週（新規既定年初）。
 
 Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、各人物のSprint1PersonStateに加え、トップレベルへ`weeklyTrainingSidecars`および`battleResults`を投影する。
 
@@ -123,19 +123,19 @@ Sprint 1以降の新規runでは文書`schemaVersion`を`0.3.0`とし、各人�
 
 | 文書 | 新規runのschemaVersion | 追加内容 |
 |---|---|---|
-| `run-metadata.json` | `0.4.0` | SimulationIdentity 0.4.0（`initialWeeklyTrainingSidecarHash`含む）、identity hash、EventEnvelope版 |
-| `initial-world.json` | `0.4.0` | RunRuleSnapshot 0.4.0、Sprint1PersonState初期値、トップレベル`initialWeeklyTrainingSidecarSnapshot` 0.1.0 |
+| `run-metadata.json` | `0.5.0` | SimulationIdentity 0.5.0（`initialWeeklyTrainingSidecarHash`／`worldCalendarConfigHash`／`yearStartProcessorManifestHash`含む）、identity hash、EventEnvelope版 |
+| `initial-world.json` | `0.5.0` | RunRuleSnapshot 0.5.0、Sprint1PersonState初期値、トップレベル`initialWeeklyTrainingSidecarSnapshot` 0.1.0 |
 | `final-world.json` | `0.3.0` | Sprint1PersonState、技習得・熟練・現在精神力、トップレベル`weeklyTrainingSidecars`＋`battleResults` |
 | `InitialWeeklyTrainingSidecarSnapshot` | `0.1.0` | 週間訓練sidecar外部入力（initial-world投影・context所有） |
 | `EventAllocationState` | `0.1.0` | runtime-only（固定7非永続） |
 | `BattleResultWeekState` | `0.1.0` | runtime-only同週count registry（固定7非永続。run全体は`battleResults`） |
 | `EventEnvelope` | `0.2.0` | Sprint 1 new-run events.jsonl |
-| `RunRuleSnapshot` | `0.4.0` | adapter／MatchId generator／DefaultBattleStrategy版 |
+| `RunRuleSnapshot` | `0.5.0` | adapter／MatchId generator／DefaultBattleStrategy版＋`worldCalendar`／`yearStartProcessorManifest`／各hash |
 
-Sprint 1新規runでの文書schema bump方針（S1-SPEC-0.1.20）:
+Sprint 1新規runでの文書schema bump方針（S1-SPEC-0.1.21／T01 CAL-JAN）:
 
-- **bumpした**: `SimulationIdentity` `0.3.0`→`0.4.0`、`run-metadata.json` Sprint1 new-run `0.3.0`→`0.4.0`、`initial-world.json` `0.3.0`→`0.4.0`、`final-world.json` `0.2.0`→`0.3.0`（`weeklyTrainingSidecars`＋`battleResults`を同一0.3.0最終shapeとして確定。0.4.0へ追加bumpしない）
-- **bumpしない**: `RunRuleSnapshot` `0.4.0`（既定）、`EventEnvelope` `0.2.0`、`InitialWeeklyTrainingSidecarSnapshot` `0.1.0`、`EventAllocationState` `0.1.0`、`BattleResultWeekState` `0.1.0`、`BattleResult` `0.5.0`
+- **bumpした（T01）**: `SimulationIdentity` `0.4.0`→`0.5.0`、`RunRuleSnapshot` `0.4.0`→`0.5.0`、`run-metadata.json` Sprint1 new-run `0.4.0`→`0.5.0`、`initial-world.json` `0.4.0`→`0.5.0`。**先行履歴**: S01-008で`SimulationIdentity` `0.3.0`→`0.4.0`、`final-world.json` `0.2.0`→`0.3.0`（`weeklyTrainingSidecars`＋`battleResults`。T01でも0.3.0維持）
+- **bumpしない**: `FinalWorldOutputDocument` `0.3.0`、`InitialWorldSnapshot` `0.1.0`、`EventEnvelope` `0.2.0`、`InitialWeeklyTrainingSidecarSnapshot` `0.1.0`、`EventAllocationState` `0.1.0`、`BattleResultWeekState` `0.1.0`、`BattleResult` `0.5.0`、`BattleState` `0.6.0`
 - fixed7は exactly 7 files（`sidecar.json`／`battle-results.json`禁止）
 - JSON wire shapeが変わる文書だけ版上げする。hash値だけが変わる／shape不変なら版上げしない。legacy readerは維持する。
 
@@ -149,7 +149,7 @@ Sprint 1以降に開始したrunでは、`events.jsonl`の全行が`run-metadata
 
 ## 8. `yearly-statistics.csv`
 
-UTF-8、ヘッダーあり。各世界年の3月第4週終了後に1行。100年実行で100行（ヘッダー除く）。
+UTF-8、ヘッダーあり。各世界年の設定年初月直前月第4週終了後に1行（既定12月）。100年実行で100行（ヘッダー除く）。
 
 必須列：
 
@@ -227,8 +227,8 @@ SimulationIdentityとRunRuleSnapshotは決定的入力なので同seed比較対�
 Sprint 1追加:
 
 - 固定7ファイルの件数・名称がSprint 1導入前後で不変
-- run-metadata.json 0.4.0の必須フィールド（SimulationIdentity 0.4.0）
-- initial-world.json 0.4.0の必須フィールド（`initialWeeklyTrainingSidecarSnapshot`含む）
+- run-metadata.json 0.5.0の必須フィールド（SimulationIdentity 0.5.0）
+- initial-world.json 0.5.0の必須フィールド（`initialWeeklyTrainingSidecarSnapshot`含む）
 - final-world.json 0.3.0の必須フィールドと人物状態検証（`weeklyTrainingSidecars`＋`battleResults`含む）
 - 旧版reader互換、run-metadata／initial-worldの全決定的入力がある場合だけの明示文書migration、入力不足時とlegacy final-worldのread-only維持
 - 未知文書schemaVersion拒否

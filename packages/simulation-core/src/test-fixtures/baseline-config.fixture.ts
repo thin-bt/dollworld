@@ -5,17 +5,14 @@ import type { InitialWorldConfig } from "../config/types.js";
  * Not the canonical config source of truth, and not part of the production build.
  */
 export const baselineConfigFixture: InitialWorldConfig = {
-  schemaVersion: "0.2.3",
+  schemaVersion: "0.3.0",
   profileId: "baseline-small-v1",
   purpose: "Sprint 0の再現性・参照整合性・性能検証用。ゲーム正式値ではない。",
-  world: {
-    startYear: 1,
-    startMonth: 4,
-    startWeekOfMonth: 1,
+  worldCalendar: {
+    monthsPerWorldYear: 12,
     weeksPerMonth: 4,
-    monthsPerYear: 12,
-    birthMonth: 4,
-    birthWeekOfMonth: 1,
+    worldYearStartMonth: 1,
+    worldYearStartWeek: 1,
   },
   population: {
     totalLiving: 600,

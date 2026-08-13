@@ -10,7 +10,7 @@ sources:
   - docs/specs/04-initial-world-generation.md
   - docs/specs/05-statistics-output.md
   - docs/specs/14-sprint1-config-schema.md
-last_verified: 2026-08-09
+last_verified: 2026-08-12
 related:
   - ../invariants/identity-and-reference.md
   - ../invariants/rng-and-determinism.md
@@ -29,11 +29,12 @@ related:
 - `eventId` は simulationId と sequence などから決定的に導出される（詳細は 03）
 - 異 seed 比較では simulationId／eventId 由来の差だけで実体差と誤認しないよう、検証器側で識別メタデータを除外する（S00-010）
 - Sprint 0 の `simulationId` 材料式は legacy として維持し、再計算置換しない
-- Sprint 1 新規 run の `SimulationIdentity` は schemaVersion `0.4.0`（`S1-SPEC-0.1.20`）。必須材料に `initialWeeklyTrainingSidecarHash` を含む
-- current new-run `validateSimulationIdentity` は 0.4.0 のみ受理。0.3.0 専用 public legacy reader module は repository に無く新設しない（維持するlegacyはSprint 0 fixed7／EventEnvelope 0.1.0／`createSimulationId`）
-- fresh Sprint 1 initialization promotion で transaction-local provisional simulationId だけを最終 identity へ bindする（保存済みSprint 0 migrationではない。詳細は02）
-- path／mtime は identity 材料にしない。CLI は `--sprint1-input` で `Sprint1CliInput` を渡す（配線はS01-008）
-- run-metadata Sprint1 new-run 文書 schemaVersion は `0.4.0`。initial-world は `0.4.0`（`initialWeeklyTrainingSidecarSnapshot`）、final-world は `0.3.0`（`weeklyTrainingSidecars`）
+- Sprint 1 pre-CAL-JAN完成snapshotの `SimulationIdentity 0.4.0` は既存run・履歴参照用として内容を変更しない。
+- CAL-JAN-SYNC適用後のSprint 1新規runは `SimulationIdentity.schemaVersion = "0.5.0"`（`S1-SPEC-0.1.21`）。0.4.0の既存材料に `worldCalendarConfigHash` と `yearStartProcessorManifestHash` を追加し、calendar本文／manifest本文は `RunRuleSnapshot 0.5.0` が保持する。
+- current new-run `validateSimulationIdentity` は `0.5.0`をstrict validationし、calendar hash／manifest hashをRunRuleSnapshotとcross-bindする。pre-CAL-JAN 0.4.0を新規run writerへfallback変換しない。
+- fresh Sprint 1 initialization promotion で transaction-local provisional simulationId だけを最終 identity へ bindする（保存済みlegacy run migrationではない。詳細は02）。
+- path／mtime は identity 材料にしない。CLI は `--sprint1-input` で `Sprint1CliInput` を渡す。
+- CAL-JAN-SYNC新規runのrun-metadata文書は `0.5.0`、initial-worldは `0.5.0`、final-worldは `0.3.0`を維持する。
 
 正本の定義をこのページへ複製しない。必ずミニ仕様を読むこと。
 

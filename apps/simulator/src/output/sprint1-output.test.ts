@@ -33,6 +33,7 @@ import {
   type RunId,
   type ValidationResult,
   type ValidatedNameData,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
 } from "@shared-world/simulation-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { createNodeSha256Provider } from "../node-sha256-provider.js";
@@ -170,17 +171,14 @@ function createTinyNameData(familyNameCount: number): ValidatedNameData {
 
 function createSmallConfig(): InitialWorldConfig {
   return {
-    schemaVersion: "0.2.3",
+    schemaVersion: "0.3.0",
     profileId: "tiny-s01-008-output-v1",
     purpose: "Sprint1 output test fixture",
-    world: {
-      startYear: 1,
-      startMonth: 4,
-      startWeekOfMonth: 1,
+    worldCalendar: {
+      monthsPerWorldYear: 12,
       weeksPerMonth: 4,
-      monthsPerYear: 12,
-      birthMonth: 4,
-      birthWeekOfMonth: 1,
+      worldYearStartMonth: 1,
+      worldYearStartWeek: 1,
     },
     population: {
       totalLiving: 10,
@@ -403,7 +401,10 @@ function buildFreshSession(seed = 5150): {
 function commitProductionBattle(
   session: import("@shared-world/simulation-core").Sprint1RunSession,
 ) {
-  const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+  const worldDate = createWorldDate(
+    { year: 21, month: 4, weekOfMonth: 1 },
+    DEFAULT_WORLD_CALENDAR_CONFIG,
+  );
   const persons = session.runtimeState.worldState.persons.map((person) => {
     if (person.lifeStatus !== "living" || person.currentAge === null) return person;
     const currentAge = worldDate.year - person.birthYear;
@@ -642,7 +643,7 @@ describe("S01-008 Sprint1 fixed seven-file output", () => {
     expect(result.runMetadata.eventEnvelopeSchemaVersion).toBe(
       SPRINT1_EVENT_ENVELOPE_SCHEMA_VERSION,
     );
-    expect(result.runMetadata.simulationIdentity.schemaVersion).toBe("0.4.0");
+    expect(result.runMetadata.simulationIdentity.schemaVersion).toBe("0.5.0");
     expect(result.runMetadata.simulationIdentityHash).toMatch(/^[0-9a-f]{64}$/);
     expect(result.finalWorld.schemaVersion).toBe("0.3.0");
     expect(result.finalWorld.weeklyTrainingSidecars.entries.length).toBe(
@@ -668,7 +669,7 @@ describe("S01-008 Sprint1 fixed seven-file output", () => {
     ) as Record<string, unknown>;
 
     expect(metadata.simulationId).toBe(result.runMetadata.simulationId);
-    expect(initialWorld["schemaVersion"]).toBe("0.4.0");
+    expect(initialWorld["schemaVersion"]).toBe("0.5.0");
     expect(initialWorld["initialWeeklyTrainingSidecarSnapshot"]).toBeDefined();
     expect(initialWorld["runRuleSnapshot"]).toBeDefined();
     expect(finalWorld["worldRngState"]).toBeUndefined();

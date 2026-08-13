@@ -147,7 +147,7 @@ describe("allocateByLargestRemainderOrdered", () => {
 describe("simulationId", () => {
   it("builds material in fixed order", () => {
     expect(buildSimulationIdMaterial("abc", 12345, "def")).toBe(
-      "SPEC-0.1.1|S0-SPEC-0.1.5|abc|12345|def|xoshiro128ss-v1",
+      "SPEC-0.1.1|S0-SPEC-0.1.6|abc|12345|def|xoshiro128ss-v1",
     );
   });
 

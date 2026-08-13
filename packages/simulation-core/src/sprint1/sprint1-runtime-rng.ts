@@ -5,6 +5,7 @@
  */
 import { createSeededRng, deriveSeed, type SeededRngState } from "../rng.js";
 import type { ProcessorRuntimeState } from "../world-engine/types.js";
+import { WORLD_YEAR_START_PROCESSOR_ID } from "./active-year-start-processor-manifest.js";
 import {
   SPRINT1_BATTLE_WORLD_RNG_SEED_LABEL,
   WEEKLY_TRAINING_PROCESSOR_ID,
@@ -14,6 +15,7 @@ import {
   createInitialTrainingProcessorRuntimeState,
   type TrainingProcessorRuntimeState,
 } from "./training-processor-runtime-state.js";
+import { createInitialWorldYearStartRuntimeState } from "./world-year-start-runtime-state.js";
 
 export { SPRINT1_BATTLE_WORLD_RNG_SEED_LABEL, WEEKLY_TRAINING_PROCESSOR_RNG_SEED_LABEL };
 
@@ -54,8 +56,10 @@ export function createInitialWeeklyTrainingProcessorRuntimeParts(
 }
 
 /**
- * Fresh Sprint 1 ProcessorRuntimeState collection with exact one weekly-training entry.
- * Uses Sprint1 seed labels; do not substitute createInitialRuntime for this path.
+ * Fresh Sprint 1 ProcessorRuntimeState (CAL-JAN 0.2.6):
+ * - processorOrder / rngStates: exact `[weekly-training]`
+ * - processorSpecificStates: exact ordered
+ *   `[weekly-training, world-year-start]`
  */
 export function createInitialSprint1WeeklyTrainingProcessorRuntimeState(
   runSeed: number,
@@ -73,6 +77,10 @@ export function createInitialSprint1WeeklyTrainingProcessorRuntimeState(
       {
         processorId: WEEKLY_TRAINING_PROCESSOR_ID,
         specificState: parts.specificState,
+      },
+      {
+        processorId: WORLD_YEAR_START_PROCESSOR_ID,
+        specificState: createInitialWorldYearStartRuntimeState(),
       },
     ],
   };

@@ -15,6 +15,11 @@ last_verified: 2026-08-12
 
 # Wiki更新履歴
 
+## 2026-08-12 — T01 CAL-JAN Markdown同期
+- 現行暦契約を CAL-JAN（既定年初1月・`worldYearStartMonth`設定可能）へ同期。`calendar.md`／`world-date.md`／`world-engine.md`／`character-growth.md` を更新
+- 歴史タスクページ（S00-004／S00-007）は本文を維持し、現行契約superseded注記のみ追加
+- 正本版: `SPEC-0.1.3`／`S0-SPEC-0.1.6`／`S1-SPEC-0.1.21`（詳細は `docs/SPEC_CHANGELOG.md`）
+
 ## 2026-08-12 — Sprint 1 completion gate完了
 - Sprint 1: **COMPLETE**（S01-001〜S01-009 accepted）。
 - clean master final verify: PASSED on `5a80268`（repo-external clone）。

@@ -8,6 +8,7 @@ import {
   createInitialWorldDate,
   createPersonInitializedEvent,
   createWorldStartedEvent,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   eventIdFromSequence,
   EVENT_ENVELOPE_SCHEMA_VERSION_SPRINT1,
   promoteProvisionalEventToSprint1,
@@ -64,7 +65,7 @@ describe("Sprint1 EventEnvelope 0.2.0", () => {
   });
 
   it("allocateWeeklyTrainingEventCandidates assigns consecutive sequences", () => {
-    const worldDate = createInitialWorldDate();
+    const worldDate = createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG);
     const personA = asPersonId("person_0000000000000001");
     const personB = asPersonId("person_0000000000000002");
 
@@ -105,7 +106,7 @@ describe("Sprint1 EventEnvelope 0.2.0", () => {
   });
 
   it("allocateWeeklyTrainingEventCandidates rejects absoluteWeek mismatch", () => {
-    const worldDate = createInitialWorldDate();
+    const worldDate = createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG);
 
     const result = allocateWeeklyTrainingEventCandidates({
       candidates: [

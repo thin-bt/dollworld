@@ -14,7 +14,7 @@ sources:
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:259a219d29b626c4678e5b248b8a8453861797f9
   - commit:3b313a5ea690351d062e751bc724e5530b835872
-last_verified: 2026-08-08
+last_verified: 2026-08-12
 related:
   - sprint1-identity-and-config.md
   - ../sprints/sprint1.md
@@ -30,8 +30,8 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 ### 仕様版
 
-- 現行: `S1-SPEC-0.1.20`
-- 正本: `SPEC-0.1.2`
+- 現行: `S1-SPEC-0.1.21`（`0.1.20` はS01-008 integration contractsの履歴版）
+- 正本: `SPEC-0.1.3`
 - `S1-SPEC-0.1.11` 確定 commit: `2800d3b959e575f57660c27b344507dd0e38ddb6`
 - `S1-SPEC-0.1.12` は 2026-08-05 の週間処理契約clarification（受入監査追補含む）。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.13` は MatchId generator契約（`match-id-generator-0.1.0`）の明文化。Sprint1Config balance／hashは不変
@@ -42,6 +42,7 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 - `S1-SPEC-0.1.18` はBattleResult決定的契約clarification（summary下位型／experienceSummary／同点比較／RNG tie-break／戦闘mastery適用順）。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.19` はpost-start execution abort契約clarification（3 result kind維持／`BattleExecutionAbortError`／dependency_failure／internal_invariant_violation／原子的abort／S01-008 commit禁止）。Sprint1Config balance／hashは不変
 - `S1-SPEC-0.1.20` はS01-008 integration contracts clarification（`weekly-training`／`Sprint1RunRuntimeState`／sidecar／SimulationIdentity 0.4.0／`--sprint1-input`／run-metadata 0.4.0）。Sprint1Config balance／hashは不変
+- `S1-SPEC-0.1.21` はSprint 1完成後のCAL-JAN同期版。current new-runのSimulationIdentity／RunRuleSnapshotは `0.5.0`、run-metadata／initial-world outer documentは `0.5.0`。S01-008で確定したweekly-training／Sprint1RunRuntimeState／sidecar／CLI契約は維持する。
 - `S1-SPEC-0.1.10-draft` は履歴であり現行版ではない
 
 ### `S1-SPEC-0.1.11` 確定時点の履歴メモ
@@ -57,7 +58,7 @@ Sprint 1 仕様のベースライン記録。正本の変更履歴は [`docs/SPE
 
 - S01-001〜S01-009 はimplemented / accepted（S01-007受入完了commit `a39e476`。S01-008受入完了。S01-009受入完了commit `5616f5f`、2026-08-11 ChatGPT再監査）
 - Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない）
-- `S1-SPEC-0.1.20` 維持（S01-008統合契約は固定済み・production実装済み）
+- 現行統合版は `S1-SPEC-0.1.21`。S01-008統合契約そのものは `S1-SPEC-0.1.20` で固定済み・production実装済みの履歴として維持する。
 
 ## 関連する正本
 

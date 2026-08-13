@@ -269,7 +269,7 @@ export function generateInitialWorld(
     nameDataVersion: nameData.manifest.nameDataVersion,
     simulationId,
     worldId: asWorldId(FIXED_WORLD_ID),
-    worldDate: createInitialWorldDate(),
+    worldDate: createInitialWorldDate(config.worldCalendar),
     configProfileId: config.profileId,
     configHash,
     seed,

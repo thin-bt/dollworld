@@ -21,6 +21,7 @@ import {
   assertBattleResultWeekMatchesWorldDate,
   assertBattleResultsWeekSuffixInvariant,
   cloneRuntimeState,
+  computeActiveYearStartProcessorManifestHash,
   computeInitialWeeklyTrainingSidecarHash,
   computeSimulationIdentityHash,
   computeSprint1ConfigHash,
@@ -36,18 +37,23 @@ import {
   createInitialSprint1WeeklyTrainingProcessorRuntimeState,
   createInitialTrainingProcessorRuntimeState,
   createInitialWeeklyTrainingProcessorRuntimeParts,
+  createInitialWorldYearStartRuntimeState,
   createRunRuleSnapshot,
   createSeededRng,
   createSimulationId,
   createSimulationIdFromIdentity,
   createSprint1RunContext,
   createWeeklyTrainingSidecarStateFromInitial,
+  createDefaultActiveYearStartProcessorManifest,
   createDefaultSprint1ConfigInput,
   getDefaultSprint1Config,
   INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1,
   FINAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1,
   MATCH_ID_GENERATOR_VERSION,
   MATCH_ID_NAMESPACE,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+  WORLD_YEAR_START_PROCESSOR_ID,
+  toCanonicalJson,
   validateAndCloneProcessorRuntimeState,
   validateBattleResultWeekState,
   validateEventAllocationState,
@@ -187,10 +193,23 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
     throw new Error("expected default Sprint1Config hash to succeed");
   }
   const hex = "a".repeat(64);
+  const defaultYearStartManifest = createDefaultActiveYearStartProcessorManifest();
+  const worldCalendarConfigHash = sha256Provider.hashUtf8(
+    toCanonicalJson(DEFAULT_WORLD_CALENDAR_CONFIG),
+  );
+  const yearStartProcessorManifestHashResult = computeActiveYearStartProcessorManifestHash(
+    defaultYearStartManifest,
+    sha256Provider,
+  );
+  if (!yearStartProcessorManifestHashResult.ok) {
+    throw new Error("expected default year-start manifest hash to succeed");
+  }
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 12345,
     initialWorldConfigHash: hex,
+    worldCalendarConfigHash,
+    yearStartProcessorManifestHash: yearStartProcessorManifestHashResult.value,
     sprint1ConfigHash: sprint1ConfigHashResult.value,
     techniqueCatalogHash: hex,
     initialWeeklyTrainingSidecarHash: hex,
@@ -207,9 +226,9 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
 }
 
 describe("S1-SPEC-0.1.20 version registry and weekly-training literal", () => {
-  it("publishes S1-SPEC-0.1.20 and SimulationIdentity 0.4.0", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
-    expect(SIMULATION_IDENTITY_SCHEMA_VERSION).toBe("0.4.0");
+  it("publishes S1-SPEC-0.1.21 and SimulationIdentity 0.5.0", () => {
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
+    expect(SIMULATION_IDENTITY_SCHEMA_VERSION).toBe("0.5.0");
     expect(SPRINT1_CLI_INPUT_SCHEMA_VERSION).toBe("0.1.0");
     expect(INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION).toBe("0.1.0");
   });
@@ -302,7 +321,7 @@ describe("SimulationIdentity 0.4.0 and sidecar hash binding", () => {
     expect(identity.initialWeeklyTrainingSidecarHash).toBe(sidecarHash);
   });
 
-  it("keeps validateRunRuleSnapshotAgainstIdentity consistent with SimulationIdentity 0.4.0", () => {
+  it("keeps validateRunRuleSnapshotAgainstIdentity consistent with SimulationIdentity 0.5.0", () => {
     const def = expectOk(validateTechniqueDefinition(techniqueDefinition("technique_alpha")));
     const catalogHash = expectOk(computeTechniqueCatalogHash([def], sha256Provider));
     const generator = expectOk(
@@ -329,6 +348,8 @@ describe("SimulationIdentity 0.4.0 and sidecar hash binding", () => {
           simulationIdentity: identity,
           simulationIdentityHash: identityHash,
           initialMatchIdGeneratorState: generator,
+          worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+          yearStartProcessorManifest: createDefaultActiveYearStartProcessorManifest(),
           sprint1Config: getDefaultSprint1Config(),
           techniqueCatalogDataVersion: "techniques-0.1.0",
           techniqueDefinitions: [def],
@@ -985,7 +1006,14 @@ describe("Sprint1 battle World RNG and weekly-training processor RNG", () => {
     expect(parts.processorId).toBe(WEEKLY_TRAINING_PROCESSOR_ID);
     const collection = createInitialSprint1WeeklyTrainingProcessorRuntimeState(1);
     expect(collection.processorOrder).toEqual([WEEKLY_TRAINING_PROCESSOR_ID]);
+    expect(collection.processorSpecificStates).toHaveLength(2);
     expect(collection.processorSpecificStates?.[0]?.specificState).toEqual(parts.specificState);
+    expect(collection.processorSpecificStates?.[1]?.processorId).toBe(
+      WORLD_YEAR_START_PROCESSOR_ID,
+    );
+    expect(collection.processorSpecificStates?.[1]?.specificState).toEqual(
+      createInitialWorldYearStartRuntimeState(),
+    );
   });
 });
 
@@ -1254,6 +1282,8 @@ describe("S1-SPEC-0.1.20 Sprint1RunContext / sidecar / docs (fix3)", () => {
           simulationIdentity: identity,
           simulationIdentityHash: identityHash,
           initialMatchIdGeneratorState: generator,
+          worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+          yearStartProcessorManifest: createDefaultActiveYearStartProcessorManifest(),
           sprint1Config: config,
           techniqueCatalogDataVersion: "techniques-0.1.0",
           techniqueDefinitions: [def],
@@ -1550,6 +1580,8 @@ describe("S1-SPEC-0.1.20 fix4 RunContext sidecar / MatchId / output / architectu
           simulationIdentity: identity,
           simulationIdentityHash: identityHash,
           initialMatchIdGeneratorState: generator,
+          worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+          yearStartProcessorManifest: createDefaultActiveYearStartProcessorManifest(),
           sprint1Config: config,
           techniqueCatalogDataVersion: "techniques-0.1.0",
           techniqueDefinitions: [def],
@@ -1697,7 +1729,7 @@ describe("S1-SPEC-0.1.20 fix4 RunContext sidecar / MatchId / output / architectu
   });
 
   it("locks Sprint1 document schema versions and fixed7 sidecar/battleResults projection fields", async () => {
-    expect(INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1).toBe("0.4.0");
+    expect(INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1).toBe("0.5.0");
     expect(FINAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1).toBe("0.3.0");
     const { readFile } = await import("node:fs/promises");
     const output = await readFile(

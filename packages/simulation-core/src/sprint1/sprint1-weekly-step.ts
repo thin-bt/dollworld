@@ -9,15 +9,17 @@
  * not fully rescanned each week.
  */
 import type { EventEnvelope } from "../events/types.js";
+import { createSeededRng } from "../rng.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
-import type { WorldDate } from "../world-date.js";
+import { isWorldYearEndWeek, type WorldDate } from "../world-date.js";
 import { runWorldOneWeek } from "../world-engine/engine.js";
 import { WorldEngineError } from "../world-engine/errors.js";
 import { cloneRuntimeState } from "../world-engine/processor-runtime.js";
 import { cloneWorldEngineState } from "../world-engine/clone.js";
 import type { WorldProcessor } from "../world-engine/types.js";
+import { WORLD_YEAR_START_PROCESSOR_ID } from "./active-year-start-processor-manifest.js";
 import {
   assertBattleResultWeekMatchesWorldDate,
   SPRINT1_TRANSACTIONAL_PROCESSOR_ADAPTER_PIPELINE,
@@ -40,6 +42,13 @@ import {
   type TrustedWeeklyTransitionDraft,
 } from "./validate-sprint1-weekly-transition.js";
 import { runSprint1WeeklyTrainingAdapter } from "./weekly-training-adapter.js";
+import {
+  replaceWorldYearStartRuntimeState,
+  runWorldYearStartPhase,
+  sealWorldYearStartReceiptHashes,
+} from "./year-start-phase.js";
+import { validateWorldYearStartRuntimeState } from "./world-year-start-runtime-state.js";
+import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 
 /** Matches world-engine WEEKS_PER_YEAR (48). */
 const WEEKS_PER_YEAR = 48;
@@ -73,6 +82,12 @@ export type RunSprint1YearsOptions = RunSprint1WeeklyStepOptions & {
    * Throws are converted to ValidationResult failure; caller session root stays unchanged.
    */
   onAfterValidatedWeek?: (observation: RunSprint1ValidatedWeekObservation) => void;
+  /**
+   * Optional hook immediately before the year-start phase mutates the draft
+   * (still on the committed world-year end week). Used by year-end statistics
+   * capture. Throws are converted to ValidationResult failure.
+   */
+  onBeforeYearStartPhase?: (worldState: Sprint1RunRuntimeState["worldState"]) => void;
 };
 
 function buildValidatedWeekObservation(input: {
@@ -267,16 +282,26 @@ type WeeklyTransitionExecution =
 
 /**
  * Shared weekly transition body. Caller must supply a validated session.
+ *
+ * CAL-JAN year-boundary weeks (`isWorldYearEndWeek`):
+ * 1. year-start phase advances date + enabled manifest slots (prefix events)
+ * 2. weekly-training adapter on the new week
+ * 3. legacy WorldEngine processors with `skipCalendarStep` (no second advance)
+ *
+ * Non-boundary weeks keep train-current → WorldEngine full calendar advance.
  */
 function executeSprint1WeeklyTransitionDraft(
   session: Sprint1RunSession,
   provider: Sha256Provider,
-  legacyProcessors: readonly WorldProcessor[],
+  legacyProcessorsInput: readonly WorldProcessor[],
   mode: "public" | "trusted",
+  onBeforeYearStartPhase?: (worldState: Sprint1RunRuntimeState["worldState"]) => void,
 ): ValidationResult<WeeklyTransitionExecution> {
   const previousAbsoluteWeek = session.runtimeState.worldState.worldDate.absoluteWeek;
   const oldNextSequence = session.runtimeState.eventStream.length;
   const battleResultsRef = session.runtimeState.battleResults;
+  const worldCalendar = session.context.runRuleSnapshot.worldCalendar;
+  let legacyProcessors: readonly WorldProcessor[] = legacyProcessorsInput;
 
   const working =
     mode === "public"
@@ -306,37 +331,212 @@ function executeSprint1WeeklyTransitionDraft(
     return failure(prefixIssues(suffixBefore.issues, "/runtimeState"));
   }
 
-  const adapterInput: Sprint1WeeklyTrainingAdapterInput = {
-    absoluteWeek: working.worldState.worldDate.absoluteWeek,
-    worldState: working.worldState,
-    weeklyTrainingSidecars: working.weeklyTrainingSidecars,
-    sprint1Config: session.context.sprint1Config,
-    techniqueCatalog: session.context.techniqueCatalog,
-    processorRuntimeStates: working.processorRuntimeStates,
-  };
+  const yearStartEvents: Sprint1EventEnvelope[] = [];
+  let worldEngineSkipCalendar = false;
+  let skipWeeklyAdapter = false;
+  let eventStartSequence = working.eventAllocationState.nextSequence;
 
-  const adapterResult = runSprint1WeeklyTrainingAdapter(adapterInput, provider);
-  if (!adapterResult.ok) {
-    return failure(prefixIssues(adapterResult.issues, "/weeklyTrainingAdapter"));
+  const weeklySpecificEntry = (working.processorRuntimeStates.processorSpecificStates ?? []).find(
+    (entry) => entry.processorId === WEEKLY_TRAINING_PROCESSOR_ID,
+  );
+  const weeklySpecificResult =
+    weeklySpecificEntry !== undefined
+      ? validateTrainingProcessorRuntimeState(weeklySpecificEntry.specificState)
+      : undefined;
+  if (weeklySpecificResult !== undefined && !weeklySpecificResult.ok) {
+    return failure(
+      prefixIssues(
+        weeklySpecificResult.issues,
+        "/processorRuntimeStates/processorSpecificStates/weekly-training",
+      ),
+    );
+  }
+  const lastProcessedAbsoluteWeek =
+    weeklySpecificResult?.ok === true ? weeklySpecificResult.value.lastProcessedAbsoluteWeek : null;
+  const currentAbsoluteWeek = working.worldState.worldDate.absoluteWeek;
+  const alreadyProcessedCurrentWeek =
+    lastProcessedAbsoluteWeek !== null && lastProcessedAbsoluteWeek === currentAbsoluteWeek;
+
+  if (isWorldYearEndWeek(working.worldState.worldDate, worldCalendar)) {
+    if (onBeforeYearStartPhase !== undefined) {
+      try {
+        onBeforeYearStartPhase(working.worldState);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        return failure([
+          {
+            path: "/onBeforeYearStartPhase",
+            message: `onBeforeYearStartPhase failed: ${detail}`,
+            actual: detail,
+            expected: "hook completes without throwing",
+          },
+        ]);
+      }
+    }
+
+    // Invoke legacy hooks (e.g. year-end statistics capture) on the committed
+    // year-end week BEFORE the year-start phase advances the date.
+    for (let index = 0; index < legacyProcessors.length; index += 1) {
+      const processor = legacyProcessors[index]!;
+      try {
+        const after = processor.process({
+          state: working.worldState,
+          rng: createSeededRng(working.worldState.seed),
+        });
+        if (after !== working.worldState) {
+          return failure([
+            {
+              path: `/legacyProcessors/${String(index)}`,
+              message: "year-end capture legacy processors must return the identical input state",
+              actual: "different state object",
+              expected: "same state reference",
+            },
+          ]);
+        }
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        return failure([
+          {
+            path: `/legacyProcessors/${String(index)}`,
+            message: `year-end capture legacy processor failed: ${detail}`,
+            actual: detail,
+            expected: "side-effect-only success",
+          },
+        ]);
+      }
+    }
+
+    const specificStates = working.processorRuntimeStates.processorSpecificStates ?? [];
+    const yearStartEntry = specificStates.find(
+      (entry) => entry.processorId === WORLD_YEAR_START_PROCESSOR_ID,
+    );
+    if (yearStartEntry === undefined) {
+      return failure([
+        {
+          path: "/processorRuntimeStates/processorSpecificStates",
+          message: "missing world-year-start runtime entry for year-start phase",
+        },
+      ]);
+    }
+    const yearStartRuntimeResult = validateWorldYearStartRuntimeState(yearStartEntry.specificState);
+    if (!yearStartRuntimeResult.ok) {
+      return failure(
+        prefixIssues(
+          yearStartRuntimeResult.issues,
+          "/processorRuntimeStates/processorSpecificStates/world-year-start",
+        ),
+      );
+    }
+
+    const preYearStartWorldState = working.worldState;
+    const preYearStartProcessorRuntimeStates = working.processorRuntimeStates;
+    const preYearStartEventAllocationNextSequence = eventStartSequence;
+    const preYearStartEventStream =
+      mode === "public" ? working.eventStream : session.runtimeState.eventStream;
+
+    const yearStartPhase = runWorldYearStartPhase({
+      worldState: working.worldState,
+      worldCalendar,
+      yearStartProcessorManifest: session.context.runRuleSnapshot.yearStartProcessorManifest,
+      worldCalendarConfigHash: session.context.runRuleSnapshot.worldCalendarConfigHash,
+      yearStartProcessorManifestHash:
+        session.context.runRuleSnapshot.yearStartProcessorManifestHash,
+      yearStartRuntime: yearStartRuntimeResult.value,
+      simulationId: session.context.simulationId,
+      startSequence: eventStartSequence,
+    });
+    if (!yearStartPhase.ok) {
+      return failure(prefixIssues(yearStartPhase.issues, "/yearStartPhase"));
+    }
+
+    working.worldState = yearStartPhase.value.worldState;
+    eventStartSequence = yearStartPhase.value.nextSequence;
+    // Year-start already advanced the date; skip a second calendar step and
+    // do not re-run legacy processors (capture already ran on year-end week).
+    worldEngineSkipCalendar = true;
+    legacyProcessors = [];
+
+    const promotedYearStart = promoteLegacyWorldEngineEvents(
+      yearStartPhase.value.events,
+      session.context.simulationId,
+    );
+    if (!promotedYearStart.ok) {
+      return failure(promotedYearStart.issues);
+    }
+
+    const sealed = sealWorldYearStartReceiptHashes({
+      provider,
+      preWorldState: preYearStartWorldState,
+      postWorldState: yearStartPhase.value.worldState,
+      worldRngState: working.worldRngState,
+      matchIdGeneratorState: working.matchIdGeneratorState,
+      preEventAllocationNextSequence: preYearStartEventAllocationNextSequence,
+      postEventAllocationNextSequence: yearStartPhase.value.nextSequence,
+      committedEventStream: preYearStartEventStream,
+      yearStartPrefixEvents: promotedYearStart.value,
+      processorRuntimeStatesBeforeYearStart: preYearStartProcessorRuntimeStates,
+      yearStartRuntimeWithSentinelReceipt: yearStartPhase.value.yearStartRuntime,
+    });
+    if (!sealed.ok) {
+      return failure(prefixIssues(sealed.issues, "/yearStartReceiptSeal"));
+    }
+
+    const replaced = replaceWorldYearStartRuntimeState(
+      specificStates,
+      sealed.value.yearStartRuntime,
+    );
+    if (!replaced.ok) {
+      return failure(prefixIssues(replaced.issues, "/processorRuntimeStates"));
+    }
+    working.processorRuntimeStates = {
+      ...working.processorRuntimeStates,
+      processorSpecificStates: replaced.value,
+    };
+
+    yearStartEvents.push(...promotedYearStart.value);
+  } else if (alreadyProcessedCurrentWeek) {
+    // After a year-start outer week that trained the new year-start week and
+    // skipped WorldEngine calendar advance, the next step must advance only
+    // (absoluteWeek += 1) without re-running weekly-training on the same week.
+    skipWeeklyAdapter = true;
   }
 
-  working.worldState = adapterResult.value.worldState;
-  working.weeklyTrainingSidecars = adapterResult.value.weeklyTrainingSidecars;
-  working.processorRuntimeStates = adapterResult.value.processorRuntimeStates;
+  let weeklyEnvelopes: Sprint1EventEnvelope[] = [];
+  let worldEngineStartSequence = eventStartSequence;
 
-  const weeklyAllocation = allocateWeeklyTrainingEventCandidates({
-    candidates: adapterResult.value.eventCandidates,
-    startSequence: working.eventAllocationState.nextSequence,
-    simulationId: session.context.simulationId,
-    worldDate: working.worldState.worldDate,
-    sourceProcessor: WEEKLY_TRAINING_PROCESSOR_ID,
-  });
-  if (!weeklyAllocation.ok) {
-    return failure(prefixIssues(weeklyAllocation.issues, "/weeklyEventAllocation"));
+  if (!skipWeeklyAdapter) {
+    const adapterInput: Sprint1WeeklyTrainingAdapterInput = {
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      worldState: working.worldState,
+      weeklyTrainingSidecars: working.weeklyTrainingSidecars,
+      sprint1Config: session.context.sprint1Config,
+      techniqueCatalog: session.context.techniqueCatalog,
+      processorRuntimeStates: working.processorRuntimeStates,
+    };
+
+    const adapterResult = runSprint1WeeklyTrainingAdapter(adapterInput, provider);
+    if (!adapterResult.ok) {
+      return failure(prefixIssues(adapterResult.issues, "/weeklyTrainingAdapter"));
+    }
+
+    working.worldState = adapterResult.value.worldState;
+    working.weeklyTrainingSidecars = adapterResult.value.weeklyTrainingSidecars;
+    working.processorRuntimeStates = adapterResult.value.processorRuntimeStates;
+
+    const weeklyAllocation = allocateWeeklyTrainingEventCandidates({
+      candidates: adapterResult.value.eventCandidates,
+      startSequence: eventStartSequence,
+      simulationId: session.context.simulationId,
+      worldDate: working.worldState.worldDate,
+      sourceProcessor: WEEKLY_TRAINING_PROCESSOR_ID,
+    });
+    if (!weeklyAllocation.ok) {
+      return failure(prefixIssues(weeklyAllocation.issues, "/weeklyEventAllocation"));
+    }
+
+    weeklyEnvelopes = weeklyAllocation.value.envelopes;
+    worldEngineStartSequence = weeklyAllocation.value.nextSequence;
   }
-
-  const weeklyEnvelopes = weeklyAllocation.value.envelopes;
-  const worldEngineStartSequence = weeklyAllocation.value.nextSequence;
 
   let worldEngineResult;
   try {
@@ -344,6 +544,7 @@ function executeSprint1WeeklyTransitionDraft(
       state: working.worldState,
       processors: legacyProcessors,
       startSequence: worldEngineStartSequence,
+      skipCalendarStep: worldEngineSkipCalendar,
     });
   } catch (error) {
     const detail =
@@ -372,7 +573,11 @@ function executeSprint1WeeklyTransitionDraft(
     return failure(promotedWorldEvents.issues);
   }
 
-  const appendedEvents: Sprint1EventEnvelope[] = [...weeklyEnvelopes, ...promotedWorldEvents.value];
+  const appendedEvents: Sprint1EventEnvelope[] = [
+    ...yearStartEvents,
+    ...weeklyEnvelopes,
+    ...promotedWorldEvents.value,
+  ];
 
   if (worldEngineResult.nextSequence !== oldNextSequence + appendedEvents.length) {
     return failure([
@@ -454,12 +659,14 @@ function runValidatedSprint1WeeklyStep(
   provider: Sha256Provider,
   legacyProcessors: readonly WorldProcessor[],
   ownedEventStream: Sprint1EventEnvelope[],
+  onBeforeYearStartPhase?: (worldState: Sprint1RunRuntimeState["worldState"]) => void,
 ): ValidationResult<Sprint1RunSession> {
   const transition = executeSprint1WeeklyTransitionDraft(
     session,
     provider,
     legacyProcessors,
     "trusted",
+    onBeforeYearStartPhase,
   );
   if (!transition.ok) {
     return transition;
@@ -544,6 +751,7 @@ export function runSprint1Years(
   }
   const legacyProcessors = options.legacyProcessors ?? [];
   const onAfterValidatedWeek = options.onAfterValidatedWeek;
+  const onBeforeYearStartPhase = options.onBeforeYearStartPhase;
 
   if (!Number.isSafeInteger(years) || years < 0) {
     return failure([
@@ -588,6 +796,7 @@ export function runSprint1Years(
       provider,
       legacyProcessors,
       ownedEventStream,
+      onBeforeYearStartPhase,
     );
     if (!step.ok) {
       return step;

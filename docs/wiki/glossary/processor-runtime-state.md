@@ -8,7 +8,7 @@ sources:
   - docs/specs/03-event-envelope.md
   - docs/specs/10-training-and-learning.md
   - docs/TECHNICAL_DECISIONS.md
-last_verified: 2026-08-09
+last_verified: 2026-08-12
 related:
   - ../invariants/runtime-state.md
   - ../architecture/world-engine.md
@@ -27,7 +27,7 @@ WorldEngine 実行中に保持するプロセッサ実行時状態（RNG サブ�
 - 世界進行は固定順の Processor パイプラインで週単位に進む（S00-007）
 - RNG 状態は復元可能であり、同一入力・同一 processor 順で決定的結果を返す
 - 詳細なフィールド定義と遷移規則はコードとミニ仕様を正とする
-- Sprint 1（`S1-SPEC-0.1.20`）: `TrainingProcessorRuntimeState` は既存 `ProcessorRuntimeState` 機構で `weekly-training` processor の runtime として保持する
+- Sprint 1 current（`S1-SPEC-0.1.21`）: `TrainingProcessorRuntimeState` はS01-008／0.1.20で導入された既存 `ProcessorRuntimeState` 機構の `weekly-training` runtimeとして維持し、CAL-JANでは同じ `processorSpecificStates` ownerへ `world-year-start` runtime componentを追加する。
 - World RNG／`MatchIdGeneratorState`／`eventStream`／`eventAllocationState`／`battleResultWeekState` は `ProcessorRuntimeState` ではなく `Sprint1RunRuntimeState` が所有する（オブジェクト自体はcheckpoint非永続）。`weeklyTrainingSidecars`および`battleResults`はfinal-worldへ投影
 - `processorRuntimeStates` field が既存 `ProcessorRuntimeState` collection を所有する。optional `processorSpecificStates` に `TrainingProcessorRuntimeState` を保持（Sprint 0は省略可または`[]`）。`specificState`はplain JSONでdescriptor-safe deep-clone（nested alias禁止）
 - `Sprint1RunRuntimeState` 直下へ `TrainingProcessorRuntimeState` を重複保存しない
@@ -65,7 +65,7 @@ WorldEngine 実行中に保持するプロセッサ実行時状態（RNG サブ�
 
 ## 未解決事項
 
-該当なし。`S1-SPEC-0.1.20` は現行。`Sprint1RunRuntimeState` production実装はS01-008で**implemented / accepted**。
+該当なし。current integrated Sprint1 specは `S1-SPEC-0.1.21`。`S1-SPEC-0.1.20` はS01-008の履歴版。
 
 ## 関連Wikiページ
 

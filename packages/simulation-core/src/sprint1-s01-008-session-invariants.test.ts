@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ABILITY_KEYS,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
   SPRINT1_CLI_INPUT_SCHEMA_VERSION,
   WEEKLY_SCORED_ACTIONS,
@@ -189,7 +190,10 @@ function mutable(session: Sprint1RunSession): Sprint1RunSession {
 }
 
 function prepareCompletedBattle(session: Sprint1RunSession) {
-  const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+  const worldDate = createWorldDate(
+    { year: 21, month: 4, weekOfMonth: 1 },
+    DEFAULT_WORLD_CALENDAR_CONFIG,
+  );
   const persons = session.runtimeState.worldState.persons.map((person) => {
     if (person.lifeStatus !== "living" || person.currentAge === null) return person;
     const currentAge = worldDate.year - person.birthYear;

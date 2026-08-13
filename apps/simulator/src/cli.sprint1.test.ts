@@ -70,7 +70,7 @@ describe("runCli Sprint 1", () => {
     const metadata = JSON.parse(
       readFileSync(join(runDirectory, "run-metadata.json"), "utf8"),
     ) as Record<string, unknown>;
-    expect(metadata["schemaVersion"]).toBe("0.4.0");
+    expect(metadata["schemaVersion"]).toBe("0.5.0");
     expect(metadata["eventEnvelopeSchemaVersion"]).toBe("0.2.0");
     expect(metadata["simulationIdentity"]).toBeTruthy();
     expect(metadata["simulationIdentityHash"]).toMatch(/^[0-9a-f]{64}$/);
@@ -78,7 +78,7 @@ describe("runCli Sprint 1", () => {
     const initialWorld = JSON.parse(
       readFileSync(join(runDirectory, "initial-world.json"), "utf8"),
     ) as Record<string, unknown>;
-    expect(initialWorld["schemaVersion"]).toBe("0.4.0");
+    expect(initialWorld["schemaVersion"]).toBe("0.5.0");
     expect(initialWorld["initialWeeklyTrainingSidecarSnapshot"]).toBeTruthy();
 
     const finalWorld = JSON.parse(

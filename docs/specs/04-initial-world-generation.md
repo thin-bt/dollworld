@@ -1,6 +1,6 @@
 # 04 初期世界生成ミニ仕様
 
-- ミニ仕様バージョン：`S0-SPEC-0.1.5`
+- ミニ仕様バージョン：`S0-SPEC-0.1.6`
 
 ## 1. 目的
 
@@ -83,7 +83,7 @@ initial-world/abilities
 ## 5. 決定的生成順序
 
 1. 設定・名前manifestを検証し、02・06ミニ仕様の正規化規則と注入された`Sha256Provider`でconfigHashとnameDataHashを検証する。00ミニ仕様の材料順でsimulationIdを作る。
-2. worldIdを`world_000001`として、世界1年4月第1週を設定する。
+2. worldIdを`world_000001`として、世界1年・設定年初月第1週・absoluteWeek=0を設定する（既定：世界1年1月第1週）。初期snapshotは年初処理反映済みであり、世界1年開始時に年初処理を二重実行しない。
 3. 人物IDは死亡済み祖先200人、存命600人の順に予約する。基準設定では`person_000001`〜`person_000200`が死亡済み、`person_000201`〜`person_000800`が存命となる。
 4. 死亡済み祖先を生成する。sexは総数に対して`floor(count × sexRatioMale)`をmale、残りをfemaleとし、候補列をshuffleする。`ageAtDeath`は設定範囲の整数、`deathYear`は0以下、`birthYear >= earliestHistoricalYear`、`ageAtDeath=deathYear-birthYear`を満たす。
 5. 存命人物を年齢帯順に生成する。各帯でmale件数を先に作り残りをfemaleとし、sex候補列を帯専用サブストリームでshuffleする。年齢は各人物ごとに`nextInt(minAge,maxAge+1)`で決め、`birthYear=1-currentAge`とする。
@@ -175,7 +175,7 @@ IDは種別ごとのゼロ埋め連番で、上記のエンティティ生成順
 
 - 600／200／100／24／45が設定と一致し、100家すべてに存命人物が1名以上いる。
 - 年齢帯・ランク分布が一致。
-- 全人物の出生時期は4月第1週固定で、人物別週を持たない。
+- 全人物の出生時期は設定年初月第1週固定（既定1月）で、人物別週を持たない。
 - `currentAge = 1 - birthYear` が初期状態で成立。
 - 16歳未満はcurrentRankなし。
 - 初期42歳以上は引退済み・currentRankなし。過去の到達ランクはhighestRank／retirementRankへ保持。

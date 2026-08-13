@@ -10,7 +10,7 @@ sources:
   - tag:sprint0-complete
   - commit:2800d3b959e575f57660c27b344507dd0e38ddb6
   - commit:3b313a5ea690351d062e751bc724e5530b835872
-last_verified: 2026-08-08
+last_verified: 2026-08-12
 ---
 
 # docs/wiki README
@@ -22,7 +22,7 @@ last_verified: 2026-08-08
 ## 現在確定している内容
 
 - Sprint 0（タグ `sprint0-complete`）の説明・索引ページが存在する
-- Sprint 1 仕様 `S1-SPEC-0.1.20` の説明・索引を収録する（S01-001〜S01-009 implemented / accepted。Sprint 1: **COMPLETE**。clean master final verify: PASSED on `5a80268`。completion tag: `sprint1-complete` (annotated) → `5a80268`。本docs更新は tag 作成後の post-completion status synchronization（tagは動かさない））
+- Sprint 1 の現行統合仕様 `S1-SPEC-0.1.21`（正本 `SPEC-0.1.3`）の説明・索引を収録する。S01-001〜S01-009のimplemented / accepted履歴と `sprint1-complete` → `5a80268` は完成snapshotの履歴アンカーとして維持する。
 
 ## Sprint 1入口
 

@@ -1,10 +1,12 @@
+import type { WorldCalendarConfig } from "../config/types.js";
 import { MINIMUM_RANK } from "../enums.js";
 import type { FamilyId, LineageId, PersonId, RelationshipId } from "../ids.js";
 import {
   createInitialWorldDate,
-  isAprilWeek1,
-  isMarchWeek4,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+  isWorldYearStartWeek,
   validateWorldDate,
+  weeksPerWorldYear,
 } from "../world-date.js";
 import { assertEventIdMatchesSequence, assertNonNegativeSafeInteger } from "./event-id.js";
 import {
@@ -157,8 +159,8 @@ function assertEmptyEntitiesExcept(
   }
 }
 
-function assertInitialWorldDate(event: EventEnvelope): void {
-  const expected = createInitialWorldDate();
+function assertInitialWorldDate(event: EventEnvelope, worldCalendar: WorldCalendarConfig): void {
+  const expected = createInitialWorldDate(worldCalendar);
   const d = event.worldDate;
   if (
     d.year !== expected.year ||
@@ -166,7 +168,7 @@ function assertInitialWorldDate(event: EventEnvelope): void {
     d.weekOfMonth !== expected.weekOfMonth ||
     d.absoluteWeek !== expected.absoluteWeek
   ) {
-    throw new Error(`${event.eventType} requires world year 1 April week 1`);
+    throw new Error(`${event.eventType} requires world year 1 configured start week`);
   }
 }
 
@@ -180,13 +182,13 @@ function assertSafeIntegerAtLeast(
   }
 }
 
-function assertEventTypeSpecific(event: EventEnvelope): void {
+function assertEventTypeSpecific(event: EventEnvelope, worldCalendar: WorldCalendarConfig): void {
   switch (event.eventType) {
     case "world.started": {
       if (event.origin !== "initialization") {
         throw new Error("world.started origin must be initialization");
       }
-      assertInitialWorldDate(event);
+      assertInitialWorldDate(event, worldCalendar);
       assertEmptyEntitiesExcept(event, null);
       break;
     }
@@ -194,7 +196,7 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
       if (event.origin !== "initialization") {
         throw new Error("family.initialized origin must be initialization");
       }
-      assertInitialWorldDate(event);
+      assertInitialWorldDate(event, worldCalendar);
       if (event.entities.familyIds.length !== 1) {
         throw new Error("family.initialized requires exactly one familyId in entities");
       }
@@ -208,7 +210,7 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
       if (event.origin !== "initialization") {
         throw new Error("lineage.initialized origin must be initialization");
       }
-      assertInitialWorldDate(event);
+      assertInitialWorldDate(event, worldCalendar);
       if (event.entities.lineageIds.length !== 1) {
         throw new Error("lineage.initialized requires exactly one lineageId in entities");
       }
@@ -222,7 +224,7 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
       if (event.origin !== "initialization") {
         throw new Error("person.initialized origin must be initialization");
       }
-      assertInitialWorldDate(event);
+      assertInitialWorldDate(event, worldCalendar);
       if (event.entities.personIds.length !== 1) {
         throw new Error("person.initialized requires exactly one personId in entities");
       }
@@ -236,7 +238,7 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
       if (event.origin !== "initialization") {
         throw new Error("relationship.initialized origin must be initialization");
       }
-      assertInitialWorldDate(event);
+      assertInitialWorldDate(event, worldCalendar);
       if (event.entities.relationshipIds.length !== 1) {
         throw new Error("relationship.initialized requires exactly one relationshipId in entities");
       }
@@ -253,11 +255,21 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
         throw new Error("world.year_stats_finalized origin must be simulation");
       }
       assertSafeIntegerAtLeast(event.payload.worldYear, "payload.worldYear", 1);
-      if (!isMarchWeek4(event.worldDate) || event.worldDate.year !== event.payload.worldYear) {
-        throw new Error("world.year_stats_finalized requires March week 4 of payload.worldYear");
+      if (!isWorldYearStartWeek(event.worldDate, worldCalendar)) {
+        throw new Error(
+          "world.year_stats_finalized requires configured world-year start week worldDate",
+        );
       }
-      if (event.worldDate.absoluteWeek !== event.payload.worldYear * 48 - 1) {
-        throw new Error("world.year_stats_finalized absoluteWeek must equal worldYear * 48 - 1");
+      if (event.worldDate.year !== event.payload.worldYear + 1) {
+        throw new Error(
+          "world.year_stats_finalized worldDate.year must equal payload.worldYear + 1",
+        );
+      }
+      const expectedAbsolute = weeksPerWorldYear(worldCalendar) * event.payload.worldYear;
+      if (event.worldDate.absoluteWeek !== expectedAbsolute) {
+        throw new Error(
+          "world.year_stats_finalized absoluteWeek must equal worldYear * weeksPerWorldYear",
+        );
       }
       assertEmptyEntitiesExcept(event, null);
       break;
@@ -267,8 +279,8 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
         throw new Error("world.year_started origin must be simulation");
       }
       assertSafeIntegerAtLeast(event.payload.worldYear, "payload.worldYear", 2);
-      if (!isAprilWeek1(event.worldDate)) {
-        throw new Error("world.year_started requires April week 1");
+      if (!isWorldYearStartWeek(event.worldDate, worldCalendar)) {
+        throw new Error("world.year_started requires configured world-year start week");
       }
       if (event.payload.worldYear !== event.worldDate.year) {
         throw new Error("world.year_started payload.worldYear must equal worldDate.year");
@@ -280,8 +292,8 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
       if (event.origin !== "simulation") {
         throw new Error("person.aged origin must be simulation");
       }
-      if (!isAprilWeek1(event.worldDate)) {
-        throw new Error("person.aged requires April week 1");
+      if (!isWorldYearStartWeek(event.worldDate, worldCalendar)) {
+        throw new Error("person.aged requires configured world-year start week");
       }
       if (event.entities.personIds.length !== 1) {
         throw new Error("person.aged requires exactly one personId");
@@ -398,7 +410,11 @@ function assertEventTypeSpecific(event: EventEnvelope): void {
   }
 }
 
-export function validateEventEnvelope(event: EventEnvelope, knownIds?: KnownEntityIds): void {
+export function validateEventEnvelope(
+  event: EventEnvelope,
+  knownIds?: KnownEntityIds,
+  worldCalendar: WorldCalendarConfig = DEFAULT_WORLD_CALENDAR_CONFIG,
+): void {
   if (event.schemaVersion !== EVENT_ENVELOPE_SCHEMA_VERSION) {
     throw new Error(
       `schemaVersion must be ${EVENT_ENVELOPE_SCHEMA_VERSION} (got ${event.schemaVersion})`,
@@ -428,7 +444,7 @@ export function validateEventEnvelope(event: EventEnvelope, knownIds?: KnownEnti
     throw new Error("sourceProcessor must be a non-empty string");
   }
 
-  validateWorldDate(event.worldDate);
+  validateWorldDate(event.worldDate, worldCalendar);
 
   if (event.entities === null || typeof event.entities !== "object") {
     throw new Error("entities must be an object");
@@ -451,7 +467,7 @@ export function validateEventEnvelope(event: EventEnvelope, knownIds?: KnownEnti
   assertNoDuplicateIds(event.entities.relationshipIds, "entities.relationshipIds");
 
   assertPlainObjectPayload(event);
-  assertEventTypeSpecific(event);
+  assertEventTypeSpecific(event, worldCalendar);
 
   if (knownIds !== undefined) {
     assertIdsExist(event.entities.personIds, toSet(knownIds.personIds), "entities.personIds");

@@ -186,8 +186,8 @@ export function verifyReloadedSprint1RunOutputContents(
   verifyYearlyStatisticsCsv(contents["yearly-statistics.csv"]);
   verifySprint1EventsJsonl(contents["events.jsonl"]);
 
-  if (metadata["schemaVersion"] !== "0.4.0") {
-    throw new Error("run-metadata.json schemaVersion must be 0.4.0");
+  if (metadata["schemaVersion"] !== "0.5.0") {
+    throw new Error("run-metadata.json schemaVersion must be 0.5.0");
   }
   if (metadata["eventEnvelopeSchemaVersion"] !== "0.2.0") {
     throw new Error("run-metadata.json eventEnvelopeSchemaVersion must be 0.2.0");
@@ -213,8 +213,8 @@ export function verifyReloadedSprint1RunOutputContents(
     "run-metadata simulationIdentity",
   );
 
-  if (initialWorld["schemaVersion"] !== "0.4.0") {
-    throw new Error("initial-world.json schemaVersion must be 0.4.0");
+  if (initialWorld["schemaVersion"] !== "0.5.0") {
+    throw new Error("initial-world.json schemaVersion must be 0.5.0");
   }
   if (initialWorld["simulationId"] !== metadata["simulationId"]) {
     throw new Error("initial-world simulationId must equal run-metadata simulationId");

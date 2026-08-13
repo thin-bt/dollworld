@@ -12,7 +12,7 @@ import type { SeededRngState } from "../rng.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
-import { validateWorldDate } from "../world-date.js";
+import { validateWorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
 import type { WorldDate } from "../world-date.js";
 import type { BattleActionSourceIdentity } from "./battle-action-source-identity.js";
 import { validateBattleActionSourceIdentity } from "./battle-action-source-identity.js";
@@ -491,7 +491,7 @@ export function parseWorldDate(
 
   const candidate = { year, month, weekOfMonth, absoluteWeek } as WorldDate;
   try {
-    validateWorldDate(candidate);
+    validateWorldDate(candidate, DEFAULT_WORLD_CALENDAR_CONFIG);
   } catch (error) {
     issues.push({
       path,

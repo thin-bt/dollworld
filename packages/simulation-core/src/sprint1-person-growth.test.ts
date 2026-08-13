@@ -16,6 +16,7 @@ import {
   createInitialWorldDate,
   createSeededRng,
   createWorldEngineState,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   deriveInjuryStage,
   freezePersonTemporaryCondition,
   generateInitialWorld,
@@ -905,7 +906,7 @@ describe("attachSprint1PersonStateToInitialWorld", () => {
 
   it("accepts only fresh initial date and rejects valid mid-run worlds", () => {
     const world = worldCopy();
-    expect(world.worldDate).toEqual(createInitialWorldDate());
+    expect(world.worldDate).toEqual(createInitialWorldDate(DEFAULT_WORLD_CALENDAR_CONFIG));
     expect(attachSprint1PersonStateToInitialWorld(world).ok).toBe(true);
 
     const engineState = createWorldEngineState(world);
@@ -915,7 +916,7 @@ describe("attachSprint1PersonStateToInitialWorld", () => {
       weeks: 1,
       startSequence: 1,
     }).state;
-    expect(week2.worldDate).toEqual({ year: 1, month: 4, weekOfMonth: 2, absoluteWeek: 1 });
+    expect(week2.worldDate).toEqual({ year: 1, month: 1, weekOfMonth: 2, absoluteWeek: 1 });
     expect(() => validateWorldEngineState(week2)).not.toThrow();
     const week2Reject = attachSprint1PersonStateToInitialWorld(week2);
     expect(week2Reject.ok).toBe(false);
@@ -929,7 +930,7 @@ describe("attachSprint1PersonStateToInitialWorld", () => {
       weeks: 4,
       startSequence: 1,
     }).state;
-    expect(month5.worldDate).toEqual({ year: 1, month: 5, weekOfMonth: 1, absoluteWeek: 4 });
+    expect(month5.worldDate).toEqual({ year: 1, month: 2, weekOfMonth: 1, absoluteWeek: 4 });
     expect(() => validateWorldEngineState(month5)).not.toThrow();
     expect(attachSprint1PersonStateToInitialWorld(month5).ok).toBe(false);
 
@@ -939,7 +940,7 @@ describe("attachSprint1PersonStateToInitialWorld", () => {
       weeks: 48,
       startSequence: 1,
     }).state;
-    expect(year2.worldDate).toEqual({ year: 2, month: 4, weekOfMonth: 1, absoluteWeek: 48 });
+    expect(year2.worldDate).toEqual({ year: 2, month: 1, weekOfMonth: 1, absoluteWeek: 48 });
     expect(() => validateWorldEngineState(year2)).not.toThrow();
     expect(attachSprint1PersonStateToInitialWorld(year2).ok).toBe(false);
 

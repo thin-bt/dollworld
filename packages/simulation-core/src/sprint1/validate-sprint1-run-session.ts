@@ -13,6 +13,8 @@ import {
 } from "./battle-result-store.js";
 import { validateBattleResultWeekState } from "./battle-result-week-state.js";
 import { WEEKLY_TRAINING_PROCESSOR_ID } from "./constants.js";
+import { WORLD_YEAR_START_PROCESSOR_ID } from "./active-year-start-processor-manifest.js";
+import { validateWorldYearStartRuntimeState } from "./world-year-start-runtime-state.js";
 import { validateEventAllocationState } from "./event-allocation-state.js";
 import { validateSprint1EventEnvelope } from "./event-envelope-sprint1.js";
 import { validateMatchIdGeneratorState } from "./match-id-generator.js";
@@ -215,19 +217,22 @@ export function validateSprint1RunSession(
   if (processorRuntimeStates !== undefined) {
     const weeklyRng = processorRuntimeStates.rngStates[0];
     const weeklySpecific = processorRuntimeStates.processorSpecificStates?.[0];
+    const yearStartSpecific = processorRuntimeStates.processorSpecificStates?.[1];
     if (
       processorRuntimeStates.processorOrder.length !== 1 ||
       processorRuntimeStates.processorOrder[0] !== WEEKLY_TRAINING_PROCESSOR_ID ||
       processorRuntimeStates.rngStates.length !== 1 ||
       weeklyRng?.processorId !== WEEKLY_TRAINING_PROCESSOR_ID ||
-      processorRuntimeStates.processorSpecificStates?.length !== 1 ||
-      weeklySpecific?.processorId !== WEEKLY_TRAINING_PROCESSOR_ID
+      processorRuntimeStates.processorSpecificStates?.length !== 2 ||
+      weeklySpecific?.processorId !== WEEKLY_TRAINING_PROCESSOR_ID ||
+      yearStartSpecific?.processorId !== WORLD_YEAR_START_PROCESSOR_ID
     ) {
       issues.push({
         path: "/runtimeState/processorRuntimeStates",
-        message: "Sprint 1 requires exactly one weekly-training processor runtime entry",
+        message:
+          "Sprint 1 requires processorOrder/rngStates=[weekly-training] and processorSpecificStates=[weekly-training, world-year-start]",
         expected:
-          "processorOrder, rngStates, and processorSpecificStates each contain [weekly-training]",
+          "processorOrder/rngStates length 1 weekly-training; processorSpecificStates length 2 ordered weekly-training then world-year-start",
       });
     } else {
       const rngResult = validateSeededRngState(weeklyRng.state);
@@ -245,6 +250,15 @@ export function validateSprint1RunSession(
           ...prefixIssues(
             specificResult.issues,
             "/runtimeState/processorRuntimeStates/processorSpecificStates/0/specificState",
+          ),
+        );
+      }
+      const yearStartResult = validateWorldYearStartRuntimeState(yearStartSpecific.specificState);
+      if (!yearStartResult.ok) {
+        issues.push(
+          ...prefixIssues(
+            yearStartResult.issues,
+            "/runtimeState/processorRuntimeStates/processorSpecificStates/1/specificState",
           ),
         );
       }

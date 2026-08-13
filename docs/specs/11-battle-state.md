@@ -1,6 +1,6 @@
 # 11 戦闘開始状態仕様
 
-- 仕様版: `S1-SPEC-0.1.20`
+- 仕様版: `S1-SPEC-0.1.21`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 1対1戦闘の入力、開始状態、参加者スナップショット、戦闘専用RNG
 - 非対象: 大会組合せ、昇格、戦績永続化、観戦画面
@@ -292,6 +292,10 @@ RunRuleSnapshot
 - schemaVersion
 - simulationId
 - simulationIdentityHash
+- worldCalendar
+- worldCalendarConfigHash
+- yearStartProcessorManifest
+- yearStartProcessorManifestHash
 - battleProfileAdapterVersion
 - matchIdGeneratorVersion
 - initialMatchIdGeneratorStateHash
@@ -305,11 +309,14 @@ RunRuleSnapshot
 - runRuleSnapshotHash
 ```
 
-- `RunRuleSnapshot.schemaVersion` の初期値は `0.4.0`
+- `RunRuleSnapshot.schemaVersion` の現行new-run値は `0.5.0`。pre-CAL-JAN `0.4.0`本文はread-only legacyとして変更しない
 - `initialMatchIdGeneratorStateHash`はSimulationIdentityの値と一致必須
 - `techniqueDefinitions` は完全カタログをTechniqueId昇順へ正規化した配列
 - 完全なSprint1Configと完全技カタログはこのrun単位snapshotにだけ保存する
-- `runRuleSnapshotHash` はschemaVersion、simulationId、simulationIdentityHash、battleProfileAdapterVersion、matchIdGeneratorVersion、initialMatchIdGeneratorStateHash、defaultBattleStrategyVersion、完全設定、設定identity、完全カタログ、カタログidentityをcanonical JSON化したSHA-256
+- `runRuleSnapshotHash` はschemaVersion、simulationId、simulationIdentityHash、worldCalendar、worldCalendarConfigHash、yearStartProcessorManifest、yearStartProcessorManifestHash、battleProfileAdapterVersion、matchIdGeneratorVersion、initialMatchIdGeneratorStateHash、defaultBattleStrategyVersion、完全設定、設定identity、完全カタログ、カタログidentityをcanonical JSON化したSHA-256
+- `worldCalendarConfigHash = SHA-256(canonicalJson(validated worldCalendar))`、`yearStartProcessorManifestHash = SHA-256(canonicalJson(validated yearStartProcessorManifest))`とし、各本文とhashを相互検証する
+- `worldCalendarConfigHash`／`yearStartProcessorManifestHash`はSimulationIdentity 0.5.0の同名hashとexact一致必須
+- `InitialWorldConfig`全文、runtime registry/module path、進行中runtime stateをRunRuleSnapshotへ重複保存しない
 - `simulationIdentityHash` は02ミニ仕様のSimulationIdentityおよび05ミニ仕様のrun-metadata値と一致し、simulationIdの再計算検証に使用する
 - 同じsimulationIdのrun中にsnapshotを差し替えない
 - 固定7ファイル出力では05ミニ仕様どおり`initial-world.json.runRuleSnapshot`へ1件だけ保存し、各戦闘はhash参照する
@@ -641,7 +648,7 @@ BattleState生成だけではイベントを出さない。全ターン詳細は
 - RunRuleSnapshot.techniqueDefinitionsは完全カタログのTechniqueId昇順配列と一致し、重複・欠落・追加がない
 - BattleRulesSnapshotRef.relevantTechniqueIdsは両参加者が参照する習得済みTechniqueIdの和集合と一致する
 - participant snapshotのlifeStatus／participationStatus／careerStatus／birthYear／ageAtBattleは開始入力と一致し戦闘中不変
-- ageAtBattleは正本の4月第1週一斉加齢規則に従い、worldDateとbirthYearから再計算した値と一致
+- ageAtBattleは正本の設定年初月第1週一斉加齢規則に従い、worldDateとbirthYearから再計算した値と一致（既定1月）
 - initialRangeは4段階のいずれかで戦闘中不変
 - participant.techniques内の各`PersonTechniqueState`は常に`0 <= successfulUseCount`、`0 <= attemptedUseCount`、`successfulUseCount <= attemptedUseCount`（safe integer）。既存snapshotで違反なら継続不能validation failure
 - Resolve時scripted modeでは両sideの`scripted_actions` identityと`canonicalScript`が一致し、片側混在は未commit failureとする（12仕様§2.1）
@@ -687,7 +694,7 @@ BattleState生成だけではイベントを出さない。全ターン詳細は
 - 戦闘中も`hash(sourceSnapshot)===sourceSnapshotHash`を検証すること（turnNumber=0限定の省略禁止）
 - 不変currentフィールドとsourceSnapshotの完全一致、techniquesの不変フィールド一致とuse count差分許可
 - BattleState.schemaVersion `0.6.0`受理と`0.5.0`新規拒否
-- ageAtBattleとworldDate・birthYearの境界（4月第1週を含む）
+- ageAtBattleとworldDate・birthYearの境界（設定年初月第1週を含む。既定1月）
 - RunRuleSnapshotのsimulationIdentityHash、config／catalog全文、identity、runRuleSnapshotHashの再計算一致
 - BattleRulesSnapshotRefのself-excluding hash入力、relevantTechniqueIds／battleRulesRefHashの再計算一致
 - DefaultBattleStrategy／scripted actions identity差分でbattleInputHashが変化

@@ -17,6 +17,10 @@ import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import { createWorldEngineState } from "../world-engine/engine.js";
 import { createInitialWorldDate } from "../world-date.js";
+import {
+  computeActiveYearStartProcessorManifestHash,
+  createDefaultActiveYearStartProcessorManifest,
+} from "./active-year-start-processor-manifest.js";
 import { attachSprint1PersonStateToInitialWorld } from "./attach-sprint1-person-state.js";
 import { createInitialBattleResults } from "./battle-result-store.js";
 import { createInitialBattleResultWeekState } from "./battle-result-week-state.js";
@@ -191,9 +195,10 @@ export function promoteProvisionalWorldSnapshot(input: {
   world: InitialWorldSnapshot;
   provisionalSimulationId: SimulationId;
   finalSimulationId: SimulationId;
+  worldCalendar: InitialWorldConfig["worldCalendar"];
 }): ValidationResult<InitialWorldSnapshot> {
   const issues: ValidationIssue[] = [];
-  const expectedDate = createInitialWorldDate();
+  const expectedDate = createInitialWorldDate(input.worldCalendar);
   for (const field of ["year", "month", "weekOfMonth", "absoluteWeek"] as const) {
     if (input.world.worldDate[field] !== expectedDate[field]) {
       issues.push(
@@ -315,6 +320,8 @@ function parseCreateSprint1RunSessionInput(
 function buildSimulationIdentity(input: {
   seed: number;
   initialWorldConfigHash: string;
+  worldCalendarConfigHash: string;
+  yearStartProcessorManifestHash: string;
   sprint1ConfigHash: string;
   techniqueCatalogHash: string;
   initialWeeklyTrainingSidecarHash: string;
@@ -324,6 +331,8 @@ function buildSimulationIdentity(input: {
     schemaVersion: SIMULATION_IDENTITY_SCHEMA_VERSION,
     seed: input.seed,
     initialWorldConfigHash: input.initialWorldConfigHash,
+    worldCalendarConfigHash: input.worldCalendarConfigHash,
+    yearStartProcessorManifestHash: input.yearStartProcessorManifestHash,
     sprint1ConfigHash: input.sprint1ConfigHash,
     techniqueCatalogHash: input.techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash: input.initialWeeklyTrainingSidecarHash,
@@ -439,9 +448,30 @@ export function createSprint1RunSession(
     return failure(prefixIssues(sidecarHashResult.issues, "/initialWeeklyTrainingSidecarHash"));
   }
 
+  const yearStartProcessorManifest = createDefaultActiveYearStartProcessorManifest();
+  const worldCalendarConfigHashResult = safeHashUtf8(
+    provider,
+    toCanonicalJson(config.worldCalendar),
+    "/worldCalendarConfigHash",
+  );
+  if (!worldCalendarConfigHashResult.ok) {
+    return failure(prefixIssues(worldCalendarConfigHashResult.issues, "/worldCalendarConfigHash"));
+  }
+  const yearStartProcessorManifestHashResult = computeActiveYearStartProcessorManifestHash(
+    yearStartProcessorManifest,
+    provider,
+  );
+  if (!yearStartProcessorManifestHashResult.ok) {
+    return failure(
+      prefixIssues(yearStartProcessorManifestHashResult.issues, "/yearStartProcessorManifestHash"),
+    );
+  }
+
   const identity = buildSimulationIdentity({
     seed,
     initialWorldConfigHash: configHash,
+    worldCalendarConfigHash: worldCalendarConfigHashResult.value,
+    yearStartProcessorManifestHash: yearStartProcessorManifestHashResult.value,
     sprint1ConfigHash: sprint1ConfigHashResult.value,
     techniqueCatalogHash: techniqueCatalogHashResult.value,
     initialWeeklyTrainingSidecarHash: sidecarHashResult.value,
@@ -468,6 +498,7 @@ export function createSprint1RunSession(
     world: attached.value,
     provisionalSimulationId,
     finalSimulationId,
+    worldCalendar: config.worldCalendar,
   });
   if (!promotedWorldResult.ok) {
     return failure(prefixIssues(promotedWorldResult.issues, "/promotedWorld"));
@@ -488,6 +519,8 @@ export function createSprint1RunSession(
       simulationIdentity: identityValidated.value,
       simulationIdentityHash: identityHashResult.value,
       initialMatchIdGeneratorState: matchIdState,
+      worldCalendar: config.worldCalendar,
+      yearStartProcessorManifest,
       sprint1Config: sprint1CliInput.sprint1Config,
       techniqueCatalogDataVersion: sprint1CliInput.techniqueCatalog.identity.dataVersion,
       techniqueDefinitions: sprint1CliInput.techniqueCatalog.definitions,

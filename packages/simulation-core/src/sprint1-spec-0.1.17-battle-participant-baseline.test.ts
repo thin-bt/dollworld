@@ -9,6 +9,7 @@ import {
   BATTLE_PROFILE_ADAPTER_VERSION,
   BATTLE_STATE_SCHEMA_VERSION,
   DEFAULT_BATTLE_STRATEGY_VERSION,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
   MAIN_SPEC_VERSION_FOR_IDENTITY,
   MATCH_ID_GENERATOR_VERSION,
   MATCH_ID_NAMESPACE,
@@ -17,8 +18,10 @@ import {
   SPRINT1_BALANCE_0_2_0_CANONICAL_SHA256,
   SPRINT1_CONFIG_SCHEMA_VERSION,
   SPRINT1_CONFIG_VERSION_DEFAULT,
+  computeActiveYearStartProcessorManifestHash,
   computeSimulationIdentityHash,
   computeTechniqueCatalogHash,
+  createDefaultActiveYearStartProcessorManifest,
   createDefaultStrategyActionSourceIdentity,
   createDefaultSprint1ConfigInput,
   createInitialMatchIdGeneratorState,
@@ -68,9 +71,11 @@ function identityWithSprint1(version: string): SimulationIdentity {
   const config = expectOk(validateSprint1Config(createDefaultSprint1ConfigInput()));
   const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(config));
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 1,
     initialWorldConfigHash: "a".repeat(64),
+    worldCalendarConfigHash: "a".repeat(64),
+    yearStartProcessorManifestHash: "a".repeat(64),
     sprint1ConfigHash,
     techniqueCatalogHash: "b".repeat(64),
     initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -165,12 +170,21 @@ const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(sprint1Config)
 const techniqueCatalogHash = expectOk(
   computeTechniqueCatalogHash(techniqueDefinitions, sha256Provider),
 );
+const defaultYearStartManifest = createDefaultActiveYearStartProcessorManifest();
+const worldCalendarConfigHash = sha256Provider.hashUtf8(
+  toCanonicalJson(DEFAULT_WORLD_CALENDAR_CONFIG),
+);
+const yearStartProcessorManifestHash = expectOk(
+  computeActiveYearStartProcessorManifestHash(defaultYearStartManifest, sha256Provider),
+);
 
 function simulationIdentity(): SimulationIdentity {
   return {
-    schemaVersion: "0.4.0",
+    schemaVersion: "0.5.0",
     seed: 20260807,
     initialWorldConfigHash: "a".repeat(64),
+    worldCalendarConfigHash,
+    yearStartProcessorManifestHash,
     sprint1ConfigHash,
     techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash: "c".repeat(64),
@@ -207,6 +221,8 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
       simulationIdentity: simulationIdentity(),
       simulationIdentityHash,
       initialMatchIdGeneratorState: freshMatchIdGeneratorForIdentity,
+      worldCalendar: DEFAULT_WORLD_CALENDAR_CONFIG,
+      yearStartProcessorManifest: defaultYearStartManifest,
       sprint1Config,
       techniqueCatalogDataVersion: "techniques-0.1.0",
       techniqueDefinitions,
@@ -215,7 +231,10 @@ const runRuleSnapshot: RunRuleSnapshot = expectOk(
   ),
 );
 
-const worldDate = createWorldDate({ year: 21, month: 4, weekOfMonth: 1 });
+const worldDate = createWorldDate(
+  { year: 21, month: 4, weekOfMonth: 1 },
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+);
 const defaultStrategyIdentity = expectOk(
   createDefaultStrategyActionSourceIdentity({
     strategyVersion: runRuleSnapshot.defaultBattleStrategyVersion,
@@ -351,9 +370,9 @@ function expectValidationPathFailure(
 
 describe("S1-SPEC-0.1.18 version registry", () => {
   it("publishes S1-SPEC-0.1.20 / BattleState 0.6.0 and keeps Sprint1Config SHA", () => {
-    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.20");
+    expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
     expect(BATTLE_STATE_SCHEMA_VERSION).toBe("0.6.0");
-    expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.2");
+    expect(MAIN_SPEC_VERSION_FOR_IDENTITY).toBe("SPEC-0.1.3");
     expect(SPRINT1_CONFIG_SCHEMA_VERSION).toBe("0.2.0");
     expect(SPRINT1_CONFIG_VERSION_DEFAULT).toBe("sprint1-balance-0.2.0");
     const config = expectOk(validateSprint1Config(createDefaultSprint1ConfigInput()));
@@ -363,7 +382,7 @@ describe("S1-SPEC-0.1.18 version registry", () => {
   });
 
   it("accepts S1-SPEC-0.1.18 identity and rejects 0.1.17", () => {
-    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.20"));
+    const ok = validateSimulationIdentity(identityWithSprint1("S1-SPEC-0.1.21"));
     expect(ok.ok).toBe(true);
     if (ok.ok) {
       expect(createSimulationIdFromIdentity(ok.value, sha256Provider).ok).toBe(true);

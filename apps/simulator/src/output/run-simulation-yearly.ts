@@ -1,12 +1,14 @@
 import {
   cloneWorldEngineState,
-  isMarchWeek4,
   runWorldOneWeek,
   runWorldWeeks,
   type EventEnvelope,
   type ProcessorRuntimeState,
   type WorldEngineState,
   type WorldProcessor,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+  isWorldYearEndWeek,
+  isWorldYearStartWeek,
 } from "@shared-world/simulation-core";
 import { evaluateReferenceIntegrity } from "./world-integrity.js";
 import { aggregateYearlyStatisticsRow, type YearlyStatisticsRow } from "./yearly-statistics.js";
@@ -38,14 +40,16 @@ type YearEndCaptureSink = {
 };
 
 /**
- * Trailing processor: on March week 4, snapshot state after prior processors
- * and before calendar year-start. Returns the input state unchanged.
+ * Trailing processor: on the configured world-year end week, snapshot state
+ * after prior processors and before calendar year-start. Returns the input
+ * state unchanged.
  */
 export function createYearEndCaptureProcessor(sink: YearEndCaptureSink): WorldProcessor {
   return {
     processorId: YEAR_END_CAPTURE_PROCESSOR_ID,
     process({ state }) {
-      if (isMarchWeek4(state.worldDate)) {
+      if (isWorldYearEndWeek(state.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG)) {
+        // Clone for statistics snapshot; never mutate the live week draft.
         sink.snapshots.push(cloneWorldEngineState(state));
       }
       return state;
@@ -141,13 +145,21 @@ export function runSimulationWithYearlyCapture(input: {
       );
     }
     const yearEndState = captureSink.snapshots[0]!;
+    // Capture is taken on the year-end week; YearStatsFinalizedNotice.worldDate is
+    // the following configured year-start week (CAL-JAN 0.2.4).
+    if (yearEndState.worldDate.year !== worldYear) {
+      throw new Error(
+        `captured year-end state worldYear ${String(yearEndState.worldDate.year)} does not match notice.worldYear ${String(worldYear)}`,
+      );
+    }
+    if (!isWorldYearEndWeek(yearEndState.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG)) {
+      throw new Error("captured year-end state must be on the configured world-year end week");
+    }
     if (
-      yearEndState.worldDate.year !== notice.worldDate.year ||
-      yearEndState.worldDate.month !== notice.worldDate.month ||
-      yearEndState.worldDate.weekOfMonth !== notice.worldDate.weekOfMonth ||
-      yearEndState.worldDate.absoluteWeek !== notice.worldDate.absoluteWeek
+      notice.worldDate.year !== worldYear + 1 ||
+      !isWorldYearStartWeek(notice.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG)
     ) {
-      throw new Error("captured year-end state worldDate does not match YearStatsFinalizedNotice");
+      throw new Error("YearStatsFinalizedNotice.worldDate must be the next world-year start week");
     }
 
     const eventCountThisYear = countEventsForYear(carryEvents, worldYear);

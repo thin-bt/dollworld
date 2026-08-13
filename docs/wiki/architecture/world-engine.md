@@ -8,7 +8,7 @@ sources:
   - docs/specs/03-event-envelope.md
   - tasks/S00-007.md
   - commit:7bf868e51027865fe73779ad2b21c7b83514b7af
-last_verified: 2026-08-10
+last_verified: 2026-08-12
 related:
   - simulation-core.md
   - sprint1-processing-flow.md
@@ -31,13 +31,14 @@ related:
 - 年初一斉加齢
 - イベント集約と RNG サブストリーム状態の保持
 - N週・N年の決定的実行、年次統計確定通知の集約
-- 受入の例: 100年=4800週、年次統計確定通知100回、終了は世界101年4月第1週年初後
+- 受入の例（CAL-JAN既定）: 100年=4800週、年次統計確定通知100回、終了は世界101年1月第1週年初後
 
 Sprint 0 では修行・戦闘・大会・結婚・出産・死亡 processor は対象外。
 
-### Sprint 1（S1-SPEC-0.1.20）
+### Sprint 1（S1-SPEC-0.1.21／T01 CAL-JAN）
 
 - production normal-week Sprint1 transactional adapter pipelineは`[weekly-training]`のみ（**S01-008でproduction実装済み**。`runSprint1WeeklyStep`がouter weekly transactionを担当）。legacy `WorldProcessor`／`RunWorldOneWeekInput.processors`へは登録しない
+- CAL-JAN: 年初phaseは同じ外側週transactionで通常週間adapterより先に実行。`processorSpecificStates` exact 2件（`weekly-training`→`world-year-start`）。`world-year-start`はnormal-week pipeline／`processorOrder`／`rngStates`へ追加しない
 - `battle-simulation`はadapter pipelineへ登録しない。戦闘は明示的run／`commitRunBattlePlan` facade経由（**S01-008でproduction実装済み**）
 - World RNG／MatchIdGenerator／`eventStream`／`eventAllocationState`の正規ownerは`Sprint1RunRuntimeState`（オブジェクト自体はcheckpoint非永続）。`weeklyTrainingSidecars`はfinal-worldへ投影
 - `TrainingProcessorRuntimeState`は既存`ProcessorRuntimeState`経由

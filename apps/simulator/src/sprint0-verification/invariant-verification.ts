@@ -190,8 +190,8 @@ export function verifyRunInvariants(
   }
   if (
     state.worldDate.year !== years + 1 ||
-    state.worldDate.month !== 4 ||
-    state.worldDate.weekOfMonth !== 1 ||
+    state.worldDate.month !== config.worldCalendar.worldYearStartMonth ||
+    state.worldDate.weekOfMonth !== config.worldCalendar.worldYearStartWeek ||
     state.worldDate.absoluteWeek !== years * 48
   ) {
     issues.push(
@@ -253,7 +253,7 @@ export function verifyRunInvariants(
     if (worldYear !== i + 1) {
       issues.push(issue("csv.worldYear", `expected continuous worldYear at row ${String(i)}`));
     }
-    if (absoluteWeek !== (i + 1) * 48) {
+    if (absoluteWeek !== (i + 1) * 48 - 1) {
       issues.push(issue("csv.absoluteWeek", `absoluteWeek mismatch at year ${String(worldYear)}`));
     }
     assertCsvLivingInvariants(row, issues, worldYear);

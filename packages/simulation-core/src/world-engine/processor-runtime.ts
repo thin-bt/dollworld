@@ -372,15 +372,8 @@ export function validateAndCloneProcessorRuntimeState(
           field: "processorSpecificStates",
         });
       }
-      if (!seen.has(processorId)) {
-        throw new WorldEngineError(
-          "processorSpecificStates.processorId must appear in processorOrder",
-          {
-            processorId,
-            field: "processorSpecificStates",
-          },
-        );
-      }
+      // CAL-JAN 0.2.6: world-year-start may appear in processorSpecificStates
+      // without being in processorOrder / rngStates (year-start is not a normal-week processor).
       if (specificSeen.has(processorId)) {
         throw new WorldEngineError("processorSpecificStates has duplicate processorId", {
           processorId,
