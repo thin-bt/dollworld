@@ -162,12 +162,13 @@ UI-010で全37件`implemented`を必須とする。
 ---
 ## 0. 適用規則
 
-`S1.5-SPEC-0.1.14`の正本は、次の2文書を不可分に組み合わせたものとする。
+`S1.5-SPEC-0.1.15`の正本は、次の文書を不可分に組み合わせたものとする。
 
 1. `SPRINT_1_5_SIMPLE_SIMULATION_UI.md` `S1.5-SPEC-0.1.13`
-2. 本文書 `S1.5-SPEC-0.1.14 規範追補`
+2. 先行凍結追補 `SPRINT_1_5_SIMPLE_SIMULATION_UI_S1.5-SPEC-0.1.14_AMENDMENT.md` / `S1.5-SPEC-0.1.14`（歴史正本。本文を変更しない）
+3. 本文書 `S1.5-SPEC-0.1.15 規範追補`
 
-本追補に同一対象の新契約が存在する場合、本追補を優先する。0.1.13のうち本追補で明示的に変更していない条項は、そのまま継承する。
+本追補に同一対象の新契約が存在する場合、本追補を優先する。0.1.14および0.1.13のうち本追補で明示的に変更していない条項は、そのまま継承する。
 
 本追補はSprint 1.5 production実装ではない。Sprint 1完成後のUI-000で実コードとの物理接続を監査し、意味論を新規発明してはならない。
 
@@ -226,7 +227,7 @@ Sprint 1完成前であるためDEFERRED_BINDINGは意図的に残る。
 apiSchemaVersion = "0.2.0"
 ```
 
-S1.5-SPEC-0.1.14を実装するprocessは、全JSON success/failure responseで`apiSchemaVersion="0.2.0"`だけを返す。通常responseとminimal fallback responseで版を分けない。
+S1.5-SPEC-0.1.15を実装するprocessは、全JSON success/failure responseで`apiSchemaVersion="0.2.0"`だけを返す。通常responseとminimal fallback responseで版を分けない。
 
 禁止:
 
@@ -8089,7 +8090,7 @@ deterministic comparison projectionのcanonical JSON本文を比較し、hashだ
 96. 保存済みmock latest/replay recordの破損が404/422/劣化200ではなく500 `INTERNAL_ERROR`となり、状態を変更しない。
 97. `WorldSummaryView.elapsedWeeks`がcanonical `WorldDate.absoluteWeek`から直接取得される。
 98. UI-000でupstream schemaVersion driftを検出した場合、adapterで吸収せずSprint 1.5仕様を先に修正する。
-99. S1.5-SPEC-0.1.14の全success/failure responseおよびCursorPayloadが`apiSchemaVersion="0.2.0"`へ同期し、署名済み旧0.1.0 cursorをcurrent 0.2.0 processへ渡した場合は改ざん400ではなく409 `STALE_CURSOR`として拒否する。
+99. S1.5-SPEC-0.1.15の全success/failure responseおよびCursorPayloadが`apiSchemaVersion="0.2.0"`へ同期し、署名済み旧0.1.0 cursorをcurrent 0.2.0 processへ渡した場合は改ざん400ではなく409 `STALE_CURSOR`として拒否する。
 100. TrainingHistoryItemViewが正規`training.action_selected`を週次anchorとしてevent列から機械的に構築され、0.1.13既存の`max(0,W-47)..W`の48週窓を`absoluteWeek desc`で返し、anchor欠落・重複・fixture不整合を部分補完しない。
 101. MockBattleReplaySnapshotおよびlatest recordが明示的SHA-256 hashを持ち、GET/log/replayでhash再計算・正規validator・cross-referenceを順に実行し、改ざんを500として検出する。
 102. ValidationResult一覧がgeneric `ok/issues[path,message]`だけを共通意味論として使用し、存在しない共通`code/sourceProcessor/canContinue`を発明せず、0.2.0では`status=success|failure`だけをfilterとして使用する。
