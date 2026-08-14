@@ -4,7 +4,7 @@
 - 文書ID: `UI-000-CHECKLIST`
 - 基礎版: `0.2.4`
 - 追補版: `0.2.5`
-- 対象仕様: `S1.5-SPEC-0.1.14`
+- 対象仕様: `S1.5-SPEC-0.1.15`
 - 前提: Sprint 1受入完了、CAL-JAN-SYNC完了
 - Project predecessor: latest `PROJECT_ROADMAP.md` に従い、T02完了・T03-A完了・T03-BのUI-000-required common-spec residual=0をP00で確認する（GATE-001～015の件数を増やす意味ではない）
 - 適用規則: 0.2.4の未変更条項を継承し、本追補の変更・追加条項を優先する
@@ -187,7 +187,7 @@ owner task受入でactual evidence + negative test PASS + `implementationStatus=
 | BRIDGE-088 | 0.1.14 §1C.6 | StableErrorCode binding | 0.1.13正本 literal set == current adapter exact set | alias/追加削除/rename吸収禁止 | exact-set drift/status-matrix evidence | `{{判定}}` |
 | BRIDGE-089 | 0.1.14 §1C.7/§9A | training.action_selected payload binding | action/target/forced payload validatorをdirect接続 | target null補完・forcedReason自由生成・unknown literal通過禁止 | four actions/target correlation/forcedReason drift | `{{判定}}` |
 | BRIDGE-090 | 0.1.14 §1C.8 | DEFERRED_BINDING body-reference coverage | 個別未確定記述 -> DB-ID -> registry subject exact | IDなし/誤ID/台帳外/複数subject漏れ禁止 | document scan + injected wrong-ID fixture | `{{判定}}` |
-| BRIDGE-091 | 0.1.14 §0A | migration override index | MIG-001～036 old contract production hit=0/new evidenceあり | deprecated alias/implicit migration/partial old DTO禁止 | old-symbol scan + alias injection | `{{判定}}` |
+| BRIDGE-091 | 0.1.15 §0A | migration override index | MIG-001～037 old contract production hit=0/new evidenceあり | deprecated alias/implicit migration/partial old DTO禁止 | old-symbol scan + alias injection | `{{判定}}` |
 | BRIDGE-092 | 0.1.14 §6I | Person age source | living=currentAge direct + computeCurrentAge cross-check、deceased age null/death direct | UI再計算/補正/mixed-generation禁止 | living mismatch/deceased/list-detail-candidate/update snapshot | `{{判定}}` |
 | BRIDGE-093 | 0.1.14 §7 / §1C.8 | relationship display / DB-022 | current snapshot全parent/master records、status filterなし、counterpart schema物理binding | first/current-only推測・dedupe・bad record除外禁止 | multiple/status metadata/broken/cycle fixtures | `{{判定}}` |
 | BRIDGE-094 | 0.1.14 §10G.4 | cursor authentication precedence | payload segment ASCIIをHMAC -> payload decode/canonical parse/schema -> semantic binding | 未認証schemaで409分類・非constant-time比較禁止 | forged old/current/unknown + valid old/current | `{{判定}}` |
@@ -1712,7 +1712,8 @@ start success from empty:
 
 reset success:
 - ready->ready
-- world reinitialized from saved RunInitializationSnapshot
+- world reinitialized from saved RunInitializationSnapshot 0.2.0 (including saved initialWeeklyTrainingSidecarSnapshot payload)
+- no current runtime/context sidecar authority
 - RunInitializationSnapshot canonical value exact unchanged
 - validation store = reset initialization results only
 - latest=null

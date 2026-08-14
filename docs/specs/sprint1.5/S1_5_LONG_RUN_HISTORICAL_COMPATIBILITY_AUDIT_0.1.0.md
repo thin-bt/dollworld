@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-LONG-RUN-HISTORICAL-COMPATIBILITY-AUDIT`
 - Version: `0.1.0`
-- Target package: `S1.5-SPEC-0.1.14` R12 preparation
+- Target package: `S1.5-SPEC-0.1.15` R12 preparation
 - Architecture authority: `S1_5_LONG_RUN_HISTORICAL_PERSON_ARCHITECTURE_0.1.0.md`
 
 ## 1. Verdict

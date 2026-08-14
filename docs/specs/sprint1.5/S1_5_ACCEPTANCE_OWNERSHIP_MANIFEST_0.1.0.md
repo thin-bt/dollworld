@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-ACCEPTANCE-OWNERSHIP`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
 - Purpose: 受入条件1～174の最終証跡ownerをUI-000実行前に固定し、UI-000/Cursorへowner判断を残さない。
 
 ## 1. Rules

@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-API-STATE-TRANSITION-AUDIT`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14` R6 preparation
+- Target spec: `S1.5-SPEC-0.1.15` R6 preparation
 - Base authority: `S1.5-SPEC-0.1.13`
 - Scope: API-001～API-015
 - Purpose: request validation → precedence → fixed source → commit/no-commit → response → failure → retryをendpoint単位で閉じる。

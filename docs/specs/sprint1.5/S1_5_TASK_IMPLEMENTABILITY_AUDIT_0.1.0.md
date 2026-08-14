@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-TASK-IMPLEMENTABILITY-AUDIT`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
 - Scope: UI-001～UI-010をimmediate predecessorだけで単独実装・受入可能か逆監査
 
 ## 1. Verdict

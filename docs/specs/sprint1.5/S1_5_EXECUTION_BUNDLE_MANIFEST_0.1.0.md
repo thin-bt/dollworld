@@ -16,7 +16,7 @@ At minimum the external Git authority includes:
 
 ```text
 tracked base `SPRINT_1_5_SIMPLE_SIMULATION_UI.md` / S1.5-SPEC-0.1.13
-tracked current `SPRINT_1_5_SIMPLE_SIMULATION_UI_S1.5-SPEC-0.1.14_AMENDMENT.md`
+tracked current `SPRINT_1_5_SIMPLE_SIMULATION_UI_S1.5-SPEC-0.1.15_AMENDMENT.md`
 all additional R12 semantic/control files classified git_authority_required or git_supporting_control_required
 ```
 
@@ -25,9 +25,9 @@ Files classified `non_authoritative_evidence` or `generated_package_or_tool` may
 
 ## Required files
 
-- `SPRINT_1_5_SIMPLE_SIMULATION_UI_S1.5-SPEC-0.1.14_AMENDMENT.md`
+- `SPRINT_1_5_SIMPLE_SIMULATION_UI_S1.5-SPEC-0.1.15_AMENDMENT.md`
 - `UI_000_BRIDGE_AUDIT_CHECKLIST_0.2.5_AMENDMENT.md`
-- `S1.5-SPEC-0.1.14-CHANGELOG.md`
+- `S1.5-SPEC-0.1.15-CHANGELOG.md`
 - `S1_5_IMPLEMENTATION_PLAN_0.1.0.md`
 - `S1_5_CONTRACT_OWNERSHIP_MANIFEST_0.1.0.md`
 - `S1_5_ACCEPTANCE_OWNERSHIP_MANIFEST_0.1.0.md`

@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-CONTRACT-OWNERSHIP`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
 - Purpose: UI-000実行時にcontract ownerを新規判断させず、各taskの受入範囲を事前固定する。
 
 ## 1. Rules
@@ -355,7 +355,7 @@ UI-010ではTX/PAGE/DET/MIG/FIXの全rowが`implemented`であることを確認
 | BRIDGE-035 | UI-003 | year-start runtime/receipt | ready_to_implement |
 | BRIDGE-036 | UI-003 | CAL-SCHEMA-MAP | ready_to_implement |
 | BRIDGE-037 | UI-002 | request journal/lastOperation | ready_to_implement |
-| BRIDGE-038 | UI-003 | RunInitializationSnapshot | ready_to_implement |
+| BRIDGE-038 | UI-003 | RunInitializationSnapshot 0.2.0 (+sidecar payload) | ready_to_implement |
 | BRIDGE-039 | UI-002 | UiSessionState/UiReadSnapshot | ready_to_implement |
 | BRIDGE-040 | UI-006 | 0.1.14 §2 / post-start battle execution abortの実class/symbol/module | ready_to_implement |
 | BRIDGE-041 | UI-002 | 0.1.14 §3 / normal response serializerとminimal fallback serializer | ready_to_implement |

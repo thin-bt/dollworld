@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-CURSOR-TASK-TEMPLATE`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
 - Applies to: `UI-001`～`UI-010`
 
 ## 1. Mandatory prompt header

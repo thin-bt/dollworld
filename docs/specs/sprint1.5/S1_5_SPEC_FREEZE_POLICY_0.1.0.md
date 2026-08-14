@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-SPEC-FREEZE-POLICY`
 - Version: `0.1.0`
-- Current amendment label: `S1.5-SPEC-0.1.14`
+- Current amendment label: `S1.5-SPEC-0.1.15`
 
 ## 1. Pre-freeze audit revisions
 
@@ -54,7 +54,7 @@ After freeze, any change to:
 
 requires a new Sprint 1.5 spec version.
 
-For the current label that means the next semantic revision is not another silent `0.1.14` replacement; it must become a new version such as `S1.5-SPEC-0.1.15`.
+For the current label that means the next semantic revision is not another silent `0.1.15` replacement; it must become a new version such as `S1.5-SPEC-0.1.16`.
 
 Pure evidence binding updates during UI-000 may update evidence records without changing semantic spec text.
 

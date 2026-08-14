@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-CROSS-API-SCENARIO-AUDIT`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14` R6 preparation
+- Target spec: `S1.5-SPEC-0.1.15` R6 preparation
 - Base authority: `S1.5-SPEC-0.1.13`
 - Scope: API-001～015の操作間相互作用
 - Rule: 単一endpoint testがPASSしても、以下SCNがFAILならtask acceptance不可。

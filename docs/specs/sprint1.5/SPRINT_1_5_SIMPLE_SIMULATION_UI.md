@@ -191,11 +191,11 @@ preset registryはserver process起動時に全entryのpresetId一意性、完�
 
 「初期状態からやり直す」は、現在の世界を作成したものと同一の正規設定スナップショットとseedを用いて新たに初期化する。現在状態を部分的に巻き戻してはならない。新規開始およびやり直しは現在状態を置き換えるため、実行前に確認を表示する。
 
-開始成功時に、resetへ必要な決定的入力をserver側画面セッションの不変`RunInitializationSnapshot 0.1.0`として1件だけ保存する。
+開始成功時に、resetへ必要な決定的入力をserver側画面セッションの不変`RunInitializationSnapshot 0.2.0`として1件だけ保存する。
 
 ```text
-RunInitializationSnapshot 0.1.0 = {
-  schemaVersion: "0.1.0",
+RunInitializationSnapshot 0.2.0 = {
+  schemaVersion: "0.2.0",
   presetId: string,
   seed: uint32,
   initialWorldConfig: CanonicalObject,
@@ -206,13 +206,16 @@ RunInitializationSnapshot 0.1.0 = {
   simulationIdentity: CanonicalObject,
   simulationIdentityHash: lowercase 64-hex string,
   runRuleSnapshot: CanonicalObject,
-  runRuleSnapshotHash: lowercase 64-hex string
+  runRuleSnapshotHash: lowercase 64-hex string,
+  initialWeeklyTrainingSidecarSnapshot: InitialWeeklyTrainingSidecarSnapshot
 }
 ```
 
 `CanonicalObject`の意味は7.1.1節と同じとする。各本文とhash／version、SimulationIdentityとRunRuleSnapshotの相互参照を開始前に正規validatorで検証する。特に`canonicalJson(initialWorldConfig.worldCalendar) = canonicalJson(runRuleSnapshot.worldCalendar)`かつ両方の`worldCalendarConfigHash`一致を必須とする。進行時はRunRuleSnapshot側だけを参照し、初期化snapshot内の値を第2の可変calendarとして使わない。`presetId`は由来を示すadapter metadataにすぎず、reset時の再解決keyまたは正規identityとして使わない。完全Sprint1ConfigとTechniqueCatalogは正規RunRuleSnapshot内の保存値を使用し、別fieldへ複製しない。`RunInitializationSnapshot`自体の独自hashをSimulationIdentityへ追加しない。
 
-resetは保存済み`RunInitializationSnapshot`だけから初期化入力を再構築し、preset registry、元設定ファイル、現在の既定値またはブラウザmetadataを再読込しない。snapshotの必須本文・hash・version・相互参照が1件でも欠落または不一致なら、旧世界を維持してresetをcommit前に失敗させる。新規開始成功時は新snapshotへ置換し、reset成功時は同じsnapshotを維持する。新規開始／reset失敗時は既存snapshotを変更しない。snapshotは画面セッション終了時に破棄し、WorldState、正規イベント、canonical世界比較、cursorまたはresponse DTOへ混入させない。
+`initialWeeklyTrainingSidecarSnapshot`はSprint 1の`InitialWeeklyTrainingSidecarSnapshot`を開始受入時に正規validatorで検証し、canonical deep-cloneとして1件だけ保存する。`SHA-256(canonicalJson(runInitializationSnapshot.initialWeeklyTrainingSidecarSnapshot))`は`runInitializationSnapshot.simulationIdentity.initialWeeklyTrainingSidecarHash`と一致必須とする。hashだけからpayloadを合成する互換変換、および`RunInitializationSnapshot 0.1.0`欠落payloadのfallbackは禁止する。
+
+resetは保存済み`RunInitializationSnapshot 0.2.0`だけから初期化入力を再構築し、保存済み`initialWeeklyTrainingSidecarSnapshot` payloadを直接使用する。current runtime/context sidecar、preset registry、元設定ファイル、現在の既定値またはブラウザmetadataを再読込／借用しない。正規化configをdisplay unitへ逆変換しない。snapshotの必須本文・hash・version・相互参照・sidecar/hash一致が1件でも欠落または不一致なら、旧世界を維持してresetをcommit前に失敗させる。新規開始成功時は新snapshotへ置換し、reset成功時は同じsnapshotを維持する。新規開始／reset失敗時は既存snapshotを変更しない。snapshotは画面セッション終了時に破棄し、WorldState、正規イベント、canonical世界比較、cursorまたはresponse DTOへ混入させない。
 
 新規開始およびやり直しでは、新しい初期状態、RNG状態、MatchIdGeneratorState、ProcessorRuntimeState、イベント状態およびRunRuleSnapshotを旧状態と分離して構築・検証する。全初期化が成功した場合だけ、正規世界、`RunInitializationSnapshot`、`CommittedValidationViewStore`および`MockBattleSessionStore.latest=null`を同じ画面セッションcommitで一括置換し、`uiRevision`を1増加させる。resetでは検証済みの同一`RunInitializationSnapshot`値を新しい画面セッション状態へ引き継ぐ。初期化に失敗した場合は旧状態、旧snapshot、旧storeおよび`uiRevision`を維持する。
 
@@ -1302,7 +1305,7 @@ Sprint 1.5は、次をすべて満たした時点で完了とする。
 34. 設定識別子その他の入力を用いて、任意ファイルパス参照、任意コマンド実行または任意モジュール読込を行えない。
 35. 正規JSON、人物名、技名およびエラー内容へHTML相当文字列を入力しても、HTMLまたはスクリプトとして解釈されず、エスケープ済みテキストとして表示される。
 36. 複数週要求の途中週が失敗した場合、その週だけがrollbackされ、それ以前にcommit済みの週は維持される。応答に要求週数、commit済み週数、失敗週および最終`uiRevision`が表示される。
-37. 実行presetが正規設定の代替identityとして扱われず、presetから解決した完全な入力が正規手順で検証される。開始成功時に完全InitialWorldConfig、ValidatedNameData、seed、SimulationIdentityおよびRunRuleSnapshotを`RunInitializationSnapshot`へ固定し、resetはその保存値だけを使用する。開始後の元ファイル、preset定義または既定値変更が実行中runとreset結果へ混入しない。
+37. 実行presetが正規設定の代替identityとして扱われず、presetから解決した完全な入力が正規手順で検証される。開始成功時に完全InitialWorldConfig、ValidatedNameData、seed、SimulationIdentity、RunRuleSnapshotおよびInitialWeeklyTrainingSidecarSnapshotを`RunInitializationSnapshot 0.2.0`へ固定し、resetはその保存値だけを使用する。開始後の元ファイル、preset定義または既定値変更が実行中runとreset結果へ混入しない。
 38. 画面用API／adapterが`startBattleTransaction`、`createBattleState`、`beginBattle`または`commitRunBattlePlan`を直接呼び出さず、公開WorldEngine APIまたは`IsolatedMockBattleRunner`だけを使用する。`runBattleToCompletion`のplan返却をcommit完了と誤認せず、facade内部で不可分commitまで完遂する。
 39. `MockBattleSessionStore.latest`が新規開始、リセットおよび画面セッション終了時に全体で破棄され、commit済みの新しい有効な模擬戦recordでのみ全体置換される。再実行時に元record内のsnapshot自体を変更しない。
 40. `uiRevision`が、新規開始、リセット、1週ごとの正規世界と`CommittedValidationViewStore`の同時commit、および確認専用領域のcommit成功時だけ単調増加する。同じ週の世界とvalidation storeで2回増加させない。画面セッション状態を変更しない入力エラー、`pre_start_failure`、rollback、競合拒否または同一要求の保存済み応答返却では増加せず、正規commit済み`resolution_error`の保存では増加する。WorldState、SimulationIdentity、canonical JSON、正規イベントおよび再現性比較へは混入しない。

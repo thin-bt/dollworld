@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-FAULT-INJECTION-MATRIX`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
 - Scope: UI-001～UI-010 acceptance-time failure injection
 - Rule: fault provider/test hookはtest-only。production behaviorへdebug branchを残さない。
 
@@ -52,7 +52,7 @@ UI-010ではFI実行証跡の欠落0を確認する。
 | FI-021 | UI-003 | Start facade precommit throw | start domain/facadeがcandidate構築中throw | 500 INTERNAL_ERROR none、old state exact | atomic start |
 | FI-022 | UI-003 | Start success serializer failure | new world完成後、success DTO serialization throw before commit | 500 none、new world/revision/lastOperation未commit | TX-085 |
 | FI-023 | UI-003 | Ready-start transport failure after atomic commit | success state+journal commit後socket write失敗 | rollbackなし。same requestIdでsaved 200 exact replay | TX-085 |
-| FI-024 | UI-003 | Reset precommit throw | saved RunInitializationSnapshotから再構築中throw | 500 none、old world/latest/validation/revision exact | TX-079 |
+| FI-024 | UI-003 | Reset precommit throw | saved RunInitializationSnapshot 0.2.0（sidecar payload含む）から再構築中throw | 500 none、old world/latest/validation/revision exact | TX-079 |
 | FI-025 | UI-003 | Reset transport failure after atomic commit | reset success commit後transport失敗 | reset state保持。saved 200 replay | TX-085 |
 | FI-026 | UI-003 | Step first-week internal failure | week1 commit前provider throw | 500 none、committedWeeks fieldなし | TX-073 |
 | FI-027 | UI-003 | Step middle-week internal failure | N>=3、week K+1でthrow | 500 partial、committedWeeks=K、revision=accepted+K | TX-073 |

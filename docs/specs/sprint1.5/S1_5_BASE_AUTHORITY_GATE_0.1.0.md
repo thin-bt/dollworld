@@ -2,24 +2,25 @@
 
 - Document ID: `S1.5-BASE-AUTHORITY-GATE`
 - Version: `0.1.0`
-- Amendment target: `S1.5-SPEC-0.1.14`
+- Amendment target: `S1.5-SPEC-0.1.15`
 - Required base authority: `SPRINT_1_5_SIMPLE_SIMULATION_UI.md` containing `S1.5-SPEC-0.1.13`
 
 ## 1. Why this gate exists
 
-`S1.5-SPEC-0.1.14` is not standalone authority.
+`S1.5-SPEC-0.1.15` is not standalone authority.
 
 Authoritative meaning is:
 
 ```text
 S1.5-SPEC-0.1.13 base
-+ S1.5-SPEC-0.1.14 amendment
++ S1.5-SPEC-0.1.14 amendment (frozen prior)
++ S1.5-SPEC-0.1.15 amendment (current)
 ```
 
 Therefore a package-only static audit cannot prove that the repository contains the correct base authority.
 
 さらに、`specs/proposed` はGit反映前にはauthorityではないため、real UI-000は
-**baseだけでなく、実装意味論を与えるcurrent `S1.5-SPEC-0.1.14` amendmentもGit管理下へ反映済み**
+**baseだけでなく、実装意味論を与えるcurrent `S1.5-SPEC-0.1.15` amendmentもGit管理下へ反映済み**
 であることを確認する。
 
 UI-000 must bind the actual tracked base file and Git-reflected amendment before any DB/BRIDGE interpretation.
@@ -43,11 +44,11 @@ S1.5-SPEC-0.1.13
 Current amendment authorityも確認する。
 
 ```text
-git ls-files "*SPRINT_1_5_SIMPLE_SIMULATION_UI_S1.5-SPEC-0.1.14_AMENDMENT.md"
+git ls-files "*SPRINT_1_5_SIMPLE_SIMULATION_UI_S1.5-SPEC-0.1.15_AMENDMENT.md"
 ```
 
 must return exactly one tracked file.
-そのfileは`S1.5-SPEC-0.1.14`を含み、package内のcurrent amendmentとbyte/hash一致すること。
+そのfileは`S1.5-SPEC-0.1.15`を含み、package内のcurrent amendmentとbyte/hash一致すること。
 
 Record:
 
@@ -128,7 +129,7 @@ tracked base file has unreviewed working-tree modification
 2+ tracked current amendment matches
   -> spec_fix_required
 
-tracked amendment version != S1.5-SPEC-0.1.14
+tracked amendment version != S1.5-SPEC-0.1.15
   -> spec_fix_required
 
 tracked amendment dirty

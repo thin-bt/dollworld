@@ -2,7 +2,8 @@
 
 - Document ID: `S1.5-CURSOR-UI-003`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
+- RunInitializationSnapshot: `0.2.0`（`initialWeeklyTrainingSidecarSnapshot` 必須。resetは保存payloadのみ）
 - Common template: `S1_5_CURSOR_TASK_TEMPLATE_0.1.0.md`
 - Implementation plan: `S1_5_IMPLEMENTATION_PLAN_0.1.0.md`
 - Implementability audit: `S1_5_TASK_IMPLEMENTABILITY_AUDIT_0.1.0.md`

@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-IMPLEMENTATION-PLAN`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
 - Purpose: Cursor実装時の依存逆転・先行実装・仕様未定義手戻りを防ぐ
 - Authority: implementation workflow companion。ゲーム意味論はSprint 1.5正本仕様を上書きしない。
 
@@ -421,7 +421,7 @@ Drive `specs/proposed`だけもsemantic authorityにはならない。
 
 Real UI-000 must prove:
 - repository contains exactly one tracked base `SPRINT_1_5_SIMPLE_SIMULATION_UI.md` at `S1.5-SPEC-0.1.13`
-- current `S1.5-SPEC-0.1.14` amendment is Git-tracked exact1 / dirty=false
+- current `S1.5-SPEC-0.1.15` amendment is Git-tracked exact1 / dirty=false
 - package amendment and Git amendment bytes/hash match
 - all R12 semantic/control inputs used for implementation have completed proposal→Git adoption classification
 - P00-fixed Git HEAD and latest `specs/current` manifest HEAD match

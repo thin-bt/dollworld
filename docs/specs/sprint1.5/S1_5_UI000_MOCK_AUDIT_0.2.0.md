@@ -3,7 +3,7 @@
 - Document ID: `S1.5-UI000-MOCK-AUDIT`
 - Version: `0.2.0`
 - Status: `HISTORICAL DRY-RUN SNAPSHOT / NON-CURRENT PROJECT STATUS`
-- Target spec: `S1.5-SPEC-0.1.14` R12
+- Target spec: `S1.5-SPEC-0.1.15` R12
 - Purpose: Sprint 1完成前にUI-000をdry-runし、本番UI-000で止まり得る箇所を先に分類する。
 
 ## 1. Important limitation

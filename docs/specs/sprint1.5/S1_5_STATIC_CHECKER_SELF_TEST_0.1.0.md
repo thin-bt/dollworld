@@ -2,7 +2,7 @@
 
 - Version: `0.1.0`
 - Target checker: `verify-s1-5-spec-package.mjs`
-- Target spec: `S1.5-SPEC-0.1.14` R12
+- Target spec: `S1.5-SPEC-0.1.15` R12
 
 ## Actual result
 

@@ -2,7 +2,7 @@
 
 - Document ID: `S1.5-UI000-RUNBOOK`
 - Version: `0.1.0`
-- Target spec: `S1.5-SPEC-0.1.14`
+- Target spec: `S1.5-SPEC-0.1.15`
 - Target checklist: `UI-000-CHECKLIST 0.2.5`
 - Purpose: Sprint 1完成後、UI production codeへ触れる前に物理bindingと実装可能性を確定する。
 
@@ -100,7 +100,7 @@ git worktree list
 - base document version `S1.5-SPEC-0.1.13`
 - base file dirty=false
 - base blob hash / last modifying commitを記録
-- Git-tracked current `S1.5-SPEC-0.1.14` amendment exact1 / dirty=false
+- Git-tracked current `S1.5-SPEC-0.1.15` amendment exact1 / dirty=false
 - package amendment == Git amendment bytes/hash
 - amendment blob hash / last modifying commitを記録
 
