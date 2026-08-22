@@ -13,11 +13,29 @@ const SCHEMA_VERSION = "0.1.0";
 const SPRINT = "1.5";
 const REPORT_RELATIVE = "output/sprint1.5-verification/sprint1.5-completion-report.json";
 
+const PREBUILD_CHECKS = [
+  {
+    key: "buildSimulationCore",
+    command: "npm run build -w @shared-world/simulation-core",
+    args: ["run", "build", "-w", "@shared-world/simulation-core"],
+  },
+  {
+    key: "buildSimulator",
+    command: "npm run build -w @shared-world/simulator",
+    args: ["run", "build", "-w", "@shared-world/simulator"],
+  },
+  {
+    key: "buildWeb",
+    command: "npm run build -w @shared-world/web",
+    args: ["run", "build", "-w", "@shared-world/web"],
+  },
+];
+
 const CHILD_CHECKS = [
-  { key: "check", command: "npm run check" },
-  { key: "verifySprint1", command: "npm run verify:sprint1" },
-  { key: "e2eChrome", command: "npm run e2e:chrome" },
-  { key: "e2eEdge", command: "npm run e2e:edge" },
+  { key: "check", command: "npm run check", args: ["run", "check"] },
+  { key: "verifySprint1", command: "npm run verify:sprint1", args: ["run", "verify:sprint1"] },
+  { key: "e2eChrome", command: "npm run e2e:chrome", args: ["run", "e2e:chrome"] },
+  { key: "e2eEdge", command: "npm run e2e:edge", args: ["run", "e2e:edge"] },
 ];
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -69,13 +87,13 @@ function resolveGitIdentity() {
   };
 }
 
-function runNpmScript(scriptName) {
-  const result = spawnSync(NPM, ["run", scriptName], {
+function runNpmArgs(args) {
+  const result = spawnSync(NPM, args, {
     cwd: REPO_ROOT,
     encoding: "utf8",
     stdio: "inherit",
     windowsHide: true,
-    shell: false,
+    shell: process.platform === "win32",
   });
   if (result.error !== undefined) {
     return { exitCode: 1, passed: false, spawnError: result.error.message };
@@ -120,8 +138,9 @@ function main() {
   const identityOk = startIdentity.gitCommit !== null && startIdentity.identityError === null;
   const mayRunChildren = identityOk && !startIdentity.workingTreeDirty;
 
-  for (const child of CHILD_CHECKS) {
-    const scriptName = child.command.replace(/^npm run /, "");
+  const allChecks = [...PREBUILD_CHECKS, ...CHILD_CHECKS];
+
+  for (const child of allChecks) {
     if (!mayRunChildren) {
       checks[child.key] = {
         command: child.command,
@@ -136,7 +155,7 @@ function main() {
       });
       continue;
     }
-    const ran = runNpmScript(scriptName);
+    const ran = runNpmArgs(child.args);
     checks[child.key] = {
       command: child.command,
       exitCode: ran.exitCode,
