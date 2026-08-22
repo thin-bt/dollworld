@@ -249,12 +249,15 @@ export type {
 export { validateSprint1RunSession } from "./sprint1/validate-sprint1-run-session.js";
 export {
   CREATE_SPRINT1_RUN_SESSION_INPUT_KEYS,
+  CREATE_SPRINT1_RUN_SESSION_FROM_RUN_INITIALIZATION_MATERIALS_KEYS,
   createSprint1RunSession,
+  createSprint1RunSessionFromRunInitializationMaterials,
   promoteProvisionalWorldSnapshot,
 } from "./sprint1/create-sprint1-run-session.js";
 export type {
   CreateSprint1RunSessionDeps,
   CreateSprint1RunSessionInput,
+  CreateSprint1RunSessionFromRunInitializationMaterialsInput,
   CreateSprint1RunSessionResult,
   ProvisionalGenerationMeta,
   Sprint1InitialWorldDocumentSnapshot,
@@ -438,10 +441,12 @@ export {
 export type { TeacherFactorKey } from "./sprint1/growth-factor-selectors.js";
 export {
   isFormalTrainingEligible,
+  isWeeklyActionPipelineEligible,
   isWeeklyStateUpdateEligible,
 } from "./sprint1/weekly-update-eligibility.js";
 export type { WeeklyEligibilityPerson } from "./sprint1/weekly-update-eligibility.js";
 export { attachSprint1PersonStateToInitialWorld } from "./sprint1/attach-sprint1-person-state.js";
+export { assignInitialActiveTechniqueCoverage } from "./sprint1/assign-initial-technique-coverage.js";
 
 export {
   ACTION_TRAITS_KEYS,

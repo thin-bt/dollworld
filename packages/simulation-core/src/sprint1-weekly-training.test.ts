@@ -2323,7 +2323,7 @@ describe("SeededRngState hardening", () => {
 /* ------------------------------------------ formal training age boundary */
 
 describe("formal training age boundary", () => {
-  it("age 42 rest applies with zero RNG and no ability / learning / mastery change", () => {
+  it("FIX15: age 42 is skipped (no weekly action / rest / RNG / history)", () => {
     const catalog = buildCatalog([definition("technique_alpha")]);
     const before = record({
       person: person({
@@ -2351,14 +2351,9 @@ describe("formal training age boundary", () => {
       processWeeklyTrainingWeek(weekInput({ personRecords: [before], catalog }), dependencies),
     );
 
-    expect(result.eventCandidates.map((event) => event.eventType)).toEqual([
-      WEEKLY_TRAINING_EVENT_TYPES.actionSelected,
-      WEEKLY_TRAINING_EVENT_TYPES.restApplied,
-    ]);
-    expect(result.eventCandidates[0]?.payload["action"]).toBe("rest");
-    expect(result.eventCandidates[0]?.payload["forcedReason"]).toBeNull();
-    expect(result.runtimeState.actionCounts.rest).toBe(1);
-    expect(result.runtimeState.processedPersonCount).toBe(1);
+    expect(result.eventCandidates).toEqual([]);
+    expect(result.runtimeState.actionCounts.rest).toBe(0);
+    expect(result.runtimeState.processedPersonCount).toBe(0);
     expect(result.runtimeState.totalStatGainMilliPoints).toBe(0);
     expect(result.runtimeState.totalLearningProgressGainTenths).toBe(0);
     expect(result.runtimeState.totalMasteryGainHundredths).toBe(0);
@@ -2366,7 +2361,6 @@ describe("formal training age boundary", () => {
     expect(JSON.stringify(sprint1StateOf(result.personRecords[0]!).techniqueStates)).toBe(
       techniqueSnapshot,
     );
-    // Single rest candidate: action / target / effect RNG are all unused.
     expect(result.rngState).toEqual(rngState());
   });
 });
@@ -2695,7 +2689,7 @@ describe("technique event unit contract", () => {
     expect(result.eventCandidates[1]?.payload["unit"]).toBeUndefined();
   });
 
-  it("rest and condition_updated do not carry technique unit fields", () => {
+  it("FIX15: age-42 skip and condition_updated do not invent technique unit fields", () => {
     const restResult = expectOkValue(
       processWeeklyTrainingWeek(
         weekInput({
@@ -2709,10 +2703,7 @@ describe("technique event unit contract", () => {
         dependencies,
       ),
     );
-    expect(eventTypes(restResult)).toEqual([
-      WEEKLY_TRAINING_EVENT_TYPES.actionSelected,
-      WEEKLY_TRAINING_EVENT_TYPES.restApplied,
-    ]);
+    expect(eventTypes(restResult)).toEqual([]);
     for (const event of restResult.eventCandidates) {
       expect(event.payload["unit"]).toBeUndefined();
     }

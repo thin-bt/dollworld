@@ -489,7 +489,7 @@ Sprint 1.5の確認専用模擬戦について、処理順にログを表示す�
 
 年・月・週、personId、イベント種別、修行および技習得は正規イベント領域へ適用し、ValidationResult codeはValidationResult領域だけへ適用する。両領域へ同じfilterを暗黙適用しない。
 
-正規イベント一覧もサーバー側で既定100件、最大200件に分割する。既定順は`sequence`昇順とし、cursorをsimulationIdと`uiRevision`へ結び付ける。絞り込み後も順序を変更しない。正規イベントがメモリに全件存在していても、ブラウザへ全件を一括送信・描画しない。
+正規イベント一覧もサーバー側で既定100件、最大200件に分割する。観察者向け既定順は`sequence`降順（最新／現在側を先頭）とし、cursorをsimulationIdと`uiRevision`へ結び付ける。絞り込み後もこの表示順を維持する。正規EventEnvelopeの保存順および`sequence`値そのものは変更しない。正規イベントがメモリに全件存在していても、ブラウザへ全件を一括送信・描画しない。
 
 正規イベントとValidationResultは、順序キー、件数および更新契約が異なるため、同じitems配列または同じcursorへ混在させない。正規イベントは`GET /events`、ValidationResultは`GET /validation-results`から別々に取得する。画面上で同じメニューに表示しても、各領域が独立したloading、empty、errorおよびページング状態を持つ。
 
@@ -642,7 +642,7 @@ MockCandidatesQuery = {
 EventsQuery = {
   kind: "events", year: positive safe integer|null, month: integer|null, week: integer|null,
   personId: string|null, eventType: string|null, eventGroup: "training"|"technique_learning"|null,
-  sortKey: "sequence", sortOrder: "asc", limit: 100|200
+  sortKey: "sequence", sortOrder: "desc", limit: 100|200
 }
 ValidationQuery = {
   kind: "validation", code: string|null,
@@ -685,7 +685,7 @@ WorldSummaryView = {
   techniqueCatalogHash: Sha256Hex,
   nameDataVersion: string,
   nameDataHash: Sha256Hex,
-  simulationIdentitySchemaVersion: "0.4.0",
+  simulationIdentitySchemaVersion: "0.5.0",
   specVersions: SpecVersionView[],
   rngAlgorithmVersion: string,
   canonicalJsonVersion: string,
@@ -745,7 +745,7 @@ PresetView = {
   techniqueCatalogHash: Sha256Hex,
   nameDataVersion: string,
   nameDataHash: Sha256Hex,
-  simulationIdentitySchemaVersion: "0.4.0",
+  simulationIdentitySchemaVersion: "0.5.0",
   specVersions: SpecVersionView[],
   rngAlgorithmVersion: string,
   canonicalJsonVersion: string,

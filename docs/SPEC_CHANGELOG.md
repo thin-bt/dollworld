@@ -1,5 +1,13 @@
 # 変更履歴
 
+### 2026-08-22 — S1-SPEC-0.1.22 weekly-action-pipeline eligibility reconciliation
+
+- 版: `S1-SPEC-0.1.22`（`10-training-and-learning.md`）。`08-character-growth.md`／`14-sprint1-config-schema.md` は本文追記のみ（版番号非bump）。
+- ユーザー再確認の原設計へ整合: 現役／訓練ライフサイクル外の人物（年齢0..7、`child`、`retired`、42歳以上、`inactive`）は週間行動パイプライン非適格とし、週間rest参加者ではない。
+- 非適格人物はPlanner／候補生成・採点／週間行動RNG／`training.action_selected`／`training.rest_applied`／通常の週間訓練action履歴へ入らない。aging／death／retirement遷移／marriage／birth／lineage／year-start 等の独立ライフサイクル処理は維持。
+- `14-sprint1-config-schema.md` の `baseScoresByCareerStatus.retired.rest=100` は設定互換のため保持。スコア参照は適格判定通過後のみとし、非適格人物の synthetic rest event／履歴生成を禁止。
+- 戦闘AI／相互回避（mutual-evasion）／default strategy 等の戦闘セマンティクスは本変更の対象外（非変更）。
+
 ### 2026-08-13 — T03-A current authority synchronization（nonbump）
 
 - `SPEC-0.1.3` / `S0-SPEC-0.1.6` / `S1-SPEC-0.1.21`を維持する。T03-Aはaccepted Sprint 0 / Sprint 1 / T01 CAL-JAN実態への本文同期であり、ゲーム挙動、balance、wire shape、schemaVersion、configVersion、canonical JSON、hash、RNG契約を変更しない。

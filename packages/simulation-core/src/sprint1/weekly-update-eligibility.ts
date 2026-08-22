@@ -25,12 +25,13 @@ export function isWeeklyStateUpdateEligible(person: WeeklyEligibilityPerson): bo
 /**
  * Formal training eligibility (08 age / career rules).
  * Age 41 may still train; age 42+ and 0..7 do not.
+ * `child` and `retired` careers never enter formal training.
  */
 export function isFormalTrainingEligible(person: WeeklyEligibilityPerson): boolean {
   if (!isWeeklyStateUpdateEligible(person)) {
     return false;
   }
-  if (person.careerStatus === "retired") {
+  if (person.careerStatus === "retired" || person.careerStatus === "child") {
     return false;
   }
   if (typeof person.currentAge !== "number" || !Number.isInteger(person.currentAge)) {
@@ -40,4 +41,13 @@ export function isFormalTrainingEligible(person: WeeklyEligibilityPerson): boole
     return false;
   }
   return true;
+}
+
+/**
+ * FIX15: weekly action planner / candidate / selection / history gate.
+ * Non-actionable persons (inactive set, child, retired, age outside 8..41) must not
+ * enter rest-or-train scoring — they are skipped entirely (no rest rows, no action RNG).
+ */
+export function isWeeklyActionPipelineEligible(person: WeeklyEligibilityPerson): boolean {
+  return isFormalTrainingEligible(person);
 }

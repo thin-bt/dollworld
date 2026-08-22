@@ -8,7 +8,7 @@ sources:
   - docs/specs/14-sprint1-config-schema.md
   - docs/specs/09-technique-system.md
   - commit:530e3f88d054eec11840e2e54743bf4c9a705654
-last_verified: 2026-08-06
+last_verified: 2026-08-22
 related:
   - character-growth.md
   - ../glossary/techniques-and-mastery.md
@@ -48,7 +48,7 @@ related:
 - 週開始時に`normalizeWeeklyLearningFocus`でfocus維持条件を評価し、不成立なら解除（RNG・独立イベントなし）
 - effect適用後に`validateProcessedWeeklyPersonRecord`で人物構造／一時状態／remainder／Sprint1PersonState／catalog意味整合を再検証
 - `rngState`は`validateSeededRngState`でdescriptor-safeに検証してからimportする
-- 正式訓練対象は`isFormalTrainingEligible`（年齢8..41）。年齢≤7／≥42、`child`／`retired`はrest限定で、`fallbackReasons`は付けない
+- 正式訓練対象は`isFormalTrainingEligible`（年齢8..41）。年齢0..7／`child`／`retired`／42歳以上は `10-training-and-learning.md` §3.0 の**週間行動パイプライン非適格**（週間rest参加者ではない。Planner／候補／RNG／`training.action_selected`／通常週間訓練action履歴へ入らない）
 - `TechniqueTargetContext.teacherCanTeachContext.masterCareerStatus`は`teacherCanTeach`と同一のCareerStatus列挙（`child`／`trainee`／`active_competitor`／`retired`）で検証する
 - package rootは`processWeeklyTrainingWeek`／RuntimeState／選択APIを公開し、内部draft・effect・commit前validatorは公開しない
 - `technique.learning_progressed`は`unit: "tenths"`、`technique.mastery_increased`は`unit: "hundredths"`を必須で持つ。`technique.acquired`にはunit／before／afterを付けない

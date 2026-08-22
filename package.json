@@ -14,7 +14,7 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "eslint .",
+    "lint": "eslint . --ignore-pattern playwright.config.ts --ignore-pattern tests/e2e/**",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
@@ -22,10 +22,14 @@
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run wiki:check && npm run build",
     "simulate": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/main.js",
     "verify:sprint0": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/verify-sprint0-main.js",
-    "verify:sprint1": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/verify-sprint1-main.js"
+    "verify:sprint1": "npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/simulator && node ./apps/simulator/dist/verify-sprint1-main.js",
+    "verify:sprint1.5": "node ./scripts/verify-sprint1.5.mjs",
+    "e2e:chrome": "playwright test --project=chrome",
+    "e2e:edge": "playwright test --project=edge"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.55.0",
     "@types/node": "24.13.3",
     "eslint": "10.7.0",
     "prettier": "3.9.6",

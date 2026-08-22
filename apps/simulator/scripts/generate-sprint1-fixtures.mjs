@@ -145,13 +145,43 @@ function statTargetContext() {
   for (const key of ABILITY_KEYS) {
     byAbility[key] = {
       relatedAptitude: 50,
-      teacherRecommendation: key === "strength" ? 100 : 0,
+      // FIX15: neutral teacher advice — do not bootstrap strength-only growth.
+      teacherRecommendation: 50,
     };
   }
   return { byAbility };
 }
 
-function sidecarEntry(personId) {
+function techniqueTargetContexts(techniqueId) {
+  // FIX15: authorized learn_technique path when catalog + teacher conditions hold.
+  return [
+    {
+      techniqueId,
+      styleMatch: 50,
+      teacherPriority: 50,
+      learningTrait: 50,
+      teachingAbility: 50,
+      compatibility: 50,
+      teacherCanTeachContext: {
+        activeMentorshipExists: true,
+        masterLifeStatus: "living",
+        masterParticipationStatus: "active",
+        masterCareerStatus: "active_competitor",
+        masterTechniqueState: {
+          techniqueId,
+          learningProgressTenths: 0,
+          masteryHundredths: 5000,
+          successfulUseCount: 10,
+          attemptedUseCount: 10,
+          lastPracticedAbsoluteWeek: 0,
+          acquiredAbsoluteWeek: 0,
+        },
+      },
+    },
+  ];
+}
+
+function sidecarEntry(personId, techniqueId) {
   return {
     personId,
     growthProfile: "normal",
@@ -161,7 +191,7 @@ function sidecarEntry(personId) {
     motivationFactor: 10000,
     plannerContext: plannerContext(),
     statTargetContext: statTargetContext(),
-    techniqueTargetContexts: [],
+    techniqueTargetContexts: techniqueTargetContexts(techniqueId),
     teacherFactorKey: "averageMaster",
     discipleCount: 0,
   };
@@ -209,7 +239,8 @@ function techniqueDefinition(techniqueId) {
   };
 }
 
-const def = expectOk(validateTechniqueDefinition(techniqueDefinition("technique_alpha")));
+const TECHNIQUE_ALPHA_ID = "technique_alpha";
+const def = expectOk(validateTechniqueDefinition(techniqueDefinition(TECHNIQUE_ALPHA_ID)));
 const catalogHash = expectOk(computeTechniqueCatalogHash([def], sha256Provider));
 
 const sprint1Input = {
@@ -221,7 +252,7 @@ const sprint1Input = {
   },
   initialWeeklyTrainingSidecar: {
     schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
-    entries: personIds.map((personId) => sidecarEntry(personId)),
+    entries: personIds.map((personId) => sidecarEntry(personId, TECHNIQUE_ALPHA_ID)),
   },
 };
 

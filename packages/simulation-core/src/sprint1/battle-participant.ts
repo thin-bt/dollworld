@@ -38,7 +38,7 @@ import {
   requireLiteralString,
   requireNonEmptyTrimmedString,
   requireNullableIntegerAtLeast,
-  requireSafeIntegerAtLeast,
+  requireSafeInteger,
   snapshotDenseArrayOrFail,
   snapshotPlainObjectOrFail,
 } from "./plain-data.js";
@@ -888,7 +888,8 @@ export function preflightBattleParticipantSnapshotStructure(
     CAREER_STATUS_VALUES,
     issues,
   );
-  const birthYear = requireSafeIntegerAtLeast(object, "birthYear", "", 1, issues);
+  // Calendar: birthYear = 1 - initialAge may be <= 0 (01-world-calendar). No floor of 1.
+  const birthYear = requireSafeInteger(object, "birthYear", "", issues);
   const ageAtBattle = requireIntegerInRange(object, "ageAtBattle", "", 0, 200, issues);
   const sourceSnapshot = parseBattleParticipantSourceSnapshot(object["sourceSnapshot"], issues);
   const sourceSnapshotHash = requireNonEmptyTrimmedString(object, "sourceSnapshotHash", "", issues);
@@ -1186,7 +1187,7 @@ function parseBattleParticipantSourceSnapshot(
     CAREER_STATUS_VALUES,
     issues,
   );
-  const birthYear = requireSafeIntegerAtLeast(object, "birthYear", "/sourceSnapshot", 1, issues);
+  const birthYear = requireSafeInteger(object, "birthYear", "/sourceSnapshot", issues);
   const ageAtBattle = requireIntegerInRange(
     object,
     "ageAtBattle",

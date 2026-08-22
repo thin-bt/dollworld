@@ -1,6 +1,6 @@
 # 10 週間行動・訓練・習得処理仕様
 
-- 仕様版: `S1-SPEC-0.1.21`
+- 仕様版: `S1-SPEC-0.1.22`
 - 状態: 正本準拠修正版／Sprint 1暫定値を明示
 - 対象: 週次行動選択、能力訓練、技習得、休養、処理順
 - 非対象: 大会日程、師匠選択、恋愛、結婚、出産
@@ -210,15 +210,45 @@ WeeklyAction =
 
 ## 3. 行動可能条件
 
-| 状態 | 許可行動 |
+### 3.0 週間行動パイプライン適格（weekly-action-pipeline eligible）
+
+週間Processorは、各人物について週開始snapshot時点で**週間行動パイプライン適格**かを先に判定する。非適格の人物は週間行動パイプラインへ入らない。
+
+**週間行動パイプライン適格** = 次をすべて満たす。
+
+- `lifeStatus = living`
+- `participationStatus = active`（`waiting`／`stopped`でない）
+- `careerStatus` が `trainee` または `active_competitor`
+- `currentAge` が整数で **8..41**（08仕様の正式訓練年齢帯）
+
+**週間行動パイプライン非適格**（以下を**週間rest参加者ではない**）。
+
+- 年齢 **0..7**
+- `careerStatus = child`
+- `careerStatus = retired`
+- 年齢 **42以上**
+- `deceased`／`waiting`／`stopped`（`inactive`）
+
+非適格人物に対して週間Processorは次を**行わない**。
+
+- Planner／候補生成／採点／行動選択
+- 週間行動RNGの消費
+- `training.action_selected`／`training.rest_applied`／`training.forced_rest_applied` の生成
+- 通常の週間訓練action履歴の付与
+
+非適格でも、aging／death／retirement遷移／marriage／birth／lineage／year-start 等、**別processorが管轄するライフサイクル処理は継続**する（本仕様の週間行動パイプライン外）。
+
+| 状態 | 週間行動パイプライン |
 |---|---|
-| 0〜7歳 | rest |
-| trainee | train_stat / learn_technique / practice_technique / rest |
-| active_competitor | train_stat / learn_technique / practice_technique / rest |
-| retired | 本人行動はrest。明示的なteach行動はSprint 3。既存師弟関係によるSprint 1の静的teacherCanTeach参照は可能 |
-| deceased | inactive |
-| waiting | inactive |
-| stopped | inactive |
+| 0〜7歳 | **非適格**（週間rest参加者ではない） |
+| child | **非適格** |
+| trainee（年齢8..41） | 適格 |
+| active_competitor（年齢8..41） | 適格 |
+| retired | **非適格**（週間rest参加者ではない）。Sprint 1の静的`teacherCanTeach`参照は師匠側コンテキストとして別途可能。明示的teach行動はSprint 3 |
+| 42歳以上 | **非適格** |
+| deceased | **inactive**（週間Processor非更新） |
+| waiting | **inactive** |
+| stopped | **inactive** |
 
 ### 3.1 強制休養
 
@@ -244,7 +274,7 @@ WeeklyForcedRestReason =
 
 ### 3.2 候補なしrest fallback
 
-訓練系3行動（`train_stat`／`learn_technique`／`practice_technique`）に有効対象がなく、`rest`だけが候補として残った場合の理由を次で表す。
+**週間行動パイプライン適格**の人物に限り、訓練系3行動（`train_stat`／`learn_technique`／`practice_technique`）に有効対象がなく、`rest`だけが候補として残った場合の理由を次で表す。
 
 ```text
 WeeklyRestFallbackReason =
@@ -412,6 +442,9 @@ RestActionScoreHundredths
 | active_competitor | 30 | 20 | 30 | 20 |
 | retired | 0 | 0 | 0 | 100 |
 
+- `baseScoresByCareerStatus` の参照は §3.0 の週間行動パイプライン適格判定**通過後**のみ行う
+- `retired.rest=100` は設定互換のため保持するが、非適格人物をPlannerへ再投入したり synthetic rest event／action history を生成しない
+- 年齢0..7・`child`・42歳以上は本表の対象外（§3.0で除外）
 - 候補が存在しない行動は除外する
 - 強制休養時は採点せずrest
 - 最高スコアを選ぶ
@@ -743,6 +776,7 @@ WorldEngineの週トランザクションはWorldState、World RNG、ProcessorRu
 規則:
 
 - 候補ごとにRNGを加算してスコアを揺らさない
+- 週間行動パイプライン非適格人物はRNGを消費しない（`inactive`と同様）
 - `inactive` 人物はRNGを消費しない
 - 強制休養と通常の `rest` は行動選択・対象選択・効果係数RNGを消費しない
 - `train_stat`、`progressing`の`learn_technique`、`practice_technique`が確定した後は、最終効果が0でも効果係数RNGを1回消費する
@@ -792,6 +826,7 @@ forcedRestCount
 - `processedPersonCount = actionCounts`の4項目（`train_stat`／`learn_technique`／`practice_technique`／`rest`）の累積合計
 - `forcedRestCount`は累積`rest`件数のうち`forced=true`だった件数
 - `inactive`は`actionCounts`へ含めない
+- 週間行動パイプライン非適格人物は`actionCounts`にも`processedPersonCount`にも含めない
 - `deceased`／`waiting`／`stopped`は`processedPersonCount`にも加算しない
 - 習得進捗はtenths、熟練度はhundredthsで集計する
 - `totalMasteryGainHundredths`には次を含む: 習得時の初期mastery、`practice_technique`による増分、`train_stat`付随熟練度増分。戦闘によるmastery増分は含めない
@@ -809,7 +844,7 @@ forcedRestCount
 
 ## 11. イベント
 
-10は行動選択を表す次のイベントを1人物・1処理週につき最大1件生成する。
+週間行動パイプライン適格人物に限り、本仕様は行動選択を表す次のイベントを1人物・1処理週につき最大1件生成する。非適格人物はイベント0件とする（§11.1 `pipeline-ineligible`）。
 
 ### `training.action_selected`
 
@@ -868,16 +903,19 @@ normal rest:
   training.action_selected
   training.rest_applied
 
+pipeline-ineligible:
+  イベント0件
+
 inactive:
   イベント0件
 ```
 
 delta=0および生成条件:
 
-- `training.action_selected`はactive人物に必須
+- `training.action_selected`は週間行動パイプライン適格人物にのみ必須
 - effect eventは責務側仕様（08／09）で必須とされた場合だけ生成する
 - 同じ状態deltaを複数eventへ重複記録しない
-- `inactive`人物は0件（行動選択イベントも生成しない）
+- 週間行動パイプライン非適格人物・`inactive`人物は0件（行動選択イベントも生成しない。synthetic no-op rest を発行しない）
 - `acquirable`では`technique.learning_progressed`を生成しない（§6.2.1）
 
 週間Processorが返すのはEventEnvelope候補であり、`eventId`、`simulationId`、`sequence`を持たない。共通append層がEventEnvelope 0.2.0へ包み、`sourceProcessor="weekly-training"`と`entities.personIds`（候補personId 1件）を設定する。
@@ -890,7 +928,7 @@ delta=0および生成条件:
 - 熟練候補なし（`no_practice_candidate`）
 - 成長余地なし（`no_trainable_stat`）
 
-この場合はrestへ置換し、`training.action_selected.fallbackReasons`へ§3.2の規則で理由を残す。強制休養や自由意志のrestでは空配列とする。
+この場合は**週間行動パイプライン適格**人物に限りrestへ置換し、`training.action_selected.fallbackReasons`へ§3.2の規則で理由を残す。強制休養や自由意志のrestでは空配列とする。
 
 ### 継続不能
 
@@ -906,8 +944,8 @@ delta=0および生成条件:
 
 ## 13. 不変条件
 
-- 1人物につき1週間1行動
-- 0〜7歳は正式訓練なし
+- 週間行動パイプライン適格人物に限り、1人物につき1週間1行動
+- 0〜7歳・`child`・`retired`・42歳以上は週間行動パイプライン非適格（週間rest参加者ではない。§3.0）
 - deceased、waiting、stoppedは人物状態・RNG・RuntimeState件数・イベントのすべてで非更新
 - 強制休養対象は訓練・技練習を行わない
 - 能力・技状態・一時状態が各仕様の範囲内

@@ -548,14 +548,14 @@
   },
   "techniqueCatalog": {
     "identity": {
-      "dataVersion": "techniques-0.1.0",
-      "catalogHash": "55b1ca4cc588f3f411237cbdbd8fe827aa781881e2373860ac8077595d99de2d"
+      "dataVersion": "techniques-0.1.1",
+      "catalogHash": "8baf385b9175bab1fad02d9bd51defb0f50e4285d60558d8223535a51b5b4b59"
     },
     "definitions": [
       {
         "techniqueId": "technique_alpha",
         "schemaVersion": "0.1.0",
-        "dataVersion": "techniques-0.1.0",
+        "dataVersion": "techniques-0.1.1",
         "name": "technique_alpha",
         "category": "unarmed",
         "primaryStats": ["strength", "skill"],
@@ -581,6 +581,88 @@
         "tags": ["strike"],
         "usableRanges": ["contact", "close", "middle"],
         "preferredRanges": ["contact"],
+        "rangeShiftAfterUse": "none",
+        "priority": 0,
+        "speedModifier": 0,
+        "injuryModifier": 0,
+        "actionTraits": {
+          "simultaneous": false,
+          "counterOnHit": false,
+          "interception": false,
+          "interrupt": false,
+          "defenseBreak": false
+        }
+      },
+      {
+        "techniqueId": "technique_magic_basic",
+        "schemaVersion": "0.1.0",
+        "dataVersion": "techniques-0.1.1",
+        "name": "technique_magic_basic",
+        "category": "magic",
+        "primaryStats": ["spirit", "magic"],
+        "requiredAptitude": 10,
+        "requiredStats": {
+          "magic": 20
+        },
+        "prerequisiteTechniqueMastery": [],
+        "mentalCost": 8,
+        "difficulty": 30,
+        "learningTier": "basic",
+        "consumptionClass": "small",
+        "learningProgressRequired": 100,
+        "learningProgressOverrideReason": null,
+        "teachingProficiencyRequired": 20,
+        "secrecy": 0,
+        "power": 25,
+        "accuracy": 70,
+        "activationDifficulty": 10,
+        "prerequisiteTechniqueIds": [],
+        "originPersonId": null,
+        "sourceTechniqueIds": [],
+        "tags": ["spell"],
+        "usableRanges": ["middle", "long"],
+        "preferredRanges": ["long"],
+        "rangeShiftAfterUse": "none",
+        "priority": 0,
+        "speedModifier": 0,
+        "injuryModifier": 0,
+        "actionTraits": {
+          "simultaneous": false,
+          "counterOnHit": false,
+          "interception": false,
+          "interrupt": false,
+          "defenseBreak": false
+        }
+      },
+      {
+        "techniqueId": "technique_sword_basic",
+        "schemaVersion": "0.1.0",
+        "dataVersion": "techniques-0.1.1",
+        "name": "technique_sword_basic",
+        "category": "sword",
+        "primaryStats": ["strength", "skill"],
+        "requiredAptitude": 10,
+        "requiredStats": {
+          "skill": 20
+        },
+        "prerequisiteTechniqueMastery": [],
+        "mentalCost": 5,
+        "difficulty": 30,
+        "learningTier": "basic",
+        "consumptionClass": "small",
+        "learningProgressRequired": 100,
+        "learningProgressOverrideReason": null,
+        "teachingProficiencyRequired": 20,
+        "secrecy": 0,
+        "power": 25,
+        "accuracy": 70,
+        "activationDifficulty": 10,
+        "prerequisiteTechniqueIds": [],
+        "originPersonId": null,
+        "sourceTechniqueIds": [],
+        "tags": ["slash"],
+        "usableRanges": ["close", "middle"],
+        "preferredRanges": ["close"],
         "rangeShiftAfterUse": "none",
         "priority": 0,
         "speedModifier": 0,
@@ -678,31 +760,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -786,31 +892,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -894,31 +1024,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1002,31 +1156,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1110,31 +1288,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1218,31 +1420,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1326,31 +1552,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1434,31 +1684,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1542,31 +1816,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1650,31 +1948,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1758,31 +2080,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1866,31 +2212,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -1974,31 +2344,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -2082,31 +2476,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       },
@@ -2190,31 +2608,55 @@
           "byAbility": {
             "stamina": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "strength": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 100
+              "teacherRecommendation": 50
             },
             "skill": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "speed": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "spirit": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             },
             "magic": {
               "relatedAptitude": 50,
-              "teacherRecommendation": 0
+              "teacherRecommendation": 50
             }
           }
         },
-        "techniqueTargetContexts": [],
+        "techniqueTargetContexts": [
+          {
+            "techniqueId": "technique_alpha",
+            "styleMatch": 50,
+            "teacherPriority": 50,
+            "learningTrait": 50,
+            "teachingAbility": 50,
+            "compatibility": 50,
+            "teacherCanTeachContext": {
+              "activeMentorshipExists": true,
+              "masterLifeStatus": "living",
+              "masterParticipationStatus": "active",
+              "masterCareerStatus": "active_competitor",
+              "masterTechniqueState": {
+                "techniqueId": "technique_alpha",
+                "learningProgressTenths": 0,
+                "masteryHundredths": 5000,
+                "successfulUseCount": 10,
+                "attemptedUseCount": 10,
+                "lastPracticedAbsoluteWeek": 0,
+                "acquiredAbsoluteWeek": 0
+              }
+            }
+          }
+        ],
         "teacherFactorKey": "averageMaster",
         "discipleCount": 0
       }

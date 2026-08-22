@@ -212,7 +212,6 @@ weeklyPlanner
     activeCompetitor: { train: 30, learn: 20, practice: 30, rest: 20 }
     retired: { train: 0, learn: 0, practice: 0, rest: 100 }
 - contextScoreRange: -20..20
-- contextWeights:
     personality: 1.0
     developmentNeed: 1.0
     recentResult: 1.0
@@ -250,6 +249,8 @@ weeklyPlanner
     teacherPriority: 15
     styleMatch: 15
 ```
+
+`baseScoresByCareerStatus`（`retired.rest=100` を含む）の参照は、`10-training-and-learning.md` §3.0 の週間行動パイプライン適格判定**通過後**のみ行う。設定互換のため `retired` 行は保持するが、非適格人物をPlannerへ再投入したり、`training.action_selected`／`training.rest_applied`／通常の週間訓練action履歴を synthetic に生成しない。
 
 - personality等のcontext scoreは入力側で-20..20へ正規化する
 - Planner比較は整数`scoreHundredths`のみを使用し、表示用小数や`Math.round`を挟まない。負値はJavaScript truncateではなく`mathematicalFloor`を使う

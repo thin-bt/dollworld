@@ -243,8 +243,12 @@ export function selectTrainingStatTarget(
   record: WeeklyTrainingPersonRecord,
   config: Sprint1Config,
   rng: WeeklyTargetRng,
+  prebuiltCandidates?: readonly StatTargetCandidate[],
 ): ValidationResult<StatTargetSelection | null> {
-  const candidatesResult = buildTrainingStatCandidates(record, config);
+  const candidatesResult =
+    prebuiltCandidates !== undefined
+      ? success(prebuiltCandidates)
+      : buildTrainingStatCandidates(record, config);
   if (!candidatesResult.ok) {
     return failure(candidatesResult.issues);
   }
@@ -597,12 +601,16 @@ export function selectLearningTechniqueTarget(
   catalog: TechniqueCatalog,
   config: Sprint1Config,
   rng: WeeklyTargetRng,
+  prebuiltCandidates?: readonly LearningTargetCandidate[],
 ): ValidationResult<LearningTargetSelection | null> {
   const parts = readPersonParts(record);
   if (!parts.ok) {
     return failure(parts.issues);
   }
-  const candidatesResult = buildLearningTechniqueCandidates(record, catalog, config);
+  const candidatesResult =
+    prebuiltCandidates !== undefined
+      ? success(prebuiltCandidates)
+      : buildLearningTechniqueCandidates(record, catalog, config);
   if (!candidatesResult.ok) {
     return failure(candidatesResult.issues);
   }
@@ -788,13 +796,12 @@ export function selectPracticeTechniqueTarget(
   config: Sprint1Config,
   currentAbsoluteWeek: number,
   rng: WeeklyTargetRng,
+  prebuiltCandidates?: readonly PracticeTargetCandidate[],
 ): ValidationResult<PracticeTargetSelection | null> {
-  const candidatesResult = buildPracticeTechniqueCandidates(
-    record,
-    catalog,
-    config,
-    currentAbsoluteWeek,
-  );
+  const candidatesResult =
+    prebuiltCandidates !== undefined
+      ? success(prebuiltCandidates)
+      : buildPracticeTechniqueCandidates(record, catalog, config, currentAbsoluteWeek);
   if (!candidatesResult.ok) {
     return failure(candidatesResult.issues);
   }

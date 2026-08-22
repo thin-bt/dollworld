@@ -68,6 +68,7 @@ import type {
   WeeklyTrainingPersonView,
   WeeklyTrainingResult,
 } from "./weekly-training-types.js";
+import { isWeeklyActionPipelineEligible } from "./weekly-update-eligibility.js";
 
 export type WeeklyTrainingProcessorDependencies = {
   sha256Provider?: Sha256Provider;
@@ -429,21 +430,19 @@ function processPerson(
     learn_technique: buildLearningTechniqueCandidates(record, catalog, config),
     practice_technique: buildPracticeTechniqueCandidates(record, catalog, config, absoluteWeek),
   };
-  for (const result of Object.values(availabilityCandidates)) {
-    if (!result.ok) {
-      return failure(result.issues);
-    }
+  if (!availabilityCandidates.train_stat.ok) {
+    return failure(availabilityCandidates.train_stat.issues);
+  }
+  if (!availabilityCandidates.learn_technique.ok) {
+    return failure(availabilityCandidates.learn_technique.issues);
+  }
+  if (!availabilityCandidates.practice_technique.ok) {
+    return failure(availabilityCandidates.practice_technique.issues);
   }
   const availability: WeeklyActionCandidateAvailability = {
-    train_stat: availabilityCandidates.train_stat.ok
-      ? availabilityCandidates.train_stat.value.length > 0
-      : false,
-    learn_technique: availabilityCandidates.learn_technique.ok
-      ? availabilityCandidates.learn_technique.value.length > 0
-      : false,
-    practice_technique: availabilityCandidates.practice_technique.ok
-      ? availabilityCandidates.practice_technique.value.length > 0
-      : false,
+    train_stat: availabilityCandidates.train_stat.value.length > 0,
+    learn_technique: availabilityCandidates.learn_technique.value.length > 0,
+    practice_technique: availabilityCandidates.practice_technique.value.length > 0,
   };
 
   const selection = selectWeeklyAction(record, config, availability, rng);
@@ -463,7 +462,12 @@ function processPerson(
 
   switch (selection.value.action) {
     case "train_stat": {
-      const target = selectTrainingStatTarget(record, config, rng);
+      const target = selectTrainingStatTarget(
+        record,
+        config,
+        rng,
+        availabilityCandidates.train_stat.value,
+      );
       if (!target.ok) {
         return failure(target.issues);
       }
@@ -494,7 +498,13 @@ function processPerson(
       break;
     }
     case "learn_technique": {
-      const target = selectLearningTechniqueTarget(record, catalog, config, rng);
+      const target = selectLearningTechniqueTarget(
+        record,
+        catalog,
+        config,
+        rng,
+        availabilityCandidates.learn_technique.value,
+      );
       if (!target.ok) {
         return failure(target.issues);
       }
@@ -542,7 +552,14 @@ function processPerson(
       break;
     }
     case "practice_technique": {
-      const target = selectPracticeTechniqueTarget(record, catalog, config, absoluteWeek, rng);
+      const target = selectPracticeTechniqueTarget(
+        record,
+        catalog,
+        config,
+        absoluteWeek,
+        rng,
+        availabilityCandidates.practice_technique.value,
+      );
       if (!target.ok) {
         return failure(target.issues);
       }
@@ -641,11 +658,18 @@ export function processWeeklyTrainingWeek(
   const eventCandidates: WeeklyTrainingEventCandidate[] = [];
 
   for (const entry of entries) {
-    const isInactive =
-      entry.view.lifeStatus === "deceased" ||
-      entry.view.participationStatus === "waiting" ||
-      entry.view.participationStatus === "stopped";
-    if (isInactive) {
+    // FIX15: skip inactive AND non-actionable (child/retired/age∉8..41) before
+    // planner / candidates / selection / rest application / action history.
+    if (
+      !isWeeklyActionPipelineEligible({
+        lifeStatus: entry.view.lifeStatus,
+        careerStatus: entry.view.careerStatus,
+        ...(entry.view.participationStatus !== null
+          ? { participationStatus: entry.view.participationStatus }
+          : {}),
+        ...(entry.view.currentAge !== null ? { currentAge: entry.view.currentAge } : {}),
+      })
+    ) {
       personRecords.push(entry.record);
       continue;
     }
