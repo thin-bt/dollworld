@@ -154,7 +154,7 @@ test.describe("S1.5 FIX9 result / event nav UX", () => {
     await expect(page.getByTestId("events-year")).toBeVisible();
     await expect(page.getByTestId("events-month")).toBeVisible();
     await expect(page.getByTestId("events-week")).toBeVisible();
-    await page.getByTestId("events-year").fill("1");
+    await page.getByTestId("events-year").selectOption("1");
     await page.getByTestId("events-month").selectOption("1");
     await page.getByTestId("events-week").selectOption("1");
     await page.getByTestId("events-apply-query").click();

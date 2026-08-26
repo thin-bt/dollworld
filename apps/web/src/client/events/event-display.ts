@@ -181,7 +181,7 @@ export function eventResultSummary(item: EventListItemView): string {
       parts.push(`対象: ${statLabel(payload.targetStat)}`);
     }
     if (typeof payload.targetTechniqueId === "string" && payload.targetTechniqueId.length > 0) {
-      parts.push(`技: ${payload.targetTechniqueId}`);
+      parts.push(`技: ${techniquePrimaryLabel(payload.targetTechniqueId)}`);
     }
     if (payload.forced === true) {
       parts.push("強制");

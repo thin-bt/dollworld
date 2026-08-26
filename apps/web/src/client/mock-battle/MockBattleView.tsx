@@ -111,7 +111,7 @@ export function MockBattleViewPanel(props: MockBattleViewProps) {
       {props.candidatesStatus === "success" ? (
         <div data-testid="mock-candidates-status" data-status="success">
           <div className="dw-participant-selectors" data-testid="mock-participant-selectors">
-            <div className="dw-fighter">
+            <div className="dw-fighter dw-fighter-side-a">
               <label htmlFor="mock-participant-a">参加者 A</label>
               {props.participantAId.length > 0 ? (
                 <h4>{findCandidateName(props.candidates, props.participantAId)}</h4>
@@ -131,7 +131,7 @@ export function MockBattleViewPanel(props: MockBattleViewProps) {
                 ))}
               </select>
             </div>
-            <div className="dw-fighter">
+            <div className="dw-fighter dw-fighter-side-b">
               <label htmlFor="mock-participant-b">参加者 B</label>
               {props.participantBId.length > 0 ? (
                 <h4>{findCandidateName(props.candidates, props.participantBId)}</h4>
@@ -157,8 +157,7 @@ export function MockBattleViewPanel(props: MockBattleViewProps) {
 
       {props.candidatesStatus === "success" &&
       (props.participantAId.length > 0 || props.participantBId.length > 0) ? (
-        <section className="dw-section" data-testid="mock-profile-comparison">
-          <h3>参加者比較</h3>
+        <section className="dw-section dw-mock-compare-section" data-testid="mock-profile-comparison">
           <CombatProfileComparison
             testId="mock-combat-profile-comparison"
             labelA={

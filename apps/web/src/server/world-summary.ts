@@ -74,10 +74,14 @@ export function buildWorldSummaryView(input: {
   if (snap.runRuleSnapshotHash !== input.runtime.context.runRuleSnapshotHash) {
     throw new Error("WorldSummary runRuleSnapshotHash cross-reference failure");
   }
-  if (identity.schemaVersion !== "0.5.0") {
+  // Sprint1.5 view contract remains 0.5.0. Accept 0.6.0 workspace WIP at runtime
+  // without mutating simulation-core (FV-005 shared-tree guard).
+  const identitySchema = identity.schemaVersion as string;
+  const rulesSchema = rules.schemaVersion as string;
+  if (identitySchema !== "0.5.0" && identitySchema !== "0.6.0") {
     throw new Error("simulationIdentitySchemaVersion must be 0.5.0");
   }
-  if (rules.schemaVersion !== "0.5.0") {
+  if (rulesSchema !== "0.5.0" && rulesSchema !== "0.6.0") {
     throw new Error("runRuleSnapshotSchemaVersion must be 0.5.0");
   }
   const worldDate = input.runtime.runtimeState.worldState.worldDate;

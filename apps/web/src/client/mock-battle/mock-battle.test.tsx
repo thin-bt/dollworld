@@ -249,6 +249,7 @@ describe("FE-03 /mock-battle route", () => {
     );
     expect(html).toContain('data-testid="mock-combat-profile-comparison"');
     expect(html).toContain('data-testid="mock-combat-profile-comparison-table"');
+    expect(html).toContain("戦闘プロファイル比較");
     expect(html).toContain('data-testid="mock-combat-profile-comparison-a-rank"');
     expect(html).toContain(">C<");
     expect(html).toContain("段位なし");

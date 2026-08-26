@@ -80,7 +80,7 @@ test.describe("S1.5 production session bind", () => {
     expect(yearText).toMatch(/\d/);
     await shot(page, project, "home-ready");
 
-    const beforeWeek = await page.getByTestId("simulation-week").innerText();
+    const beforeElapsed = await page.getByTestId("simulation-elapsed-weeks").innerText();
     await expect(page.getByTestId("simulation-step-1")).toBeEnabled();
     await page.getByTestId("simulation-step-1").click();
     await expect(page.getByTestId("simulation-feedback")).toHaveAttribute("data-kind", "success", {
@@ -88,9 +88,9 @@ test.describe("S1.5 production session bind", () => {
     });
     await expect(page.getByTestId("simulation-status")).toHaveAttribute("data-status", "success");
     await expect
-      .poll(async () => page.getByTestId("simulation-week").innerText(), { timeout: 60_000 })
-      .not.toBe(beforeWeek);
-    const afterWeek = await page.getByTestId("simulation-week").innerText();
+      .poll(async () => page.getByTestId("simulation-elapsed-weeks").innerText(), { timeout: 60_000 })
+      .not.toBe(beforeElapsed);
+    const afterElapsed = await page.getByTestId("simulation-elapsed-weeks").innerText();
     await shot(page, project, "home-after-step");
 
     await page.goto("/people");
@@ -98,17 +98,17 @@ test.describe("S1.5 production session bind", () => {
     await expect(page.getByTestId("people-status")).toHaveAttribute("data-status", "success", {
       timeout: 30_000,
     });
-    await expect(page.getByTestId("people-meta")).toContainText("totalCount=");
+    await expect(page.getByTestId("people-meta")).toContainText("全");
     await shot(page, project, "people-same-session");
 
     await page.goto("/");
     await waitHomeReady(page);
-    await expect(page.getByTestId("simulation-week")).toHaveText(afterWeek);
+    await expect(page.getByTestId("simulation-elapsed-weeks")).toHaveText(afterElapsed);
     await shot(page, project, "home-after-nav-roundtrip");
 
     await page.reload();
     await waitHomeReady(page);
-    await expect(page.getByTestId("simulation-week")).toHaveText(afterWeek);
+    await expect(page.getByTestId("simulation-elapsed-weeks")).toHaveText(afterElapsed);
     await shot(page, project, "home-after-reload");
 
     await page.goto("/dev-viewer");

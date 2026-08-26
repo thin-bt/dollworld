@@ -55,16 +55,6 @@ export type BattleLogViewProps = {
   participantBDetailError?: string | null;
 };
 
-function displayRaw(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "null";
-  }
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  return JSON.stringify(value);
-}
-
 function personName(
   personId: unknown,
   map: BattleLogViewProps["personNameById"],
@@ -136,21 +126,6 @@ function resolvedKindOf(value: unknown): string | null {
   }
   const kind = (value as Record<string, unknown>).kind;
   return typeof kind === "string" ? kind : null;
-}
-
-function formatStrategyCandidateScores(value: unknown): string {
-  if (!Array.isArray(value) || value.length === 0) {
-    return "null";
-  }
-  return value
-    .map((entry) => {
-      if (entry === null || typeof entry !== "object" || Array.isArray(entry)) {
-        return displayRaw(entry);
-      }
-      const record = entry as Record<string, unknown>;
-      return `${formatBattleAction(record.action)}=${displayRaw(record.score)}`;
-    })
-    .join(" · ");
 }
 
 function localizeRangeChangeLine(line: string): string {
@@ -278,43 +253,6 @@ export function BattleLogViewPanel(props: BattleLogViewProps) {
               <dd>{String(summary.logTotalCount)}</dd>
             </div>
           </dl>
-          <DeveloperDetails>
-            <dl className="dw-dl">
-              <div>
-                <dt>resultKind</dt>
-                <dd>{displayRaw(summary.resultKind)}</dd>
-              </div>
-              <div>
-                <dt>endReason</dt>
-                <dd>{displayRaw(summary.endReason)}</dd>
-              </div>
-              <div>
-                <dt>winnerPersonId</dt>
-                <dd>{displayRaw(summary.winnerPersonId)}</dd>
-              </div>
-              <div>
-                <dt>loserPersonId</dt>
-                <dd>{displayRaw(summary.loserPersonId)}</dd>
-              </div>
-              <div>
-                <dt>matchId</dt>
-                <dd>{displayRaw(summary.matchId)}</dd>
-              </div>
-              <div>
-                <dt>battleSeed</dt>
-                <dd>{displayRaw(summary.battleSeed)}</dd>
-              </div>
-              <div>
-                <dt>finalRngState</dt>
-                <dd>{displayRaw(summary.finalRngState)}</dd>
-              </div>
-              <div>
-                <dt>logTotalCount</dt>
-                <dd>{displayRaw(summary.logTotalCount)}</dd>
-              </div>
-            </dl>
-            <pre>{JSON.stringify(summary)}</pre>
-          </DeveloperDetails>
         </div>
       ) : null}
 
@@ -474,91 +412,6 @@ export function BattleLogViewPanel(props: BattleLogViewProps) {
                                 </p>
                               ) : null}
                             </div>
-                            <DeveloperDetails testId="developer-details-log-item">
-                              <dl className="dw-dl">
-                                <div>
-                                  <dt>actorSide</dt>
-                                  <dd>{displayRaw(item.actorSide)}</dd>
-                                </div>
-                                <div>
-                                  <dt>actorPersonId</dt>
-                                  <dd>{displayRaw(item.actorPersonId)}</dd>
-                                </div>
-                                <div>
-                                  <dt>priority</dt>
-                                  <dd>{displayRaw(item.priority)}</dd>
-                                </div>
-                                <div>
-                                  <dt>actionOrderScore</dt>
-                                  <dd>{displayRaw(item.actionOrderScore)}</dd>
-                                </div>
-                                <div>
-                                  <dt>requestedAction</dt>
-                                  <dd>{displayRaw(item.requestedAction)}</dd>
-                                </div>
-                                <div>
-                                  <dt>resolvedAction</dt>
-                                  <dd>{displayRaw(item.resolvedAction)}</dd>
-                                </div>
-                                <div>
-                                  <dt>replacementReason</dt>
-                                  <dd>{displayNull(item.replacementReason as string | null)}</dd>
-                                </div>
-                                <div>
-                                  <dt>activationSucceeded</dt>
-                                  <dd>{displayRaw(item.activationSucceeded)}</dd>
-                                </div>
-                                <div>
-                                  <dt>activationChance</dt>
-                                  <dd>{displayRaw(item.activationChance)}</dd>
-                                </div>
-                                <div>
-                                  <dt>activationRoll</dt>
-                                  <dd>{displayRaw(item.activationRoll)}</dd>
-                                </div>
-                                <div>
-                                  <dt>activationFailureReason</dt>
-                                  <dd>{displayRaw(item.activationFailureReason)}</dd>
-                                </div>
-                                <div>
-                                  <dt>strategyCandidateScores</dt>
-                                  <dd
-                                    data-testid={`battle-log-strategy-scores-${String(globalIndex)}`}
-                                  >
-                                    {formatStrategyCandidateScores(item.strategyCandidateScores)}
-                                  </dd>
-                                </div>
-                                <div>
-                                  <dt>strategyTieBreakUsed</dt>
-                                  <dd>{displayRaw(item.strategyTieBreakUsed)}</dd>
-                                </div>
-                                <div>
-                                  <dt>hit</dt>
-                                  <dd>{displayRaw(item.hit)}</dd>
-                                </div>
-                                <div>
-                                  <dt>damage</dt>
-                                  <dd>{displayRaw(item.damage)}</dd>
-                                </div>
-                                <div>
-                                  <dt>injuryResult</dt>
-                                  <dd>{displayRaw(item.injuryResult)}</dd>
-                                </div>
-                                <div>
-                                  <dt>rangeBefore</dt>
-                                  <dd>{displayRaw(item.rangeBefore)}</dd>
-                                </div>
-                                <div>
-                                  <dt>rangeAfter</dt>
-                                  <dd>{displayRaw(item.rangeAfter)}</dd>
-                                </div>
-                                <div>
-                                  <dt>sourceLogEntry</dt>
-                                  <dd>{displayRaw(item.sourceLogEntry)}</dd>
-                                </div>
-                              </dl>
-                              <pre>{JSON.stringify(item)}</pre>
-                            </DeveloperDetails>
                           </div>
                         </li>
                       );
@@ -657,6 +510,12 @@ export function BattleLogViewPanel(props: BattleLogViewProps) {
 
       <DeveloperDetails testId="battle-log-meta-dev">
         <p data-testid="battle-log-meta-dev-count">totalCount={props.logTotalCount}</p>
+        {summary !== null ? (
+          <pre data-testid="battle-log-summary-dev">{JSON.stringify(summary, null, 2)}</pre>
+        ) : null}
+        {props.logItems.length > 0 ? (
+          <pre data-testid="battle-log-items-dev">{JSON.stringify(props.logItems, null, 2)}</pre>
+        ) : null}
       </DeveloperDetails>
     </section>
   );

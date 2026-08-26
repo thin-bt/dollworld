@@ -184,11 +184,15 @@ async function stepAcceptedYears(page: Page, years: number): Promise<void> {
   }
 }
 
-async function waitEventsRows(page: Page): Promise<void> {
+async function waitEventsPageReady(page: Page): Promise<void> {
   await expect(page.getByTestId("events-page")).toBeVisible();
   await expect(page.getByTestId("events-status")).toHaveAttribute("data-status", "success", {
     timeout: 60_000,
   });
+}
+
+async function waitEventsRows(page: Page): Promise<void> {
+  await waitEventsPageReady(page);
   await expect(page.getByTestId("events-items").locator("li")).not.toHaveCount(0);
   await expect(page.locator(".dw-event-when").first()).toBeVisible();
   await expect(page.locator(".dw-event-what").first()).toBeVisible();
@@ -234,20 +238,21 @@ test.describe("S1.5 runtime functional regression FIX4", () => {
     });
 
     await page.goto("/events?tab=events");
-    await waitEventsRows(page);
-    await expect(page.getByTestId("events-tab-events")).toHaveText("出来事");
+    // At time-zero, API totalCount includes technical init events; human cards may be empty (FIX8/FIX12).
+    await waitEventsPageReady(page);
+    await expect(page.getByTestId("events-tab-events")).toHaveText("出来事（正史）");
     await shot(page, project, "events-after-start");
 
     await page.goto("/");
     await expect(page.getByTestId("simulation-step-1")).toBeEnabled();
-    const beforeWeek = await page.getByTestId("simulation-week").innerText();
+    const beforeElapsed = await page.getByTestId("simulation-elapsed-weeks").innerText();
     await page.getByTestId("simulation-step-1").click();
     await expect(page.getByTestId("simulation-feedback")).toHaveAttribute("data-kind", "success", {
       timeout: 60_000,
     });
     await expect
-      .poll(async () => page.getByTestId("simulation-week").innerText(), { timeout: 60_000 })
-      .not.toBe(beforeWeek);
+      .poll(async () => page.getByTestId("simulation-elapsed-weeks").innerText(), { timeout: 60_000 })
+      .not.toBe(beforeElapsed);
     await shot(page, project, "home-after-ui-week");
 
     const eventsAfterWeek = await browserJson(page, { url: "/api/s1_5/events?limit=100" });

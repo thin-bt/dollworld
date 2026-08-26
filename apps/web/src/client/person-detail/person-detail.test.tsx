@@ -215,6 +215,7 @@ describe("FE-02 PersonDetailView sparse + populated + safe-text", () => {
     expect(html).not.toContain(">empty</");
     expect(html).not.toContain("technique_invented");
     expect(html).toContain('data-testid="person-detail-statHistory"');
+    expect(html).not.toContain("<th>現在</th>");
     expect(html).toContain("能力の推移はまだありません");
     expect(html).not.toContain(">absent</");
   });

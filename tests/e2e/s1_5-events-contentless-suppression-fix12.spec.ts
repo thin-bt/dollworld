@@ -133,7 +133,7 @@ async function pageAnalysis(page: Page): Promise<{
   conditionOnly: string[];
   whatSample: string[];
 }> {
-  const cardCount = await page.locator(".dw-event-item").count();
+  const cardCount = await page.getByTestId("events-items").locator("li").count();
   const meta = await page.getByTestId("events-meta").textContent();
   const techDev = await page
     .getByTestId("events-technical-count")
@@ -226,8 +226,14 @@ test.describe("S1.5 FIX12 events contentless suppression", () => {
         timeout: 60_000,
       },
     );
+    const filteredStatus = await page.getByTestId("events-status").getAttribute("data-status");
+    if (filteredStatus === "success") {
+      await expect(page.getByTestId("events-items").locator("li").first()).toBeVisible({
+        timeout: 60_000,
+      });
+    }
     const filtered = await pageAnalysis(page);
-    if ((await page.getByTestId("events-status").getAttribute("data-status")) === "success") {
+    if (filteredStatus === "success") {
       expect(filtered.cardCount).toBeGreaterThan(0);
       expect(filtered.techDev ?? "").not.toMatch(/contentlessHidden=100\b/);
     }

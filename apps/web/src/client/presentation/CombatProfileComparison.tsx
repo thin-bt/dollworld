@@ -11,8 +11,27 @@ import {
   STAT_KEYS,
   statLabel,
 } from "./display-labels.js";
+import {
+  abilityValueClassName,
+  abilityValueTier,
+  abilityValueToneLabel,
+} from "./ability-value-presentation.js";
 import { presentTechniqueView } from "./technique-presentation.js";
 import type { CombatProfileStatus } from "./CombatProfileSummary.js";
+
+function renderAbilityCompareValue(value: number | null | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return <span className="dw-compare-val">{displayNull(value ?? null)}</span>;
+  }
+  const tier = abilityValueTier(value);
+  const tone = abilityValueToneLabel(tier);
+  return (
+    <span className={`dw-compare-val ${abilityValueClassName(value)}`} data-ability-tier={tier}>
+      <b>{String(value)}</b>
+      {tone !== null ? <small className="dw-ability-tone">{tone}</small> : null}
+    </span>
+  );
+}
 
 export type CombatProfileComparisonProps = {
   testId: string;
@@ -61,7 +80,9 @@ export function CombatProfileComparison(props: CombatProfileComparisonProps) {
   if (!ready) {
     return (
       <div className="dw-profile-compare" data-testid={testId} data-status="pending">
-        <p className="dw-sub" data-testid={`${testId}-pending`}>
+        <h4 className="dw-compare-title">戦闘プロファイル比較</h4>
+        <p className="dw-compare-pending dw-sub" data-testid={`${testId}-pending`}>
+          <span className="dw-compare-spinner" aria-hidden="true" />
           {sideStatus(props.statusA, props.detailA, props.errorA)}
           {" / "}
           {sideStatus(props.statusB, props.detailB, props.errorB)}
@@ -77,45 +98,87 @@ export function CombatProfileComparison(props: CombatProfileComparisonProps) {
 
   return (
     <div className="dw-profile-compare" data-testid={testId} data-status="success">
-      <table className="dw-compare-table" data-testid={`${testId}-table`}>
-        <thead>
-          <tr>
-            <th scope="col">項目</th>
-            <th scope="col">{props.labelA}</th>
-            <th scope="col">{props.labelB}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-row="rank">
-            <th scope="row">段位</th>
-            <td data-testid={`${testId}-a-rank`}>{rankText(a.currentRank)}</td>
-            <td data-testid={`${testId}-b-rank`}>{rankText(b.currentRank)}</td>
-          </tr>
-          {APTITUDE_KEYS.map((key) => (
-            <tr key={`apt-${key}`} data-row={`aptitude-${key}`}>
-              <th scope="row">{aptitudeLabel(key)}</th>
-              <td>{displayNull(a.aptitudes[key] ?? null)}</td>
-              <td>{displayNull(b.aptitudes[key] ?? null)}</td>
+      <div className="dw-compare-head">
+        <h4 className="dw-compare-title">戦闘プロファイル比較</h4>
+        <p className="dw-compare-vs" aria-hidden="true">
+          <span className="dw-compare-vs-side" data-side="a">
+            {props.labelA}
+          </span>
+          <span className="dw-compare-vs-mark">VS</span>
+          <span className="dw-compare-vs-side" data-side="b">
+            {props.labelB}
+          </span>
+        </p>
+      </div>
+      <div className="dw-compare-table-wrap">
+        <table className="dw-compare-table" data-testid={`${testId}-table`}>
+          <thead>
+            <tr>
+              <th scope="col">項目</th>
+              <th scope="col" data-side="a">
+                {props.labelA}
+              </th>
+              <th scope="col" data-side="b">
+                {props.labelB}
+              </th>
             </tr>
-          ))}
-          {STAT_KEYS.map((key) => (
-            <tr key={`stat-${key}`} data-row={`stat-${key}`}>
-              <th scope="row">{statLabel(key)}</th>
-              <td>{displayNull(a.stats[key] ?? null)}</td>
-              <td>{displayNull(b.stats[key] ?? null)}</td>
+          </thead>
+          <tbody>
+            <tr className="dw-compare-section-row">
+              <th colSpan={3} scope="colgroup">
+                段位
+              </th>
             </tr>
-          ))}
-          <tr data-row="techniques">
-            <th scope="row">習得技</th>
-            <td data-testid={`${testId}-a-techniques`}>
-              {techA.length === 0 ? "なし" : techA.map((t) => t.primaryLabel).join("、")}
-            </td>
-            <td data-testid={`${testId}-b-techniques`}>
-              {techB.length === 0 ? "なし" : techB.map((t) => t.primaryLabel).join("、")}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            <tr className="dw-compare-rank-row" data-row="rank">
+              <th scope="row">現在</th>
+              <td data-side="a" data-testid={`${testId}-a-rank`}>
+                <span className="dw-compare-rank-badge">{rankText(a.currentRank)}</span>
+              </td>
+              <td data-side="b" data-testid={`${testId}-b-rank`}>
+                <span className="dw-compare-rank-badge">{rankText(b.currentRank)}</span>
+              </td>
+            </tr>
+            <tr className="dw-compare-section-row">
+              <th colSpan={3} scope="colgroup">
+                適性
+              </th>
+            </tr>
+            {APTITUDE_KEYS.map((key) => (
+              <tr key={`apt-${key}`} data-row={`aptitude-${key}`}>
+                <th scope="row">{aptitudeLabel(key)}</th>
+                <td>{renderAbilityCompareValue(a.aptitudes[key] ?? null)}</td>
+                <td>{renderAbilityCompareValue(b.aptitudes[key] ?? null)}</td>
+              </tr>
+            ))}
+            <tr className="dw-compare-section-row">
+              <th colSpan={3} scope="colgroup">
+                能力
+              </th>
+            </tr>
+            {STAT_KEYS.map((key) => (
+              <tr key={`stat-${key}`} data-row={`stat-${key}`}>
+                <th scope="row">{statLabel(key)}</th>
+                <td>{renderAbilityCompareValue(a.stats[key] ?? null)}</td>
+                <td>{renderAbilityCompareValue(b.stats[key] ?? null)}</td>
+              </tr>
+            ))}
+            <tr className="dw-compare-section-row">
+              <th colSpan={3} scope="colgroup">
+                習得技
+              </th>
+            </tr>
+            <tr data-row="techniques">
+              <th scope="row">一覧</th>
+              <td data-testid={`${testId}-a-techniques`} className="dw-compare-tech">
+                {techA.length === 0 ? "なし" : techA.map((t) => t.primaryLabel).join("、")}
+              </td>
+              <td data-testid={`${testId}-b-techniques`} className="dw-compare-tech">
+                {techB.length === 0 ? "なし" : techB.map((t) => t.primaryLabel).join("、")}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

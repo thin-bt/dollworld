@@ -145,18 +145,16 @@ test.describe("S1.5 FIX10 canonical labels / event filter", () => {
       timeout: 60_000,
     });
     const head = await page.locator('[data-testid="people-table"] thead').innerText();
-    expect(head).toContain("体力");
-    expect(head).toContain("筋力");
-    expect(head).toContain("技量");
-    expect(head).toContain("速度");
-    expect(head).toContain("精神");
-    expect(head).toContain("魔力");
-    expect(head).toContain("格闘");
-    expect(head).toContain("剣技");
-    expect(head).toContain("魔法");
+    expect(head).toContain("基礎能力");
     expect(head).not.toContain("技術");
     expect(head).not.toContain("精神（能力）");
     expect(head).not.toContain("素手");
+    const abilityGrid = page.locator('[data-testid^="people-base-abilities-person_"]').first();
+    await expect(abilityGrid).toBeVisible();
+    const abilityText = await abilityGrid.innerText();
+    for (const label of ["体力", "筋力", "技量", "速度", "精神", "魔力"]) {
+      expect(abilityText).toContain(label);
+    }
     await shot(page, project, "fix10-people-labels");
 
     await page.goto("/events");
@@ -183,7 +181,10 @@ test.describe("S1.5 FIX10 canonical labels / event filter", () => {
     );
     const panelText = await page.locator('[data-testid="events-list-panel"]').innerText();
     expect(panelText).not.toContain("SESSION_REQUIRED: session cookie is required");
-    const whats = await page.locator(".dw-event-what").allInnerTexts();
+    await expect(page.locator('[data-testid="events-items"] .dw-event-what').first()).toBeVisible({
+      timeout: 60_000,
+    });
+    const whats = await page.locator('[data-testid="events-items"] .dw-event-what').allInnerTexts();
     expect(whats.length).toBeGreaterThan(0);
     const growthOnly = whats.filter((w) => /が成長した$/.test(w));
     const conditionOnly = whats.filter((w) => /コンディションが更新された$/.test(w));

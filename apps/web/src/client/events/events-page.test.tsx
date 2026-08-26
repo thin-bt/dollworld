@@ -205,9 +205,10 @@ describe("FE-05 API-009 events binding", () => {
     expect(html).not.toContain('class="dw-event-what">出来事<');
     expect(html).toContain("1年 1月 第1週");
     expect(html).toContain('data-testid="events-who-event_a"');
-    // Raw eventType remains in developer details, not as the primary what label.
-    expect(html).toContain("eventType=training_completed");
+    // Raw eventType remains in aggregated developer details, not as the primary what label.
     expect(html).toContain("training_completed");
+    expect(html).toContain('data-testid="events-cards-dev-aggregate"');
+    expect(html).not.toContain('data-testid="developer-details-event"');
     const weekOfMonthHtml = renderToStaticMarkup(
       <EventListView
         {...eventViewProps({
@@ -265,13 +266,14 @@ describe("FE-05 API-009 events binding", () => {
         })}
       />,
     );
-    expect(html).toContain('data-testid="events-person-ids-spoof"');
-    const personIdsBlock = html.slice(
-      html.indexOf('data-testid="events-person-ids-spoof"'),
-      html.indexOf("</p>", html.indexOf('data-testid="events-person-ids-spoof"')),
+    expect(html).toContain('data-testid="events-cards-dev-aggregate"');
+    expect(html).toContain("person_real");
+    const ordinaryList = html.slice(
+      html.indexOf('data-testid="events-items"'),
+      html.indexOf('data-testid="events-technical-dev"'),
     );
-    expect(personIdsBlock).toContain("person_real");
-    expect(personIdsBlock).not.toContain("person_fake");
+    expect(ordinaryList).not.toContain("person_fake");
+    expect(html).not.toContain('data-testid="developer-details-event"');
   });
 
   it("6. eventGroup is server-driven; no client classifier", async () => {
@@ -682,9 +684,38 @@ describe("FE-05 safe-text / keyboard / static audit", () => {
     expect(html).toContain("テスト花子が体力の修行を行った");
     expect(html).toContain("能力を鍛える");
     expect(html).toContain("対象: 体力");
-    expect(html).toContain("eventType=training.action_selected");
+    expect(html).toContain("training.action_selected");
+    expect(html).toContain('data-testid="events-cards-dev-aggregate"');
     expect(html).not.toMatch(/class="dw-event-what">training\.action_selected</);
     expect(html).not.toMatch(/class="dw-event-what">出来事</);
+    expect(html).not.toContain('data-testid="developer-details-event"');
+  });
+
+  it("UA-016: practice_technique result maps targetTechniqueId without raw technique_* leak", () => {
+    const item = sampleEvent({
+      eventId: "event_practice",
+      eventType: "training.action_selected",
+      entities: { personIds: ["person_000001"] },
+      payload: {
+        personId: "person_000001",
+        action: "practice_technique",
+        targetTechniqueId: "technique_sword_basic",
+        forced: false,
+      },
+    });
+    const html = renderToStaticMarkup(
+      <EventListView
+        {...eventViewProps({
+          status: "success",
+          items: [item],
+          totalCount: 1,
+          personNameById: { person_000001: "テスト花子" },
+        })}
+      />,
+    );
+    expect(html).toContain("基本剣技");
+    expect(html).not.toMatch(/class="dw-event-result"[^>]*>[^<]*technique_/);
+    expect(html).not.toContain('data-testid="developer-details-event"');
   });
 
   it("FIX8: training choice + rest_applied group into one ordinary card", () => {

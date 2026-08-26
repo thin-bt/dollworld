@@ -62,13 +62,14 @@ export function PeopleViewer(props: PeopleViewerProps) {
   const [nameFilter, setNameFilter] = useState("");
   // FIX7: current-world viewing default = living only (existing filter; not invented semantics).
   const [stateFilter, setStateFilter] = useState("life:living");
-  const [sortBy, setSortBy] = useState("personId");
+  const defaultSortBy = props.enablePersonNavigation === true ? "stamina" : "personId";
+  const [sortBy, setSortBy] = useState(defaultSortBy);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [appliedQuery, setAppliedQuery] = useState<PeopleListQuery>(() =>
     toApiQuery({
       nameFilter: "",
       stateFilter: "life:living",
-      sortBy: "personId",
+      sortBy: defaultSortBy,
       sortOrder: "asc",
     }),
   );

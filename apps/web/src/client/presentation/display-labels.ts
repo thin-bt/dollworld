@@ -203,17 +203,66 @@ export function trainingKindLabel(value: string | null | undefined): string {
   return TRAINING_KIND_LABEL[value] ?? value;
 }
 
+function formatStatChangeDelta(change: {
+  stat?: unknown;
+  before?: unknown;
+  after?: unknown;
+  amount?: unknown;
+}): string | null {
+  if (typeof change.stat !== "string" || change.stat.length === 0) {
+    return null;
+  }
+  const label = statLabel(change.stat);
+  if (
+    typeof change.before === "number" &&
+    typeof change.after === "number" &&
+    Number.isFinite(change.before) &&
+    Number.isFinite(change.after)
+  ) {
+    const signed =
+      typeof change.amount === "number" && Number.isFinite(change.amount)
+        ? change.amount
+        : change.after - change.before;
+    const sign = signed > 0 ? "+" : "";
+    return `${label} ${sign}${String(signed)}（${String(change.before)}→${String(change.after)}）`;
+  }
+  if (typeof change.amount === "number" && Number.isFinite(change.amount)) {
+    const sign = change.amount > 0 ? "+" : "";
+    return `${label} ${sign}${String(change.amount)}`;
+  }
+  return null;
+}
+
 /**
  * Human line for one training-history row. Uses trainingKind + optional targetStat
- * without inventing domain facts.
+ * and canonical statChanges (before/after/amount) without inventing domain facts.
  */
 export function trainingHistoryItemLabel(item: {
   trainingKind?: unknown;
   targetStat?: unknown;
+  statChanges?: unknown;
 }): string {
   const kind = typeof item.trainingKind === "string" ? item.trainingKind : "";
-  if (kind === "train_stat" && typeof item.targetStat === "string" && item.targetStat.length > 0) {
-    return `${statLabel(item.targetStat)}の修行`;
+  const base =
+    kind === "train_stat" && typeof item.targetStat === "string" && item.targetStat.length > 0
+      ? `${statLabel(item.targetStat)}の修行`
+      : trainingKindLabel(kind.length > 0 ? kind : null);
+
+  if (!Array.isArray(item.statChanges) || item.statChanges.length === 0) {
+    return base;
   }
-  return trainingKindLabel(kind.length > 0 ? kind : null);
+  const deltas: string[] = [];
+  for (const entry of item.statChanges) {
+    if (entry === null || typeof entry !== "object" || Array.isArray(entry)) {
+      continue;
+    }
+    const formatted = formatStatChangeDelta(entry as Record<string, unknown>);
+    if (formatted !== null) {
+      deltas.push(formatted);
+    }
+  }
+  if (deltas.length === 0) {
+    return base;
+  }
+  return `${base}：${deltas.join("、")}`;
 }

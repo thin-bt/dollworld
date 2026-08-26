@@ -27,7 +27,10 @@ test.describe("UI-010 ACC-056/057 browser smoke", () => {
     await page.goto("/");
     await expect(page.getByTestId("ui001-shell")).toBeVisible();
     await expect(page.getByTestId("common-menu")).toBeVisible();
-    await expect(page.getByTestId("session-state")).toBeVisible();
+    await expect(page.getByTestId("session-state")).toBeAttached();
+    await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
+      timeout: 60_000,
+    });
 
     const identity = await captureBrowserIdentity(page, testInfo);
     if (testInfo.project.name === "chrome") {

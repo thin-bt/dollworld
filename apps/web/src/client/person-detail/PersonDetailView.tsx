@@ -18,6 +18,11 @@ import {
   STAT_KEYS,
   trainingHistoryItemLabel,
 } from "../presentation/display-labels.js";
+import {
+  abilityValueClassName,
+  abilityValueTier,
+  abilityValueToneLabel,
+} from "../presentation/ability-value-presentation.js";
 import { presentTechniqueView } from "../presentation/technique-presentation.js";
 
 export type PersonDetailViewProps = {
@@ -33,12 +38,26 @@ export type PersonDetailViewProps = {
 function renderStatGrid(record: Record<string, number>, testId: string) {
   return (
     <div className="dw-stat-grid" data-testid={testId}>
-      {STAT_KEYS.map((key) => (
-        <div key={key} className="dw-stat" data-stat={key}>
-          <small>{key === "spirit" ? spiritAbilityLabel() : statLabel(key)}</small>
-          <b>{String(record[key] ?? "—")}</b>
-        </div>
-      ))}
+      {STAT_KEYS.map((key) => {
+        const value = record[key];
+        const n = typeof value === "number" ? value : Number.NaN;
+        const tier = abilityValueTier(n);
+        const tone = abilityValueToneLabel(tier);
+        return (
+          <div
+            key={key}
+            className={`dw-stat dw-stat--${Number.isFinite(n) ? tier : "mid"}`}
+            data-stat={key}
+            data-ability-tier={Number.isFinite(n) ? tier : "mid"}
+          >
+            <small>{key === "spirit" ? spiritAbilityLabel() : statLabel(key)}</small>
+            <b className={Number.isFinite(n) ? abilityValueClassName(n) : undefined}>
+              {String(value ?? "—")}
+            </b>
+            {tone !== null ? <span className="dw-ability-tone">{tone}</span> : null}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -46,12 +65,26 @@ function renderStatGrid(record: Record<string, number>, testId: string) {
 function renderAptitudeGrid(record: Record<string, number>, testId: string) {
   return (
     <div className="dw-stat-grid" data-testid={testId}>
-      {APTITUDE_KEYS.map((key) => (
-        <div key={key} className="dw-stat" data-aptitude={key}>
-          <small>{aptitudeLabel(key)}</small>
-          <b>{String(record[key] ?? "—")}</b>
-        </div>
-      ))}
+      {APTITUDE_KEYS.map((key) => {
+        const value = record[key];
+        const n = typeof value === "number" ? value : Number.NaN;
+        const tier = abilityValueTier(n);
+        const tone = abilityValueToneLabel(tier);
+        return (
+          <div
+            key={key}
+            className={`dw-stat dw-stat--${Number.isFinite(n) ? tier : "mid"}`}
+            data-aptitude={key}
+            data-ability-tier={Number.isFinite(n) ? tier : "mid"}
+          >
+            <small>{aptitudeLabel(key)}</small>
+            <b className={Number.isFinite(n) ? abilityValueClassName(n) : undefined}>
+              {String(value ?? "—")}
+            </b>
+            {tone !== null ? <span className="dw-ability-tone">{tone}</span> : null}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -73,7 +106,6 @@ function renderStatHistory(history: Record<string, unknown> | null) {
           <tr>
             <th>能力</th>
             <th>初期</th>
-            <th>現在</th>
             <th>48週差</th>
             <th>直近週差</th>
           </tr>
@@ -89,7 +121,6 @@ function renderStatHistory(history: Record<string, unknown> | null) {
               <tr key={key} data-stat-history-key={key}>
                 <td data-stat={key}>{statLabel(key)}</td>
                 <td>{displayNull(fields.initial as number | null)}</td>
-                <td>{displayNull(fields.current as number | null)}</td>
                 <td>{displayNull(fields.last48WeeksDelta as number | null)}</td>
                 <td>{displayNull(fields.lastWeekDelta as number | null)}</td>
               </tr>
@@ -138,7 +169,7 @@ export function PersonDetailViewPanel(props: PersonDetailViewProps) {
 
       {props.status === "success" && detail !== null ? (
         <div data-testid="person-detail-status" data-status="success">
-          <header className="dw-person-hero" data-testid="person-detail-identity">
+          <header className="dw-person-hero dw-person-hero--rich" data-testid="person-detail-identity">
             <div className="dw-person-top">
               <div>
                 <h2>{detail.displayName}</h2>
@@ -271,9 +302,11 @@ export function PersonDetailViewPanel(props: PersonDetailViewProps) {
             ) : (
               <ol className="dw-training-list">
                 {detail.trainingHistory.items.map((item, index) => (
-                  <li key={`training-${String(index)}`}>
+                  <li key={`training-${String(index)}`} className="dw-training-item">
                     <time className="dw-event-when">{formatWorldDateValue(item.worldDate)}</time>
-                    <span>{trainingHistoryItemLabel(item)}</span>
+                    <div className="dw-training-result" data-testid={`person-detail-training-result-${String(index)}`}>
+                      {trainingHistoryItemLabel(item)}
+                    </div>
                   </li>
                 ))}
               </ol>

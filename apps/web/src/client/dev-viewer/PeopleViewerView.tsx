@@ -23,6 +23,11 @@ import {
   statLabel,
   STAT_KEYS,
 } from "../presentation/display-labels.js";
+import {
+  abilityValueClassName,
+  abilityValueTier,
+  abilityValueToneLabel,
+} from "../presentation/ability-value-presentation.js";
 
 export const PEOPLE_STATE_FILTER_OPTIONS = [
   "",
@@ -76,10 +81,52 @@ export type PeopleViewerViewProps = {
   personHref?: (personId: string) => string;
 };
 
+
+function isBaseStatSort(sortBy: string): sortBy is (typeof STAT_KEYS)[number] {
+  return (STAT_KEYS as readonly string[]).includes(sortBy);
+}
+
+function renderPeopleBaseAbilityGrid(row: PersonListItemView, sortBy: string) {
+  return (
+    <div
+      className="dw-people-ability-grid"
+      data-testid={`people-base-abilities-${row.personId}`}
+    >
+      {STAT_KEYS.map((key) => {
+        const value = row.stats[key];
+        const tier = abilityValueTier(value);
+        const tone = abilityValueToneLabel(tier);
+        const sortActive = isBaseStatSort(sortBy) && sortBy === key;
+        return (
+          <div
+            key={key}
+            className={`dw-people-ability-chip dw-people-ability-chip--${tier}${sortActive ? " dw-people-ability-chip--sort-active" : ""}`}
+            data-stat={key}
+            data-ability-tier={tier}
+            {...(sortActive ? { "data-sort-active": "true" } : {})}
+          >
+            <small>{statLabel(key)}</small>
+            <span className={abilityValueClassName(value)}>
+              <b>{String(value)}</b>
+              {tone !== null ? <span className="dw-ability-tone">{tone}</span> : null}
+            </span>
+            {sortActive ? <span className="dw-people-sort-indicator" aria-hidden="true">▲</span> : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function PeopleViewerView(props: PeopleViewerViewProps) {
   const hrefFor = props.personHref ?? personDetailPath;
   const navEnabled = props.enablePersonNavigation === true;
   const controlsDisabled = props.status === "loading";
+  const sortOptions = navEnabled
+    ? PEOPLE_SORT_BY_OPTIONS.filter((key) => key !== "personId")
+    : PEOPLE_SORT_BY_OPTIONS;
+  const showBaseAbilityColumn = navEnabled;
+  const baseStatSortActive = isBaseStatSort(props.sortBy);
 
   return (
     <section className="dw-card" data-testid="dev-viewer-people">
@@ -129,7 +176,7 @@ export function PeopleViewerView(props: PeopleViewerViewProps) {
           disabled={controlsDisabled}
           onChange={(event) => props.onSortByChange(event.target.value)}
         >
-          {PEOPLE_SORT_BY_OPTIONS.map((key) => (
+          {sortOptions.map((key) => (
             <option key={key} value={key}>
               {sortByLabel(key)}
             </option>
@@ -222,24 +269,43 @@ export function PeopleViewerView(props: PeopleViewerViewProps) {
 
       {props.status === "success" ? (
         <div className="dw-table-wrap" data-testid="people-status" data-status="success">
-          <table className="dw-table dw-people-table" data-testid="people-table">
+          <table
+            className={`dw-table dw-people-table${navEnabled ? " dw-people-table-observation" : ""}`}
+            data-testid="people-table"
+          >
             <thead>
               <tr>
                 <th>人物</th>
                 <th>年齢</th>
-                <th>生死</th>
-                <th>キャリア</th>
+                {!navEnabled ? (
+                  <>
+                    <th>生死</th>
+                    <th>キャリア</th>
+                  </>
+                ) : null}
                 <th>段位</th>
-                {STAT_KEYS.map((key) => (
-                  <th key={key} data-stat={key}>
-                    {statLabel(key)}
+                {showBaseAbilityColumn ? (
+                  <th data-testid="people-base-abilities-column">
+                    基礎能力
+                    {baseStatSortActive ? (
+                      <small className="dw-people-sort-hint">（{sortByLabel(props.sortBy)}で並び）</small>
+                    ) : null}
                   </th>
-                ))}
-                {APTITUDE_KEYS.map((key) => (
-                  <th key={key} data-aptitude={key}>
-                    {aptitudeLabel(key)}
-                  </th>
-                ))}
+                ) : null}
+                {!navEnabled ? (
+                  <>
+                    {STAT_KEYS.map((key) => (
+                      <th key={key} data-stat={key}>
+                        {statLabel(key)}
+                      </th>
+                    ))}
+                    {APTITUDE_KEYS.map((key) => (
+                      <th key={key} data-aptitude={key}>
+                        {aptitudeLabel(key)}
+                      </th>
+                    ))}
+                  </>
+                ) : null}
                 <th>習得技</th>
               </tr>
             </thead>
@@ -253,30 +319,72 @@ export function PeopleViewerView(props: PeopleViewerViewProps) {
                           href={hrefFor(row.personId)}
                           data-testid={`people-open-${row.personId}`}
                           data-person-nav={row.personId}
+                          className="dw-person-name-link"
                         >
                           {row.displayName}
                         </a>
                       ) : (
                         <b>{row.displayName}</b>
                       )}
+                      {navEnabled ? (
+                        <div className="dw-person-badges">
+                          <span className="dw-badge" data-life-status={row.lifeStatus}>
+                            {lifeStatusLabel(row.lifeStatus)}
+                          </span>
+                          <span className="dw-badge" data-career-status={row.careerStatus}>
+                            {careerStatusLabel(row.careerStatus)}
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
                   </td>
                   <td>{displayNull(row.age)}</td>
-                  <td data-life-status={row.lifeStatus}>{lifeStatusLabel(row.lifeStatus)}</td>
-                  <td data-career-status={row.careerStatus}>
-                    {careerStatusLabel(row.careerStatus)}
-                  </td>
+                  {!navEnabled ? (
+                    <>
+                      <td data-life-status={row.lifeStatus}>
+                        {lifeStatusLabel(row.lifeStatus)}
+                      </td>
+                      <td data-career-status={row.careerStatus}>
+                        {careerStatusLabel(row.careerStatus)}
+                      </td>
+                    </>
+                  ) : null}
                   <td>{displayNull(row.currentRank)}</td>
-                  {STAT_KEYS.map((key) => (
-                    <td key={key} data-stat={key}>
-                      {String(row.stats[key])}
+                  {showBaseAbilityColumn ? (
+                    <td data-testid={`people-base-abilities-cell-${row.personId}`}>
+                      {renderPeopleBaseAbilityGrid(row, props.sortBy)}
                     </td>
-                  ))}
-                  {APTITUDE_KEYS.map((key) => (
-                    <td key={key} data-aptitude={key}>
-                      {String(row.aptitudes[key])}
-                    </td>
-                  ))}
+                  ) : null}
+                  {!navEnabled ? (
+                    <>
+                      {STAT_KEYS.map((key) => {
+                        const value = row.stats[key];
+                        const tier = abilityValueTier(value);
+                        const tone = abilityValueToneLabel(tier);
+                        return (
+                          <td key={key} data-stat={key}>
+                            <span className={abilityValueClassName(value)} data-ability-tier={tier}>
+                              <b>{String(value)}</b>
+                              {tone !== null ? <small className="dw-ability-tone">{tone}</small> : null}
+                            </span>
+                          </td>
+                        );
+                      })}
+                      {APTITUDE_KEYS.map((key) => {
+                        const value = row.aptitudes[key];
+                        const tier = abilityValueTier(value);
+                        const tone = abilityValueToneLabel(tier);
+                        return (
+                          <td key={key} data-aptitude={key}>
+                            <span className={abilityValueClassName(value)} data-ability-tier={tier}>
+                              <b>{String(value)}</b>
+                              {tone !== null ? <small className="dw-ability-tone">{tone}</small> : null}
+                            </span>
+                          </td>
+                        );
+                      })}
+                    </>
+                  ) : null}
                   <td>{row.learnedTechniqueCount}</td>
                 </tr>
               ))}

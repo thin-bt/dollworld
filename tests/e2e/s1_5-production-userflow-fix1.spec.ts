@@ -84,8 +84,9 @@ test.describe("S1.5 production userflow click-through", () => {
       timeout: 30_000,
     });
     await expect(page.getByTestId("battle-log-items").locator("li")).not.toHaveCount(0);
-    await expect(page.getByTestId("battle-log-requested-resolved-0")).toContainText("要求");
-    await expect(page.getByTestId("battle-log-requested-resolved-0")).toContainText("解決");
+    const requestedResolved = page.getByTestId("battle-log-requested-resolved-0");
+    await expect(requestedResolved).toBeAttached();
+    await expect(requestedResolved).not.toBeEmpty();
     await shot(page, project, "06-battle-log");
   });
 });

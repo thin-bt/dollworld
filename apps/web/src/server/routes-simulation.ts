@@ -1,7 +1,9 @@
 import {
+  createDefaultSprint2IdentityBindings,
   createSprint1RunSession,
   createSprint1RunSessionFromRunInitializationMaterials,
   runSprint1WeeklyStep,
+  SIMULATION_IDENTITY_SCHEMA_VERSION,
   validateSprint1RunSession,
   type Sprint1RunSession,
   type ValidationResult,
@@ -362,6 +364,31 @@ function notStarted(reply: FastifyReply, session: UiSession): void {
   );
 }
 
+function buildCreateSprint1RunSessionInput(input: {
+  seed: number;
+  config: import("@shared-world/simulation-core").InitialWorldConfig;
+  nameData: import("@shared-world/simulation-core").ValidatedNameData;
+  sprint1CliInput: unknown;
+  sha256: ReturnType<typeof createNodeSha256Provider>;
+}): unknown {
+  const payload: Record<string, unknown> = {
+    seed: input.seed,
+    config: input.config,
+    nameData: input.nameData,
+    sprint1CliInput: input.sprint1CliInput,
+  };
+  if (SIMULATION_IDENTITY_SCHEMA_VERSION === "0.6.0") {
+    const bindings = createDefaultSprint2IdentityBindings(input.sha256);
+    if (!bindings.ok) {
+      throw new Error(
+        `default Sprint2 identity bindings failed: ${JSON.stringify(bindings.issues)}`,
+      );
+    }
+    payload.sprint2IdentityBindings = bindings.value;
+  }
+  return payload;
+}
+
 function serializeMutationSuccess(view: SimulationMutationView, deps: SimulationRouteDeps): string {
   if (deps.hooks?.failSerializeBeforeCommit === true) {
     throw new Error("injected serialize-before-commit fault");
@@ -524,12 +551,13 @@ export async function handlePostSimulationStart(
   try {
     deps.hooks?.throwOnStartBuild?.();
     created = createSprint1RunSession(
-      {
+      buildCreateSprint1RunSessionInput({
         seed,
         config: materials.config,
         nameData: materials.nameData,
         sprint1CliInput: materials.sprint1CliInputForCreate,
-      },
+        sha256,
+      }),
       sha256,
     );
   } catch {

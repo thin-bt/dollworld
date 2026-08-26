@@ -122,12 +122,13 @@ test.describe("S1.5 FIX7 people + mock readability", () => {
     await expect(page.getByTestId("people-status")).toHaveAttribute("data-status", "success", {
       timeout: 60_000,
     });
-    await expect(page.getByTestId("people-sort-by")).toHaveValue("personId");
+    await expect(page.getByTestId("people-sort-by")).toHaveValue("stamina");
     await expect(page.getByTestId("people-sort-order")).toHaveValue("asc");
     await expect(page.getByTestId("people-state-filter")).toHaveValue("life:living");
     const sortHtml = await page.getByTestId("people-sort-by").innerHTML();
-    expect(sortHtml).toContain("識別子");
+    expect(sortHtml).toContain("体力");
     expect(sortHtml).not.toContain("既定");
+    expect(sortHtml).not.toContain("識別子");
     await expect(page.getByTestId("people-prev")).toBeDisabled();
     await shot(page, project, "fix7-people-list-default-living");
 
@@ -145,7 +146,7 @@ test.describe("S1.5 FIX7 people + mock readability", () => {
     await expect(page.getByTestId("person-detail-current-mental")).toContainText("現在精神力");
     await expect(page.getByTestId("person-detail-status-chips")).not.toContainText("現在精神力");
     await expect(page.getByTestId("person-detail-current-state")).toBeVisible();
-    await expect(page.locator('[data-stat="spirit"] small')).toContainText("精神（能力）");
+    await expect(page.locator('[data-stat="spirit"] small')).toContainText("精神");
     await shot(page, project, "fix7-person-detail-mental-labels");
 
     await page.goto("/mock-battle");
@@ -187,10 +188,18 @@ test.describe("S1.5 FIX7 people + mock readability", () => {
     await shot(page, project, "fix7-battle-log-human");
     await shot(page, project, "fix7-battle-status-vs");
 
+    await page.goto("/");
+    await expect(page.getByTestId("simulation-step-1")).toBeEnabled();
+    await page.getByTestId("simulation-step-1").click();
+    await expect(page.getByTestId("simulation-feedback")).toHaveAttribute("data-kind", "success", {
+      timeout: 60_000,
+    });
+
     await page.goto("/events");
     await expect(page.getByTestId("events-status")).toHaveAttribute("data-status", "success", {
       timeout: 60_000,
     });
+    await expect(page.locator(".dw-event-what").first()).toBeVisible({ timeout: 60_000 });
     const eventWhat = await page.locator(".dw-event-what").first().innerText();
     expect(eventWhat.length).toBeGreaterThan(0);
     expect(eventWhat).not.toBe("出来事");
@@ -201,10 +210,10 @@ test.describe("S1.5 FIX7 people + mock readability", () => {
     await shot(page, project, "fix7-validation-dev-context");
 
     await writeNote(project, "fix7-summary", {
-      defaultSort: "personId asc",
+      defaultSort: "stamina asc",
       defaultStateFilter: "life:living",
       participationPrimaryUi: false,
-      mentalLabels: ["現在精神力", "精神（能力）"],
+      mentalLabels: ["現在精神力", "精神"],
       battleStateSource: "finalState + sourceLogEntry",
       validationPresentation: "developer/system de-emphasized",
     });

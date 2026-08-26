@@ -118,23 +118,6 @@ export function ValidationListView(props: ValidationListViewProps) {
                     ))}
                   </ul>
                 )}
-                <DeveloperDetails testId="developer-details-validation">
-                  <dl className="dw-dl">
-                    <div>
-                      <dt>validationOccurrence</dt>
-                      <dd>{String(item.validationOccurrence)}</dd>
-                    </div>
-                    <div>
-                      <dt>status</dt>
-                      <dd>{item.status}</dd>
-                    </div>
-                    <div>
-                      <dt>issueCount</dt>
-                      <dd>{String(item.issueCount)}</dd>
-                    </div>
-                  </dl>
-                  <pre>{JSON.stringify(item)}</pre>
-                </DeveloperDetails>
               </li>
             ))}
           </ol>
@@ -152,6 +135,9 @@ export function ValidationListView(props: ValidationListViewProps) {
 
       <DeveloperDetails testId="validation-meta-dev">
         <p data-testid="validation-meta-dev">totalCount={props.totalCount}</p>
+        {props.items.length > 0 ? (
+          <pre data-testid="validation-items-dev">{JSON.stringify(props.items, null, 2)}</pre>
+        ) : null}
       </DeveloperDetails>
     </section>
   );

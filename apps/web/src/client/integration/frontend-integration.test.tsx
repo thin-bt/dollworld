@@ -825,9 +825,8 @@ describe("FE-06 state / safe-text / keyboard / static audits", () => {
 
   it("18. /dev-viewer shared regression stays green where touched", () => {
     const home = renderToStaticMarkup(<Shell sessionState="ready" route={{ kind: "home" }} />);
-    expect(home).toContain('data-testid="dev-viewer-entry"');
-    expect(home).toContain('href="/dev-viewer"');
     expect(home).toContain('data-testid="shell-main"');
+    expect(home).not.toContain('data-testid="shell-session-developer-details"');
   });
 });
 

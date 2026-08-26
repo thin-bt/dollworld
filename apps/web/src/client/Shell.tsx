@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   MENU_ITEMS,
-  SESSION_DISPLAY_STATES,
   type SessionDisplayState,
 } from "../shared/ui001-contracts.js";
 import { BattleLogPage } from "./battle-log/BattleLogPage.js";
@@ -10,8 +9,6 @@ import { SimulationPanel } from "./dev-viewer/SimulationPanel.js";
 import { EventsPage, type EventsTab } from "./events/EventsPage.js";
 import { MockBattlePage } from "./mock-battle/MockBattlePage.js";
 import { PersonDetailPage } from "./person-detail/PersonDetailPage.js";
-import { DeveloperDetails } from "./presentation/DeveloperDetails.js";
-import { sessionStateLabel } from "./presentation/display-labels.js";
 import { ensureReadySimulation, loadUiSession } from "./session-client.js";
 
 export type { EventsTab };
@@ -143,28 +140,20 @@ export function Shell({
       <header className="dw-header">
         <div className="dw-brand">
           <h1>Dollworld</h1>
+          <p
+            className="dw-session"
+            data-testid="session-state"
+            data-session-state={sessionState}
+            hidden
+          >
+            {sessionState}
+          </p>
           {loadError !== null ? (
             <p data-testid="session-load-error" data-error={loadError}>
               セッション取得に失敗しました
             </p>
           ) : null}
         </div>
-        <DeveloperDetails testId="shell-session-developer-details">
-          <p className="dw-session" data-testid="session-state" data-session-state={sessionState}>
-            セッション状態: {sessionStateLabel(sessionState)} ({sessionState})
-          </p>
-          <ul className="dw-legend" data-testid="session-state-legend">
-            {SESSION_DISPLAY_STATES.map((state) => (
-              <li
-                key={state}
-                data-state={state}
-                data-current={state === sessionState ? "true" : "false"}
-              >
-                {sessionStateLabel(state)} ({state})
-              </li>
-            ))}
-          </ul>
-        </DeveloperDetails>
         <nav className="dw-nav" aria-label="共通メニュー">
           <ul data-testid="common-menu">
             {MENU_ITEMS.map((item) => {
@@ -216,15 +205,6 @@ export function Shell({
             refreshGeneration={homeRefresh}
             onAfterMutation={refreshHome}
           />
-        ) : null}
-        {route.kind === "home" ? (
-          <DeveloperDetails testId="dev-viewer-entry-details">
-            <p>
-              <a className="dw-secondary-link" href="/dev-viewer" data-testid="dev-viewer-entry">
-                Dev Viewer（開発者向け · UI-004）
-              </a>
-            </p>
-          </DeveloperDetails>
         ) : null}
         {sessionAllowsReadRoutes(sessionState) && route.kind === "people" ? (
           <PeopleViewer enablePersonNavigation={true} />

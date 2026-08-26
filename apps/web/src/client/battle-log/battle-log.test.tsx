@@ -220,7 +220,8 @@ describe("FE-04 BattleLogView grouping / sparse / safe-text", () => {
     expect(html).not.toContain("回避中");
     expect(html).toContain('data-testid="battle-log-next"');
     expect(html).toMatch(/data-testid="battle-log-next"[^>]*disabled/);
-    expect(html).toContain("<dt>actorSide</dt><dd>sideA</dd>");
+    expect(html).toContain('data-testid="battle-log-items-dev"');
+    expect(html).toContain("sideA");
     expect(html).toContain("—"); // judge unset
     expect(html).toContain("<details>");
     expect(html).not.toContain('class="dw-event-item"');
@@ -316,7 +317,8 @@ describe("FE-04 BattleLogView grouping / sparse / safe-text", () => {
     expect(html).toContain("基本格闘");
     expect(html).not.toContain("開始耐久");
     expect(html).toContain("発動判定に失敗（出目 90 / 成功上限 35%）。命中判定は行われていません");
-    expect(html).toContain("基本攻撃（魔法）=1200");
+    expect(html).toContain('data-testid="battle-log-items-dev"');
+    expect(html).toContain("strategyCandidateScores");
     expect(html).not.toMatch(/技を使う（technique_magic_basic）/);
   });
 

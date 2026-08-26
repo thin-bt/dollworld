@@ -4,7 +4,10 @@
  */
 
 import { DeveloperDetails } from "../presentation/DeveloperDetails.js";
-import { displayNull, formatWorldDate } from "../presentation/display-labels.js";
+import { displayNull, sessionStateLabel } from "../presentation/display-labels.js";
+import {
+  SESSION_DISPLAY_STATES,
+} from "../../shared/ui001-contracts.js";
 import {
   STEP_WEEKS_FOUR_WEEKS,
   STEP_WEEKS_ONE_WEEK,
@@ -38,45 +41,47 @@ export function SimulationPanelView(props: SimulationPanelViewProps) {
   const worldDate = props.summary?.worldDate ?? null;
 
   const controls = (
-    <div className="dw-advance">
-      <h3 className="dw-section-title">世界を進める</h3>
-      <div
-        className="dw-btnrow"
-        data-testid="simulation-controls"
-        data-mutating={props.mutating ? "true" : "false"}
-      >
-        {STEP_BUTTONS.map((button) => (
-          <button
-            key={button.weeks}
-            type="button"
-            className={button.weeks === STEP_WEEKS_ONE_WEEK ? "dw-btn-primary" : undefined}
-            data-testid={`simulation-step-${String(button.weeks)}`}
-            data-weeks={String(button.weeks)}
-            disabled={controlsDisabled}
-            onClick={() => {
-              props.onStep(button.weeks);
-            }}
-          >
-            {button.label}
-          </button>
-        ))}
+    <div
+      className="dw-btnrow dw-home-controls-actions"
+      data-testid="simulation-controls"
+      data-mutating={props.mutating ? "true" : "false"}
+    >
+      {STEP_BUTTONS.map((button) => (
         <button
+          key={button.weeks}
           type="button"
-          data-testid="simulation-reset"
+          className={button.weeks === STEP_WEEKS_ONE_WEEK ? "dw-btn-primary" : undefined}
+          data-testid={`simulation-step-${String(button.weeks)}`}
+          data-weeks={String(button.weeks)}
           disabled={controlsDisabled}
-          onClick={props.onReset}
+          onClick={() => {
+            props.onStep(button.weeks);
+          }}
         >
-          初期状態からやり直す
+          {button.label}
         </button>
-      </div>
+      ))}
+      <button
+        type="button"
+        data-testid="simulation-reset"
+        disabled={controlsDisabled}
+        onClick={props.onReset}
+      >
+        初期状態からやり直す
+      </button>
+    </div>
+  );
+
+  const controlsPanel = (
+    <div className="dw-card dw-home-controls">
+      <h2 className="dw-home-controls-title">世界を進める</h2>
+      <p className="dw-lead dw-home-controls-lead">観察したい速度で時間を進めます。</p>
+      {controls}
     </div>
   );
 
   return (
-    <section className="dw-card dw-home-card" data-testid="dev-viewer-simulation">
-      <div className="dw-eyebrow">現在の世界</div>
-      <h2>世界の現況</h2>
-
+    <section className="dw-home-layout" data-testid="dev-viewer-simulation">
       {props.status === "loading" ? (
         <p className="dw-status" data-testid="simulation-status" data-status="loading">
           読み込み中…
@@ -90,7 +95,9 @@ export function SimulationPanelView(props: SimulationPanelViewProps) {
 
       {props.status === "success" && worldDate !== null ? (
         <div className="dw-home-hero" data-testid="simulation-status" data-status="success">
-          <div>
+          <div className="dw-card dw-home-world">
+            <div className="dw-eyebrow">現在の世界</div>
+            <h2 className="dw-home-world-title">世界の現況</h2>
             <div className="dw-worldtime">
               <p
                 data-testid="simulation-year"
@@ -98,12 +105,13 @@ export function SimulationPanelView(props: SimulationPanelViewProps) {
                 data-month={String(worldDate.month)}
                 data-week={String(worldDate.week)}
               >
-                <strong data-testid="simulation-week">
-                  {formatWorldDate(worldDate.year, worldDate.month, worldDate.week)}
-                </strong>
+                <strong data-testid="simulation-week">世界暦 {String(worldDate.year)}年</strong>
+                <span className="dw-worldtime-sub">
+                  {String(worldDate.month)}月 第{String(worldDate.week)}週
+                </span>
               </p>
             </div>
-            <div className="dw-stats">
+            <div className="dw-stats dw-home-stats">
               <div className="dw-stat">
                 <small>経過週</small>
                 <b data-testid="simulation-elapsed-weeks">
@@ -118,10 +126,10 @@ export function SimulationPanelView(props: SimulationPanelViewProps) {
               </div>
             </div>
           </div>
-          {controls}
+          {controlsPanel}
         </div>
       ) : (
-        controls
+        controlsPanel
       )}
 
       {props.mutating ? <p data-testid="simulation-mutating">更新処理中…</p> : null}
@@ -134,7 +142,26 @@ export function SimulationPanelView(props: SimulationPanelViewProps) {
         </section>
       ) : null}
 
-      <DeveloperDetails>
+      <DeveloperDetails testId="shell-developer-details">
+        <p className="dw-session" data-session-state={props.sessionState ?? ""}>
+          セッション状態: {sessionStateLabel(props.sessionState ?? "empty")} ({props.sessionState ?? "empty"})
+        </p>
+        <ul className="dw-legend" data-testid="session-state-legend">
+          {SESSION_DISPLAY_STATES.map((state) => (
+            <li
+              key={state}
+              data-state={state}
+              data-current={state === props.sessionState ? "true" : "false"}
+            >
+              {sessionStateLabel(state)} ({state})
+            </li>
+          ))}
+        </ul>
+        <p>
+          <a className="dw-secondary-link" href="/dev-viewer" data-testid="dev-viewer-entry">
+            Dev Viewer（開発者向け · UI-004）
+          </a>
+        </p>
         {worldDate !== null ? (
           <p data-testid="simulation-calendar-code">
             Y{String(worldDate.year)} M{String(worldDate.month)} W{String(worldDate.week)}

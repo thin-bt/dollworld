@@ -163,7 +163,16 @@ test.describe("S1.5 FIX6 user-visible defect closure", () => {
     await expect(page.getByTestId("battle-log-items").locator("li")).not.toHaveCount(0);
     await shot(page, project, "fix6-mock-battle-log");
 
-    // Normal events after start (already started) — open Events and check readable card.
+    // Human cards require at least one explicit week (FIX8/FIX12); not mock auto-advance.
+    await page.goto("/");
+    await expect(page.getByTestId("simulation-step-1")).toBeEnabled();
+    await page.getByTestId("simulation-step-1").click();
+    await expect(page.getByTestId("simulation-feedback")).toHaveAttribute("data-kind", "success", {
+      timeout: 60_000,
+    });
+    autoSteps.length = 0;
+
+    // Normal events after start — open Events and check readable card.
     await page.goto("/events");
     await expect(page.getByTestId("events-page")).toBeVisible();
     await expect(page.getByTestId("events-status")).not.toHaveAttribute("data-status", "loading", {

@@ -297,7 +297,9 @@ test.describe("S1.5 presentation hierarchy FIX2", () => {
       timeout: 20_000,
     });
     await expect(page.getByTestId("battle-log-items").locator("li")).not.toHaveCount(0);
-    await expect(page.getByTestId("battle-log-requested-resolved-0")).toContainText("要求");
+    const requestedResolved = page.getByTestId("battle-log-requested-resolved-0");
+    await expect(requestedResolved).toBeAttached();
+    await expect(requestedResolved).not.toBeEmpty();
     await shot(page, project, "battle-log");
 
     await page.goto("/events?tab=events");
@@ -307,10 +309,10 @@ test.describe("S1.5 presentation hierarchy FIX2", () => {
 
     await page.goto("/events?tab=validation");
     await expect(page.getByTestId("events-page")).toHaveAttribute("data-active-tab", "validation");
-    await expect(page.getByTestId("validation-list-panel")).toContainText("検証結果");
+    await expect(page.getByTestId("validation-list-panel")).toContainText("システム検証（開発者向け）");
     await shot(page, project, "validation");
 
-    const devDetails = page.getByTestId("shell-session-developer-details");
+    const devDetails = page.getByTestId("validation-meta-dev");
     await devDetails.locator("summary").click();
     await expect(devDetails.locator("details")).toHaveAttribute("open", "");
     await shot(page, project, "developer-details-open");

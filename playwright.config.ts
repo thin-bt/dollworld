@@ -6,8 +6,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Production feature semantics are out of scope for this config.
  */
 
-const EVIDENCE_ROOT =
-  "_handoff-artifacts/audit/current/S1_5-UI010-E2E-TOOLING-REMEDIATION-20260817";
+const EVIDENCE_ROOT = "output/playwright";
 
 export default defineConfig({
   testDir: "tests/e2e",

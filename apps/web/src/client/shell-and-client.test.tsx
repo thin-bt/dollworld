@@ -5,7 +5,7 @@ import { Shell } from "./Shell.js";
 import { ensureReadySimulation, loadUiSession } from "./session-client.js";
 
 describe("UI-001 React static shell", () => {
-  it("renders common menu and empty/ready/updating legend; 人物 links to /people", () => {
+  it("renders common menu; session dev consolidated on home simulation panel", () => {
     const html = renderToStaticMarkup(<Shell sessionState="empty" />);
     expect(html).toContain("シミュレーション");
     expect(html).toContain("人物");
@@ -13,10 +13,7 @@ describe("UI-001 React static shell", () => {
     expect(html).toContain("模擬戦");
     expect(html).toContain("イベント");
     expect(html).toContain('href="/events"');
-    expect(html).toContain('data-session-state="empty"');
-    expect(html).toContain('data-state="ready"');
-    expect(html).toContain('data-state="updating"');
-    expect(html).toContain("/dev-viewer");
+    expect(html).not.toContain('data-testid="shell-session-developer-details"');
     expect(html).not.toContain("/api/s1_5/people/");
     expect(html).not.toContain("/mock-battles");
     expect(html).not.toContain("/api/s1_5/events");
@@ -37,7 +34,6 @@ describe("production `/` session lifecycle parity with /dev-viewer", () => {
       <Shell sessionState="updating" route={{ kind: "events", tab: "events" }} />,
     );
     expect(html).toContain('data-testid="events-page"');
-    expect(html).toContain('data-session-state="updating"');
   });
 
   it("empty session then ensureReadySimulation before domain reads", async () => {

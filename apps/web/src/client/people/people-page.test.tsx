@@ -117,6 +117,80 @@ describe("FE-01 /people route and Shell navigation", () => {
     expect(html).toContain(">C</td>");
     expect(html).not.toContain('class="dw-badge dw-rank-badge"');
   });
+
+  it("UA-031/032: observation mode shows all six base abilities with tier markup", () => {
+    const html = renderToStaticMarkup(
+      <PeopleViewerView
+        {...peopleViewProps({
+          status: "success",
+          items: [
+            {
+              ...samplePerson,
+              stats: {
+                stamina: 95,
+                strength: 75,
+                skill: 50,
+                speed: 30,
+                spirit: 45,
+                magic: 5,
+              },
+            },
+          ],
+          totalCount: 1,
+          sortBy: "stamina",
+          enablePersonNavigation: true,
+        })}
+      />,
+    );
+    expect(html).toContain('data-testid="people-base-abilities-column"');
+    expect(html).toContain('data-testid="people-base-abilities-person_000001"');
+    expect(html).toContain('data-testid="people-base-abilities-cell-person_000001"');
+    expect(html).toContain('data-stat="stamina"');
+    expect(html).toContain('data-stat="strength"');
+    expect(html).toContain('data-stat="skill"');
+    expect(html).toContain('data-stat="speed"');
+    expect(html).toContain('data-stat="spirit"');
+    expect(html).toContain('data-stat="magic"');
+    expect(html).toContain(">体力<");
+    expect(html).toContain(">筋力<");
+    expect(html).toContain(">技量<");
+    expect(html).toContain(">速度<");
+    expect(html).toContain(">精神<");
+    expect(html).toContain(">魔力<");
+    expect(html).toContain('data-sort-active="true"');
+    expect(html).toContain("dw-ability-value--peak");
+    expect(html).toContain("突出");
+    expect(html).toContain(">95</b>");
+    expect(html).toContain("dw-ability-value--strong");
+    expect(html).toContain("得意");
+    expect(html).toContain(">75</b>");
+    expect(html).toContain("dw-ability-value--weak");
+    expect(html).toContain("苦手");
+    expect(html).toContain(">30</b>");
+    expect(html).toContain("dw-ability-value--critical");
+    expect(html).toContain("弱点");
+    expect(html).toContain(">5</b>");
+    const statCount = (html.match(/data-stat="/g) ?? []).length;
+    expect(statCount).toBe(6);
+  });
+
+  it("UA-031: sorting by ability does not hide the other five base abilities", () => {
+    const html = renderToStaticMarkup(
+      <PeopleViewerView
+        {...peopleViewProps({
+          status: "success",
+          items: [samplePerson],
+          totalCount: 1,
+          sortBy: "magic",
+          enablePersonNavigation: true,
+        })}
+      />,
+    );
+    const statCount = (html.match(/data-stat="/g) ?? []).length;
+    expect(statCount).toBeGreaterThanOrEqual(6);
+    expect(html).toContain('data-stat="magic"');
+    expect(html).not.toContain('data-testid="people-sort-metric-column"');
+  });
 });
 
 describe("FE-01 API-007 query/paging (no local domain recompute)", () => {

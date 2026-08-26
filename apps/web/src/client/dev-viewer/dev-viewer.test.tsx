@@ -6,6 +6,7 @@ import { loadMockCandidatesPage, loadPeoplePage } from "./fetch-ui004.js";
 import { MockCandidatesViewerView } from "./MockCandidatesViewerView.js";
 import { PEOPLE_PAGE_SIZE_DEFAULT } from "./people-paging.js";
 import { PeopleViewerView, type PeopleViewerViewProps } from "./PeopleViewerView.js";
+import { SimulationPanelView } from "./SimulationPanelView.js";
 import type { MockBattleCandidateView, PersonListItemView } from "./ui004-views.js";
 
 function peopleViewProps(overrides: Partial<PeopleViewerViewProps>): PeopleViewerViewProps {
@@ -93,10 +94,32 @@ function failureEnvelope(code: string, message: string): string {
 }
 
 describe("DEV-VIEWER-001 shell entry", () => {
-  it("exposes /dev-viewer developer entry without PersonDetail links", () => {
-    const html = renderToStaticMarkup(<Shell sessionState="empty" />);
+  it("home simulation panel exposes consolidated developer entry with /dev-viewer link", () => {
+    const html = renderToStaticMarkup(
+      <SimulationPanelView
+        status="success"
+        summary={{
+          simulationId: "sim_test",
+          worldDate: { year: 1, month: 1, week: 1 },
+          elapsedWeeks: 0,
+          personCount: 10,
+          worldYearStartMonth: 1,
+        }}
+        uiRevision={1}
+        isUpdating={false}
+        sessionState="ready"
+        errorText={null}
+        mutating={false}
+        feedback={null}
+        onStep={() => undefined}
+        onReset={() => undefined}
+      />,
+    );
     expect(html).toContain('data-testid="dev-viewer-entry"');
     expect(html).toContain("/dev-viewer");
+    expect(html).toContain('data-testid="shell-developer-details"');
+    expect(html).toContain('data-testid="simulation-session-state"');
+    expect((html.match(/開発者情報/g) ?? []).length).toBe(1);
     expect(html).not.toContain("/api/s1_5/people/");
     expect(html).not.toContain("PersonDetail");
   });

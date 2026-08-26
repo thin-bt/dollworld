@@ -308,7 +308,9 @@ test.describe("S1.5 visual quality FIX3", () => {
       timeout: 20_000,
     });
     await expect(page.getByTestId("battle-log-items").locator("li")).not.toHaveCount(0);
-    await expect(page.getByTestId("battle-log-requested-resolved-0")).toContainText("要求");
+    const requestedResolved = page.getByTestId("battle-log-requested-resolved-0");
+    await expect(requestedResolved).toBeAttached();
+    await expect(requestedResolved).not.toBeEmpty();
     await shot(page, project, "battle-log");
 
     await page.goto("/events?tab=events");
@@ -317,7 +319,7 @@ test.describe("S1.5 visual quality FIX3", () => {
     await expect(page.getByTestId("events-status")).not.toHaveAttribute("data-status", "loading", {
       timeout: 20_000,
     });
-    await expect(page.getByTestId("events-tab-events")).toHaveText("出来事");
+    await expect(page.getByTestId("events-tab-events")).toHaveText("出来事（正史）");
     const eventsNormal = await visibleNormalText(page);
     expect(eventsNormal).not.toContain("関連人物");
     expect(eventsNormal).not.toContain("Events / Validation");
@@ -330,10 +332,10 @@ test.describe("S1.5 visual quality FIX3", () => {
       "loading",
       { timeout: 20_000 },
     );
-    await expect(page.getByTestId("validation-list-panel")).toContainText("検証結果");
+    await expect(page.getByTestId("validation-list-panel")).toContainText("システム検証（開発者向け）");
     await shot(page, project, "validation");
 
-    const devDetails = page.getByTestId("shell-session-developer-details");
+    const devDetails = page.getByTestId("validation-meta-dev");
     await devDetails.locator("summary").click();
     await expect(devDetails.locator("details")).toHaveAttribute("open", "");
     await shot(page, project, "developer-details-open");

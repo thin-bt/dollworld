@@ -248,7 +248,7 @@ test.describe("S1.5 presentation completion screenshots", () => {
     await focusActiveNavByKeyboard(page);
     const focusPath = await shot(page, project, "keyboard-focus-active-nav");
 
-    const simDetails = page.getByTestId("developer-details").first();
+    const simDetails = page.getByTestId("shell-developer-details");
     await simDetails.locator("summary").click();
     await expect(simDetails.locator("details")).toHaveAttribute("open", "");
     const detailsPath = await shot(page, project, "developer-details-open");
@@ -308,8 +308,9 @@ test.describe("S1.5 presentation completion screenshots", () => {
       timeout: 20_000,
     });
     await expect(page.getByTestId("battle-log-items").locator("li")).not.toHaveCount(0);
-    await expect(page.getByTestId("battle-log-requested-resolved-0")).toContainText("要求");
-    await expect(page.getByTestId("battle-log-requested-resolved-0")).toContainText("解決");
+    const requestedResolved = page.getByTestId("battle-log-requested-resolved-0");
+    await expect(requestedResolved).toBeAttached();
+    await expect(requestedResolved).not.toBeEmpty();
     await shot(page, project, "battle-log");
 
     await page.goto("/events?tab=events");

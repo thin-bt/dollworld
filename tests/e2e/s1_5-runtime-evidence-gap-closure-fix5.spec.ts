@@ -92,6 +92,27 @@ async function startWorld(page: Page, seed: number): Promise<void> {
   }
 }
 
+async function stepAcceptedYears(page: Page, years: number): Promise<void> {
+  for (let i = 0; i < years; i += 1) {
+    const { csrf, uiRevision } = await sessionCsrf(page);
+    const step = await browserJson(page, {
+      url: "/api/s1_5/simulation/step",
+      method: "POST",
+      csrf,
+      body: {
+        requestId: crypto.randomUUID(),
+        expectedUiRevision: uiRevision,
+        weeks: STEP_WEEKS_ONE_YEAR,
+      },
+    });
+    if (step.ok !== true) {
+      throw new Error(
+        `simulation step year ${String(i + 1)} failed: ${String(step.status)} ${JSON.stringify(step.body)}`,
+      );
+    }
+  }
+}
+
 async function resetWorld(page: Page): Promise<void> {
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const { csrf, uiRevision } = await sessionCsrf(page);
@@ -253,6 +274,13 @@ test.describe("S1.5 runtime evidence gap closure FIX5", () => {
     // -----------------------------
     await resetWorld(page);
     await startWorld(page, coldSeed);
+    await page.goto("/");
+    await expect(page.getByTestId("simulation-status")).toHaveAttribute("data-status", "success", {
+      timeout: 60_000,
+    });
+
+    // Seed human-readable cards before contention (FIX8/FIX12 suppress time-zero init noise).
+    await stepAcceptedYears(page, 1);
     await page.goto("/");
     await expect(page.getByTestId("simulation-status")).toHaveAttribute("data-status", "success", {
       timeout: 60_000,

@@ -41,24 +41,6 @@ export type EventListViewProps = {
   onRecoverSession?: () => void;
 };
 
-function display(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "null";
-  }
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  return JSON.stringify(value);
-}
-
-function personIdsOf(item: EventListItemView): string {
-  const ids = item.entities?.personIds;
-  if (!Array.isArray(ids)) {
-    return "[]";
-  }
-  return ids.map((id) => display(id)).join(", ");
-}
-
 export function EventListView(props: EventListViewProps) {
   const grouped =
     props.status === "success"
@@ -90,7 +72,7 @@ export function EventListView(props: EventListViewProps) {
           }
         }}
       >
-        <label htmlFor="events-person-id">人物ID（任意）</label>
+        <label htmlFor="events-person-id">人物（任意）</label>
         <input
           id="events-person-id"
           data-testid="events-person-id"
@@ -275,26 +257,21 @@ export function EventListView(props: EventListViewProps) {
               {grouped.hiddenContentless.length}
             </p>
             {grouped.cards.length > 0 ? (
-              <section data-testid="events-cards-dev">
-                <h4>観察カードの技術詳細</h4>
-                <ul>
-                  {grouped.cards.map((card) => {
-                    const item = card.primary;
-                    return (
-                      <li key={`dev-${card.key}`} data-testid="developer-details-event">
-                        <p>
-                          {card.what} · eventId={item.eventId} · sequence={String(item.sequence)} ·
-                          eventType={item.eventType}
-                        </p>
-                        <p data-testid={`events-person-ids-${item.eventId}`}>
-                          entities.personIds={personIdsOf(item)}
-                        </p>
-                        <pre>{JSON.stringify({ primary: item, related: card.related })}</pre>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
+              <pre data-testid="events-cards-dev-aggregate">
+                {JSON.stringify(
+                  grouped.cards.map((card) => ({
+                    what: card.what,
+                    eventId: card.primary.eventId,
+                    sequence: card.primary.sequence,
+                    eventType: card.primary.eventType,
+                    personIds: card.primary.entities?.personIds ?? [],
+                    primary: card.primary,
+                    related: card.related,
+                  })),
+                  null,
+                  2,
+                )}
+              </pre>
             ) : null}
             <pre>
               {JSON.stringify(
