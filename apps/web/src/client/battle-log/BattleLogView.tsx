@@ -30,7 +30,6 @@ import {
 } from "../presentation/battle-display.js";
 import { CombatProfileComparison } from "../presentation/CombatProfileComparison.js";
 import { DeveloperDetails } from "../presentation/DeveloperDetails.js";
-import { displayNull } from "../presentation/display-labels.js";
 import type { BattleLogItemView } from "./ui007-views.js";
 
 export type BattleLogViewProps = {

@@ -1,6 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { Shell } from "../Shell.js";
 import { DevViewer } from "./DevViewer.js";
 import { loadMockCandidatesPage, loadPeoplePage } from "./fetch-ui004.js";
 import { MockCandidatesViewerView } from "./MockCandidatesViewerView.js";
