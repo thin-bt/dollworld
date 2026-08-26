@@ -3,12 +3,7 @@
  * Thresholds are UI acceptance rules; does not invent domain values.
  */
 
-export type AbilityValueTier =
-  | "peak"
-  | "strong"
-  | "mid"
-  | "weak"
-  | "critical";
+export type AbilityValueTier = "peak" | "strong" | "mid" | "weak" | "critical";
 
 export function abilityValueTier(value: number): AbilityValueTier {
   if (!Number.isFinite(value)) {

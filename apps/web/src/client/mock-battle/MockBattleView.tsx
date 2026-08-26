@@ -157,7 +157,10 @@ export function MockBattleViewPanel(props: MockBattleViewProps) {
 
       {props.candidatesStatus === "success" &&
       (props.participantAId.length > 0 || props.participantBId.length > 0) ? (
-        <section className="dw-section dw-mock-compare-section" data-testid="mock-profile-comparison">
+        <section
+          className="dw-section dw-mock-compare-section"
+          data-testid="mock-profile-comparison"
+        >
           <CombatProfileComparison
             testId="mock-combat-profile-comparison"
             labelA={

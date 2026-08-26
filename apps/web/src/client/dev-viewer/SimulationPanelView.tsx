@@ -5,9 +5,7 @@
 
 import { DeveloperDetails } from "../presentation/DeveloperDetails.js";
 import { displayNull, sessionStateLabel } from "../presentation/display-labels.js";
-import {
-  SESSION_DISPLAY_STATES,
-} from "../../shared/ui001-contracts.js";
+import { SESSION_DISPLAY_STATES } from "../../shared/ui001-contracts.js";
 import {
   STEP_WEEKS_FOUR_WEEKS,
   STEP_WEEKS_ONE_WEEK,
@@ -144,7 +142,8 @@ export function SimulationPanelView(props: SimulationPanelViewProps) {
 
       <DeveloperDetails testId="shell-developer-details">
         <p className="dw-session" data-session-state={props.sessionState ?? ""}>
-          セッション状態: {sessionStateLabel(props.sessionState ?? "empty")} ({props.sessionState ?? "empty"})
+          セッション状態: {sessionStateLabel(props.sessionState ?? "empty")} (
+          {props.sessionState ?? "empty"})
         </p>
         <ul className="dw-legend" data-testid="session-state-legend">
           {SESSION_DISPLAY_STATES.map((state) => (

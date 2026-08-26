@@ -81,17 +81,13 @@ export type PeopleViewerViewProps = {
   personHref?: (personId: string) => string;
 };
 
-
 function isBaseStatSort(sortBy: string): sortBy is (typeof STAT_KEYS)[number] {
   return (STAT_KEYS as readonly string[]).includes(sortBy);
 }
 
 function renderPeopleBaseAbilityGrid(row: PersonListItemView, sortBy: string) {
   return (
-    <div
-      className="dw-people-ability-grid"
-      data-testid={`people-base-abilities-${row.personId}`}
-    >
+    <div className="dw-people-ability-grid" data-testid={`people-base-abilities-${row.personId}`}>
       {STAT_KEYS.map((key) => {
         const value = row.stats[key];
         const tier = abilityValueTier(value);
@@ -110,7 +106,11 @@ function renderPeopleBaseAbilityGrid(row: PersonListItemView, sortBy: string) {
               <b>{String(value)}</b>
               {tone !== null ? <span className="dw-ability-tone">{tone}</span> : null}
             </span>
-            {sortActive ? <span className="dw-people-sort-indicator" aria-hidden="true">▲</span> : null}
+            {sortActive ? (
+              <span className="dw-people-sort-indicator" aria-hidden="true">
+                ▲
+              </span>
+            ) : null}
           </div>
         );
       })}
@@ -288,7 +288,9 @@ export function PeopleViewerView(props: PeopleViewerViewProps) {
                   <th data-testid="people-base-abilities-column">
                     基礎能力
                     {baseStatSortActive ? (
-                      <small className="dw-people-sort-hint">（{sortByLabel(props.sortBy)}で並び）</small>
+                      <small className="dw-people-sort-hint">
+                        （{sortByLabel(props.sortBy)}で並び）
+                      </small>
                     ) : null}
                   </th>
                 ) : null}
@@ -341,9 +343,7 @@ export function PeopleViewerView(props: PeopleViewerViewProps) {
                   <td>{displayNull(row.age)}</td>
                   {!navEnabled ? (
                     <>
-                      <td data-life-status={row.lifeStatus}>
-                        {lifeStatusLabel(row.lifeStatus)}
-                      </td>
+                      <td data-life-status={row.lifeStatus}>{lifeStatusLabel(row.lifeStatus)}</td>
                       <td data-career-status={row.careerStatus}>
                         {careerStatusLabel(row.careerStatus)}
                       </td>
@@ -365,7 +365,9 @@ export function PeopleViewerView(props: PeopleViewerViewProps) {
                           <td key={key} data-stat={key}>
                             <span className={abilityValueClassName(value)} data-ability-tier={tier}>
                               <b>{String(value)}</b>
-                              {tone !== null ? <small className="dw-ability-tone">{tone}</small> : null}
+                              {tone !== null ? (
+                                <small className="dw-ability-tone">{tone}</small>
+                              ) : null}
                             </span>
                           </td>
                         );
@@ -378,7 +380,9 @@ export function PeopleViewerView(props: PeopleViewerViewProps) {
                           <td key={key} data-aptitude={key}>
                             <span className={abilityValueClassName(value)} data-ability-tier={tier}>
                               <b>{String(value)}</b>
-                              {tone !== null ? <small className="dw-ability-tone">{tone}</small> : null}
+                              {tone !== null ? (
+                                <small className="dw-ability-tone">{tone}</small>
+                              ) : null}
                             </span>
                           </td>
                         );

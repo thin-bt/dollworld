@@ -309,7 +309,9 @@ test.describe("S1.5 presentation hierarchy FIX2", () => {
 
     await page.goto("/events?tab=validation");
     await expect(page.getByTestId("events-page")).toHaveAttribute("data-active-tab", "validation");
-    await expect(page.getByTestId("validation-list-panel")).toContainText("システム検証（開発者向け）");
+    await expect(page.getByTestId("validation-list-panel")).toContainText(
+      "システム検証（開発者向け）",
+    );
     await shot(page, project, "validation");
 
     const devDetails = page.getByTestId("validation-meta-dev");

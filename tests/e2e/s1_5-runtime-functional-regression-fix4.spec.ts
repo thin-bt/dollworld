@@ -251,7 +251,9 @@ test.describe("S1.5 runtime functional regression FIX4", () => {
       timeout: 60_000,
     });
     await expect
-      .poll(async () => page.getByTestId("simulation-elapsed-weeks").innerText(), { timeout: 60_000 })
+      .poll(async () => page.getByTestId("simulation-elapsed-weeks").innerText(), {
+        timeout: 60_000,
+      })
       .not.toBe(beforeElapsed);
     await shot(page, project, "home-after-ui-week");
 

@@ -169,7 +169,10 @@ export function PersonDetailViewPanel(props: PersonDetailViewProps) {
 
       {props.status === "success" && detail !== null ? (
         <div data-testid="person-detail-status" data-status="success">
-          <header className="dw-person-hero dw-person-hero--rich" data-testid="person-detail-identity">
+          <header
+            className="dw-person-hero dw-person-hero--rich"
+            data-testid="person-detail-identity"
+          >
             <div className="dw-person-top">
               <div>
                 <h2>{detail.displayName}</h2>
@@ -304,7 +307,10 @@ export function PersonDetailViewPanel(props: PersonDetailViewProps) {
                 {detail.trainingHistory.items.map((item, index) => (
                   <li key={`training-${String(index)}`} className="dw-training-item">
                     <time className="dw-event-when">{formatWorldDateValue(item.worldDate)}</time>
-                    <div className="dw-training-result" data-testid={`person-detail-training-result-${String(index)}`}>
+                    <div
+                      className="dw-training-result"
+                      data-testid={`person-detail-training-result-${String(index)}`}
+                    >
                       {trainingHistoryItemLabel(item)}
                     </div>
                   </li>

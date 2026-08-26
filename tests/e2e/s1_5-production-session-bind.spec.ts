@@ -88,7 +88,9 @@ test.describe("S1.5 production session bind", () => {
     });
     await expect(page.getByTestId("simulation-status")).toHaveAttribute("data-status", "success");
     await expect
-      .poll(async () => page.getByTestId("simulation-elapsed-weeks").innerText(), { timeout: 60_000 })
+      .poll(async () => page.getByTestId("simulation-elapsed-weeks").innerText(), {
+        timeout: 60_000,
+      })
       .not.toBe(beforeElapsed);
     const afterElapsed = await page.getByTestId("simulation-elapsed-weeks").innerText();
     await shot(page, project, "home-after-step");

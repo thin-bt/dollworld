@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  MENU_ITEMS,
-  type SessionDisplayState,
-} from "../shared/ui001-contracts.js";
+import { MENU_ITEMS, type SessionDisplayState } from "../shared/ui001-contracts.js";
 import { BattleLogPage } from "./battle-log/BattleLogPage.js";
 import { PeopleViewer } from "./dev-viewer/PeopleViewer.js";
 import { SimulationPanel } from "./dev-viewer/SimulationPanel.js";
