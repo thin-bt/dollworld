@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
 /**
  * FIX5 evidence path, realigned to FIX6:
@@ -8,8 +9,9 @@ import { expect, test, type Page } from "@playwright/test";
  * - Events during update: open Events while an explicit year step is in flight.
  */
 
-const EVIDENCE_ROOT =
-  "_handoff-artifacts/audit/current/S1_5-RUNTIME-EVIDENCE-GAP-CLOSURE-FIX5-20260819";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-RUNTIME-EVIDENCE-GAP-CLOSURE-FIX5-20260819",
+);
 const STEP_WEEKS_ONE_YEAR = 48;
 
 type BrowserJson = {

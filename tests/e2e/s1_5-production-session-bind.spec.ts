@@ -1,13 +1,16 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
 /**
  * Production `/` session-bind proof — Chrome/Edge.
  * Confirms empty sessions auto-start like /dev-viewer; no SIMULATION_NOT_STARTED on normal load.
  */
 
-const EVIDENCE_ROOT = "_handoff-artifacts/audit/current/S1_5-PRODUCTION-SESSION-BIND-FIX-20260818";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-PRODUCTION-SESSION-BIND-FIX-20260818",
+);
 
 type BrowserJson = {
   ok?: boolean;

@@ -6,6 +6,7 @@ export default defineConfig({
       "packages/**/src/**/*.test.ts",
       "apps/**/src/**/*.test.ts",
       "apps/**/src/**/*.test.tsx",
+      "tests/e2e/support/**/*.test.ts",
     ],
     // Long-horizon Sprint 0 Vitest wrapper is optional/manual; `npm run verify:sprint0`
     // runs the CLI suite (`verify-sprint0-main.js`), not this file.

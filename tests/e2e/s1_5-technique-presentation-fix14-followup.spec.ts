@@ -4,9 +4,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
-const EVIDENCE_ROOT =
-  "_handoff-artifacts/audit/current/S1_5-FIX14-TECHNIQUE-PRESENTATION-FOLLOWUP-B2-20260822";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-FIX14-TECHNIQUE-PRESENTATION-FOLLOWUP-B2-20260822",
+);
 
 type BrowserJson = {
   ok?: boolean;

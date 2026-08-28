@@ -1,13 +1,16 @@
 import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
 /**
  * Presentation FIX1 browser evidence — does not change UI-010 smoke.
  * Captures Chrome/Edge screenshots under the FIX1 evidence directory.
  */
 
-const EVIDENCE_ROOT = "_handoff-artifacts/audit/current/S1_5-UI-PRESENTATION-FIX1-20260817";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-UI-PRESENTATION-FIX1-20260817",
+);
 const STEP_WEEKS_ONE_YEAR = 48;
 const TRAINEE_MIN_AGE = 8;
 

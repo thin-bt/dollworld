@@ -1,13 +1,16 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
 /**
  * Click-through-only userflow evidence for people→detail and mock battle.
  * Does not accept by typing detail/result URLs.
  */
 
-const EVIDENCE_ROOT = "_handoff-artifacts/audit/current/S1_5-PRODUCTION-USERFLOW-FIX1-20260818";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-PRODUCTION-USERFLOW-FIX1-20260818",
+);
 
 async function shot(page: Page, project: string, name: string): Promise<void> {
   const dir = path.join(EVIDENCE_ROOT, project);

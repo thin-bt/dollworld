@@ -5,8 +5,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
-const EVIDENCE_ROOT = "_handoff-artifacts/audit/current/S1_5-RESULT-EVENT-NAV-UX-FIX9-20260821";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-RESULT-EVENT-NAV-UX-FIX9-20260821",
+);
 const STEP_WEEKS_ONE_YEAR = 48;
 
 type BrowserJson = {

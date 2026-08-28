@@ -1,9 +1,11 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { Page, TestInfo } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./evidence-output-root.js";
 
-export const EVIDENCE_ROOT =
-  "_handoff-artifacts/audit/current/S1_5-UI010-E2E-TOOLING-REMEDIATION-20260817";
+export const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-UI010-E2E-TOOLING-REMEDIATION-20260817",
+);
 
 export type BrowserIdentityRecord = {
   projectName: string;

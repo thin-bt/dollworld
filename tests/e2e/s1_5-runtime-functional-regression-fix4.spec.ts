@@ -1,14 +1,16 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
 /**
  * FIX4 runtime functional regression: Events rows after UI week step,
  * and mock battle via 模擬戦を開始 (not API POST + 最新結果).
  */
 
-const EVIDENCE_ROOT =
-  "_handoff-artifacts/audit/current/S1_5-RUNTIME-FUNCTIONAL-REGRESSION-FIX4-20260819";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-RUNTIME-FUNCTIONAL-REGRESSION-FIX4-20260819",
+);
 const STEP_WEEKS_ONE_YEAR = 48;
 const TRAINEE_MIN_AGE = 8;
 

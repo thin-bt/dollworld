@@ -5,8 +5,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page, type Request } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
-const EVIDENCE_ROOT = "_handoff-artifacts/audit/current/S1_5-USER-VISIBLE-DEFECT-FIX6-20260820";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-USER-VISIBLE-DEFECT-FIX6-20260820",
+);
 
 type BrowserJson = {
   ok?: boolean;

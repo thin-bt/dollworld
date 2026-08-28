@@ -1,14 +1,16 @@
 import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { resolveE2eEvidenceDir } from "./support/evidence-output-root.js";
 
 /**
  * Presentation hierarchy FIX2 browser evidence.
  * Captures Chrome/Edge screenshots + hierarchy assertions.
  */
 
-const EVIDENCE_ROOT =
-  "_handoff-artifacts/audit/current/S1_5-UI-PRESENTATION-HIERARCHY-FIX2-20260818";
+const EVIDENCE_ROOT = resolveE2eEvidenceDir(
+  "_handoff-artifacts/audit/current/S1_5-UI-PRESENTATION-HIERARCHY-FIX2-20260818",
+);
 const STEP_WEEKS_ONE_YEAR = 48;
 const TRAINEE_MIN_AGE = 8;
 
