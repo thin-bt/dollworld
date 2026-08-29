@@ -10,6 +10,8 @@ const EVIDENCE_ROOT = "output/playwright";
 
 export default defineConfig({
   testDir: "tests/e2e",
+  // Vitest unit tests live under tests/e2e/support/*.test.ts; exclude them from Playwright.
+  testMatch: "**/*.spec.ts",
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
