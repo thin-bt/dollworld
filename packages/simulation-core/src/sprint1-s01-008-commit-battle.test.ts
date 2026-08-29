@@ -45,6 +45,7 @@ import {
   createNodeSha256Provider,
   createTinyNameData,
 } from "./test-fixtures/name-data-loader.fixture.js";
+import { withDefaultSprint2BindingsForRunSessionInput } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 
@@ -238,12 +239,15 @@ function buildSession(seed = 5150): Sprint1RunSession {
   const personIds = generated.snapshot.persons.map((person) => person.personId);
   const created = expectOk(
     createSprint1RunSession(
-      {
-        seed,
-        config,
-        nameData,
-        sprint1CliInput: buildSprint1CliInput(buildSidecarForPersonIds(personIds)),
-      },
+      withDefaultSprint2BindingsForRunSessionInput(
+        {
+          seed,
+          config,
+          nameData,
+          sprint1CliInput: buildSprint1CliInput(buildSidecarForPersonIds(personIds)),
+        },
+        sha256Provider,
+      ),
       sha256Provider,
       { generateInitialWorld: () => generated },
     ),

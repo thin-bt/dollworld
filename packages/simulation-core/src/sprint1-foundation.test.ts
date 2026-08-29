@@ -42,6 +42,7 @@ import {
 import { countNumericLeaves } from "./sprint1/basis-points.js";
 import { cloneBaselineConfig } from "./test-fixtures/baseline-config.fixture.js";
 import { createNodeSha256Provider } from "./test-fixtures/name-data-loader.fixture.js";
+import { withTestSprint2IdentityFields } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 
@@ -426,8 +427,7 @@ describe("SimulationIdentity", () => {
       throw new Error("expected default Sprint1Config hash to succeed");
     }
     const hex = "a".repeat(64);
-    return {
-      schemaVersion: "0.5.0",
+    return withTestSprint2IdentityFields({
       seed: 12345,
       initialWorldConfigHash: hex,
       worldCalendarConfigHash: "a".repeat(64),
@@ -444,7 +444,7 @@ describe("SimulationIdentity", () => {
       canonicalJsonVersion: "canonical-json-v1",
       hashAlgorithm: "SHA-256",
       ...overrides,
-    };
+    }, sha256Provider);
   }
 
   it("accepts complete version info and produces a stable simulationId", () => {
@@ -534,8 +534,7 @@ describe("S01-001 acceptance negative probes", () => {
       throw new Error("expected default Sprint1Config hash to succeed");
     }
     const hex = "a".repeat(64);
-    return {
-      schemaVersion: "0.5.0",
+    return withTestSprint2IdentityFields({
       seed: 12345,
       initialWorldConfigHash: hex,
       worldCalendarConfigHash: "a".repeat(64),
@@ -552,7 +551,7 @@ describe("S01-001 acceptance negative probes", () => {
       canonicalJsonVersion: "canonical-json-v1",
       hashAlgorithm: "SHA-256",
       ...overrides,
-    };
+    }, sha256Provider);
   }
 
   it("rejects arbitrary unknown configVersion", () => {

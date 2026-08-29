@@ -14,11 +14,15 @@ import type { ValidationIssue, ValidationResult } from "../validation.js";
 import {
   BATTLE_PROFILE_ADAPTER_VERSION,
   CANONICAL_JSON_VERSION,
+  COMPETITION_DOMAIN_REGISTRY_VERSION_FOR_IDENTITY,
+  DERIVED_TIE_KEY_POLICY_VERSION_FOR_IDENTITY,
   DEFAULT_BATTLE_STRATEGY_VERSION,
   EXPECTED_SPEC_VERSIONS,
   HASH_ALGORITHM,
   MATCH_ID_GENERATOR_VERSION,
   SIMULATION_IDENTITY_SCHEMA_VERSION,
+  SPRINT2_CONFIG_VERSION_FOR_IDENTITY,
+  TOURNAMENT_ID_GENERATOR_VERSION_FOR_IDENTITY,
 } from "./constants.js";
 import {
   SHA256_HEX_PATTERN,
@@ -45,6 +49,13 @@ const ROOT_KEYS = [
   "sprint1ConfigHash",
   "techniqueCatalogHash",
   "initialWeeklyTrainingSidecarHash",
+  "sprint2ConfigVersion",
+  "sprint2ConfigHash",
+  "competitionDomainRegistryVersion",
+  "competitionDomainRegistryHash",
+  "derivedTieKeyPolicyVersion",
+  "tournamentIdGeneratorVersion",
+  "initialTournamentIdGeneratorStateHash",
   "battleProfileAdapterVersion",
   "matchIdGeneratorVersion",
   "initialMatchIdGeneratorStateHash",
@@ -255,6 +266,47 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     "",
     issues,
   );
+  const sprint2ConfigVersion = requireLiteralString(
+    object,
+    "sprint2ConfigVersion",
+    "",
+    SPRINT2_CONFIG_VERSION_FOR_IDENTITY,
+    issues,
+  );
+  const sprint2ConfigHash = requireHashHex(object, "sprint2ConfigHash", "", issues);
+  const competitionDomainRegistryVersion = requireLiteralString(
+    object,
+    "competitionDomainRegistryVersion",
+    "",
+    COMPETITION_DOMAIN_REGISTRY_VERSION_FOR_IDENTITY,
+    issues,
+  );
+  const competitionDomainRegistryHash = requireHashHex(
+    object,
+    "competitionDomainRegistryHash",
+    "",
+    issues,
+  );
+  const derivedTieKeyPolicyVersion = requireLiteralString(
+    object,
+    "derivedTieKeyPolicyVersion",
+    "",
+    DERIVED_TIE_KEY_POLICY_VERSION_FOR_IDENTITY,
+    issues,
+  );
+  const tournamentIdGeneratorVersion = requireLiteralString(
+    object,
+    "tournamentIdGeneratorVersion",
+    "",
+    TOURNAMENT_ID_GENERATOR_VERSION_FOR_IDENTITY,
+    issues,
+  );
+  const initialTournamentIdGeneratorStateHash = requireHashHex(
+    object,
+    "initialTournamentIdGeneratorStateHash",
+    "",
+    issues,
+  );
   const battleProfileAdapterVersion = requireLiteralString(
     object,
     "battleProfileAdapterVersion",
@@ -308,6 +360,13 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     sprint1ConfigHash === undefined ||
     techniqueCatalogHash === undefined ||
     initialWeeklyTrainingSidecarHash === undefined ||
+    sprint2ConfigVersion === undefined ||
+    sprint2ConfigHash === undefined ||
+    competitionDomainRegistryVersion === undefined ||
+    competitionDomainRegistryHash === undefined ||
+    derivedTieKeyPolicyVersion === undefined ||
+    tournamentIdGeneratorVersion === undefined ||
+    initialTournamentIdGeneratorStateHash === undefined ||
     battleProfileAdapterVersion === undefined ||
     matchIdGeneratorVersion === undefined ||
     initialMatchIdGeneratorStateHash === undefined ||
@@ -330,6 +389,13 @@ export function validateSimulationIdentity(input: unknown): ValidationResult<Sim
     sprint1ConfigHash,
     techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash,
+    sprint2ConfigVersion,
+    sprint2ConfigHash,
+    competitionDomainRegistryVersion,
+    competitionDomainRegistryHash,
+    derivedTieKeyPolicyVersion,
+    tournamentIdGeneratorVersion,
+    initialTournamentIdGeneratorStateHash,
     battleProfileAdapterVersion,
     matchIdGeneratorVersion,
     initialMatchIdGeneratorStateHash,

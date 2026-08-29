@@ -33,6 +33,7 @@ import {
   createNodeSha256Provider,
   createTinyNameData,
 } from "./test-fixtures/name-data-loader.fixture.js";
+import { withDefaultSprint2BindingsForRunSessionInput } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 
@@ -163,23 +164,26 @@ function makeSession(): Sprint1RunSession {
   };
   return expectOk(
     createSprint1RunSession(
-      {
-        seed: 8181,
-        config,
-        nameData,
-        sprint1CliInput: {
-          schemaVersion: SPRINT1_CLI_INPUT_SCHEMA_VERSION,
-          sprint1Config: createDefaultSprint1ConfigInput(),
-          techniqueCatalog: {
-            identity: {
-              dataVersion: "techniques-0.1.0",
-              catalogHash: expectOk(computeTechniqueCatalogHash([definition], sha256Provider)),
+      withDefaultSprint2BindingsForRunSessionInput(
+        {
+          seed: 8181,
+          config,
+          nameData,
+          sprint1CliInput: {
+            schemaVersion: SPRINT1_CLI_INPUT_SCHEMA_VERSION,
+            sprint1Config: createDefaultSprint1ConfigInput(),
+            techniqueCatalog: {
+              identity: {
+                dataVersion: "techniques-0.1.0",
+                catalogHash: expectOk(computeTechniqueCatalogHash([definition], sha256Provider)),
+              },
+              definitions: [definition],
             },
-            definitions: [definition],
+            initialWeeklyTrainingSidecar: sidecar,
           },
-          initialWeeklyTrainingSidecar: sidecar,
         },
-      },
+        sha256Provider,
+      ),
       sha256Provider,
     ),
   ).session;

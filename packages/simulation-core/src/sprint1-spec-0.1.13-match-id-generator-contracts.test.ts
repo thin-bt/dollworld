@@ -22,6 +22,7 @@ import {
   type SimulationIdentity,
 } from "./index.js";
 import { createNodeSha256Provider } from "./test-fixtures/name-data-loader.fixture.js";
+import { withTestSprint2IdentityFields } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 
@@ -97,28 +98,30 @@ function sha256Hex(text: string): string {
 }
 
 function identityWithStateHash(stateHash: string): SimulationIdentity {
-  return {
-    schemaVersion: "0.5.0",
-    seed: 1,
-    initialWorldConfigHash: "a".repeat(64),
-    worldCalendarConfigHash: "a".repeat(64),
-    yearStartProcessorManifestHash: "a".repeat(64),
-    sprint1ConfigHash: "b".repeat(64),
-    techniqueCatalogHash: "c".repeat(64),
-    initialWeeklyTrainingSidecarHash: "c".repeat(64),
-    battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
-    matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
-    initialMatchIdGeneratorStateHash: stateHash,
-    defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
-    specVersions: [
-      { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint1", version: S1_SPEC_VERSION },
-    ],
-    rngAlgorithmVersion: "xoshiro128ss-v1",
-    canonicalJsonVersion: "canonical-json-v1",
-    hashAlgorithm: "SHA-256",
-  };
+  return withTestSprint2IdentityFields(
+    {
+      seed: 1,
+      initialWorldConfigHash: "a".repeat(64),
+      worldCalendarConfigHash: "a".repeat(64),
+      yearStartProcessorManifestHash: "a".repeat(64),
+      sprint1ConfigHash: "b".repeat(64),
+      techniqueCatalogHash: "c".repeat(64),
+      initialWeeklyTrainingSidecarHash: "c".repeat(64),
+      battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
+      matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
+      initialMatchIdGeneratorStateHash: stateHash,
+      defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
+      specVersions: [
+        { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint1", version: S1_SPEC_VERSION },
+      ],
+      rngAlgorithmVersion: "xoshiro128ss-v1",
+      canonicalJsonVersion: "canonical-json-v1",
+      hashAlgorithm: "SHA-256",
+    },
+    sha256Provider,
+  );
 }
 
 describe("S1-SPEC-0.1.13 version registry (superseded current = 0.1.17)", () => {

@@ -72,6 +72,7 @@ import {
   type WeeklyTrainingEventCandidate,
 } from "./index.js";
 import { createNodeSha256Provider } from "./test-fixtures/name-data-loader.fixture.js";
+import { withTestSprint2IdentityFields } from "./test-fixtures/sprint2-identity.fixture.js";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -204,31 +205,33 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
   if (!yearStartProcessorManifestHashResult.ok) {
     throw new Error("expected default year-start manifest hash to succeed");
   }
-  return {
-    schemaVersion: "0.5.0",
-    seed: 12345,
-    initialWorldConfigHash: hex,
-    worldCalendarConfigHash,
-    yearStartProcessorManifestHash: yearStartProcessorManifestHashResult.value,
-    sprint1ConfigHash: sprint1ConfigHashResult.value,
-    techniqueCatalogHash: hex,
-    initialWeeklyTrainingSidecarHash: hex,
-    battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
-    matchIdGeneratorVersion: "match-id-generator-0.1.0",
-    initialMatchIdGeneratorStateHash: hex,
-    defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
-    specVersions: createExpectedSpecVersions(),
-    rngAlgorithmVersion: "xoshiro128ss-v1",
-    canonicalJsonVersion: "canonical-json-v1",
-    hashAlgorithm: "SHA-256",
-    ...overrides,
-  };
+  return withTestSprint2IdentityFields(
+    {
+      seed: 12345,
+      initialWorldConfigHash: hex,
+      worldCalendarConfigHash,
+      yearStartProcessorManifestHash: yearStartProcessorManifestHashResult.value,
+      sprint1ConfigHash: sprint1ConfigHashResult.value,
+      techniqueCatalogHash: hex,
+      initialWeeklyTrainingSidecarHash: hex,
+      battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
+      matchIdGeneratorVersion: "match-id-generator-0.1.0",
+      initialMatchIdGeneratorStateHash: hex,
+      defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
+      specVersions: createExpectedSpecVersions(),
+      rngAlgorithmVersion: "xoshiro128ss-v1",
+      canonicalJsonVersion: "canonical-json-v1",
+      hashAlgorithm: "SHA-256",
+      ...overrides,
+    },
+    sha256Provider,
+  );
 }
 
 describe("S1-SPEC-0.1.20 version registry and weekly-training literal", () => {
   it("publishes S1-SPEC-0.1.21 and SimulationIdentity 0.5.0", () => {
     expect(S1_SPEC_VERSION).toBe("S1-SPEC-0.1.21");
-    expect(SIMULATION_IDENTITY_SCHEMA_VERSION).toBe("0.5.0");
+    expect(SIMULATION_IDENTITY_SCHEMA_VERSION).toBe("0.6.0");
     expect(SPRINT1_CLI_INPUT_SCHEMA_VERSION).toBe("0.1.0");
     expect(INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION).toBe("0.1.0");
   });

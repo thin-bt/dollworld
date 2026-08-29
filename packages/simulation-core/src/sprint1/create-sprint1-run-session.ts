@@ -29,11 +29,15 @@ import {
   BATTLE_PROFILE_ADAPTER_VERSION,
   CANONICAL_JSON_VERSION,
   DEFAULT_BATTLE_STRATEGY_VERSION,
+  COMPETITION_DOMAIN_REGISTRY_VERSION_FOR_IDENTITY,
+  DERIVED_TIE_KEY_POLICY_VERSION_FOR_IDENTITY,
   HASH_ALGORITHM,
   INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION_SPRINT1,
   MATCH_ID_GENERATOR_VERSION,
   MATCH_ID_NAMESPACE,
   SIMULATION_IDENTITY_SCHEMA_VERSION,
+  SPRINT2_CONFIG_VERSION_FOR_IDENTITY,
+  TOURNAMENT_ID_GENERATOR_VERSION_FOR_IDENTITY,
 } from "./constants.js";
 import { createEventAllocationStateAfterPromotedInitialEvents } from "./event-allocation-state.js";
 import { promoteProvisionalEventStreamToSprint1 } from "./event-envelope-sprint1.js";
@@ -51,8 +55,11 @@ import {
   assertNoAccessors,
   cloneValidatedPlainJson,
   deepFreezePlainJson,
+  hasOwn,
   rejectUnknownKeys,
   requireInteger,
+  requireLiteralString,
+  SHA256_HEX_PATTERN,
   snapshotPlainObjectOrFail,
 } from "./plain-data.js";
 import {
@@ -85,7 +92,7 @@ import {
   validateTechniqueCatalog,
   type TechniqueCatalog,
 } from "./technique-catalog.js";
-import type { SimulationIdentity, Sprint1Config } from "./types.js";
+import type { SimulationIdentity, Sprint1Config, Sprint2IdentityBindings } from "./types.js";
 import { validateNormalizedSprint1Config } from "./validate-sprint1-config.js";
 import { validateSprint1RunSession } from "./validate-sprint1-run-session.js";
 import { createWeeklyTrainingSidecarStateFromInitial } from "./weekly-training-sidecar-state.js";
@@ -95,6 +102,7 @@ export const CREATE_SPRINT1_RUN_SESSION_INPUT_KEYS = [
   "config",
   "nameData",
   "sprint1CliInput",
+  "sprint2IdentityBindings",
 ] as const;
 
 export type CreateSprint1RunSessionInput = {
@@ -102,6 +110,7 @@ export type CreateSprint1RunSessionInput = {
   config: InitialWorldConfig;
   nameData: ValidatedNameData;
   sprint1CliInput: Sprint1CliInput;
+  sprint2IdentityBindings: Sprint2IdentityBindings;
 };
 
 /**
@@ -275,6 +284,95 @@ export function promoteProvisionalWorldSnapshot(input: {
   return success(promoted);
 }
 
+const SPRINT2_IDENTITY_BINDINGS_KEYS = [
+  "sprint2ConfigVersion",
+  "sprint2ConfigHash",
+  "competitionDomainRegistryVersion",
+  "competitionDomainRegistryHash",
+  "derivedTieKeyPolicyVersion",
+  "tournamentIdGeneratorVersion",
+  "initialTournamentIdGeneratorStateHash",
+] as const;
+
+function parseSprint2IdentityBindings(
+  input: unknown,
+  issues: ValidationIssue[],
+): Sprint2IdentityBindings | undefined {
+  const object = snapshotPlainObjectOrFail(input, "/sprint2IdentityBindings", issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(object, SPRINT2_IDENTITY_BINDINGS_KEYS, "/sprint2IdentityBindings", issues);
+
+  const sprint2ConfigVersion = requireLiteralString(
+    object,
+    "sprint2ConfigVersion",
+    "/sprint2IdentityBindings",
+    SPRINT2_CONFIG_VERSION_FOR_IDENTITY,
+    issues,
+  );
+  const competitionDomainRegistryVersion = requireLiteralString(
+    object,
+    "competitionDomainRegistryVersion",
+    "/sprint2IdentityBindings",
+    COMPETITION_DOMAIN_REGISTRY_VERSION_FOR_IDENTITY,
+    issues,
+  );
+  const derivedTieKeyPolicyVersion = requireLiteralString(
+    object,
+    "derivedTieKeyPolicyVersion",
+    "/sprint2IdentityBindings",
+    DERIVED_TIE_KEY_POLICY_VERSION_FOR_IDENTITY,
+    issues,
+  );
+  const tournamentIdGeneratorVersion = requireLiteralString(
+    object,
+    "tournamentIdGeneratorVersion",
+    "/sprint2IdentityBindings",
+    TOURNAMENT_ID_GENERATOR_VERSION_FOR_IDENTITY,
+    issues,
+  );
+
+  const hashKeys = [
+    "sprint2ConfigHash",
+    "competitionDomainRegistryHash",
+    "initialTournamentIdGeneratorStateHash",
+  ] as const;
+  const hashes: Partial<Record<(typeof hashKeys)[number], string>> = {};
+  for (const key of hashKeys) {
+    if (!hasOwn(object, key) || typeof object[key] !== "string" || !SHA256_HEX_PATTERN.test(object[key])) {
+      issues.push({
+        path: `/sprint2IdentityBindings/${key}`,
+        message: "value must be a 64 lowercase hex character SHA-256 digest",
+        actual: object[key],
+        expected: "64 lowercase hex chars",
+      });
+      continue;
+    }
+    hashes[key] = object[key] as string;
+  }
+
+  if (
+    sprint2ConfigVersion === undefined ||
+    competitionDomainRegistryVersion === undefined ||
+    derivedTieKeyPolicyVersion === undefined ||
+    tournamentIdGeneratorVersion === undefined ||
+    hashKeys.some((key) => hashes[key] === undefined)
+  ) {
+    return undefined;
+  }
+
+  return {
+    sprint2ConfigVersion,
+    sprint2ConfigHash: hashes.sprint2ConfigHash!,
+    competitionDomainRegistryVersion,
+    competitionDomainRegistryHash: hashes.competitionDomainRegistryHash!,
+    derivedTieKeyPolicyVersion,
+    tournamentIdGeneratorVersion,
+    initialTournamentIdGeneratorStateHash: hashes.initialTournamentIdGeneratorStateHash!,
+  };
+}
+
 function parseCreateSprint1RunSessionInput(
   input: unknown,
   provider: Sha256Provider,
@@ -340,11 +438,17 @@ function parseCreateSprint1RunSessionInput(
     issues.push(...prefixIssues(cliResult.issues, "/sprint1CliInput"));
   }
 
+  const sprint2IdentityBindings = parseSprint2IdentityBindings(
+    object["sprint2IdentityBindings"],
+    issues,
+  );
+
   if (
     seed === undefined ||
     !configResult.ok ||
     nameData === undefined ||
     !cliResult.ok ||
+    sprint2IdentityBindings === undefined ||
     issues.length > 0
   ) {
     return failure(issues);
@@ -355,6 +459,7 @@ function parseCreateSprint1RunSessionInput(
     config: configResult.value,
     nameData,
     sprint1CliInput: cliResult.value,
+    sprint2IdentityBindings,
   });
 }
 
@@ -367,6 +472,7 @@ function buildSimulationIdentity(input: {
   techniqueCatalogHash: string;
   initialWeeklyTrainingSidecarHash: string;
   initialMatchIdGeneratorStateHash: string;
+  sprint2IdentityBindings: Sprint2IdentityBindings;
 }): SimulationIdentity {
   return {
     schemaVersion: SIMULATION_IDENTITY_SCHEMA_VERSION,
@@ -377,6 +483,15 @@ function buildSimulationIdentity(input: {
     sprint1ConfigHash: input.sprint1ConfigHash,
     techniqueCatalogHash: input.techniqueCatalogHash,
     initialWeeklyTrainingSidecarHash: input.initialWeeklyTrainingSidecarHash,
+    sprint2ConfigVersion: input.sprint2IdentityBindings.sprint2ConfigVersion,
+    sprint2ConfigHash: input.sprint2IdentityBindings.sprint2ConfigHash,
+    competitionDomainRegistryVersion:
+      input.sprint2IdentityBindings.competitionDomainRegistryVersion,
+    competitionDomainRegistryHash: input.sprint2IdentityBindings.competitionDomainRegistryHash,
+    derivedTieKeyPolicyVersion: input.sprint2IdentityBindings.derivedTieKeyPolicyVersion,
+    tournamentIdGeneratorVersion: input.sprint2IdentityBindings.tournamentIdGeneratorVersion,
+    initialTournamentIdGeneratorStateHash:
+      input.sprint2IdentityBindings.initialTournamentIdGeneratorStateHash,
     battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
     matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
     initialMatchIdGeneratorStateHash: input.initialMatchIdGeneratorStateHash,
@@ -414,7 +529,7 @@ export function createSprint1RunSession(
     return failure(parsed.issues);
   }
 
-  const { seed, config, nameData, sprint1CliInput } = parsed.value;
+  const { seed, config, nameData, sprint1CliInput, sprint2IdentityBindings } = parsed.value;
   const configHash = computeConfigHash(config, provider);
   const nameDataHash = computeNameDataHash(nameData.manifest, provider);
   const rngFactory = deps.rngFactory ?? createSeededRng;
@@ -529,6 +644,7 @@ export function createSprint1RunSession(
     techniqueCatalogHash: techniqueCatalogHashResult.value,
     initialWeeklyTrainingSidecarHash: sidecarHashResult.value,
     initialMatchIdGeneratorStateHash: matchIdHashResult.value,
+    sprint2IdentityBindings,
   });
 
   const identityValidated = validateSimulationIdentity(identity);

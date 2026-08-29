@@ -735,6 +735,55 @@ export {
 } from "./sprint1/run-rule-snapshot.js";
 export type { CreateRunRuleSnapshotInput, RunRuleSnapshot } from "./sprint1/run-rule-snapshot.js";
 export {
+  COMPETITION_DOMAIN_KEYS,
+  COMPETITION_DOMAIN_REGISTRY_SCHEMA_VERSION,
+  COMPETITION_DOMAIN_REGISTRY_VERSION,
+  DERIVED_TIE_KEY_POLICY_VERSION,
+  DERIVED_TIE_KEY_PURPOSES,
+  SPRINT2_CONFIG_SCHEMA_VERSION,
+  SPRINT2_CONFIG_VERSION_DEFAULT,
+  TOURNAMENT_ID_GENERATOR_STATE_SCHEMA_VERSION,
+  TOURNAMENT_ID_GENERATOR_VERSION,
+  TOURNAMENT_ID_NAMESPACE,
+} from "./sprint2/constants.js";
+export {
+  computeCompetitionDomainRegistryHash,
+  createDefaultCompetitionDomainRegistryInput,
+  finalizeCompetitionDomainRegistry,
+  validateCompetitionDomainRegistry,
+} from "./sprint2/competition-domain.js";
+export {
+  computeDerivedTieKey,
+  computeDerivedTieKeysForCandidates,
+  validateDerivedTieKeyInput,
+} from "./sprint2/derived-tie-key.js";
+export {
+  createDefaultSprint2IdentityBindings,
+  validateSprint2IdentityBindings,
+} from "./sprint2/sprint2-identity-bindings.js";
+export {
+  computeTournamentIdGeneratorStateHash,
+  createInitialTournamentIdGeneratorState,
+  validateTournamentIdGeneratorState,
+} from "./sprint2/tournament-id-registry.js";
+export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
+export {
+  computeSprint2ConfigHash,
+  createDefaultSprint2Config,
+  validateNormalizedSprint2Config,
+  validateSprint2Config,
+} from "./sprint2/validate-sprint2-config.js";
+export type {
+  Sprint2Config,
+  Sprint2ConfigInput,
+  CompetitionDomainBinding,
+  CompetitionDomainRegistry,
+  CompetitionDomainRegistryInput,
+  DerivedTieKeyInput,
+  TournamentIdGeneratorState,
+} from "./sprint2/types.js";
+export type { Sprint2IdentityBindings } from "./sprint1/types.js";
+export {
   ACTIVE_YEAR_START_PROCESSOR_MANIFEST_SCHEMA_VERSION,
   WORLD_YEAR_START_PROCESSOR_ID,
   YEAR_START_PROCESSOR_SLOTS,

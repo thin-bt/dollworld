@@ -19,6 +19,7 @@ import {
 } from "./index.js";
 import { createSeededRng, deriveSeed } from "./rng.js";
 import { createNodeSha256Provider } from "./test-fixtures/name-data-loader.fixture.js";
+import { withTestSprint2IdentityFields } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 const CONTRACT_RNG_PARENT_SEED = 0x0_1_12_00;
@@ -92,29 +93,31 @@ function sampleIdentity(overrides: Partial<SimulationIdentity> = {}): Simulation
       value: sha256Provider.hashUtf8(toCanonicalJson(validated.value)),
     };
   })();
-  return {
-    schemaVersion: "0.5.0",
-    seed: 12345,
-    initialWorldConfigHash: hex,
-    worldCalendarConfigHash: "a".repeat(64),
-    yearStartProcessorManifestHash: "a".repeat(64),
-    sprint1ConfigHash: sprint1ConfigHashResult.value,
-    techniqueCatalogHash: hex,
-    initialWeeklyTrainingSidecarHash: "c".repeat(64),
-    battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
-    matchIdGeneratorVersion: "match-id-generator-0.1.0",
-    initialMatchIdGeneratorStateHash: hex,
-    defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
-    specVersions: [
-      { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint1", version: S1_SPEC_VERSION },
-    ],
-    rngAlgorithmVersion: "xoshiro128ss-v1",
-    canonicalJsonVersion: "canonical-json-v1",
-    hashAlgorithm: "SHA-256",
-    ...overrides,
-  };
+  return withTestSprint2IdentityFields(
+    {
+      seed: 12345,
+      initialWorldConfigHash: hex,
+      worldCalendarConfigHash: "a".repeat(64),
+      yearStartProcessorManifestHash: "a".repeat(64),
+      sprint1ConfigHash: sprint1ConfigHashResult.value,
+      techniqueCatalogHash: hex,
+      initialWeeklyTrainingSidecarHash: "c".repeat(64),
+      battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
+      matchIdGeneratorVersion: "match-id-generator-0.1.0",
+      initialMatchIdGeneratorStateHash: hex,
+      defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
+      specVersions: [
+        { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint1", version: S1_SPEC_VERSION },
+      ],
+      rngAlgorithmVersion: "xoshiro128ss-v1",
+      canonicalJsonVersion: "canonical-json-v1",
+      hashAlgorithm: "SHA-256",
+      ...overrides,
+    },
+    sha256Provider,
+  );
 }
 
 describe("S1-SPEC-0.1.12 SimulationIdentity / config hash", () => {

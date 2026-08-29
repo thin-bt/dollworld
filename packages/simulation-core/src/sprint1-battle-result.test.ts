@@ -75,6 +75,7 @@ import {
 } from "./sprint1/battle-result-compute.js";
 import { startBattleTransaction } from "./sprint1/start-battle-transaction.js";
 import { createNodeSha256Provider } from "./test-fixtures/name-data-loader.fixture.js";
+import { withTestSprint2IdentityFields } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 
@@ -201,28 +202,30 @@ const yearStartProcessorManifestHash = expectOk(
 );
 
 function simulationIdentity(): SimulationIdentity {
-  return {
-    schemaVersion: "0.5.0",
-    seed: 20260807,
-    initialWorldConfigHash: "a".repeat(64),
-    worldCalendarConfigHash,
-    yearStartProcessorManifestHash,
-    sprint1ConfigHash,
-    techniqueCatalogHash,
-    initialWeeklyTrainingSidecarHash: "c".repeat(64),
-    battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
-    matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
-    initialMatchIdGeneratorStateHash: FIXED_MATCH_ID_STATE_SHA256,
-    defaultBattleStrategyVersion: DEFAULT_BATTLE_STRATEGY_VERSION,
-    specVersions: [
-      { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint1", version: S1_SPEC_VERSION },
-    ],
-    rngAlgorithmVersion: "xoshiro128ss-v1",
-    canonicalJsonVersion: "canonical-json-v1",
-    hashAlgorithm: "SHA-256",
-  };
+  return withTestSprint2IdentityFields(
+    {
+      seed: 20260807,
+      initialWorldConfigHash: "a".repeat(64),
+      worldCalendarConfigHash,
+      yearStartProcessorManifestHash,
+      sprint1ConfigHash,
+      techniqueCatalogHash,
+      initialWeeklyTrainingSidecarHash: "c".repeat(64),
+      battleProfileAdapterVersion: BATTLE_PROFILE_ADAPTER_VERSION,
+      matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
+      initialMatchIdGeneratorStateHash: FIXED_MATCH_ID_STATE_SHA256,
+      defaultBattleStrategyVersion: DEFAULT_BATTLE_STRATEGY_VERSION,
+      specVersions: [
+        { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint1", version: S1_SPEC_VERSION },
+      ],
+      rngAlgorithmVersion: "xoshiro128ss-v1",
+      canonicalJsonVersion: "canonical-json-v1",
+      hashAlgorithm: "SHA-256",
+    },
+    sha256Provider,
+  );
 }
 
 const simulationIdentityHash = expectOk(

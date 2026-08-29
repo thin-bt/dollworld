@@ -27,6 +27,7 @@ import {
   createNodeSha256Provider,
   createTinyNameData,
 } from "./test-fixtures/name-data-loader.fixture.js";
+import { withDefaultSprint2BindingsForRunSessionInput } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 const here = dirname(fileURLToPath(import.meta.url));
@@ -157,28 +158,31 @@ describe("FIX14 initial active technique coverage", () => {
 
     const result = expectOk(
       createSprint1RunSession(
-        {
-          seed: 42,
-          config,
-          nameData,
-          sprint1CliInput: {
-            schemaVersion: SPRINT1_CLI_INPUT_SCHEMA_VERSION,
-            sprint1Config: createDefaultSprint1ConfigInput(),
-            techniqueCatalog: {
-              identity: {
-                dataVersion: "techniques-0.1.1",
-                catalogHash: hash,
+        withDefaultSprint2BindingsForRunSessionInput(
+          {
+            seed: 42,
+            config,
+            nameData,
+            sprint1CliInput: {
+              schemaVersion: SPRINT1_CLI_INPUT_SCHEMA_VERSION,
+              sprint1Config: createDefaultSprint1ConfigInput(),
+              techniqueCatalog: {
+                identity: {
+                  dataVersion: "techniques-0.1.1",
+                  catalogHash: hash,
+                },
+                definitions: productionInput.techniqueCatalog.definitions,
               },
-              definitions: productionInput.techniqueCatalog.definitions,
-            },
-            initialWeeklyTrainingSidecar: {
-              schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
-              entries: [...personIds]
-                .sort((a, b) => a.localeCompare(b))
-                .map((personId) => sidecarEntry(personId)),
+              initialWeeklyTrainingSidecar: {
+                schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+                entries: [...personIds]
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((personId) => sidecarEntry(personId)),
+              },
             },
           },
-        },
+          sha256Provider,
+        ),
         sha256Provider,
       ),
     );

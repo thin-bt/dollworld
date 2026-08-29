@@ -71,6 +71,7 @@ import {
   createNodeSha256Provider,
   createTinyNameData,
 } from "./test-fixtures/name-data-loader.fixture.js";
+import { withDefaultSprint2BindingsForRunSessionInput } from "./test-fixtures/sprint2-identity.fixture.js";
 import * as publicApiSurface from "./index.js";
 
 const CAL_JAN_LEGACY_FIXTURE_DIR = path.join(
@@ -289,12 +290,15 @@ function buildFreshSession(seed = 7101): Sprint1RunSession {
   const personIds = generated.snapshot.persons.map((person) => person.personId);
   const created = expectOk(
     createSprint1RunSession(
-      {
-        seed,
-        config,
-        nameData,
-        sprint1CliInput: buildSprint1CliInput(buildSidecarForPersonIds(personIds)),
-      },
+      withDefaultSprint2BindingsForRunSessionInput(
+        {
+          seed,
+          config,
+          nameData,
+          sprint1CliInput: buildSprint1CliInput(buildSidecarForPersonIds(personIds)),
+        },
+        sha256Provider,
+      ),
       sha256Provider,
     ),
   );
@@ -778,8 +782,8 @@ describe("CAL-JAN outer week year-start transaction", () => {
 
   it("CAL-JAN-012: identity / RRS schema 0.5.0 bind calendar + manifest hashes", () => {
     const session = buildFreshSession(7208);
-    expect(session.context.simulationIdentity.schemaVersion).toBe("0.5.0");
-    expect(session.context.runRuleSnapshot.schemaVersion).toBe("0.5.0");
+    expect(session.context.simulationIdentity.schemaVersion).toBe("0.6.0");
+    expect(session.context.runRuleSnapshot.schemaVersion).toBe("0.6.0");
     expect(session.context.simulationIdentity.worldCalendarConfigHash).toBe(
       session.context.runRuleSnapshot.worldCalendarConfigHash,
     );
@@ -1191,7 +1195,7 @@ describe("CAL-JAN fix2/fix3 acceptance gaps", () => {
     expect(initialWorldShaAfter).toBe(initialWorldShaBefore);
 
     const current = buildFreshSession(4242);
-    expect(current.context.simulationIdentity.schemaVersion).toBe("0.5.0");
+    expect(current.context.simulationIdentity.schemaVersion).toBe("0.6.0");
     expect(current.context.runRuleSnapshot.worldCalendar.worldYearStartMonth).toBe(1);
     expect(current.runtimeState.worldState.worldDate).toEqual({
       year: 1,

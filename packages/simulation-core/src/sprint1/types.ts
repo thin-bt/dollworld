@@ -932,12 +932,10 @@ export type SpecVersionEntry = {
 };
 
 /**
- * Sprint 1 SimulationIdentity (02 §12 / S1-SPEC-0.1.21 / CAL-JAN).
- * Catalog/MatchId generator contents and the initial weekly-training sidecar
- * are supplied as hashes/versions. Calendar and year-start manifest are hash-only.
+ * Sprint 1+2 SimulationIdentity (02 §12 / S1-SPEC-0.1.21 / S2-SPEC-0.2.2-draft §17.2).
  */
 export type SimulationIdentity = {
-  schemaVersion: "0.5.0";
+  schemaVersion: "0.6.0";
   seed: number;
   initialWorldConfigHash: string;
   worldCalendarConfigHash: string;
@@ -945,6 +943,13 @@ export type SimulationIdentity = {
   sprint1ConfigHash: string;
   techniqueCatalogHash: string;
   initialWeeklyTrainingSidecarHash: string;
+  sprint2ConfigVersion: string;
+  sprint2ConfigHash: string;
+  competitionDomainRegistryVersion: string;
+  competitionDomainRegistryHash: string;
+  derivedTieKeyPolicyVersion: string;
+  tournamentIdGeneratorVersion: string;
+  initialTournamentIdGeneratorStateHash: string;
   battleProfileAdapterVersion: string;
   matchIdGeneratorVersion: string;
   initialMatchIdGeneratorStateHash: string;
@@ -953,4 +958,14 @@ export type SimulationIdentity = {
   rngAlgorithmVersion: string;
   canonicalJsonVersion: string;
   hashAlgorithm: "SHA-256";
+};
+
+export type Sprint2IdentityBindings = {
+  sprint2ConfigVersion: string;
+  sprint2ConfigHash: string;
+  competitionDomainRegistryVersion: string;
+  competitionDomainRegistryHash: string;
+  derivedTieKeyPolicyVersion: string;
+  tournamentIdGeneratorVersion: string;
+  initialTournamentIdGeneratorStateHash: string;
 };

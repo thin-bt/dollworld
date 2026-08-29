@@ -24,6 +24,7 @@ import {
   type SimulationIdentity,
 } from "./index.js";
 import { createNodeSha256Provider } from "./test-fixtures/name-data-loader.fixture.js";
+import { withTestSprint2IdentityFields } from "./test-fixtures/sprint2-identity.fixture.js";
 
 const sha256Provider = createNodeSha256Provider();
 
@@ -38,28 +39,30 @@ function expectOk<T>(result: { ok: boolean; value?: T; issues?: unknown }): T {
 function identityWithSprint1(version: string): SimulationIdentity {
   const config = expectOk(validateSprint1Config(createDefaultSprint1ConfigInput()));
   const sprint1ConfigHash = sha256Provider.hashUtf8(toCanonicalJson(config));
-  return {
-    schemaVersion: "0.5.0",
-    seed: 1,
-    initialWorldConfigHash: "a".repeat(64),
-    worldCalendarConfigHash: "a".repeat(64),
-    yearStartProcessorManifestHash: "a".repeat(64),
-    sprint1ConfigHash,
-    techniqueCatalogHash: "b".repeat(64),
-    initialWeeklyTrainingSidecarHash: "c".repeat(64),
-    battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
-    matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
-    initialMatchIdGeneratorStateHash: "c".repeat(64),
-    defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
-    specVersions: [
-      { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
-      { specSetId: "sprint1", version },
-    ],
-    rngAlgorithmVersion: "xoshiro128ss-v1",
-    canonicalJsonVersion: "canonical-json-v1",
-    hashAlgorithm: "SHA-256",
-  };
+  return withTestSprint2IdentityFields(
+    {
+      seed: 1,
+      initialWorldConfigHash: "a".repeat(64),
+      worldCalendarConfigHash: "a".repeat(64),
+      yearStartProcessorManifestHash: "a".repeat(64),
+      sprint1ConfigHash,
+      techniqueCatalogHash: "b".repeat(64),
+      initialWeeklyTrainingSidecarHash: "c".repeat(64),
+      battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
+      matchIdGeneratorVersion: MATCH_ID_GENERATOR_VERSION,
+      initialMatchIdGeneratorStateHash: "c".repeat(64),
+      defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
+      specVersions: [
+        { specSetId: "main", version: MAIN_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint0", version: S0_SPEC_VERSION_FOR_IDENTITY },
+        { specSetId: "sprint1", version },
+      ],
+      rngAlgorithmVersion: "xoshiro128ss-v1",
+      canonicalJsonVersion: "canonical-json-v1",
+      hashAlgorithm: "SHA-256",
+    },
+    sha256Provider,
+  );
 }
 
 describe("S1-SPEC-0.1.18 version registry", () => {
