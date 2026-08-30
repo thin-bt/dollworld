@@ -1,3 +1,4 @@
+import type { ValidationResult } from "../validation.js";
 import type {
   COMPETITION_DOMAIN_REGISTRY_SCHEMA_VERSION,
   COMPETITION_DOMAIN_REGISTRY_VERSION,
@@ -5,7 +6,9 @@ import type {
   CompetitionDomainKey,
   DERIVED_TIE_KEY_POLICY_VERSION,
   DerivedTieKeyPurpose,
+  ENTRY_CHOICE_POLICY_VERSION,
   NormalRankKey,
+  PLANNED_PARTICIPANT_LIST_SCHEMA_VERSION,
   SPRINT2_CONFIG_SCHEMA_VERSION,
   TOURNAMENT_ID_GENERATOR_STATE_SCHEMA_VERSION,
   TOURNAMENT_ID_GENERATOR_VERSION,
@@ -15,6 +18,8 @@ import type {
   TournamentLifecycleState,
 } from "./constants.js";
 import type { TournamentId } from "../ids.js";
+import type { CareerStatus, LifeStatus, ParticipationStatus, Rank } from "../enums.js";
+import type { PersonId } from "../ids.js";
 import type { WorldMonth, WeekOfMonth } from "../world-date.js";
 
 export type CapacityTriple = {
@@ -244,6 +249,89 @@ export type TournamentScheduleReadModelEntry = {
   mergeSourceIds: readonly TournamentId[];
   scheduleOrdinal: number;
   championshipCycleClassification: ChampionshipCycleClassification;
+};
+
+export type EntrantEligibilityRejectionReason =
+  | "not_living"
+  | "not_active_participation"
+  | "not_active_competitor"
+  | "age_below_minimum"
+  | "age_above_maximum"
+  | "no_current_rank"
+  | "normal_rank_mismatch"
+  | "open_rank_ineligible"
+  | "limited_rank_below_minimum"
+  | "promotion_qualification_missing"
+  | "championship_qualification_missing"
+  | "cancelled_tournament"
+  | "terminal_merged_lifecycle"
+  | "duplicate_effective_participation"
+  | "stale_schedule_lifecycle_identity";
+
+export type EntrantCandidateFacts = {
+  personId: PersonId;
+  currentAge: number;
+  lifeStatus: LifeStatus;
+  participationStatus: ParticipationStatus;
+  careerStatus: CareerStatus;
+  currentRank?: Rank;
+  /** Accepted upstream promotion-qualification fact; absent => fail closed for promotion tournaments. */
+  acceptedPromotionQualification?: boolean;
+  /** Accepted upstream championship entrant fact; absent => fail closed when required. */
+  acceptedChampionshipEntrantQualification?: boolean;
+};
+
+export type EntrantEligibilityResult =
+  | { eligible: true }
+  | { eligible: false; reason: EntrantEligibilityRejectionReason };
+
+export type EntryChoicePolicyIdentity = {
+  policyVersion: typeof ENTRY_CHOICE_POLICY_VERSION;
+  configVersion: string;
+};
+
+export type EntryChoiceDecisionInput = {
+  personId: PersonId;
+  candidateFacts: EntrantCandidateFacts;
+  tournament: TournamentScheduleReadModelEntry;
+};
+
+export type EntryChoicePolicyResult = {
+  preferenceScoreHundredths: number;
+  policyVersion: typeof ENTRY_CHOICE_POLICY_VERSION;
+};
+
+export type EntryChoicePolicy = {
+  identity: EntryChoicePolicyIdentity;
+  evaluatePreference: (input: EntryChoiceDecisionInput) => ValidationResult<EntryChoicePolicyResult>;
+};
+
+export type ScheduleLifecycleIdentity = {
+  tournamentId: TournamentId;
+  lifecycleState: TournamentLifecycleState;
+  absoluteWeek: number;
+  scheduleOrdinal: number;
+  mergeTargetId?: TournamentId;
+  mergeSourceIds: readonly TournamentId[];
+  identityHash: string;
+};
+
+export type PlannedParticipantList = {
+  schemaVersion: typeof PLANNED_PARTICIPANT_LIST_SCHEMA_VERSION;
+  tournamentId: TournamentId;
+  scheduleLifecycleIdentity: ScheduleLifecycleIdentity;
+  selectedPersonIds: readonly PersonId[];
+  policyIdentity: EntryChoicePolicyIdentity;
+  participantListHash: string;
+};
+
+export type EntrySelectionHandoff = {
+  tournamentId: TournamentId;
+  selectedPersonIds: readonly PersonId[];
+  participantListHash: string;
+  scheduleLifecycleIdentity: ScheduleLifecycleIdentity;
+  policyIdentity: EntryChoicePolicyIdentity;
+  rejectionFacts?: Readonly<Partial<Record<EntrantEligibilityRejectionReason, readonly PersonId[]>>>;
 };
 
 export type { ChampionshipCycleClassification, NormalRankKey, TournamentKind, TournamentLifecycleState };

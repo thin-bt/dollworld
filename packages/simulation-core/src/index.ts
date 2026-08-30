@@ -748,6 +748,8 @@ export {
   TOURNAMENT_SCHEDULE_STATE_SCHEMA_VERSION,
   TOURNAMENT_KINDS,
   TOURNAMENT_LIFECYCLE_STATES,
+  PLANNED_PARTICIPANT_LIST_SCHEMA_VERSION,
+  ENTRY_CHOICE_POLICY_VERSION,
 } from "./sprint2/constants.js";
 export {
   computeCompetitionDomainRegistryHash,
@@ -788,6 +790,21 @@ export {
   buildTournamentScheduleReadModel,
   toScheduleReadModelEntry,
 } from "./sprint2/tournament-schedule-read-model.js";
+export {
+  assertScheduleLifecycleIdentityFresh,
+  buildPlannedParticipantList,
+  buildTournamentChoiceCandidates,
+  canProduceParticipantList,
+  collectEligibilityRejections,
+  computeParticipantListHash,
+  computeScheduleLifecycleIdentity,
+  createNeutralEntryChoicePolicy,
+  evaluateEntrantEligibility,
+  OFFICIAL_COMPETITION_MAXIMUM_AGE,
+  OFFICIAL_COMPETITION_MINIMUM_AGE,
+  selectSimultaneousTournamentForPerson,
+  toEntrySelectionHandoff,
+} from "./sprint2/tournament-entry-selection.js";
 export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
 export {
   computeSprint2ConfigHash,
@@ -808,6 +825,16 @@ export type {
   TournamentScheduleReadModelEntry,
   TournamentScheduleState,
   TournamentSeriesKey,
+  EntrantCandidateFacts,
+  EntrantEligibilityRejectionReason,
+  EntrantEligibilityResult,
+  EntryChoiceDecisionInput,
+  EntryChoicePolicy,
+  EntryChoicePolicyIdentity,
+  EntryChoicePolicyResult,
+  EntrySelectionHandoff,
+  PlannedParticipantList,
+  ScheduleLifecycleIdentity,
 } from "./sprint2/types.js";
 export type { Sprint2IdentityBindings } from "./sprint1/types.js";
 export {

@@ -58,3 +58,6 @@ export type ChampionshipCycleClassification =
 
 export const NORMAL_RANK_KEYS = ["F", "E", "D", "C", "B"] as const;
 export type NormalRankKey = (typeof NORMAL_RANK_KEYS)[number];
+
+export const PLANNED_PARTICIPANT_LIST_SCHEMA_VERSION = "0.1.0" as const;
+export const ENTRY_CHOICE_POLICY_VERSION = "entry-choice-policy-0.1.0" as const;
