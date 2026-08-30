@@ -61,3 +61,6 @@ export type NormalRankKey = (typeof NORMAL_RANK_KEYS)[number];
 
 export const PLANNED_PARTICIPANT_LIST_SCHEMA_VERSION = "0.1.0" as const;
 export const ENTRY_CHOICE_POLICY_VERSION = "entry-choice-policy-0.1.0" as const;
+
+export const TOURNAMENT_BRACKET_DEFINITION_SCHEMA_VERSION = "0.1.0" as const;
+export const BRACKET_RUNTIME_SLOT_STATE_SCHEMA_VERSION = "0.1.0" as const;

@@ -750,6 +750,8 @@ export {
   TOURNAMENT_LIFECYCLE_STATES,
   PLANNED_PARTICIPANT_LIST_SCHEMA_VERSION,
   ENTRY_CHOICE_POLICY_VERSION,
+  TOURNAMENT_BRACKET_DEFINITION_SCHEMA_VERSION,
+  BRACKET_RUNTIME_SLOT_STATE_SCHEMA_VERSION,
 } from "./sprint2/constants.js";
 export {
   computeCompetitionDomainRegistryHash,
@@ -805,6 +807,36 @@ export {
   selectSimultaneousTournamentForPerson,
   toEntrySelectionHandoff,
 } from "./sprint2/tournament-entry-selection.js";
+export {
+  STRUCTURAL_FORMAT_KINDS,
+  validateFormatSelectionResult,
+  validateInjectedStructuralPolicyInput,
+} from "./sprint2/tournament-bracket-policy.js";
+export type {
+  FormatSelectionPolicyIdentity,
+  FormatSelectionResult,
+  InjectedStructuralPolicyInput,
+  KnockoutSeedByeMapping,
+  KnockoutSeedByePolicyIdentity,
+  KnockoutStructuralSlot,
+  StandingsTieBreakPolicyIdentity,
+  StructuralFormatKind,
+} from "./sprint2/tournament-bracket-policy.js";
+export {
+  buildStructuralBracketDefinition,
+  computeBracketDefinitionHash,
+  createInitialBracketRuntimeSlotState,
+  toStructuralBracketHandoff,
+} from "./sprint2/tournament-bracket-definition.js";
+export type {
+  BracketRuntimeSlotState,
+  StructuralBracketBuildInput,
+  StructuralBracketBuildResult,
+  StructuralBracketHandoff,
+  StructuralGroupMembership,
+  StructuralRoundRobinPair,
+  TournamentBracketDefinition,
+} from "./sprint2/tournament-bracket-definition.js";
 export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
 export {
   computeSprint2ConfigHash,
