@@ -752,6 +752,8 @@ export {
   ENTRY_CHOICE_POLICY_VERSION,
   TOURNAMENT_BRACKET_DEFINITION_SCHEMA_VERSION,
   BRACKET_RUNTIME_SLOT_STATE_SCHEMA_VERSION,
+  TOURNAMENT_MATCH_PLAN_SCHEMA_VERSION,
+  TOURNAMENT_BATTLE_HANDOFF_RESULT_SCHEMA_VERSION,
 } from "./sprint2/constants.js";
 export {
   computeCompetitionDomainRegistryHash,
@@ -837,6 +839,29 @@ export type {
   StructuralRoundRobinPair,
   TournamentBracketDefinition,
 } from "./sprint2/tournament-bracket-definition.js";
+export {
+  buildTournamentMatchPlan,
+  canonicalStructuralSlotKey,
+  computeTournamentMatchPlanIdentityHash,
+  verifyTournamentMatchPlanReservation,
+} from "./sprint2/tournament-match-plan.js";
+export type {
+  TournamentMatchPlan,
+  TournamentMatchPlanBuildInput,
+  TournamentSlotMatchBinding,
+  TournamentStructuralSlotIdentity,
+} from "./sprint2/tournament-match-plan.js";
+export {
+  executeTournamentBattleHandoff,
+  snapshotTournamentHandoffMaterial,
+  snapshotTournamentHandoffMaterialJson,
+} from "./sprint2/tournament-battle-handoff.js";
+export type {
+  TournamentBattleHandoffInput,
+  TournamentBattleHandoffOutput,
+  TournamentBattleHandoffResult,
+  TournamentBattleHandoffSuccess,
+} from "./sprint2/tournament-battle-handoff.js";
 export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
 export {
   computeSprint2ConfigHash,
