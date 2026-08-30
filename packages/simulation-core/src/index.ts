@@ -745,6 +745,9 @@ export {
   TOURNAMENT_ID_GENERATOR_STATE_SCHEMA_VERSION,
   TOURNAMENT_ID_GENERATOR_VERSION,
   TOURNAMENT_ID_NAMESPACE,
+  TOURNAMENT_SCHEDULE_STATE_SCHEMA_VERSION,
+  TOURNAMENT_KINDS,
+  TOURNAMENT_LIFECYCLE_STATES,
 } from "./sprint2/constants.js";
 export {
   computeCompetitionDomainRegistryHash,
@@ -764,8 +767,27 @@ export {
 export {
   computeTournamentIdGeneratorStateHash,
   createInitialTournamentIdGeneratorState,
+  formatTournamentIdFromSequence,
+  isTournamentIdText,
+  reserveNextTournamentId,
+  validateTournamentId,
   validateTournamentIdGeneratorState,
 } from "./sprint2/tournament-id-registry.js";
+export {
+  buildSeriesKey,
+  classifyChampionshipCycleYear,
+  generateSchedulePlan,
+  validateSchedulePlanInputs,
+} from "./sprint2/tournament-schedule-plan.js";
+export {
+  applyFailureToStart,
+  commitSchedulePlan,
+  rejectInvalidScheduleTransition,
+} from "./sprint2/tournament-schedule-state.js";
+export {
+  buildTournamentScheduleReadModel,
+  toScheduleReadModelEntry,
+} from "./sprint2/tournament-schedule-read-model.js";
 export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
 export {
   computeSprint2ConfigHash,
@@ -780,7 +802,12 @@ export type {
   CompetitionDomainRegistry,
   CompetitionDomainRegistryInput,
   DerivedTieKeyInput,
+  PlannedScheduleSlot,
   TournamentIdGeneratorState,
+  TournamentScheduleEntry,
+  TournamentScheduleReadModelEntry,
+  TournamentScheduleState,
+  TournamentSeriesKey,
 } from "./sprint2/types.js";
 export type { Sprint2IdentityBindings } from "./sprint1/types.js";
 export {

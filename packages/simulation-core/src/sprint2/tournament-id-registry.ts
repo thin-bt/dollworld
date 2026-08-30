@@ -1,15 +1,23 @@
 /**
- * Deterministic empty TournamentId generator state (G069 / S2-SPEC-0.2.2-draft §8.2).
- * No allocator, reserve-next, seed derivation, or RNG consumption in S02-001.
+ * Deterministic TournamentId generator state (G069 / S02-001 empty registry, S02-002 allocator).
+ * No wall clock, UUID, process-global counter, World RNG, Battle RNG, MatchId counter, or event counter.
  */
 import { toCanonicalJson } from "../canonical-json.js";
+import { asTournamentId } from "../ids.js";
+import type { TournamentId } from "../ids.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import {
+  TOURNAMENT_ID_FORMAT_PATTERN,
+  TOURNAMENT_ID_GENERATOR_STATE_INVALID_CODE,
   TOURNAMENT_ID_GENERATOR_STATE_SCHEMA_VERSION,
   TOURNAMENT_ID_GENERATOR_VERSION,
   TOURNAMENT_ID_NAMESPACE,
+  TOURNAMENT_ID_SEQUENCE_DIGITS,
+  TOURNAMENT_ID_SEQUENCE_EXHAUSTED_CODE,
+  TOURNAMENT_ID_SEQUENCE_EXHAUSTED_SENTINEL,
+  TOURNAMENT_ID_SEQUENCE_MAXIMUM,
   TOURNAMENT_ID_SEQUENCE_MINIMUM,
 } from "./constants.js";
 import {
@@ -29,6 +37,24 @@ export const TOURNAMENT_ID_GENERATOR_STATE_KEYS = [
   "nextSequence",
 ] as const;
 
+export type ReserveNextTournamentIdResult =
+  | {
+      kind: "success";
+      tournamentId: TournamentId;
+      nextState: TournamentIdGeneratorState;
+      code: null;
+      issues: readonly ValidationIssue[];
+    }
+  | {
+      kind: "failure";
+      tournamentId: null;
+      nextState: null;
+      code:
+        | typeof TOURNAMENT_ID_SEQUENCE_EXHAUSTED_CODE
+        | typeof TOURNAMENT_ID_GENERATOR_STATE_INVALID_CODE;
+      issues: readonly ValidationIssue[];
+    };
+
 function buildState(nextSequence: number): TournamentIdGeneratorState {
   return {
     schemaVersion: TOURNAMENT_ID_GENERATOR_STATE_SCHEMA_VERSION,
@@ -36,6 +62,49 @@ function buildState(nextSequence: number): TournamentIdGeneratorState {
     namespace: TOURNAMENT_ID_NAMESPACE,
     nextSequence,
   };
+}
+
+/** `tournament_` + zero-padded 12-digit decimal. The prefix carries no tournament semantics. */
+export function formatTournamentIdFromSequence(sequence: number): TournamentId {
+  if (
+    !Number.isSafeInteger(sequence) ||
+    sequence < TOURNAMENT_ID_SEQUENCE_MINIMUM ||
+    sequence > TOURNAMENT_ID_SEQUENCE_MAXIMUM
+  ) {
+    throw new Error(
+      `TournamentId sequence must be an integer within ${String(TOURNAMENT_ID_SEQUENCE_MINIMUM)}..${String(TOURNAMENT_ID_SEQUENCE_MAXIMUM)} (got ${String(sequence)})`,
+    );
+  }
+  return asTournamentId(
+    `tournament_${String(sequence).padStart(TOURNAMENT_ID_SEQUENCE_DIGITS, "0")}`,
+  );
+}
+
+export function isTournamentIdText(value: unknown): value is string {
+  if (typeof value !== "string" || !TOURNAMENT_ID_FORMAT_PATTERN.test(value)) {
+    return false;
+  }
+  const sequence = Number(value.slice("tournament_".length));
+  return (
+    Number.isSafeInteger(sequence) &&
+    sequence >= TOURNAMENT_ID_SEQUENCE_MINIMUM &&
+    sequence <= TOURNAMENT_ID_SEQUENCE_MAXIMUM
+  );
+}
+
+export function validateTournamentId(input: unknown): ValidationResult<TournamentId> {
+  if (!isTournamentIdText(input)) {
+    return failure([
+      {
+        path: "",
+        message:
+          "TournamentId must match ^tournament_[0-9]{12}$ with a numeric part within 1..999999999999",
+        actual: input,
+        expected: "tournament_<12-digit decimal>",
+      },
+    ]);
+  }
+  return success(asTournamentId(input));
 }
 
 export function createInitialTournamentIdGeneratorState(): ValidationResult<TournamentIdGeneratorState> {
@@ -78,7 +147,7 @@ export function validateTournamentIdGeneratorState(
     "nextSequence",
     "",
     TOURNAMENT_ID_SEQUENCE_MINIMUM,
-    Number.MAX_SAFE_INTEGER,
+    TOURNAMENT_ID_SEQUENCE_EXHAUSTED_SENTINEL,
     issues,
   );
 
@@ -110,4 +179,47 @@ export function cloneTournamentIdGeneratorState(
     return failure(validated.issues);
   }
   return success(deepFreezePlainJson({ ...validated.value }));
+}
+
+/**
+ * Internal pre-commit reservation stage. Never mutates `state`; callers must discard
+ * the reservation unless the whole schedule commit succeeds.
+ */
+export function reserveNextTournamentId(state: unknown): ReserveNextTournamentIdResult {
+  const validated = validateTournamentIdGeneratorState(state);
+  if (!validated.ok) {
+    return {
+      kind: "failure",
+      tournamentId: null,
+      nextState: null,
+      code: TOURNAMENT_ID_GENERATOR_STATE_INVALID_CODE,
+      issues: validated.issues,
+    };
+  }
+
+  const current = validated.value;
+  if (current.nextSequence === TOURNAMENT_ID_SEQUENCE_EXHAUSTED_SENTINEL) {
+    return {
+      kind: "failure",
+      tournamentId: null,
+      nextState: null,
+      code: TOURNAMENT_ID_SEQUENCE_EXHAUSTED_CODE,
+      issues: [
+        {
+          path: "/nextSequence",
+          message: "TournamentId sequence is exhausted; no further TournamentId can be issued",
+          actual: current.nextSequence,
+          expected: `${String(TOURNAMENT_ID_SEQUENCE_MINIMUM)}..${String(TOURNAMENT_ID_SEQUENCE_MAXIMUM)}`,
+        },
+      ],
+    };
+  }
+
+  return {
+    kind: "success",
+    tournamentId: formatTournamentIdFromSequence(current.nextSequence),
+    nextState: deepFreezePlainJson(buildState(current.nextSequence + 1)),
+    code: null,
+    issues: [],
+  };
 }
