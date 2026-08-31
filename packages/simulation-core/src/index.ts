@@ -754,6 +754,8 @@ export {
   BRACKET_RUNTIME_SLOT_STATE_SCHEMA_VERSION,
   TOURNAMENT_MATCH_PLAN_SCHEMA_VERSION,
   TOURNAMENT_BATTLE_HANDOFF_RESULT_SCHEMA_VERSION,
+  STORED_BATTLE_RESULT_REF_SCHEMA_VERSION,
+  TOURNAMENT_BATTLE_APPLICATION_FACT_SCHEMA_VERSION,
   STORED_BATTLE_RESULT_RECORD_SCHEMA_VERSION,
   MATERIALIZED_BATTLE_RESULT_VIEW_SCHEMA_VERSION,
   IMPORTANT_BATTLE_MARKER_SCHEMA_VERSION,
@@ -872,6 +874,29 @@ export type {
   TournamentBattleHandoffResult,
   TournamentBattleHandoffSuccess,
 } from "./sprint2/tournament-battle-handoff.js";
+export {
+  buildStoredBattleResultRef,
+  computeStoredBattleResultRefHash,
+  formatTournamentSlotId,
+  validateStoredBattleResultRef,
+  validateTournamentBattleSlotIdentity,
+} from "./sprint2/stored-battle-result-ref.js";
+export type {
+  BuildStoredBattleResultRefInput,
+  StoredBattleResultRef,
+  TournamentBattleSlotIdentity,
+} from "./sprint2/stored-battle-result-ref.js";
+export {
+  executeTournamentBattleAtomic,
+  snapshotTournamentBattleAtomicBaseline,
+} from "./sprint2/tournament-battle-atomic-adapter.js";
+export type {
+  ExecuteTournamentBattleAtomicInput,
+  ExecuteTournamentBattleAtomicOutput,
+  ExecuteTournamentBattleAtomicSuccess,
+  TournamentBattleApplicationFact,
+  TournamentBattleAtomicPublicationGate,
+} from "./sprint2/tournament-battle-atomic-adapter.js";
 export {
   computeDetailedLogPayloadHash,
   computeDetailedLogPayloadBytes,
