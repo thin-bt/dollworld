@@ -85,3 +85,22 @@ export const IMPORTANT_BATTLE_REASONS = [
   "historical_record_update",
 ] as const;
 export type ImportantBattleReason = (typeof IMPORTANT_BATTLE_REASONS)[number];
+
+export const TOURNAMENT_FINAL_RESULT_SCHEMA_VERSION = "0.1.0" as const;
+export const TOURNAMENT_AWARD_TIERS = ["champion", "runner_up", "top_four", "completed"] as const;
+export type TournamentAwardTier = (typeof TOURNAMENT_AWARD_TIERS)[number];
+
+export const COMPETITIVE_RECORD_SCHEMA_VERSION = "0.2.0" as const;
+export const PROMOTION_PROGRESS_SCHEMA_VERSION = "0.1.0" as const;
+export const PROMOTION_QUALIFICATION_STATUSES = ["inactive", "active"] as const;
+export type PromotionQualificationStatus = (typeof PROMOTION_QUALIFICATION_STATUSES)[number];
+
+export const S_QUALIFICATION_CONTRIBUTION_SCHEMA_VERSION = "0.1.0" as const;
+export const S_QUALIFICATION_STATE_SCHEMA_VERSION = "0.1.0" as const;
+export const S_QUALIFICATION_SOURCE_KINDS = ["open_match", "open_placement"] as const;
+export type SQualificationSourceKind = (typeof S_QUALIFICATION_SOURCE_KINDS)[number];
+
+export const RANK_PROMOTION_RESULT_SCHEMA_VERSION = "0.1.0" as const;
+export const PERSON_RANK_HISTORY_SCHEMA_VERSION = "0.1.0" as const;
+export const PERSON_RANK_HISTORY_ENTRY_SCHEMA_VERSION = "0.1.0" as const;
+export const S_QUALIFICATION_HISTORY_ENTRY_SCHEMA_VERSION = "0.1.0" as const;

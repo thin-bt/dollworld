@@ -898,6 +898,77 @@ export type {
   TournamentBattleAtomicPublicationGate,
 } from "./sprint2/tournament-battle-atomic-adapter.js";
 export {
+  buildTournamentFinalResult,
+  computeTournamentFinalResultHash,
+  tournamentPlacementContributionKey,
+  validateTournamentFinalResult,
+  validateTournamentFinalResultSource,
+} from "./sprint2/tournament-final-result.js";
+export type {
+  BuildTournamentFinalResultInput,
+  TournamentFinalPlacement,
+  TournamentFinalResult,
+  ValidateTournamentFinalResultSource,
+} from "./sprint2/tournament-final-result.js";
+export {
+  applyTournamentFinalResultToCompetitiveRecord,
+  computeCompetitiveRecordHash,
+  createEmptyCompetitiveRecord,
+  validateCompetitiveRecordShape,
+} from "./sprint2/competitive-record-update.js";
+export type {
+  ApplyTournamentFinalResultToCompetitiveRecordInput,
+  ApplyTournamentFinalResultToCompetitiveRecordOutput,
+  CompetitiveRecord,
+  PromotionProgress,
+  SQualificationContribution,
+  SQualificationState,
+  WinsByDomain,
+  WinsByTournamentKind,
+} from "./sprint2/competitive-record-update.js";
+export {
+  buildRankPromotionResult,
+  commitPromotionWithRankHistory,
+  computeRankPromotionResultHash,
+  findCommittedPromotionResult,
+  snapshotPromotionAtomicBaseline,
+} from "./sprint2/rank-promotion-result.js";
+export type {
+  BuildRankPromotionResultInput,
+  CommittedPromotionRegistry,
+  CommitPromotionWithRankHistoryInput,
+  CommitPromotionWithRankHistoryOutput,
+  PromotionAtomicCommitGate,
+  RankPromotionResult,
+} from "./sprint2/rank-promotion-result.js";
+export {
+  appendPersonRankHistoryEntry,
+  buildPersonRankHistoryEntry,
+  createEmptyPersonRankHistory,
+  isExactlyOneRankStepUp,
+  validatePersonRankHistoryContinuity,
+} from "./sprint2/person-rank-history.js";
+export type {
+  AppendPersonRankHistoryEntryOutput,
+  BuildPersonRankHistoryEntryInput,
+  PersonRankHistory,
+  PersonRankHistoryEntry,
+} from "./sprint2/person-rank-history.js";
+export {
+  buildSQualificationHistoryEntry,
+  commitSQualificationHistoryEntry,
+  computeSQualificationHistoryEntryHash,
+  createEmptySQualificationHistory,
+  validateSQualificationHistorySource,
+} from "./sprint2/s-qualification-history.js";
+export type {
+  BuildSQualificationHistoryEntryInput,
+  CommitSQualificationHistoryEntryOutput,
+  SQualificationHistory,
+  SQualificationHistoryEntry,
+  ValidateSQualificationHistorySource,
+} from "./sprint2/s-qualification-history.js";
+export {
   computeDetailedLogPayloadHash,
   computeDetailedLogPayloadBytes,
   createEmptyDetailedLogPayloadStore,
