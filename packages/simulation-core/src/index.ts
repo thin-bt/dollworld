@@ -754,6 +754,16 @@ export {
   BRACKET_RUNTIME_SLOT_STATE_SCHEMA_VERSION,
   TOURNAMENT_MATCH_PLAN_SCHEMA_VERSION,
   TOURNAMENT_BATTLE_HANDOFF_RESULT_SCHEMA_VERSION,
+  STORED_BATTLE_RESULT_RECORD_SCHEMA_VERSION,
+  MATERIALIZED_BATTLE_RESULT_VIEW_SCHEMA_VERSION,
+  IMPORTANT_BATTLE_MARKER_SCHEMA_VERSION,
+  DETAILED_LOG_PAYLOAD_STORE_SCHEMA_VERSION,
+  DETAILED_LOG_RETENTION_STATUSES,
+  IMPORTANT_BATTLE_REASONS,
+} from "./sprint2/constants.js";
+export type {
+  DetailedLogRetentionStatus,
+  ImportantBattleReason,
 } from "./sprint2/constants.js";
 export {
   computeCompetitionDomainRegistryHash,
@@ -862,6 +872,63 @@ export type {
   TournamentBattleHandoffResult,
   TournamentBattleHandoffSuccess,
 } from "./sprint2/tournament-battle-handoff.js";
+export {
+  computeDetailedLogPayloadHash,
+  computeDetailedLogPayloadBytes,
+  createEmptyDetailedLogPayloadStore,
+  deleteDetailedLogPayloadEntries,
+  getDetailedLogPayloadBytes,
+  putDetailedLogPayloadIfAbsent,
+  countRetainedPayloadReferences,
+} from "./sprint2/detailed-log-payload-store.js";
+export type {
+  DetailedLogPayloadEntry,
+  DetailedLogPayloadStore,
+  PutDetailedLogPayloadOutcome,
+} from "./sprint2/detailed-log-payload-store.js";
+export {
+  buildImportantBattleMarker,
+  computeBattleResultHash,
+  computeStoredRecordHash,
+  publishStoredBattleResult,
+  rejectRetroactiveImportantBattleMarker,
+  validateImportantBattleMarker,
+  validateStoredBattleResultRecord,
+  validateStoredBattleResultReferences,
+  withStoredBattleResultRetentionStatus,
+} from "./sprint2/stored-battle-result.js";
+export type {
+  ImportantBattleMarker,
+  PublishStoredBattleResultInput,
+  PublishStoredBattleResultResult,
+  StoredBattleResultRecord,
+} from "./sprint2/stored-battle-result.js";
+export {
+  applyRetentionPrunePlan,
+  classifyRetentionPolicy,
+  isSummaryOrResultPermanent,
+  planRetentionPruneUpdates,
+  resolveDetailedLogRetentionYears,
+  shouldPruneDetailedLogRecord,
+} from "./sprint2/battle-log-retention.js";
+export type { RetentionPolicyClass } from "./sprint2/battle-log-retention.js";
+export {
+  materializeStoredBattleResultView,
+  rejectPrunedDetailedLogProjection,
+  verifyRetainedDetailedLogPayloadIdentity,
+} from "./sprint2/stored-battle-result-materialization.js";
+export type { MaterializedBattleResultView } from "./sprint2/stored-battle-result-materialization.js";
+export {
+  executeDetailedLogPayloadGc,
+  logicalPruneSurvivesGcFailure,
+  planDetailedLogPayloadGc,
+  retainedOwnerCountForPayload,
+} from "./sprint2/stored-battle-result-gc.js";
+export type {
+  DetailedLogPayloadGcExecutionResult,
+  DetailedLogPayloadGcExecutor,
+  DetailedLogPayloadGcPlan,
+} from "./sprint2/stored-battle-result-gc.js";
 export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
 export {
   computeSprint2ConfigHash,

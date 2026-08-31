@@ -67,3 +67,18 @@ export const BRACKET_RUNTIME_SLOT_STATE_SCHEMA_VERSION = "0.1.0" as const;
 
 export const TOURNAMENT_MATCH_PLAN_SCHEMA_VERSION = "0.1.0" as const;
 export const TOURNAMENT_BATTLE_HANDOFF_RESULT_SCHEMA_VERSION = "0.1.0" as const;
+
+export const STORED_BATTLE_RESULT_RECORD_SCHEMA_VERSION = "0.1.0" as const;
+export const MATERIALIZED_BATTLE_RESULT_VIEW_SCHEMA_VERSION = "0.1.0" as const;
+export const IMPORTANT_BATTLE_MARKER_SCHEMA_VERSION = "0.1.0" as const;
+export const DETAILED_LOG_PAYLOAD_STORE_SCHEMA_VERSION = "0.1.0" as const;
+
+export const DETAILED_LOG_RETENTION_STATUSES = ["retained", "pruned"] as const;
+export type DetailedLogRetentionStatus = (typeof DETAILED_LOG_RETENTION_STATUSES)[number];
+
+export const IMPORTANT_BATTLE_REASONS = [
+  "highest_tournament_match",
+  "tournament_final",
+  "historical_record_update",
+] as const;
+export type ImportantBattleReason = (typeof IMPORTANT_BATTLE_REASONS)[number];
