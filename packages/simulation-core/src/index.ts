@@ -969,6 +969,52 @@ export type {
   ValidateSQualificationHistorySource,
 } from "./sprint2/s-qualification-history.js";
 export {
+  createDefaultTournamentPayoutConfig,
+  createDefaultTournamentPayoutTable,
+  lookupTournamentPayoutAmount,
+  validateTournamentPayoutConfig,
+} from "./sprint2/tournament-payout-config.js";
+export type {
+  LookupTournamentPayoutInput,
+  TournamentPayoutConfig,
+  TournamentPayoutTable,
+} from "./sprint2/tournament-payout-config.js";
+export {
+  applyTournamentFinalResultEarnings,
+  computeAnnualEarningsApplicationIdentityHash,
+  computeYearlyCumulativeEarnings,
+  createEmptyAnnualEarningsLedger,
+  listAnnualEarningsApplicationsForYear,
+} from "./sprint2/annual-earnings.js";
+export type {
+  AnnualEarningsApplication,
+  AnnualEarningsLedger,
+  ApplyTournamentFinalResultEarningsInput,
+  ApplyTournamentFinalResultEarningsOutput,
+} from "./sprint2/annual-earnings.js";
+export {
+  projectAnnualRanking,
+  projectAnnualRankingForBrowser,
+} from "./sprint2/annual-ranking.js";
+export type { AnnualRankingDisplayFacts, ProjectAnnualRankingInput } from "./sprint2/annual-ranking.js";
+export {
+  createEmptyAnnualRankingHistoryStore,
+  finalizeClosedYearHistory,
+  toAnnualRankingDisplayFacts,
+  upsertAnnualRankingHistoryEntry,
+  validateAnnualRankingHistoryEntry,
+} from "./sprint2/annual-ranking-history.js";
+export type {
+  AnnualRankingHistoryEntry,
+  AnnualRankingHistoryRow,
+  AnnualRankingHistoryStore,
+  FinalizeClosedYearHistoryOutput,
+  UpsertAnnualRankingHistoryInput,
+  UpsertAnnualRankingHistoryOutput,
+} from "./sprint2/annual-ranking-history.js";
+export { buildPreviousWorldYearEarningsSnapshot } from "./sprint2/previous-world-year-snapshot.js";
+export type { PreviousWorldYearEarningsSnapshot } from "./sprint2/previous-world-year-snapshot.js";
+export {
   computeDetailedLogPayloadHash,
   computeDetailedLogPayloadBytes,
   createEmptyDetailedLogPayloadStore,
