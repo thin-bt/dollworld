@@ -735,9 +735,9 @@ export function runSprint1WeeklyStep(
  * one start full validation, transition-local validation each week, one final
  * full validation. Public {@link runSprint1WeeklyStep} contract is unchanged.
  */
-export function runSprint1Years(
+export function runSprint1Weeks(
   session: Sprint1RunSession,
-  years: number,
+  weeks: number,
   provider: Sha256Provider,
   options: RunSprint1YearsOptions = {},
 ): ValidationResult<Sprint1RunSession> {
@@ -753,24 +753,12 @@ export function runSprint1Years(
   const onAfterValidatedWeek = options.onAfterValidatedWeek;
   const onBeforeYearStartPhase = options.onBeforeYearStartPhase;
 
-  if (!Number.isSafeInteger(years) || years < 0) {
+  if (!Number.isSafeInteger(weeks) || weeks < 0) {
     return failure([
       {
-        path: "/years",
-        message: "years must be a non-negative safe integer",
-        actual: years,
-      },
-    ]);
-  }
-
-  const weeks = years * WEEKS_PER_YEAR;
-  if (!Number.isSafeInteger(weeks)) {
-    return failure([
-      {
-        path: "/years",
-        message: "years * 48 must be a safe integer",
-        actual: years,
-        expected: "safe integer weeks",
+        path: "/weeks",
+        message: "weeks must be a non-negative safe integer",
+        actual: weeks,
       },
     ]);
   }
@@ -821,4 +809,38 @@ export function runSprint1Years(
     return failure(prefixIssues(finalValidated.issues, "/finalSession"));
   }
   return success(finalValidated.value);
+}
+
+/**
+ * Advance the session by `years * 48` weeks using {@link runSprint1Weeks}.
+ */
+export function runSprint1Years(
+  session: Sprint1RunSession,
+  years: number,
+  provider: Sha256Provider,
+  options: RunSprint1YearsOptions = {},
+): ValidationResult<Sprint1RunSession> {
+  if (!Number.isSafeInteger(years) || years < 0) {
+    return failure([
+      {
+        path: "/years",
+        message: "years must be a non-negative safe integer",
+        actual: years,
+      },
+    ]);
+  }
+
+  const weeks = years * WEEKS_PER_YEAR;
+  if (!Number.isSafeInteger(weeks)) {
+    return failure([
+      {
+        path: "/years",
+        message: "years * 48 must be a safe integer",
+        actual: years,
+        expected: "safe integer weeks",
+      },
+    ]);
+  }
+
+  return runSprint1Weeks(session, weeks, provider, options);
 }

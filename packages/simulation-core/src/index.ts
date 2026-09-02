@@ -1071,6 +1071,59 @@ export type {
   DetailedLogPayloadGcExecutor,
   DetailedLogPayloadGcPlan,
 } from "./sprint2/stored-battle-result-gc.js";
+export {
+  createInitialSprint2CheckpointRunContext,
+  validateSprint2CheckpointRunContext,
+  canonicalizeSprint2CheckpointRunContext,
+} from "./sprint2/sprint2-checkpoint-context.js";
+export type { Sprint2CheckpointRunContext } from "./sprint2/sprint2-checkpoint-context.js";
+export {
+  createInitialWorldWeekExecutionState,
+  deriveProcessedWorldWeeks,
+  markExecutionStateCompleted,
+  normalizeCompletedToPendingWeek,
+  toCompletedCheckpointExecutionState,
+  validateWorldWeekExecutionState,
+  assertExecutionStateConfigCompatibility,
+} from "./sprint2/world-week-execution-state.js";
+export type { WorldWeekExecutionState } from "./sprint2/world-week-execution-state.js";
+export { runWeeks, runYears, SPRINT2_WEEKS_PER_WORLD_YEAR } from "./sprint2/run-weeks.js";
+export type { RunWeeksOptions } from "./sprint2/run-weeks.js";
+export {
+  buildDetailedBattleLogCheckpointManifest,
+  buildDetailedLogLogicalPath,
+  validateDetailedBattleLogCheckpointManifest,
+  validateDetailedLogLogicalPath,
+} from "./sprint2/checkpoint-manifest.js";
+export type {
+  DetailedBattleLogCheckpointManifest,
+  DetailedBattleLogCheckpointManifestEntry,
+} from "./sprint2/checkpoint-manifest.js";
+export {
+  buildSprint2CheckpointBundle,
+  validateSprint2CheckpointBundle,
+  assertBundleRefMatchesBundle,
+} from "./sprint2/checkpoint-bundle.js";
+export type {
+  Sprint2CheckpointBundle,
+  Sprint2CheckpointBundleRef,
+} from "./sprint2/checkpoint-bundle.js";
+export {
+  publishSprint2Checkpoint,
+  beginCheckpointTransaction,
+  endCheckpointTransaction,
+  Sprint2CheckpointPublicationStore,
+} from "./sprint2/checkpoint-publish.js";
+export type {
+  PublishCheckpointInput,
+  PublishCheckpointOutcome,
+} from "./sprint2/checkpoint-publish.js";
+export {
+  restoreSprint2CheckpointRunContextFromBundle,
+  resumeSprint2CheckpointFromStore,
+  rejectUnsupportedDraftCheckpointBundle,
+} from "./sprint2/checkpoint-resume.js";
+export type { ResumeCheckpointInput } from "./sprint2/checkpoint-resume.js";
 export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
 export {
   computeSprint2ConfigHash,

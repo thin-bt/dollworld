@@ -110,3 +110,16 @@ export const ANNUAL_EARNINGS_APPLICATION_SCHEMA_VERSION = "0.1.0" as const;
 export const ANNUAL_RANKING_HISTORY_ENTRY_SCHEMA_VERSION = "0.1.0" as const;
 export const ANNUAL_RANKING_HISTORY_ROW_SCHEMA_VERSION = "0.1.0" as const;
 export const PREVIOUS_WORLD_YEAR_EARNINGS_SNAPSHOT_SCHEMA_VERSION = "0.1.0" as const;
+
+export const WORLD_WEEK_EXECUTION_STATE_SCHEMA_VERSION = "0.1.0" as const;
+export const WORLD_WEEK_EXECUTION_PHASES = ["pending", "completed"] as const;
+export type WorldWeekExecutionPhase = (typeof WORLD_WEEK_EXECUTION_PHASES)[number];
+
+export const DETAILED_BATTLE_LOG_CHECKPOINT_MANIFEST_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_CHECKPOINT_BUNDLE_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_CHECKPOINT_BUNDLE_REF_SCHEMA_VERSION = "0.1.0" as const;
+
+/** Reject unsupported draft checkpoint formats (CHK-010). */
+export const SUPPORTED_CHECKPOINT_BUNDLE_SCHEMA_VERSIONS = [
+  SPRINT2_CHECKPOINT_BUNDLE_SCHEMA_VERSION,
+] as const;
