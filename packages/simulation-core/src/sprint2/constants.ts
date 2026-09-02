@@ -123,3 +123,41 @@ export const SPRINT2_CHECKPOINT_BUNDLE_REF_SCHEMA_VERSION = "0.1.0" as const;
 export const SUPPORTED_CHECKPOINT_BUNDLE_SCHEMA_VERSIONS = [
   SPRINT2_CHECKPOINT_BUNDLE_SCHEMA_VERSION,
 ] as const;
+
+/** S02-011 fixed-seven publish protocol and projection document versions. */
+export const FIXED_SEVEN_PUBLISH_PROTOCOL_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_INITIAL_WORLD_DOCUMENT_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_FINAL_WORLD_DOCUMENT_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_RUN_METADATA_DOCUMENT_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_VALIDATION_REPORT_DOCUMENT_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_PERFORMANCE_DOCUMENT_SCHEMA_VERSION = "0.1.0" as const;
+
+export const SPRINT2_TOURNAMENT_EVENT_PROCESSOR = "sprint2-tournament" as const;
+
+export const SPRINT2_TOURNAMENT_EVENT_TYPES = [
+  "tournament.match_recorded",
+  "tournament.match_bye",
+  "tournament.round_completed",
+  "tournament.finished",
+  "person.promotion_qualified",
+  "person.rank_promoted",
+  "person.s_rank_qualified",
+  "person.s_rank_promoted",
+] as const;
+export type Sprint2TournamentEventType = (typeof SPRINT2_TOURNAMENT_EVENT_TYPES)[number];
+
+export const TOURNAMENT_FINISHED_COMPLETION_KINDS = ["winner_determined", "no_winner"] as const;
+export type TournamentFinishedCompletionKind = (typeof TOURNAMENT_FINISHED_COMPLETION_KINDS)[number];
+
+/** Fixed-seven output file names (immutable Sprint1 contract). */
+export const FIXED_SEVEN_OUTPUT_FILE_NAMES = [
+  "run-metadata.json",
+  "initial-world.json",
+  "final-world.json",
+  "yearly-statistics.csv",
+  "events.jsonl",
+  "validation-report.json",
+  "performance.json",
+] as const;
+export type FixedSevenOutputFileName = (typeof FIXED_SEVEN_OUTPUT_FILE_NAMES)[number];
+export const FIXED_SEVEN_OUTPUT_FILE_COUNT = FIXED_SEVEN_OUTPUT_FILE_NAMES.length;

@@ -1124,6 +1124,74 @@ export {
   rejectUnsupportedDraftCheckpointBundle,
 } from "./sprint2/checkpoint-resume.js";
 export type { ResumeCheckpointInput } from "./sprint2/checkpoint-resume.js";
+export {
+  validateSprint2TournamentEventPayload,
+  TOURNAMENT_MATCH_RECORDED_EVENT_TYPE,
+  TOURNAMENT_MATCH_BYE_EVENT_TYPE,
+  TOURNAMENT_ROUND_COMPLETED_EVENT_TYPE,
+  TOURNAMENT_FINISHED_EVENT_TYPE,
+  PERSON_PROMOTION_QUALIFIED_EVENT_TYPE,
+  PERSON_RANK_PROMOTED_EVENT_TYPE,
+  PERSON_S_RANK_QUALIFIED_EVENT_TYPE,
+  PERSON_S_RANK_PROMOTED_EVENT_TYPE,
+  isSprint2TournamentEventType,
+} from "./sprint2/tournament-event-payloads.js";
+export type {
+  TournamentMatchRecordedPayload,
+  TournamentMatchByePayload,
+  TournamentRoundCompletedPayload,
+  TournamentFinishedPayload,
+} from "./sprint2/tournament-event-payloads.js";
+export {
+  validateSprint2EventEnvelope,
+  allocateSprint2EventEnvelope,
+  validateSprint2EventSequence,
+  rejectDuplicateSprint2EventCandidate,
+  validateSprint2TournamentEventOrdering,
+  sprint2EventsToJsonl,
+  computeSprint2EventCandidateIdentity,
+} from "./sprint2/tournament-event-envelope-sprint2.js";
+export type {
+  Sprint2EventEnvelope,
+  Sprint2EventEntities,
+  AllocateSprint2EventEnvelopeInput,
+} from "./sprint2/tournament-event-envelope-sprint2.js";
+export {
+  projectSprint2InitialWorldDocument,
+  projectSprint2FinalWorldDocument,
+  materializeFinalWorldBattleResults,
+  buildSprint2FixedSevenRunOutput,
+  rejectFixedSevenProjectionMutation,
+} from "./sprint2/fixed-seven-projection.js";
+export type {
+  Sprint2InitialWorldDocument,
+  Sprint2FinalWorldDocument,
+  Sprint2RunMetadataDocument,
+  Sprint2ValidationReportDocument,
+  Sprint2PerformanceDocument,
+  Sprint2FixedSevenProjectionInput,
+  FixedSevenRunOutput,
+  Sprint2FinalWorldMaterializedBattleResult,
+} from "./sprint2/fixed-seven-projection.js";
+export {
+  serializeFixedSevenToMemoryReference,
+  serializeFixedSevenStreaming,
+  reassembleFixedSevenFromStreaming,
+  assertFixedSevenStreamingEqualsReference,
+  measureFixedSevenUtf8Bytes,
+} from "./sprint2/fixed-seven-serializer.js";
+export type { FixedSevenStreamingChunk } from "./sprint2/fixed-seven-serializer.js";
+export {
+  Sprint2FixedSevenPublicationStore,
+  publishSprint2FixedSevenRun,
+  validateFixedSevenStagingMembership,
+  listCompletedFixedSevenRuns,
+  listStagingFixedSevenRuns,
+} from "./sprint2/fixed-seven-publish.js";
+export type {
+  PublishFixedSevenRunInput,
+  PublishFixedSevenRunOutcome,
+} from "./sprint2/fixed-seven-publish.js";
 export { createDefaultSprint2ConfigInput } from "./sprint2/sprint2-config-defaults.js";
 export {
   computeSprint2ConfigHash,
