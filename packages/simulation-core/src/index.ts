@@ -15,7 +15,13 @@ export type {
 } from "./abilities.js";
 export { ABILITY_KEYS, APTITUDE_KEYS } from "./abilities.js";
 
-export { canonicalize, compareUnicodeCodePoints, toCanonicalJson } from "./canonical-json.js";
+export {
+  appendCanonicalJson,
+  canonicalize,
+  compareUnicodeCodePoints,
+  hashCanonicalValueUtf8,
+  toCanonicalJson,
+} from "./canonical-json.js";
 
 export type {
   AbilitiesConfig,
@@ -1682,7 +1688,7 @@ export {
   validateNameDataManifest,
 } from "./names/validate-name-data.js";
 
-export type { Sha256Provider } from "./sha256-provider.js";
+export type { Sha256Provider, Sha256Utf8Hasher } from "./sha256-provider.js";
 export { computeConfigHash, computeNameDataHash } from "./sha256-provider.js";
 
 export type { SeededRng, SeededRngFactory, SeededRngState } from "./rng.js";

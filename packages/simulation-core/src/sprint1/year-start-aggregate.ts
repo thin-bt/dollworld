@@ -3,7 +3,6 @@
  * postTransactionAggregateHash uses the sentinel method: the receipt field is
  * temporarily 64 zeros while hashing processorRuntimeState, then replaced.
  */
-import { toCanonicalJson } from "../canonical-json.js";
 import type { SeededRngState } from "../rng.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import { failure, success } from "../validation.js";
@@ -14,7 +13,7 @@ import { EVENT_ENVELOPE_SCHEMA_VERSION_SPRINT1 } from "./event-envelope-sprint1.
 import type { MatchIdGeneratorState } from "./match-id-generator.js";
 import { computeMatchIdGeneratorStateHash } from "./match-id-generator.js";
 import { computeSeededRngStateHash } from "./start-battle-runtime-transition.js";
-import { safeHashUtf8 } from "./safe-sha256.js";
+import { safeHashCanonicalUtf8 } from "./safe-sha256.js";
 import {
   WORLD_YEAR_START_TRANSACTION_AGGREGATE_SCHEMA_VERSION,
   computeWorldYearStartTransactionAggregateHash,
@@ -44,7 +43,7 @@ function hashCanonical(
   value: unknown,
   path: string,
 ): ValidationResult<string> {
-  return safeHashUtf8(provider, toCanonicalJson(value), path);
+  return safeHashCanonicalUtf8(provider, value, path);
 }
 
 export function computeWorldStateComponentHash(

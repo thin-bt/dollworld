@@ -2,13 +2,28 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Sha256Provider, ValidatedNameData } from "../index.js";
+import type { Sha256Provider, Sha256Utf8Hasher, ValidatedNameData } from "../index.js";
 import { toCanonicalJson, validateNameData } from "../index.js";
+
+export function createNodeSha256Hasher(): Sha256Utf8Hasher {
+  const hash = createHash("sha256");
+  return {
+    update(utf8Text: string): void {
+      hash.update(utf8Text, "utf8");
+    },
+    digestHex(): string {
+      return hash.digest("hex");
+    },
+  };
+}
 
 export function createNodeSha256Provider(): Sha256Provider {
   return {
     hashUtf8(utf8Text: string): string {
       return createHash("sha256").update(utf8Text, "utf8").digest("hex");
+    },
+    createUtf8Hasher(): Sha256Utf8Hasher {
+      return createNodeSha256Hasher();
     },
   };
 }

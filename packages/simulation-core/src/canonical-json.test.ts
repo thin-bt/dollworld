@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { canonicalize, toCanonicalJson } from "./index.js";
+import { canonicalize, appendCanonicalJson, hashCanonicalValueUtf8, toCanonicalJson } from "./index.js";
+import { createNodeSha256Provider } from "./test-fixtures/name-data-loader.fixture.js";
+
+const provider = createNodeSha256Provider();
 
 describe("canonical JSON", () => {
   it("is independent of object key order, whitespace, and newlines", () => {
@@ -52,5 +55,29 @@ describe("canonical JSON", () => {
   it("sorts nested integer-form keys by Unicode code points", () => {
     expect(toCanonicalJson({ outer: { "10": 1, "2": 2 } })).toBe('{"outer":{"10":1,"2":2}}');
     expect(toCanonicalJson({ outer: { "2": 2, "10": 1 } })).toBe('{"outer":{"10":1,"2":2}}');
+  });
+
+  it("appendCanonicalJson matches toCanonicalJson", () => {
+    const value = {
+      b: 1,
+      a: { d: 2, c: 3 },
+      list: [{ sequence: 2 }, { sequence: 1 }],
+    };
+    let appended = "";
+    appendCanonicalJson(value, (chunk) => {
+      appended += chunk;
+    });
+    expect(appended).toBe(toCanonicalJson(value));
+  });
+
+  it("hashCanonicalValueUtf8 matches hashUtf8(toCanonicalJson) for bounded values", () => {
+    const value = {
+      eventEnvelopeSchemaVersion: "0.2.0",
+      nextSequence: 99,
+      nested: [{ z: 1, a: 2 }],
+    };
+    expect(hashCanonicalValueUtf8(provider, value)).toBe(
+      provider.hashUtf8(toCanonicalJson(value)),
+    );
   });
 });
