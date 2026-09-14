@@ -35,10 +35,12 @@ jobs:
         continue-on-error: true
         run: (npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/web) 2>&1 | tee build.log
 
-      - name: Install Chrome test browser
+      - name: Verify Chrome test browser
         id: browser_install
         continue-on-error: true
-        run: npx playwright install --with-deps chromium 2>&1 | tee browser-install.log
+        run: |
+          set -o pipefail
+          (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version) 2>&1 | tee browser-install.log
 
       - name: Chrome E2E
         id: e2e
