@@ -1,4 +1,8 @@
-export type CompetitionLifecyclePhase = "idle" | "awaiting_match" | "finished";
+export type CompetitionLifecyclePhase =
+  | "idle"
+  | "awaiting_match"
+  | "round_robin_complete"
+  | "finished";
 
 export type CompetitionPreStartPreview = {
   tournamentKindLabel: string;
@@ -44,6 +48,44 @@ export type CompetitionScheduleOverview = {
   activeSelectionKey: string | null;
 };
 
+export type CompetitionRoundRobinHistoryRow = {
+  pairIndex: number;
+  participantAId: string;
+  participantBId: string;
+  participantADisplayName: string;
+  participantBDisplayName: string;
+  matchId: string | null;
+  winnerPersonId: string | null;
+  loserPersonId: string | null;
+  resultKind: string | null;
+};
+
+export type CompetitionRoundRobinMatrixCell = {
+  opponentPersonId: string;
+  opponentDisplayName: string;
+  pairIndex: number;
+  matchId: string | null;
+  outcome: "pending" | "win" | "loss";
+};
+
+export type CompetitionRoundRobinMatrixRow = {
+  personId: string;
+  displayName: string;
+  wins: number;
+  losses: number;
+  played: number;
+  cells: readonly CompetitionRoundRobinMatrixCell[];
+};
+
+export type CompetitionRoundRobinProgress = {
+  participantIds: readonly string[];
+  matchesTotal: number;
+  matchesCompleted: number;
+  nextPairIndex: number | null;
+  history: readonly CompetitionRoundRobinHistoryRow[];
+  matrix: readonly CompetitionRoundRobinMatrixRow[];
+};
+
 export type CompetitionProgressView = {
   schemaVersion: string;
   lifecyclePhase: CompetitionLifecyclePhase;
@@ -81,6 +123,7 @@ export type CompetitionProgressView = {
   preStartPreview: CompetitionPreStartPreview | null;
   lastMatchPlayerLabels: CompetitionLastMatchPlayerLabels | null;
   championDisplayName: string | null;
+  roundRobinProgress: CompetitionRoundRobinProgress | null;
   scheduleOverview: CompetitionScheduleOverview;
 };
 
