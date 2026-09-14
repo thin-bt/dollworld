@@ -19,6 +19,7 @@ export const COMPETITION_VIEW_KEYS = [
   "preStartPreview",
   "lastMatchPlayerLabels",
   "championDisplayName",
+  "roundRobinProgress",
   "scheduleOverview",
 ] as const;
 
@@ -94,6 +95,44 @@ export type CompetitionLastMatchPlayerLabels = {
   loserDisplayName: string;
 };
 
+export type CompetitionRoundRobinHistoryRowView = {
+  pairIndex: number;
+  participantAId: string;
+  participantBId: string;
+  participantADisplayName: string;
+  participantBDisplayName: string;
+  matchId: string | null;
+  winnerPersonId: string | null;
+  loserPersonId: string | null;
+  resultKind: string | null;
+};
+
+export type CompetitionRoundRobinMatrixCellView = {
+  opponentPersonId: string;
+  opponentDisplayName: string;
+  pairIndex: number;
+  matchId: string | null;
+  outcome: "pending" | "win" | "loss";
+};
+
+export type CompetitionRoundRobinMatrixRowView = {
+  personId: string;
+  displayName: string;
+  wins: number;
+  losses: number;
+  played: number;
+  cells: readonly CompetitionRoundRobinMatrixCellView[];
+};
+
+export type CompetitionRoundRobinProgressView = {
+  participantIds: readonly string[];
+  matchesTotal: number;
+  matchesCompleted: number;
+  nextPairIndex: number | null;
+  history: readonly CompetitionRoundRobinHistoryRowView[];
+  matrix: readonly CompetitionRoundRobinMatrixRowView[];
+};
+
 export type CompetitionProgressView = {
   schemaVersion: typeof COMPETITION_VIEW_SCHEMA_VERSION;
   lifecyclePhase: CompetitionLifecyclePhase;
@@ -111,6 +150,7 @@ export type CompetitionProgressView = {
   preStartPreview: CompetitionPreStartPreviewView | null;
   lastMatchPlayerLabels: CompetitionLastMatchPlayerLabels | null;
   championDisplayName: string | null;
+  roundRobinProgress: CompetitionRoundRobinProgressView | null;
   scheduleOverview: CompetitionScheduleOverviewView;
 };
 
