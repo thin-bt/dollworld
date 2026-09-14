@@ -16,6 +16,9 @@ function phaseLabel(phase: CompetitionProgressView["lifecyclePhase"]): string {
   if (phase === "awaiting_match") {
     return "試合待ち";
   }
+  if (phase === "round_robin_complete") {
+    return "総当たり戦終了";
+  }
   return "終了";
 }
 
@@ -53,6 +56,8 @@ function TournamentDetailPanel(props: {
     (entry.isActiveCompetition || entry.isPlayable) &&
     view.lifecyclePhase !== "idle";
   const finished = view.lifecyclePhase === "finished" && entry?.isActiveCompetition === true;
+  const roundRobinComplete =
+    view.lifecyclePhase === "round_robin_complete" && entry?.isActiveCompetition === true;
   const canShowParticipants =
     entry !== null && entry.participantLinks.length > 0 && (entry.isPlayable || entry.isActiveCompetition);
 
@@ -115,8 +120,20 @@ function TournamentDetailPanel(props: {
               {view.participantDisplayNames.length > 0
                 ? ` · 参加者 ${view.participantDisplayNames.join(" · ")}`
                 : ""}
-              {view.matchesCompleted > 0 ? ` · 消化試合数 ${view.matchesCompleted}` : ""}
+              {view.roundRobinProgress !== null
+                ? ` · ${view.roundRobinProgress.matchesCompleted}/${view.roundRobinProgress.matchesTotal}試合`
+                : view.matchesCompleted > 0
+                  ? ` · 消化試合数 ${view.matchesCompleted}`
+                  : ""}
             </p>
+          ) : null}
+
+          {roundRobinComplete ? (
+            <div className="competition-result-hero" data-testid="competition-round-robin-complete">
+              <p className="competition-result-hero-kicker">総当たり戦</p>
+              <p className="competition-result-hero-title">全試合終了</p>
+              <p className="competition-detail-hint">順位・優勝者はまだ確定していません。</p>
+            </div>
           ) : null}
 
           {finished && view.championDisplayName !== null ? (
@@ -137,6 +154,64 @@ function TournamentDetailPanel(props: {
                 {" · "}
                 敗者 {view.lastMatchPlayerLabels.loserDisplayName}
               </p>
+            </section>
+          ) : null}
+
+          {showProgress && view.roundRobinProgress !== null ? (
+            <section className="competition-ranking" aria-labelledby="competition-round-robin-heading">
+              <h4 id="competition-round-robin-heading" className="competition-section-heading">
+                総当たり戦績
+              </h4>
+              <table className="data-table" data-testid="competition-round-robin-matrix">
+                <thead>
+                  <tr>
+                    <th>選手</th>
+                    <th>勝</th>
+                    <th>敗</th>
+                    <th>試合</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {view.roundRobinProgress.matrix.map((row) => (
+                    <tr key={row.personId}>
+                      <td>{row.displayName}</td>
+                      <td>{row.wins}</td>
+                      <td>{row.losses}</td>
+                      <td>{row.played}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <h4 className="competition-section-heading">対戦履歴</h4>
+              <table className="data-table" data-testid="competition-round-robin-history">
+                <thead>
+                  <tr>
+                    <th>試合</th>
+                    <th>対戦</th>
+                    <th>結果</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {view.roundRobinProgress.history.map((row) => {
+                    const winnerName =
+                      row.winnerPersonId === row.participantAId
+                        ? row.participantADisplayName
+                        : row.winnerPersonId === row.participantBId
+                          ? row.participantBDisplayName
+                          : null;
+                    return (
+                      <tr key={row.pairIndex}>
+                        <td>{row.pairIndex + 1}</td>
+                        <td>
+                          {row.participantADisplayName} vs {row.participantBDisplayName}
+                        </td>
+                        <td>{winnerName === null ? "未消化" : `${winnerName} 勝利`}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </section>
           ) : null}
 
@@ -301,8 +376,8 @@ export function CompetitionPage(props: CompetitionPageProps) {
   const canStep =
     view !== null &&
     selectedEntry !== null &&
-    selectedEntry.isPlayable &&
-    view.lifecyclePhase !== "finished" &&
+    ((view.lifecyclePhase === "idle" && selectedEntry.isPlayable) ||
+      (view.lifecyclePhase === "awaiting_match" && selectedEntry.isActiveCompetition)) &&
     !actionPending;
 
   if (loadStatus === "loading") {
@@ -325,7 +400,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
     );
   }
 
-  const finished = view.lifecyclePhase === "finished";
+  const closed = view.lifecyclePhase === "finished" || view.lifecyclePhase === "round_robin_complete";
   const primaryCtaLabel =
     view.lifecyclePhase === "idle" ? "大会を開始して1試合進める" : "次の試合を進める";
 
@@ -360,9 +435,13 @@ export function CompetitionPage(props: CompetitionPageProps) {
       </div>
 
       <footer className="competition-actions">
-        {finished ? (
+        {closed ? (
           <div className="competition-finished-actions" data-testid="competition-finished">
-            <p className="competition-finished-message">この大会は終了しました。</p>
+            <p className="competition-finished-message">
+              {view.lifecyclePhase === "round_robin_complete"
+                ? "総当たり戦の全試合を消化しました。"
+                : "この大会は終了しました。"}
+            </p>
             <p>
               <button type="button" className="competition-next-link" onClick={() => setScheduleFocus(true)}>
                 日程表を見る
@@ -384,7 +463,10 @@ export function CompetitionPage(props: CompetitionPageProps) {
             >
               {actionPending ? "試合を処理中…" : primaryCtaLabel}
             </button>
-            {!canStep && selectedEntry !== null && !selectedEntry.isPlayable ? (
+            {!canStep &&
+            selectedEntry !== null &&
+            !selectedEntry.isPlayable &&
+            !selectedEntry.isActiveCompetition ? (
               <span className="competition-step-hint"> 進行できる大会を選択してください。</span>
             ) : null}
           </p>
