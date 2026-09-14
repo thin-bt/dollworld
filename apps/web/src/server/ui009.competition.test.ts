@@ -255,5 +255,17 @@ describe("UI-009 competition progression", () => {
     expect(firstRow.displayName).not.toMatch(/^person_/);
     expect(firstRow.yearlyCumulativeEarningsLabel).toMatch(/,/);
     expect(firstRow.officialRecordLabel).toMatch(/勝.*敗/);
+
+    // Competition owns its own journal record. It must not replace the simulation
+    // lastOperation pointer, because GET /simulation only accepts simulation/mock views.
+    const simulation = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/simulation`,
+      headers: { host: HOST, cookie },
+    });
+    expect(simulation.statusCode).toBe(200);
+    const simulationBody = JSON.parse(simulation.body) as Envelope;
+    expect(simulationBody.ok).toBe(true);
+    expect((simulationBody.data as { lastOperation: { operation: string } }).lastOperation.operation).toBe("start");
   });
 });
