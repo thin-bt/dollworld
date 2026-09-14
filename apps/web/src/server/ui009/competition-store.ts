@@ -4,7 +4,7 @@ export const COMPETITION_STORE_SCHEMA_VERSION = "0.1.0" as const;
 
 export type CompetitionPersistedState = {
   readonly schemaVersion: typeof COMPETITION_STORE_SCHEMA_VERSION;
-  readonly phase: "awaiting_match" | "finished";
+  readonly phase: "awaiting_match" | "round_robin_complete" | "finished";
   readonly tournamentId: string;
   readonly tournamentKind: string;
   readonly targetRank: string;
