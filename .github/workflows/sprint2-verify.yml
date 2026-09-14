@@ -42,6 +42,11 @@ jobs:
           set -o pipefail
           (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version) 2>&1 | tee browser-install.log
 
+      - name: UI009 Chrome acceptance
+        id: ui009_e2e
+        continue-on-error: true
+        run: npx playwright test tests/e2e/s2-ui009-round-robin-competition.spec.ts --project=chrome 2>&1 | tee ui009-e2e-chrome.log
+
       - name: Chrome E2E
         id: e2e
         continue-on-error: true
@@ -57,6 +62,7 @@ jobs:
             targeted-tests.log
             build.log
             browser-install.log
+            ui009-e2e-chrome.log
             e2e-chrome.log
           if-no-files-found: warn
 
@@ -67,4 +73,5 @@ jobs:
           test '${{ steps.targeted.outcome }}' = success
           test '${{ steps.build.outcome }}' = success
           test '${{ steps.browser_install.outcome }}' = success
+          test '${{ steps.ui009_e2e.outcome }}' = success
           test '${{ steps.e2e.outcome }}' = success
