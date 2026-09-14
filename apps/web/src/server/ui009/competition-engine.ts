@@ -10,6 +10,7 @@ import {
   computeParticipantListHash,
   createEmptyAnnualEarningsLedger,
   createEmptyCompetitiveRecord,
+  createEmptyDetailedLogPayloadStore,
   toCanonicalJson,
   validateSprint1RunSession,
   type AnnualRankingDisplayFacts,
@@ -26,6 +27,7 @@ import {
   buildAcceptedCompetitionParticipantPlan,
   plannedCompetitionParticipantIdsForPreview,
 } from "./competition-participant-preview.js";
+import { persistDetailedLogPayloadStore } from "./competition-payload-store.js";
 import { executeNextRoundRobinMatch } from "./competition-round-robin-execution.js";
 import { projectRoundRobinProgress } from "./competition-round-robin-progress.js";
 import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
@@ -207,7 +209,7 @@ function initializeCompetitionState(
     bracketDefinition: JSON.parse(toCanonicalJson(built.value.definition)) as Record<string, unknown>,
     bracketRuntimeState: JSON.parse(toCanonicalJson(built.value.runtimeState)) as Record<string, unknown>,
     isolatedSession: JSON.parse(toCanonicalJson(isolatedSession)) as Record<string, unknown>,
-    payloadStore: {},
+    payloadStore: persistDetailedLogPayloadStore(createEmptyDetailedLogPayloadStore()),
     storedRecords: [],
     matchesCompleted: 0,
     lastMatch: null,
@@ -281,7 +283,7 @@ function playNextMatch(
     ...state,
     phase: roundRobinComplete ? "round_robin_complete" : "awaiting_match",
     isolatedSession: JSON.parse(toCanonicalJson(atomic.session)) as Record<string, unknown>,
-    payloadStore: JSON.parse(toCanonicalJson(atomic.payloadStore)) as Record<string, unknown>,
+    payloadStore: persistDetailedLogPayloadStore(atomic.payloadStore),
     storedRecords: atomic.storedRecords.map(
       (row) => JSON.parse(toCanonicalJson(row)) as Record<string, unknown>,
     ),
