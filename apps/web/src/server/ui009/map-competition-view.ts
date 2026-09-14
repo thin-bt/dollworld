@@ -24,6 +24,7 @@ import {
 } from "./competition-player-labels.js";
 import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
 import type {
+  CompetitionLifecyclePhase,
   CompetitionParticipantLinkView,
   CompetitionProgressView,
   CompetitionRankingRowView,
@@ -174,6 +175,16 @@ function activeParticipantIds(state: CompetitionPersistedState): readonly string
   return [state.participantAId, state.participantBId];
 }
 
+function lifecyclePhaseFromState(state: CompetitionPersistedState): CompetitionLifecyclePhase {
+  if (state.phase === "finished") {
+    return "finished";
+  }
+  if (state.phase === "round_robin_complete") {
+    return "round_robin_complete";
+  }
+  return "awaiting_match";
+}
+
 export function mapCompetitionProgressView(
   store: CompetitionSessionStore,
   rankingFacts: readonly AnnualRankingDisplayFacts[],
@@ -223,7 +234,7 @@ export function mapCompetitionProgressView(
 
   return {
     schemaVersion: COMPETITION_VIEW_SCHEMA_VERSION,
-    lifecyclePhase: state.phase === "finished" ? "finished" : "awaiting_match",
+    lifecyclePhase: lifecyclePhaseFromState(state),
     tournamentId: state.tournamentId,
     tournamentKind: state.tournamentKind,
     targetRank: state.targetRank,
