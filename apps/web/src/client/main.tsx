@@ -24,6 +24,9 @@ function parseClientRoute(pathname: string, search: string): { kind: "dev-viewer
   if (path === "/mock-battle") {
     return { kind: "mock-battle" };
   }
+  if (path === "/competition") {
+    return { kind: "competition" };
+  }
   if (path === "/people") {
     return { kind: "people" };
   }

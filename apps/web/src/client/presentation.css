@@ -1586,3 +1586,286 @@ a.dw-person-name-link:focus-visible {
   color: var(--dw-accent);
   line-height: 1;
 }
+
+.panel-status {
+  padding: 1rem 1.25rem;
+  color: var(--dw-muted);
+}
+
+.panel-error {
+  color: var(--dw-danger);
+}
+
+.competition-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.competition-header h2 {
+  margin: 0 0 0.35rem;
+}
+
+.competition-phase {
+  margin: 0;
+  color: var(--dw-muted);
+}
+
+.competition-section-heading {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--dw-accent-2);
+}
+
+.competition-pre-start {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 10px;
+  background: var(--dw-panel);
+}
+
+.competition-pre-start-summary {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.competition-pre-start-participants {
+  margin: 0 0 0.5rem;
+}
+
+.competition-pre-start-hint {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--dw-muted);
+}
+
+.competition-meta {
+  margin: 0;
+  color: var(--dw-muted);
+}
+
+.competition-result-hero {
+  padding: 1.25rem 1.35rem;
+  border-radius: 12px;
+  border: 1px solid rgba(199, 164, 106, 0.45);
+  background:
+    linear-gradient(145deg, rgba(199, 164, 106, 0.14), transparent 55%), var(--dw-panel-2);
+  text-align: center;
+}
+
+.competition-result-hero-kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  color: var(--dw-muted);
+  text-transform: uppercase;
+}
+
+.competition-result-hero-title {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  color: var(--dw-accent);
+}
+
+.competition-result-hero-name {
+  margin: 0.35rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.competition-match-result {
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--dw-line);
+}
+
+.competition-ranking-note {
+  margin: 0 0 0.65rem;
+  font-size: 0.9rem;
+  color: var(--dw-muted);
+}
+
+.competition-finished-message {
+  margin: 0 0 0.5rem;
+  color: var(--dw-muted);
+}
+
+.competition-next-link {
+  display: inline-block;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 9px;
+  text-decoration: none;
+  background: #2b302b;
+}
+
+.competition-next-link:hover {
+  border-color: var(--dw-accent);
+}
+
+.competition-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.9fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .competition-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.competition-schedule-time {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+
+.competition-schedule-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--dw-line);
+  border-radius: 10px;
+  background: var(--dw-panel);
+}
+
+.competition-schedule-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.competition-schedule-table th,
+.competition-schedule-table td {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.15rem;
+  text-align: center;
+}
+
+.competition-schedule-row-label {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--dw-panel-2);
+  font-weight: 600;
+  min-width: 2.5rem;
+}
+
+.competition-schedule-month {
+  background: rgba(199, 164, 106, 0.08);
+  font-size: 0.75rem;
+}
+
+.competition-schedule-week {
+  font-weight: 400;
+  color: var(--dw-muted);
+  min-width: 1.35rem;
+}
+
+.competition-schedule-cell {
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.competition-schedule-cell--now {
+  box-shadow: inset 0 0 0 1px rgba(199, 164, 106, 0.35);
+}
+
+.competition-schedule-cell--past {
+  opacity: 0.55;
+}
+
+.competition-schedule-cell--selected {
+  background: rgba(199, 164, 106, 0.18);
+}
+
+.competition-schedule-marker {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--dw-accent);
+  cursor: pointer;
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+.competition-schedule-marker:hover,
+.competition-schedule-marker:focus-visible {
+  color: #fff;
+  outline: 1px solid var(--dw-accent);
+}
+
+.competition-schedule-cell--playable .competition-schedule-marker {
+  color: #9fd4a0;
+}
+
+.competition-schedule-cell--active .competition-schedule-marker {
+  color: #e8c88a;
+}
+
+.competition-detail {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 10px;
+  background: var(--dw-panel-2);
+}
+
+.competition-detail-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.competition-detail-tabs button {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 8px;
+  background: #2b302b;
+  color: inherit;
+  cursor: pointer;
+}
+
+.competition-detail-tabs button[aria-selected="true"] {
+  border-color: var(--dw-accent);
+  background: rgba(199, 164, 106, 0.12);
+}
+
+.competition-detail-tabs button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.competition-detail-meta {
+  margin: 0 0 0.65rem;
+  color: var(--dw-muted);
+  font-size: 0.92rem;
+}
+
+.competition-detail-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--dw-muted);
+}
+
+.competition-detail-back {
+  margin: 0.85rem 0 0;
+}
+
+.competition-step-hint {
+  margin-left: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--dw-muted);
+}
+
+.competition-schedule-empty {
+  margin: 0;
+  color: var(--dw-muted);
+  font-size: 0.92rem;
+}

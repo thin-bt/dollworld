@@ -29,6 +29,8 @@ const REGISTERED = [
   "/api/s1_5/mock-battles/latest/log",
   "/api/s1_5/events",
   "/api/s1_5/validation-results",
+  "/api/s1_5/competition",
+  "/api/s1_5/competition/step",
 ];
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");

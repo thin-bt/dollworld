@@ -46,6 +46,8 @@ import {
   deriveEnvelopeRevision,
   type UiSession,
 } from "./ui-session.js";
+import { buildProductionCreateSprint1RunSessionInput } from "./create-sprint1-run-session-input.js";
+import { resetCompetitionStore } from "./ui009/competition-session-registry.js";
 import {
   createValidationStoreFromInitialization,
   type ValidationStoreHooks,
@@ -362,20 +364,6 @@ function notStarted(reply: FastifyReply, session: UiSession): void {
   );
 }
 
-function buildCreateSprint1RunSessionInput(input: {
-  seed: number;
-  config: import("@shared-world/simulation-core").InitialWorldConfig;
-  nameData: import("@shared-world/simulation-core").ValidatedNameData;
-  sprint1CliInput: unknown;
-}): unknown {
-  return {
-    seed: input.seed,
-    config: input.config,
-    nameData: input.nameData,
-    sprint1CliInput: input.sprint1CliInput,
-  };
-}
-
 function serializeMutationSuccess(view: SimulationMutationView, deps: SimulationRouteDeps): string {
   if (deps.hooks?.failSerializeBeforeCommit === true) {
     throw new Error("injected serialize-before-commit fault");
@@ -538,12 +526,7 @@ export async function handlePostSimulationStart(
   try {
     deps.hooks?.throwOnStartBuild?.();
     created = createSprint1RunSession(
-      buildCreateSprint1RunSessionInput({
-        seed,
-        config: materials.config,
-        nameData: materials.nameData,
-        sprint1CliInput: materials.sprint1CliInputForCreate,
-      }),
+      buildProductionCreateSprint1RunSessionInput(materials, seed, sha256),
       sha256,
     );
   } catch {
@@ -639,6 +622,7 @@ export async function handlePostSimulationStart(
     session.runInitializationSnapshot = runInit;
     session.committedValidationStore = validationStore;
     session.mockBattleStore = createEmptyMockBattleStore();
+    resetCompetitionStore(session.sessionId);
     completeJournalRecord({
       session,
       requestId,
@@ -891,6 +875,7 @@ export async function handlePostSimulationReset(
     session.runInitializationSnapshot = validatedSnap.value;
     session.committedValidationStore = validationStore;
     session.mockBattleStore = createEmptyMockBattleStore();
+    resetCompetitionStore(session.sessionId);
     completeJournalRecord({
       session,
       requestId,

@@ -4,6 +4,7 @@ import { BattleLogPage } from "./battle-log/BattleLogPage.js";
 import { PeopleViewer } from "./dev-viewer/PeopleViewer.js";
 import { SimulationPanel } from "./dev-viewer/SimulationPanel.js";
 import { EventsPage, type EventsTab } from "./events/EventsPage.js";
+import { CompetitionPage } from "./competition/CompetitionPage.js";
 import { MockBattlePage } from "./mock-battle/MockBattlePage.js";
 import { PersonDetailPage } from "./person-detail/PersonDetailPage.js";
 import { ensureReadySimulation, loadUiSession } from "./session-client.js";
@@ -16,6 +17,7 @@ export type ShellRoute =
   | { kind: "person-detail"; personId: string }
   | { kind: "mock-battle" }
   | { kind: "mock-battle-result" }
+  | { kind: "competition" }
   | { kind: "events"; tab: EventsTab };
 
 export type ShellProps = {
@@ -33,6 +35,9 @@ function menuHref(item: (typeof MENU_ITEMS)[number]): string | null {
   }
   if (item === "模擬戦") {
     return "/mock-battle";
+  }
+  if (item === "大会") {
+    return "/competition";
   }
   if (item === "イベント") {
     return "/events";
@@ -125,6 +130,7 @@ export function Shell({
 
   const peopleActive = route.kind === "people" || route.kind === "person-detail";
   const mockActive = route.kind === "mock-battle" || route.kind === "mock-battle-result";
+  const competitionActive = route.kind === "competition";
   const eventsActive = route.kind === "events";
   const homeActive = route.kind === "home";
 
@@ -157,12 +163,14 @@ export function Shell({
               const href = menuHref(item);
               const isPeople = item === "人物";
               const isMock = item === "模擬戦";
+              const isCompetition = item === "大会";
               const isEvents = item === "イベント";
               const isHome = item === "シミュレーション";
               const active =
                 (isHome && homeActive) ||
                 (isPeople && peopleActive) ||
                 (isMock && mockActive) ||
+                (isCompetition && competitionActive) ||
                 (isEvents && eventsActive);
               return (
                 <li key={item}>
@@ -191,9 +199,20 @@ export function Shell({
         data-route-kind={route.kind}
       >
         {sessionState === "empty" ? (
-          <p className="dw-status" data-status={loadError !== null ? "error" : "loading"}>
-            {loadError !== null ? "セッション取得に失敗しました" : "読み込み中…"}
-          </p>
+          <div className="dw-status" data-status={loadError !== null ? "error" : "loading"}>
+            <p data-testid="shell-bootstrap-status">
+              {loadError !== null
+                ? "シミュレーションの準備に失敗しました。"
+                : "シミュレーションを準備中…"}
+            </p>
+            {loadError !== null ? (
+              <p>
+                <button type="button" onClick={() => setNavigationEpoch((n) => n + 1)}>
+                  再試行
+                </button>
+              </p>
+            ) : null}
+          </div>
         ) : null}
         {sessionState === "ready" && csrfToken !== null && route.kind === "home" ? (
           <SimulationPanel
@@ -210,6 +229,9 @@ export function Shell({
           <PersonDetailPage personId={route.personId} />
         ) : null}
         {sessionState === "ready" && route.kind === "mock-battle" ? <MockBattlePage /> : null}
+        {sessionAllowsReadRoutes(sessionState) && route.kind === "competition" ? (
+          <CompetitionPage />
+        ) : null}
         {sessionAllowsReadRoutes(sessionState) && route.kind === "mock-battle-result" ? (
           <BattleLogPage />
         ) : null}

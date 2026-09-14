@@ -49,6 +49,11 @@ import {
 import { handleGetBattleLog, type BattleLogRouteDeps } from "./ui007/routes-battle-log.js";
 import { handleGetEvents, type EventsRouteDeps } from "./ui008/routes-events.js";
 import { handleGetValidationResults, type ValidationRouteDeps } from "./ui008/routes-validation.js";
+import {
+  handleGetCompetition,
+  handlePostCompetitionStep,
+  type CompetitionRouteDeps,
+} from "./ui009/routes-competition.js";
 import { CSRF_HEADER_NAME, csrfTokensEqual, parseSessionCookieHeader } from "./session-cookie.js";
 import { createMemorySessionStore, type SessionStore } from "./session-store.js";
 import type { UiSession } from "./ui-session.js";
@@ -361,6 +366,8 @@ export async function createUiApp(options: CreateUiAppOptions = {}): Promise<UiA
   const mockBattlesLatestLogPath = `${API_PREFIX}/mock-battles/latest/log`;
   const eventsPath = `${API_PREFIX}/events`;
   const validationResultsPath = `${API_PREFIX}/validation-results`;
+  const competitionPath = `${API_PREFIX}/competition`;
+  const competitionStepPath = `${API_PREFIX}/competition/step`;
   registeredApiPaths.push(
     sessionPath,
     presetsPath,
@@ -377,6 +384,8 @@ export async function createUiApp(options: CreateUiAppOptions = {}): Promise<UiA
     mockBattlesLatestLogPath,
     eventsPath,
     validationResultsPath,
+    competitionPath,
+    competitionStepPath,
   );
 
   app.get(sessionPath, async (request, reply) => {
@@ -491,6 +500,17 @@ export async function createUiApp(options: CreateUiAppOptions = {}): Promise<UiA
   });
   app.get(validationResultsPath, async (request, reply) => {
     await handleGetValidationResults(request, reply, validationDeps());
+  });
+
+  const competitionDeps = (): CompetitionRouteDeps => ({
+    store: sessionStore,
+    processKeys,
+  });
+  app.get(competitionPath, async (request, reply) => {
+    await handleGetCompetition(request, reply, competitionDeps());
+  });
+  app.post(competitionStepPath, async (request, reply) => {
+    await handlePostCompetitionStep(request, reply, competitionDeps());
   });
 
   if (options.enableTestProbe === true) {

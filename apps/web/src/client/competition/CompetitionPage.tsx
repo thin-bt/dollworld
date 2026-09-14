@@ -1,0 +1,405 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { loadUiSession } from "../session-client.js";
+import type { FetchLike } from "../session-client.js";
+import { CompetitionScheduleMatrix } from "./competition-schedule-matrix.js";
+import { loadCompetitionState, postCompetitionStep } from "./fetch-ui009.js";
+import type { CompetitionProgressView, CompetitionScheduleEntry } from "./ui009-views.js";
+
+export type CompetitionPageProps = {
+  fetchImpl?: FetchLike;
+};
+
+function phaseLabel(phase: CompetitionProgressView["lifecyclePhase"]): string {
+  if (phase === "idle") {
+    return "未開始";
+  }
+  if (phase === "awaiting_match") {
+    return "試合待ち";
+  }
+  return "終了";
+}
+
+function defaultSelectedKey(view: CompetitionProgressView): string | null {
+  const overview = view.scheduleOverview;
+  if (overview.activeSelectionKey !== null) {
+    return overview.activeSelectionKey;
+  }
+  if (overview.playableSelectionKey !== null) {
+    return overview.playableSelectionKey;
+  }
+  return overview.entries[0]?.selectionKey ?? null;
+}
+
+function findEntry(
+  view: CompetitionProgressView,
+  selectionKey: string | null,
+): CompetitionScheduleEntry | null {
+  if (selectionKey === null) {
+    return null;
+  }
+  return view.scheduleOverview.entries.find((entry) => entry.selectionKey === selectionKey) ?? null;
+}
+
+function TournamentDetailPanel(props: {
+  view: CompetitionProgressView;
+  entry: CompetitionScheduleEntry | null;
+  detailPane: "overview" | "participants";
+  onDetailPane: (pane: "overview" | "participants") => void;
+  onBackToSchedule: () => void;
+}) {
+  const { view, entry, detailPane, onDetailPane, onBackToSchedule } = props;
+  const showProgress =
+    entry !== null &&
+    (entry.isActiveCompetition || entry.isPlayable) &&
+    view.lifecyclePhase !== "idle";
+  const finished = view.lifecyclePhase === "finished" && entry?.isActiveCompetition === true;
+  const canShowParticipants =
+    entry !== null && entry.participantLinks.length > 0 && (entry.isPlayable || entry.isActiveCompetition);
+
+  if (entry === null) {
+    return (
+      <aside className="competition-detail" data-testid="competition-detail-empty">
+        <p>日程表から大会を選択してください。</p>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="competition-detail" aria-label="大会詳細" data-testid="competition-detail">
+      <div className="competition-detail-tabs" role="tablist" aria-label="大会詳細タブ">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={detailPane === "overview"}
+          data-testid="competition-detail-tab-overview"
+          onClick={() => onDetailPane("overview")}
+        >
+          大会詳細
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={detailPane === "participants"}
+          disabled={!canShowParticipants}
+          data-testid="competition-detail-tab-participants"
+          onClick={() => onDetailPane("participants")}
+        >
+          参加者
+        </button>
+      </div>
+
+      {detailPane === "overview" ? (
+        <div className="competition-detail-body" data-testid="competition-detail-overview">
+          <h3 className="competition-section-heading">
+            {entry.timingLabel} {entry.rankOrCategoryLabel}
+          </h3>
+          <p className="competition-detail-meta">
+            {entry.kindLabel} · {entry.lifecycleStateLabel}
+            {entry.participantCountLabel !== null ? ` · 参加 ${entry.participantCountLabel}` : ""}
+          </p>
+          {entry.isPlayable && view.lifecyclePhase === "idle" ? (
+            <p className="competition-detail-hint">
+              この大会が次に進行できます。下のボタンで開始し、1試合を進行します。
+            </p>
+          ) : null}
+          {!entry.isPlayable && !entry.isActiveCompetition ? (
+            <p className="competition-detail-hint">
+              日程と種別のみ表示しています。参加者確定前の大会は詳細データがありません。
+            </p>
+          ) : null}
+
+          {showProgress && view.tournamentKindLabel !== null ? (
+            <p className="competition-meta">
+              {view.tournamentKindLabel}
+              {view.targetRankLabel !== null ? ` · ${view.targetRankLabel}` : ""}
+              {view.participantDisplayNames.length > 0
+                ? ` · 参加者 ${view.participantDisplayNames.join(" · ")}`
+                : ""}
+              {view.matchesCompleted > 0 ? ` · 消化試合数 ${view.matchesCompleted}` : ""}
+            </p>
+          ) : null}
+
+          {finished && view.championDisplayName !== null ? (
+            <div className="competition-result-hero" data-testid="competition-champion">
+              <p className="competition-result-hero-kicker">大会結果</p>
+              <p className="competition-result-hero-title">優勝</p>
+              <p className="competition-result-hero-name">{view.championDisplayName}</p>
+            </div>
+          ) : null}
+
+          {showProgress && view.lastMatchPlayerLabels !== null ? (
+            <section className="competition-match-result" aria-labelledby="competition-last-match">
+              <h4 id="competition-last-match" className="competition-section-heading">
+                最新試合
+              </h4>
+              <p>
+                勝者 <strong>{view.lastMatchPlayerLabels.winnerDisplayName}</strong>
+                {" · "}
+                敗者 {view.lastMatchPlayerLabels.loserDisplayName}
+              </p>
+            </section>
+          ) : null}
+
+          {showProgress && view.rankingRows.length > 0 ? (
+            <section className="competition-ranking" aria-labelledby="competition-ranking-heading">
+              <h4 id="competition-ranking-heading" className="competition-section-heading">
+                年間順位
+              </h4>
+              <p className="competition-ranking-note">
+                公式戦戦績は本大会の結果を含まない通算記録です。
+              </p>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>順位</th>
+                    <th>選手</th>
+                    <th>年間獲得金</th>
+                    <th>ランク</th>
+                    <th>公式戦戦績（本大会除く）</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {view.rankingRows.map((row) => (
+                    <tr key={row.personId}>
+                      <td>{row.annualRank}</td>
+                      <td>{row.displayName}</td>
+                      <td>{row.yearlyCumulativeEarningsLabel}</td>
+                      <td>{row.currentRankLabel}</td>
+                      <td>{row.officialRecordLabel}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ) : null}
+        </div>
+      ) : (
+        <div className="competition-detail-body" data-testid="competition-participants">
+          {canShowParticipants ? (
+            <table className="data-table competition-participant-table">
+              <thead>
+                <tr>
+                  <th>選手</th>
+                  <th>詳細</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entry.participantLinks.map((link) => (
+                  <tr key={link.personId}>
+                    <td>{link.displayName}</td>
+                    <td>
+                      <a href={`/people/${encodeURIComponent(link.personId)}`}>人物詳細</a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="competition-schedule-empty">参加者情報はまだありません。</p>
+          )}
+        </div>
+      )}
+
+      <p className="competition-detail-back">
+        <button type="button" onClick={onBackToSchedule}>
+          日程表に戻る
+        </button>
+      </p>
+    </aside>
+  );
+}
+
+export function CompetitionPage(props: CompetitionPageProps) {
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
+  const [uiRevision, setUiRevision] = useState(0);
+  const [view, setView] = useState<CompetitionProgressView | null>(null);
+  const [loadStatus, setLoadStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionPending, setActionPending] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [detailPane, setDetailPane] = useState<"overview" | "participants">("overview");
+  const [scheduleFocus, setScheduleFocus] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoadStatus("loading");
+    setLoadError(null);
+    const fetchOpts = props.fetchImpl !== undefined ? { fetchImpl: props.fetchImpl } : {};
+    const session = await loadUiSession(fetchOpts);
+    if (session.kind !== "success") {
+      setLoadStatus("error");
+      setLoadError(
+        session.message === "transport_error"
+          ? "通信に失敗しました。ネットワークを確認して再試行してください。"
+          : "セッションを取得できませんでした。",
+      );
+      return;
+    }
+    setCsrfToken(session.csrfToken);
+    setUiRevision(session.uiRevision);
+    const page = await loadCompetitionState(fetchOpts);
+    if (page.kind === "failure") {
+      setLoadStatus("error");
+      setLoadError(page.message || "大会情報の読み込みに失敗しました。");
+      return;
+    }
+    setView(page.data);
+    setSelectedKey((prev) => prev ?? defaultSelectedKey(page.data));
+    setUiRevision(page.uiRevision);
+    setLoadStatus("ready");
+  }, [props.fetchImpl]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    if (view === null) {
+      return;
+    }
+    setSelectedKey((prev) => {
+      if (prev !== null && view.scheduleOverview.entries.some((e) => e.selectionKey === prev)) {
+        return prev;
+      }
+      return defaultSelectedKey(view);
+    });
+  }, [view]);
+
+  const selectedEntry = useMemo(
+    () => (view === null ? null : findEntry(view, selectedKey)),
+    [view, selectedKey],
+  );
+
+  const onStep = useCallback(async () => {
+    if (csrfToken === null || actionPending) {
+      return;
+    }
+    setActionPending(true);
+    setActionError(null);
+    const result = await postCompetitionStep({
+      csrfToken,
+      expectedUiRevision: uiRevision,
+      requestId: crypto.randomUUID(),
+      ...(props.fetchImpl !== undefined ? { fetchImpl: props.fetchImpl } : {}),
+    });
+    if (result.kind === "failure") {
+      setActionPending(false);
+      setActionError(
+        result.message || "試合の進行に失敗しました。しばらくしてから再試行してください。",
+      );
+      return;
+    }
+    setView(result.data.competition);
+    setUiRevision(result.uiRevision);
+    setActionPending(false);
+    setScheduleFocus(false);
+    if (result.data.competition.scheduleOverview.activeSelectionKey !== null) {
+      setSelectedKey(result.data.competition.scheduleOverview.activeSelectionKey);
+    }
+  }, [actionPending, csrfToken, props.fetchImpl, uiRevision]);
+
+  const canStep =
+    view !== null &&
+    selectedEntry !== null &&
+    selectedEntry.isPlayable &&
+    view.lifecyclePhase !== "finished" &&
+    !actionPending;
+
+  if (loadStatus === "loading") {
+    return (
+      <p className="panel-status" data-testid="competition-load-status" data-status="loading">
+        大会情報を読み込み中…
+      </p>
+    );
+  }
+  if (loadStatus === "error" || view === null) {
+    return (
+      <div className="panel-status panel-error" data-testid="competition-load-status" data-status="error">
+        <p>{loadError ?? "大会情報を読み込めませんでした。"}</p>
+        <p>
+          <button type="button" onClick={() => void refresh()}>
+            再読み込み
+          </button>
+        </p>
+      </div>
+    );
+  }
+
+  const finished = view.lifecyclePhase === "finished";
+  const primaryCtaLabel =
+    view.lifecyclePhase === "idle" ? "大会を開始して1試合進める" : "次の試合を進める";
+
+  return (
+    <section className="panel competition-panel" aria-labelledby="competition-heading">
+      <header className="competition-header">
+        <h2 id="competition-heading">大会</h2>
+        <p className="competition-phase">
+          進行状態: <strong>{phaseLabel(view.lifecyclePhase)}</strong>
+        </p>
+      </header>
+
+      <div className="competition-layout">
+        {scheduleFocus ? (
+          <CompetitionScheduleMatrix
+            overview={view.scheduleOverview}
+            selectedKey={selectedKey}
+            onSelect={(key) => {
+              setSelectedKey(key);
+              setDetailPane("overview");
+            }}
+          />
+        ) : null}
+
+        <TournamentDetailPanel
+          view={view}
+          entry={selectedEntry}
+          detailPane={detailPane}
+          onDetailPane={setDetailPane}
+          onBackToSchedule={() => setScheduleFocus(true)}
+        />
+      </div>
+
+      <footer className="competition-actions">
+        {finished ? (
+          <div className="competition-finished-actions" data-testid="competition-finished">
+            <p className="competition-finished-message">この大会は終了しました。</p>
+            <p>
+              <button type="button" className="competition-next-link" onClick={() => setScheduleFocus(true)}>
+                日程表を見る
+              </button>
+              {" · "}
+              <a className="competition-next-link" href="/">
+                シミュレーションへ戻る
+              </a>
+            </p>
+          </div>
+        ) : (
+          <p>
+            <button
+              type="button"
+              data-testid="competition-step-cta"
+              disabled={!canStep}
+              aria-busy={actionPending}
+              onClick={() => void onStep()}
+            >
+              {actionPending ? "試合を処理中…" : primaryCtaLabel}
+            </button>
+            {!canStep && selectedEntry !== null && !selectedEntry.isPlayable ? (
+              <span className="competition-step-hint"> 進行できる大会を選択してください。</span>
+            ) : null}
+          </p>
+        )}
+        {actionError !== null ? (
+          <div className="panel-error" data-testid="competition-action-error">
+            <p>{actionError}</p>
+            <p>
+              <button type="button" disabled={actionPending} onClick={() => void onStep()}>
+                再試行
+              </button>
+            </p>
+          </div>
+        ) : null}
+      </footer>
+    </section>
+  );
+}
