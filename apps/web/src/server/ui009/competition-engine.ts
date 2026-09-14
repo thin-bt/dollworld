@@ -1,62 +1,42 @@
 /**
  * Sprint2 competition progression via accepted domain surfaces (session-isolated clone).
+ *
+ * This adapter intentionally stops at factual round-robin completion. Tournament
+ * ranking/tie-break/finalization is not fabricated here; it must be supplied by
+ * an accepted domain contract before finalResult/earnings/ranking are committed.
  */
 import {
-  applyTournamentFinalResultEarnings,
-  applyTournamentFinalResultToCompetitiveRecord,
-  buildPlannedParticipantList,
   buildStructuralBracketDefinition,
-  buildTournamentFinalResult,
-  buildTournamentMatchPlan,
-  commitSchedulePlan,
-  createDefaultStrategyActionSourceIdentity,
-  createDefaultTournamentPayoutConfig,
-  buildTournamentScheduleReadModel,
+  computeParticipantListHash,
   createEmptyAnnualEarningsLedger,
   createEmptyCompetitiveRecord,
-  createEmptyDetailedLogPayloadStore,
-  type DetailedLogPayloadStore,
-  createInitialTournamentIdGeneratorState,
-  createNeutralEntryChoicePolicy,
-  computeParticipantListHash,
-  computeScheduleLifecycleIdentity,
-  DEFAULT_WORLD_CALENDAR_CONFIG,
-  executeTournamentBattleAtomic,
-  formatTournamentSlotId,
-  isEligibleForBattleKind,
-  projectAnnualRanking,
-  projectAnnualRankingForBrowser,
   toCanonicalJson,
   validateSprint1RunSession,
-  validateStoredBattleResultRecord,
   type AnnualRankingDisplayFacts,
-  type BattleActionsSource,
-  type CompetitiveRecord,
-  type EntrantCandidateFacts,
   type Person,
   type PersonId,
-  type ParticipationStatus,
   type Rank,
-  type StoredBattleResultRecord,
   type Sha256Provider,
   type Sprint1RunSession,
-  type ScheduleLifecycleIdentity,
   type TournamentBracketDefinition,
-  type TournamentId,
   type ValidationIssue,
 } from "@shared-world/simulation-core";
-import { buildMockCandidateSourceRows } from "../ui004/source-from-runtime.js";
-import { mockCandidateEligible } from "../ui004/mock-candidates/mock-candidate-eligible.js";
+import { createNodeSha256Provider } from "../presets.js";
+import {
+  buildAcceptedCompetitionParticipantPlan,
+  plannedCompetitionParticipantIdsForPreview,
+} from "./competition-participant-preview.js";
+import { executeNextRoundRobinMatch } from "./competition-round-robin-execution.js";
+import { projectRoundRobinProgress } from "./competition-round-robin-progress.js";
 import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
 import { COMPETITION_STORE_SCHEMA_VERSION } from "./competition-store.js";
-import {
-  defaultCompetitionRuleHash,
-  defaultTournamentBattleActionIdentity,
-} from "./competition-engine-helpers.js";
-import { tinyScheduleConfig } from "./competition-engine-schedule-config.js";
 
 export type CompetitionEngineOutcome =
-  | { kind: "ok"; store: CompetitionSessionStore; stepKind: "initialized" | "match_played" | "already_finished" }
+  | {
+      kind: "ok";
+      store: CompetitionSessionStore;
+      stepKind: "initialized" | "match_played" | "already_finished";
+    }
   | { kind: "insufficient_participants"; message: string }
   | { kind: "domain_failure"; issues: readonly ValidationIssue[] }
   | { kind: "corrupt" };
@@ -88,77 +68,11 @@ function parseStoredSession(
   provider: Sha256Provider,
 ): Sprint1RunSession | null {
   const validated = validateSprint1RunSession(json as Sprint1RunSession, provider);
-  if (!validated.ok) {
-    return null;
-  }
-  return validated.value;
+  return validated.ok ? validated.value : null;
 }
 
 function competitiveRecordRank(person: Person, fallbackRank: Rank): Rank {
-  if (person.careerStatus === "active_competitor") {
-    return person.currentRank as Rank;
-  }
-  return fallbackRank;
-}
-
-function entrantFacts(person: Person, worldYear: number): EntrantCandidateFacts {
-  const currentAge =
-    person.lifeStatus === "living" ? person.currentAge : worldYear - person.birthYear;
-  const participationStatus: ParticipationStatus =
-    person.lifeStatus === "living" ? person.participationStatus : "stopped";
-  const currentRank: Rank =
-    person.careerStatus === "active_competitor" ? (person.currentRank as Rank) : "F";
-  return {
-    personId: person.personId,
-    currentAge,
-    lifeStatus: person.lifeStatus,
-    participationStatus,
-    careerStatus: person.careerStatus,
-    currentRank,
-  };
-}
-
-function isOfficialBattleEligiblePerson(person: Person, worldYear: number): boolean {
-  if (person.lifeStatus !== "living" || person.participationStatus !== "active") {
-    return false;
-  }
-  const age = person.currentAge;
-  return isEligibleForBattleKind("official", person.careerStatus, age);
-}
-
-export function pickTwoParticipantIdsForPreview(session: Sprint1RunSession): PersonId[] | null {
-  return pickTwoParticipantIds(session);
-}
-
-function pickTwoParticipantIds(session: Sprint1RunSession): PersonId[] | null {
-  const worldYear = session.runtimeState.worldState.worldDate.year;
-  const source = buildMockCandidateSourceRows(session);
-  if (!source.ok) {
-    return null;
-  }
-  const personsById = new Map(
-    session.runtimeState.worldState.persons.map((person) => [person.personId, person as Person]),
-  );
-  const eligible = source.rows
-    .filter((row) => row.sourceValidationOk && row.eligibleInput !== undefined)
-    .filter((row) => mockCandidateEligible(row.eligibleInput!))
-    .filter((row) => {
-      const person = personsById.get(row.personId as PersonId);
-      return person !== undefined && isOfficialBattleEligiblePerson(person, worldYear);
-    })
-    .map((row) => row.personId as PersonId)
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-  if (eligible.length >= 2) {
-    return [eligible[0]!, eligible[1]!];
-  }
-  const fallback = session.runtimeState.worldState.persons
-    .filter((person) => isOfficialBattleEligiblePerson(person as Person, worldYear))
-    .map((person) => person.personId)
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-  if (fallback.length < 2) {
-    return null;
-  }
-  return [fallback[0]!, fallback[1]!];
+  return person.careerStatus === "active_competitor" ? (person.currentRank as Rank) : fallbackRank;
 }
 
 function personDisplayName(person: Person | undefined): string {
@@ -168,14 +82,34 @@ function personDisplayName(person: Person | undefined): string {
   return person.displayName.length > 0 ? person.displayName : "不明";
 }
 
+export function displayNameForPersonIdInSession(
+  session: Sprint1RunSession,
+  personId: string,
+): string {
+  const person = session.runtimeState.worldState.persons.find((row) => row.personId === personId);
+  return personDisplayName(person as Person | undefined);
+}
+
+/** Backward-compatible helper retained for callers that only need a pair preview. */
+export function pickTwoParticipantIdsForPreview(session: Sprint1RunSession): PersonId[] | null {
+  const planned = plannedCompetitionParticipantIdsForPreview(session, createNodeSha256Provider());
+  if (planned.length < 2) {
+    return null;
+  }
+  return [planned[0]!, planned[1]!];
+}
+
 /** Idle-state preview for player-facing pre-start context (no competition store mutation). */
 export function buildIdleCompetitionPreStartPreview(session: Sprint1RunSession): {
   tournamentKindLabel: string;
   targetRankLabel: string;
   participantDisplayNames: readonly string[];
 } | null {
-  const participantIds = pickTwoParticipantIds(session);
-  if (participantIds === null) {
+  const participantIds = plannedCompetitionParticipantIdsForPreview(
+    session,
+    createNodeSha256Provider(),
+  );
+  if (participantIds.length < 2) {
     return null;
   }
   const personsById = new Map(
@@ -184,114 +118,46 @@ export function buildIdleCompetitionPreStartPreview(session: Sprint1RunSession):
   return {
     tournamentKindLabel: "通常大会",
     targetRankLabel: "Fランク",
-    participantDisplayNames: participantIds.map((id) =>
-      personDisplayName(personsById.get(id)),
-    ),
+    participantDisplayNames: participantIds.map((id) => personDisplayName(personsById.get(id))),
   };
-}
-
-export function displayNameForPersonIdInSession(
-  session: Sprint1RunSession,
-  personId: string,
-): string {
-  const person = session.runtimeState.worldState.persons.find((p) => p.personId === personId);
-  return personDisplayName(person as Person | undefined);
-}
-
-function expectOk<T>(result: { ok: boolean; issues?: readonly ValidationIssue[]; value?: T }): T {
-  if (!result.ok) {
-    throw new Error(`domain step failed: ${JSON.stringify(result.issues ?? [])}`);
-  }
-  return result.value as T;
 }
 
 function initializeCompetitionState(
   worldSession: Sprint1RunSession,
   provider: Sha256Provider,
 ): CompetitionEngineOutcome {
-  const participantIds = pickTwoParticipantIds(worldSession);
-  if (participantIds === null) {
+  const isolatedSession = cloneSessionJson(worldSession);
+  const acceptedPlan = buildAcceptedCompetitionParticipantPlan(isolatedSession, provider);
+  if (acceptedPlan === null || acceptedPlan.selectedPersonIds.length < 2) {
     return {
       kind: "insufficient_participants",
       message: "公式戦可能な参加者が2名未満です。シミュレーションを進めてから再試行してください。",
     };
   }
+
+  const participantIds = [...acceptedPlan.selectedPersonIds];
   const participantAId = participantIds[0]!;
   const participantBId = participantIds[1]!;
-  const isolatedSession = cloneSessionJson(worldSession);
-
-  const config = tinyScheduleConfig();
-  const generator = createInitialTournamentIdGeneratorState();
-  if (!generator.ok) {
-    return { kind: "domain_failure", issues: generator.issues };
-  }
-  const committed = commitSchedulePlan(
-    config,
-    DEFAULT_WORLD_CALENDAR_CONFIG,
-    isolatedSession.runtimeState.worldState.worldDate.year,
-    generator.value,
-  );
-  if (committed.kind !== "success") {
-    return { kind: "domain_failure", issues: [{ path: "", message: "schedule commit failed" }] };
-  }
-
-  const schedule = buildTournamentScheduleReadModel(committed.scheduleState);
-  const tournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F");
-  if (tournament === undefined) {
-    return { kind: "domain_failure", issues: [{ path: "", message: "F-rank normal tournament missing" }] };
-  }
-
-  const policy = createNeutralEntryChoicePolicy(config);
-  const facts = new Map<PersonId, EntrantCandidateFacts>();
-  for (const personId of participantIds) {
-    const person = isolatedSession.runtimeState.worldState.persons.find((p) => p.personId === personId);
-    if (person === undefined) {
-      return { kind: "corrupt" };
-    }
-    facts.set(personId, entrantFacts(person as Person, isolatedSession.runtimeState.worldState.worldDate.year));
-  }
-
-  const list = buildPlannedParticipantList({
-    tournamentId: tournament.tournamentId,
-    scheduleEntries: schedule,
-    candidateFactsByPersonId: facts,
-    policy,
-    config,
-    simulationId: isolatedSession.context.simulationId,
-    runSeed: isolatedSession.context.simulationIdentity.seed,
+  const participantListHash = computeParticipantListHash(
+    {
+      tournamentId: acceptedPlan.tournament.tournamentId,
+      scheduleLifecycleIdentityHash: acceptedPlan.lifecycle.identityHash,
+      selectedPersonIds: participantIds,
+      policyIdentity: acceptedPlan.policy.identity,
+    },
     provider,
-  });
-  if (!list.ok) {
-    return { kind: "domain_failure", issues: list.issues };
-  }
-  if (list.value === null) {
-    return { kind: "insufficient_participants", message: "大会参加者リストを確定できませんでした。" };
-  }
-
-  const lifecycle = computeScheduleLifecycleIdentity(tournament, provider);
-  if (!lifecycle.ok) {
-    return { kind: "domain_failure", issues: lifecycle.issues };
-  }
-
-  const participantListHash = expectOk(
-    computeParticipantListHash(
-      {
-        tournamentId: tournament.tournamentId,
-        scheduleLifecycleIdentityHash: lifecycle.value.identityHash,
-        selectedPersonIds: participantIds,
-        policyIdentity: policy.identity,
-      },
-      provider,
-    ),
   );
+  if (!participantListHash.ok) {
+    return { kind: "domain_failure", issues: participantListHash.issues };
+  }
 
   const built = buildStructuralBracketDefinition(
     {
-      tournamentId: tournament.tournamentId,
+      tournamentId: acceptedPlan.tournament.tournamentId,
       orderedPersonIds: participantIds,
-      participantListHash,
-      scheduleLifecycleIdentity: lifecycle.value,
-      entryChoicePolicyIdentity: policy.identity,
+      participantListHash: participantListHash.value,
+      scheduleLifecycleIdentity: acceptedPlan.lifecycle,
+      entryChoicePolicyIdentity: acceptedPlan.policy.identity,
       policy: STRUCTURAL_POLICY,
     },
     provider,
@@ -302,10 +168,15 @@ function initializeCompetitionState(
 
   const competitiveRecordByPersonId: Record<string, Record<string, unknown>> = {};
   for (const personId of participantIds) {
-    const person = isolatedSession.runtimeState.worldState.persons.find((p) => p.personId === personId)!;
+    const person = isolatedSession.runtimeState.worldState.persons.find(
+      (row) => row.personId === personId,
+    ) as Person | undefined;
+    if (person === undefined) {
+      return { kind: "corrupt" };
+    }
     const empty = createEmptyCompetitiveRecord(
       person.personId,
-      competitiveRecordRank(person as Person, tournament.targetRank ?? "F"),
+      competitiveRecordRank(person, acceptedPlan.tournament.targetRank ?? "F"),
       provider,
     );
     if (!empty.ok) {
@@ -317,29 +188,34 @@ function initializeCompetitionState(
     >;
   }
 
-  const payloadStore = createEmptyDetailedLogPayloadStore();
   const state: CompetitionPersistedState = {
     schemaVersion: COMPETITION_STORE_SCHEMA_VERSION,
     phase: "awaiting_match",
-    tournamentId: tournament.tournamentId,
-    tournamentKind: tournament.kind,
-    targetRank: tournament.targetRank ?? "F",
-    participantAId: participantAId as string,
-    participantBId: participantBId as string,
+    tournamentId: acceptedPlan.tournament.tournamentId,
+    tournamentKind: acceptedPlan.tournament.kind,
+    targetRank: acceptedPlan.tournament.targetRank ?? "F",
+    participantAId,
+    participantBId,
     bracketDefinitionHash: built.value.definition.bracketDefinitionHash,
     structuralSourceIdentityHash: built.value.definition.bracketDefinitionHash,
-    scheduleLifecycleIdentityHash: lifecycle.value.identityHash,
-    scheduleLifecycleIdentity: JSON.parse(toCanonicalJson(lifecycle.value)) as Record<string, unknown>,
-    participantListHash,
+    scheduleLifecycleIdentityHash: acceptedPlan.lifecycle.identityHash,
+    scheduleLifecycleIdentity: JSON.parse(toCanonicalJson(acceptedPlan.lifecycle)) as Record<
+      string,
+      unknown
+    >,
+    participantListHash: participantListHash.value,
     bracketDefinition: JSON.parse(toCanonicalJson(built.value.definition)) as Record<string, unknown>,
     bracketRuntimeState: JSON.parse(toCanonicalJson(built.value.runtimeState)) as Record<string, unknown>,
     isolatedSession: JSON.parse(toCanonicalJson(isolatedSession)) as Record<string, unknown>,
-    payloadStore: JSON.parse(toCanonicalJson(payloadStore)) as Record<string, unknown>,
+    payloadStore: {},
     storedRecords: [],
     matchesCompleted: 0,
     lastMatch: null,
     competitiveRecordByPersonId,
-    earningsLedger: JSON.parse(toCanonicalJson(createEmptyAnnualEarningsLedger())) as Record<string, unknown>,
+    earningsLedger: JSON.parse(toCanonicalJson(createEmptyAnnualEarningsLedger())) as Record<
+      string,
+      unknown
+    >,
     finalResult: null,
     worldYear: isolatedSession.runtimeState.worldState.worldDate.year,
     rankingDisplayFacts: [],
@@ -352,77 +228,31 @@ function initializeCompetitionState(
   };
 }
 
-function playMatch(state: CompetitionPersistedState, provider: Sha256Provider): CompetitionEngineOutcome {
+function playNextMatch(
+  state: CompetitionPersistedState,
+  provider: Sha256Provider,
+): CompetitionEngineOutcome {
   const session = parseStoredSession(state.isolatedSession, provider);
   if (session === null) {
     return { kind: "corrupt" };
   }
-  const payloadStore = createEmptyDetailedLogPayloadStore();
-  const storedRecords = state.storedRecords.map((row) => {
-    const validated = validateStoredBattleResultRecord(row as StoredBattleResultRecord, provider);
-    if (!validated.ok) {
-      throw new Error("stored record corrupt");
-    }
-    return validated.value;
-  });
-  const tournamentId = state.tournamentId as TournamentId;
-  const participantAId = state.participantAId as PersonId;
-  const participantBId = state.participantBId as PersonId;
 
-  const lifecycle = state.scheduleLifecycleIdentity as unknown as ScheduleLifecycleIdentity;
-  const rebuilt = buildStructuralBracketDefinition(
-    {
-      tournamentId,
-      orderedPersonIds: [participantAId, participantBId],
-      participantListHash: state.participantListHash,
-      scheduleLifecycleIdentity: lifecycle,
-      entryChoicePolicyIdentity: createNeutralEntryChoicePolicy(tinyScheduleConfig()).identity,
-      policy: STRUCTURAL_POLICY,
-    },
-    provider,
-  );
-  if (!rebuilt.ok) {
-    return { kind: "domain_failure", issues: rebuilt.issues };
-  }
-  const plan = buildTournamentMatchPlan(
-    {
-      tournamentId,
-      bracketDefinition: rebuilt.value.definition,
-      runtimeState: rebuilt.value.runtimeState,
-      structuralSlot: { kind: "round_robin", pairIndex: 0 },
-      scheduleLifecycleIdentity: lifecycle,
-      slotBindings: [],
-      matchIdGeneratorState: session.runtimeState.matchIdGeneratorState,
-    },
-    provider,
-  );
-  if (!plan.ok) {
-    return { kind: "domain_failure", issues: plan.issues };
-  }
-
-  const actionIdentity = defaultTournamentBattleActionIdentity(session);
-  const actionsSource = { identity: actionIdentity } as BattleActionsSource;
-
-  const atomic = executeTournamentBattleAtomic(
-    {
-      handoff: {
-        matchPlan: plan.value,
-        session,
-        participantAActionSourceIdentity: actionIdentity,
-        participantBActionSourceIdentity: actionIdentity,
-        participantAActionsSource: actionsSource,
-        participantBActionsSource: actionsSource,
-        slotBindings: [],
+  const executed = executeNextRoundRobinMatch({ state, session, provider });
+  if (executed.kind === "complete") {
+    return {
+      kind: "ok",
+      store: {
+        schemaVersion: COMPETITION_STORE_SCHEMA_VERSION,
+        state: { ...state, phase: "round_robin_complete" },
       },
-      matchPlan: plan.value,
-      slotIdentity: { slotId: formatTournamentSlotId(0), matchOrdinal: 0 },
-      competitionRuleHash: defaultCompetitionRuleHash(session),
-      payloadStore,
-      storedRecords,
-    },
-    provider,
-  );
+      stepKind: "already_finished",
+    };
+  }
+  if (executed.kind === "domain_failure") {
+    return { kind: "domain_failure", issues: executed.issues };
+  }
 
+  const atomic = executed.atomic;
   if (atomic.kind !== "completed") {
     const issues =
       "issues" in atomic && atomic.issues !== undefined
@@ -436,139 +266,35 @@ function playMatch(state: CompetitionPersistedState, provider: Sha256Provider): 
   const winnerPersonId = atomic.applicationFact.handoffResult.winnerPersonId;
   const loserPersonId = atomic.applicationFact.handoffResult.loserPersonId;
   if (winnerPersonId === null || loserPersonId === null) {
-    return { kind: "domain_failure", issues: [{ path: "", message: "match produced no winner" }] };
-  }
-
-  const placements = [
-    {
-      personId: winnerPersonId,
-      placementOrdinal: 1,
-      awardTier: "champion" as const,
-      placementBandKind: "champion",
-      placementBandOrdinal: 1,
-    },
-    {
-      personId: loserPersonId,
-      placementOrdinal: 2,
-      awardTier: "runner_up" as const,
-      placementBandKind: "runner_up",
-      placementBandOrdinal: 1,
-    },
-  ];
-
-  const completionApplicationIdentityHash =
-    atomic.applicationFact.handoffResult.executionPlanIdentityHash;
-  const simulationId = session.context.simulationId;
-  const structuralSourceIdentityHash = state.structuralSourceIdentityHash;
-  if (
-    typeof simulationId !== "string" ||
-    typeof state.tournamentId !== "string" ||
-    typeof structuralSourceIdentityHash !== "string" ||
-    typeof completionApplicationIdentityHash !== "string"
-  ) {
     return {
       kind: "domain_failure",
-      issues: [{ path: "", message: "tournament finalize source identity incomplete" }],
+      issues: [{ path: "", message: "round-robin match produced no winner" }],
     };
   }
 
-  const finalBuilt = buildTournamentFinalResult(
-    {
-      simulationId,
-      tournamentId,
-      structuralSourceIdentityHash,
-      completionApplicationIdentityHash,
-      completionKind: "winner_determined",
-      placements,
-    },
-    provider,
-  );
-  if (!finalBuilt.ok) {
-    return { kind: "domain_failure", issues: finalBuilt.issues };
-  }
-  const finalResult = finalBuilt.value;
-
-  const competitiveRecordByPersonId = { ...state.competitiveRecordByPersonId };
-  for (const personId of [participantAId, participantBId]) {
-    const record = competitiveRecordByPersonId[personId] as unknown as CompetitiveRecord;
-    const applied = applyTournamentFinalResultToCompetitiveRecord(
-      {
-        record,
-        finalResult,
-        source: {
-          tournamentId,
-          structuralSourceIdentityHash: state.structuralSourceIdentityHash,
-          completionApplicationIdentityHash: atomic.applicationFact.handoffResult.executionPlanIdentityHash,
-        },
-      },
-      provider,
-    );
-    if (applied.kind !== "applied") {
-      return { kind: "domain_failure", issues: [{ path: "", message: applied.kind }] };
-    }
-    competitiveRecordByPersonId[personId] = JSON.parse(toCanonicalJson(applied.record)) as Record<
-      string,
-      unknown
-    >;
-  }
-
-  const payoutConfig = expectOk(createDefaultTournamentPayoutConfig(provider));
-
-  let earningsLedger = JSON.parse(toCanonicalJson(state.earningsLedger)) as ReturnType<
-    typeof createEmptyAnnualEarningsLedger
-  >;
-  const earningsApplied = applyTournamentFinalResultEarnings(
-    {
-      ledger: earningsLedger,
-      finalResult,
-      source: {
-        tournamentId,
-        structuralSourceIdentityHash: state.structuralSourceIdentityHash,
-        completionApplicationIdentityHash: atomic.applicationFact.handoffResult.executionPlanIdentityHash,
-      },
-      worldYear: state.worldYear,
-      tournamentKind: "normal",
-      payoutConfig,
-    },
-    provider,
-  );
-  if (earningsApplied.kind !== "applied") {
-    return { kind: "domain_failure", issues: [{ path: "", message: earningsApplied.kind }] };
-  }
-  earningsLedger = earningsApplied.ledger;
-
-  const recordsMap = new Map<PersonId, CompetitiveRecord>();
-  for (const personId of [participantAId, participantBId]) {
-    recordsMap.set(personId, competitiveRecordByPersonId[personId] as unknown as CompetitiveRecord);
-  }
-  const ranking = projectAnnualRanking({
-    worldYear: state.worldYear,
-    ledger: earningsLedger,
-    competitiveRecords: recordsMap,
+  const progress = projectRoundRobinProgress({
+    bracketDefinition: state.bracketDefinition as unknown as TournamentBracketDefinition,
+    storedRecords: atomic.storedRecords,
   });
-  if (!ranking.ok) {
-    return { kind: "domain_failure", issues: ranking.issues };
-  }
-  const rankingDisplay = projectAnnualRankingForBrowser(ranking.value);
-
+  const roundRobinComplete = progress.nextPairIndex === null;
   const nextState: CompetitionPersistedState = {
     ...state,
-    phase: "finished",
+    phase: roundRobinComplete ? "round_robin_complete" : "awaiting_match",
     isolatedSession: JSON.parse(toCanonicalJson(atomic.session)) as Record<string, unknown>,
     payloadStore: JSON.parse(toCanonicalJson(atomic.payloadStore)) as Record<string, unknown>,
     storedRecords: atomic.storedRecords.map(
       (row) => JSON.parse(toCanonicalJson(row)) as Record<string, unknown>,
     ),
-    matchesCompleted: state.matchesCompleted + 1,
+    matchesCompleted: progress.matchesCompleted,
     lastMatch: {
       matchId: atomic.applicationFact.handoffResult.matchId,
       winnerPersonId,
       loserPersonId,
     },
-    competitiveRecordByPersonId,
-    earningsLedger: JSON.parse(toCanonicalJson(earningsLedger)) as Record<string, unknown>,
-    finalResult: JSON.parse(toCanonicalJson(finalResult)) as Record<string, unknown>,
-    rankingDisplayFacts: rankingDisplay.map((row) => JSON.parse(toCanonicalJson(row)) as Record<string, unknown>),
+    // No finalResult/earnings/ranking mutation here. Accepted standings and
+    // tie-break semantics have not yet been identified for Sprint2.
+    finalResult: null,
+    rankingDisplayFacts: [],
   };
 
   return {
@@ -583,23 +309,25 @@ export function runCompetitionProgressionStep(
   worldSession: Sprint1RunSession,
   provider: Sha256Provider,
 ): CompetitionEngineOutcome {
-  if (store.state?.phase === "finished") {
+  if (store.state?.phase === "finished" || store.state?.phase === "round_robin_complete") {
     return { kind: "ok", store, stepKind: "already_finished" };
   }
   if (store.state === null) {
     const initialized = initializeCompetitionState(worldSession, provider);
-    if (initialized.kind !== "ok") {
+    if (initialized.kind !== "ok" || initialized.store.state === null) {
       return initialized;
     }
-    return playMatch(initialized.store.state!, provider);
+    return playNextMatch(initialized.store.state, provider);
   }
   if (store.state.phase === "awaiting_match") {
-    return playMatch(store.state, provider);
+    return playNextMatch(store.state, provider);
   }
   return { kind: "corrupt" };
 }
 
-export function rankingFactsForStore(store: CompetitionSessionStore): readonly AnnualRankingDisplayFacts[] {
+export function rankingFactsForStore(
+  store: CompetitionSessionStore,
+): readonly AnnualRankingDisplayFacts[] {
   if (store.state === null) {
     return [];
   }
