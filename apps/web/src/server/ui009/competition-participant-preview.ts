@@ -1,0 +1,91 @@
+import {
+  buildPlannedParticipantList,
+  buildTournamentScheduleReadModel,
+  commitSchedulePlan,
+  computeScheduleLifecycleIdentity,
+  createInitialTournamentIdGeneratorState,
+  createNeutralEntryChoicePolicy,
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+  type EntrantCandidateFacts,
+  type Person,
+  type PersonId,
+  type ParticipationStatus,
+  type Rank,
+  type Sha256Provider,
+  type Sprint1RunSession,
+} from "@shared-world/simulation-core";
+import { tinyScheduleConfig } from "./competition-engine-schedule-config.js";
+
+function entrantFacts(person: Person, worldYear: number): EntrantCandidateFacts {
+  const currentAge =
+    person.lifeStatus === "living" ? person.currentAge : worldYear - person.birthYear;
+  const participationStatus: ParticipationStatus =
+    person.lifeStatus === "living" ? person.participationStatus : "stopped";
+  const currentRank: Rank =
+    person.careerStatus === "active_competitor" ? (person.currentRank as Rank) : "F";
+  return {
+    personId: person.personId,
+    currentAge,
+    lifeStatus: person.lifeStatus,
+    participationStatus,
+    careerStatus: person.careerStatus,
+    currentRank,
+  };
+}
+
+/**
+ * Player-facing participant preview derived from the same accepted Sprint2
+ * schedule + entry-selection contracts used by competition execution.
+ *
+ * This intentionally returns the full capacity-bounded planned participant
+ * list instead of UI009's legacy two-person placeholder.
+ */
+export function plannedCompetitionParticipantIdsForPreview(
+  session: Sprint1RunSession,
+  provider: Sha256Provider,
+): readonly PersonId[] {
+  const config = tinyScheduleConfig();
+  const generator = createInitialTournamentIdGeneratorState();
+  if (!generator.ok) {
+    return [];
+  }
+  const committed = commitSchedulePlan(
+    config,
+    DEFAULT_WORLD_CALENDAR_CONFIG,
+    session.runtimeState.worldState.worldDate.year,
+    generator.value,
+  );
+  if (committed.kind !== "success") {
+    return [];
+  }
+  const schedule = buildTournamentScheduleReadModel(committed.scheduleState);
+  const tournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F");
+  if (tournament === undefined) {
+    return [];
+  }
+  const lifecycle = computeScheduleLifecycleIdentity(tournament, provider);
+  if (!lifecycle.ok) {
+    return [];
+  }
+  const facts = new Map<PersonId, EntrantCandidateFacts>();
+  for (const rawPerson of session.runtimeState.worldState.persons) {
+    const person = rawPerson as Person;
+    facts.set(person.personId, entrantFacts(person, session.runtimeState.worldState.worldDate.year));
+  }
+  const policy = createNeutralEntryChoicePolicy(config);
+  const list = buildPlannedParticipantList({
+    tournamentId: tournament.tournamentId,
+    scheduleEntries: schedule,
+    candidateFactsByPersonId: facts,
+    policy,
+    config,
+    simulationId: session.context.simulationId,
+    runSeed: session.context.simulationIdentity.seed,
+    provider,
+    expectedScheduleLifecycleIdentity: lifecycle.value,
+  });
+  if (!list.ok || list.value === null) {
+    return [];
+  }
+  return list.value.selectedPersonIds;
+}
