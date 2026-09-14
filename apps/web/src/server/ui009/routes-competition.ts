@@ -419,7 +419,7 @@ export async function handlePostCompetitionStep(
     responseBody,
     committedWeeks: 0,
     completedUiRevision: resultUiRevision,
-    replaceLastOperation: true,
+    replaceLastOperation: false,
   });
   assertUiSessionIntegrity(session);
   sendApiJson(reply, 200, responseBody);
