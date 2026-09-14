@@ -1,9 +1,10 @@
 import type { AnnualRankingDisplayFacts, Sprint1RunSession } from "@shared-world/simulation-core";
+import { createNodeSha256Provider } from "../presets.js";
 import {
   buildIdleCompetitionPreStartPreview,
   displayNameForPersonIdInSession,
-  pickTwoParticipantIdsForPreview,
 } from "./competition-engine.js";
+import { plannedCompetitionParticipantIdsForPreview } from "./competition-participant-preview.js";
 import { buildCompetitionScheduleOverview } from "./competition-schedule-overview.js";
 import {
   formatYenForPlayer,
@@ -79,6 +80,10 @@ function participantLinksFromIds(
   }));
 }
 
+function plannedPreviewParticipantIds(worldSession: Sprint1RunSession): readonly string[] {
+  return plannedCompetitionParticipantIdsForPreview(worldSession, createNodeSha256Provider());
+}
+
 function scheduleOverviewForSession(
   worldSession: Sprint1RunSession | null,
   store: CompetitionSessionStore,
@@ -96,8 +101,7 @@ function scheduleOverviewForSession(
     };
   }
   const persisted = store.state;
-  const playableIds =
-    persisted === null ? (pickTwoParticipantIdsForPreview(worldSession) ?? []) : [];
+  const playableIds = persisted === null ? plannedPreviewParticipantIds(worldSession) : [];
   const playableLinks = playableIds.map((personId) => ({
     personId,
     displayName: displayNameForPersonIdInSession(worldSession, personId),
@@ -123,20 +127,28 @@ export function mapCompetitionProgressView(
   if (state === null) {
     const preStartPreview =
       worldSession === null ? null : buildIdleCompetitionPreStartPreview(worldSession);
+    const plannedIds = worldSession === null ? [] : plannedPreviewParticipantIds(worldSession);
+    const participantDisplayNames =
+      worldSession === null
+        ? []
+        : plannedIds.map((personId) => displayNameForPersonIdInSession(worldSession, personId));
     return {
       schemaVersion: COMPETITION_VIEW_SCHEMA_VERSION,
       lifecyclePhase: "idle",
       tournamentId: null,
       tournamentKind: null,
       targetRank: null,
-      participantIds: [],
+      participantIds: plannedIds,
       matchesCompleted: 0,
       lastMatch: null,
       finalResultSummary: null,
       rankingRows: [],
       ...EMPTY_PLAYER_FIELDS,
-      preStartPreview,
-      participantDisplayNames: preStartPreview?.participantDisplayNames ?? [],
+      preStartPreview:
+        preStartPreview === null
+          ? null
+          : { ...preStartPreview, participantDisplayNames },
+      participantDisplayNames,
       tournamentKindLabel: preStartPreview?.tournamentKindLabel ?? null,
       targetRankLabel: preStartPreview?.targetRankLabel ?? null,
       scheduleOverview: scheduleOverviewForSession(worldSession, store),
