@@ -1,0 +1,31 @@
+name: Sprint2 competition verification
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26.5.1'
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: UI009 targeted tests
+        run: npx vitest run apps/web/src/server/ui009.competition.test.ts apps/web/src/server/ui009/competition-round-robin-progress.test.ts
+      - name: Build
+        run: npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/web
+      - name: Install Chrome test browser
+        run: npx playwright install --with-deps chromium
+      - name: Chrome E2E
+        run: npm run e2e:chrome
