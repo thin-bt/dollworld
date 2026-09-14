@@ -1,10 +1,20 @@
-import type { AnnualRankingDisplayFacts, Sprint1RunSession } from "@shared-world/simulation-core";
+import type {
+  AnnualRankingDisplayFacts,
+  Sprint1RunSession,
+  StoredBattleResultRecord,
+  TournamentBracketDefinition,
+} from "@shared-world/simulation-core";
 import { createNodeSha256Provider } from "../presets.js";
 import {
   buildIdleCompetitionPreStartPreview,
   displayNameForPersonIdInSession,
 } from "./competition-engine.js";
 import { plannedCompetitionParticipantIdsForPreview } from "./competition-participant-preview.js";
+import {
+  projectRoundRobinProgress,
+  type RoundRobinMatchHistoryRow,
+  type RoundRobinParticipantMatrixRow,
+} from "./competition-round-robin-progress.js";
 import { buildCompetitionScheduleOverview } from "./competition-schedule-overview.js";
 import {
   formatYenForPlayer,
@@ -17,6 +27,7 @@ import type {
   CompetitionParticipantLinkView,
   CompetitionProgressView,
   CompetitionRankingRowView,
+  CompetitionRoundRobinProgressView,
   CompetitionStepDataView,
 } from "./types.js";
 import { COMPETITION_VIEW_SCHEMA_VERSION } from "./types.js";
@@ -109,13 +120,58 @@ function scheduleOverviewForSession(
   const activeLinks =
     persisted === null
       ? []
-      : participantLinksFromIds(persisted, [persisted.participantAId, persisted.participantBId]);
+      : participantLinksFromIds(persisted, activeParticipantIds(persisted));
   return buildCompetitionScheduleOverview(
     worldSession,
     persisted,
     playableLinks,
     activeLinks,
   );
+}
+
+function roundRobinProgressFromState(
+  state: CompetitionPersistedState,
+): CompetitionRoundRobinProgressView | null {
+  try {
+    const projected = projectRoundRobinProgress({
+      bracketDefinition: state.bracketDefinition as unknown as TournamentBracketDefinition,
+      storedRecords: state.storedRecords as unknown as readonly StoredBattleResultRecord[],
+    });
+    const mapHistoryRow = (row: RoundRobinMatchHistoryRow) => ({
+      ...row,
+      participantADisplayName: displayNameInIsolatedState(state, row.participantAId),
+      participantBDisplayName: displayNameInIsolatedState(state, row.participantBId),
+    });
+    const mapMatrixRow = (row: RoundRobinParticipantMatrixRow) => ({
+      personId: row.personId,
+      displayName: displayNameInIsolatedState(state, row.personId),
+      wins: row.wins,
+      losses: row.losses,
+      played: row.played,
+      cells: row.cells.map((cell) => ({
+        ...cell,
+        opponentDisplayName: displayNameInIsolatedState(state, cell.opponentPersonId),
+      })),
+    });
+    return {
+      participantIds: projected.participantIds,
+      matchesTotal: projected.matchesTotal,
+      matchesCompleted: projected.matchesCompleted,
+      nextPairIndex: projected.nextPairIndex,
+      history: projected.history.map(mapHistoryRow),
+      matrix: projected.matrix.map(mapMatrixRow),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function activeParticipantIds(state: CompetitionPersistedState): readonly string[] {
+  const progress = roundRobinProgressFromState(state);
+  if (progress !== null && progress.participantIds.length > 0) {
+    return progress.participantIds;
+  }
+  return [state.participantAId, state.participantBId];
 }
 
 export function mapCompetitionProgressView(
@@ -151,12 +207,15 @@ export function mapCompetitionProgressView(
       participantDisplayNames,
       tournamentKindLabel: preStartPreview?.tournamentKindLabel ?? null,
       targetRankLabel: preStartPreview?.targetRankLabel ?? null,
+      roundRobinProgress: null,
       scheduleOverview: scheduleOverviewForSession(worldSession, store),
     };
   }
 
   const finalResult = state.finalResult as { winnerPersonId?: string; resultHash?: string } | null;
-  const participantDisplayNames = [state.participantAId, state.participantBId].map((id) =>
+  const roundRobinProgress = roundRobinProgressFromState(state);
+  const participantIds = roundRobinProgress?.participantIds ?? [state.participantAId, state.participantBId];
+  const participantDisplayNames = participantIds.map((id) =>
     displayNameInIsolatedState(state, id),
   );
   const kindLabel = tournamentKindPlayerLabel(state.tournamentKind);
@@ -168,8 +227,8 @@ export function mapCompetitionProgressView(
     tournamentId: state.tournamentId,
     tournamentKind: state.tournamentKind,
     targetRank: state.targetRank,
-    participantIds: [state.participantAId, state.participantBId],
-    matchesCompleted: state.matchesCompleted,
+    participantIds,
+    matchesCompleted: roundRobinProgress?.matchesCompleted ?? state.matchesCompleted,
     lastMatch:
       state.lastMatch === null
         ? null
@@ -201,6 +260,7 @@ export function mapCompetitionProgressView(
       finalResult?.winnerPersonId !== undefined
         ? displayNameInIsolatedState(state, finalResult.winnerPersonId)
         : null,
+    roundRobinProgress,
     scheduleOverview: scheduleOverviewForSession(worldSession, store),
   };
 }
