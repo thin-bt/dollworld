@@ -56,7 +56,11 @@ export type CompetitionScheduleOverviewView = {
   activeSelectionKey: string | null;
 };
 
-export type CompetitionLifecyclePhase = "idle" | "awaiting_match" | "finished";
+export type CompetitionLifecyclePhase =
+  | "idle"
+  | "awaiting_match"
+  | "round_robin_complete"
+  | "finished";
 
 export type CompetitionMatchSummaryView = {
   matchId: string;
