@@ -34,20 +34,18 @@ function entrantFacts(person: Person, worldYear: number): EntrantCandidateFacts 
 }
 
 /**
- * Player-facing participant preview derived from the same accepted Sprint2
- * schedule + entry-selection contracts used by competition execution.
- *
- * This intentionally returns the full capacity-bounded planned participant
- * list instead of UI009's legacy two-person placeholder.
+ * Accepted Sprint2 participant-planning result for the currently exposed
+ * F-rank normal tournament. This is shared by preview and production execution
+ * so UI009 cannot silently regress to a different two-person selection path.
  */
-export function plannedCompetitionParticipantIdsForPreview(
+export function buildAcceptedCompetitionParticipantPlan(
   session: Sprint1RunSession,
   provider: Sha256Provider,
-): readonly PersonId[] {
+) {
   const config = tinyScheduleConfig();
   const generator = createInitialTournamentIdGeneratorState();
   if (!generator.ok) {
-    return [];
+    return null;
   }
   const committed = commitSchedulePlan(
     config,
@@ -56,16 +54,16 @@ export function plannedCompetitionParticipantIdsForPreview(
     generator.value,
   );
   if (committed.kind !== "success") {
-    return [];
+    return null;
   }
   const schedule = buildTournamentScheduleReadModel(committed.scheduleState);
   const tournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F");
   if (tournament === undefined) {
-    return [];
+    return null;
   }
   const lifecycle = computeScheduleLifecycleIdentity(tournament, provider);
   if (!lifecycle.ok) {
-    return [];
+    return null;
   }
   const facts = new Map<PersonId, EntrantCandidateFacts>();
   for (const rawPerson of session.runtimeState.worldState.persons) {
@@ -84,8 +82,26 @@ export function plannedCompetitionParticipantIdsForPreview(
     provider,
     expectedScheduleLifecycleIdentity: lifecycle.value,
   });
-  if (!list.ok || list.value === null) {
-    return [];
+  if (!list.ok || list.value === null || list.value.selectedPersonIds.length < 2) {
+    return null;
   }
-  return list.value.selectedPersonIds;
+  return {
+    config,
+    schedule,
+    tournament,
+    lifecycle: lifecycle.value,
+    policy,
+    selectedPersonIds: list.value.selectedPersonIds,
+  };
+}
+
+/**
+ * Player-facing participant preview derived from the exact accepted Sprint2
+ * participant plan used by production competition execution.
+ */
+export function plannedCompetitionParticipantIdsForPreview(
+  session: Sprint1RunSession,
+  provider: Sha256Provider,
+): readonly PersonId[] {
+  return buildAcceptedCompetitionParticipantPlan(session, provider)?.selectedPersonIds ?? [];
 }
