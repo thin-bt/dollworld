@@ -1,6 +1,5 @@
 import {
   buildTournamentMatchPlan,
-  createEmptyDetailedLogPayloadStore,
   executeTournamentBattleAtomic,
   formatTournamentSlotId,
   type BattleActionsSource,
@@ -13,6 +12,7 @@ import {
   type TournamentId,
 } from "@shared-world/simulation-core";
 import { defaultCompetitionRuleHash, defaultTournamentBattleActionIdentity } from "./competition-engine-helpers.js";
+import { restoreDetailedLogPayloadStore } from "./competition-payload-store.js";
 import { projectRoundRobinProgress } from "./competition-round-robin-progress.js";
 
 export type RoundRobinExecutionState = {
@@ -20,6 +20,7 @@ export type RoundRobinExecutionState = {
   readonly scheduleLifecycleIdentity: Record<string, unknown>;
   readonly bracketDefinition: Record<string, unknown>;
   readonly bracketRuntimeState: Record<string, unknown>;
+  readonly payloadStore: Record<string, unknown>;
   readonly storedRecords: readonly Record<string, unknown>[];
 };
 
@@ -47,6 +48,13 @@ export function executeNextRoundRobinMatch(input: {
   const bracketDefinition = input.state.bracketDefinition as unknown as TournamentBracketDefinition;
   const bracketRuntimeState = input.state.bracketRuntimeState as unknown as BracketRuntimeSlotState;
   const storedRecords = input.state.storedRecords as unknown as readonly StoredBattleResultRecord[];
+  const payloadStore = restoreDetailedLogPayloadStore(input.state.payloadStore);
+  if (payloadStore === null) {
+    return {
+      kind: "domain_failure",
+      issues: [{ path: "/payloadStore", message: "competition detailed-log payload store is invalid" }],
+    };
+  }
   const progress = projectRoundRobinProgress({ bracketDefinition, storedRecords });
   if (progress.nextPairIndex === null) {
     return { kind: "complete" };
@@ -89,7 +97,7 @@ export function executeNextRoundRobinMatch(input: {
         matchOrdinal: progress.matchesCompleted,
       },
       competitionRuleHash: defaultCompetitionRuleHash(input.session),
-      payloadStore: createEmptyDetailedLogPayloadStore(),
+      payloadStore,
       storedRecords: [...storedRecords],
     },
     input.provider,
