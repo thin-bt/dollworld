@@ -4,6 +4,7 @@ import {
   executeTournamentBattleAtomic,
   formatTournamentSlotId,
   type BattleActionsSource,
+  type BracketRuntimeSlotState,
   type ScheduleLifecycleIdentity,
   type Sha256Provider,
   type Sprint1RunSession,
@@ -44,6 +45,7 @@ export function executeNextRoundRobinMatch(input: {
   provider: Sha256Provider;
 }): ExecuteNextRoundRobinMatchOutcome {
   const bracketDefinition = input.state.bracketDefinition as unknown as TournamentBracketDefinition;
+  const bracketRuntimeState = input.state.bracketRuntimeState as unknown as BracketRuntimeSlotState;
   const storedRecords = input.state.storedRecords as unknown as readonly StoredBattleResultRecord[];
   const progress = projectRoundRobinProgress({ bracketDefinition, storedRecords });
   if (progress.nextPairIndex === null) {
@@ -56,7 +58,7 @@ export function executeNextRoundRobinMatch(input: {
     {
       tournamentId,
       bracketDefinition,
-      runtimeState: input.state.bracketRuntimeState as never,
+      runtimeState: bracketRuntimeState,
       structuralSlot: { kind: "round_robin", pairIndex: progress.nextPairIndex },
       scheduleLifecycleIdentity: lifecycle,
       slotBindings: [],
