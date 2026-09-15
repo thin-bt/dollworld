@@ -1,0 +1,25 @@
+task-key: SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914
+lane: A
+terminal: READY / SPRINT2_WIREFRAME_SOURCE_EVIDENCE_REPAIR_A_READY / COMMITTED
+pickup: SDK_EXECUTOR / ACTIVE_IDLE 2026-09-16T01:22+09:00
+branch: master
+baseline-commit: 0dacb0e41f12e9b83313a9a71c598a1112816e32
+live-head: 1543d153b5b8880429d272bcdf4671a62369f1d3
+commit-policy: ALLOWED (honored)
+
+implementation-summary:
+  Repaired UI009 participant planning so preview and execution share a resolved planning session (domain roster when >2, otherwise in-memory year-21 projection) plus integration fallback and round-robin roster supplement.
+  Fixed shell/e2e bootstrap: explicit seed-42 session start before /competition; Playwright heading strict-mode selector.
+  Published CURRENT SOURCE evidence manifest mapping Sprint2 blockers to exact files/tests/browser output (source-evidence-manifest.txt).
+
+verification:
+  build: npm run build -w @shared-world/simulation-core && npm run build -w @shared-world/web — PASS
+  targeted-test: npx vitest run apps/web/src/server/ui009.competition.test.ts apps/web/src/server/ui009/competition-format-selection.test.ts apps/web/src/server/ui009/competition-round-robin-progress.test.ts apps/web/src/server/ui009/competition-payload-store.test.ts — PASS
+  playwright-chrome: npx playwright test tests/e2e/s2-ui009-round-robin-competition.spec.ts --project=chrome — PASS
+  browser-evidence: _handoff-artifacts/audit/current/SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914/browser-acceptance.txt
+
+source-evidence:
+  manifest: _handoff-artifacts/audit/current/SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914/source-evidence-manifest.txt
+  observability-correction: _handoff-artifacts/audit/current/SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914/SPRINT2_CURRENT_SOURCE_OBSERVABILITY_CORRECTION_20260914.txt
+
+control-closure: CURSOR_ACTIVE_TASK returned to IDLE; CURSOR_INBOX returned to IDLE

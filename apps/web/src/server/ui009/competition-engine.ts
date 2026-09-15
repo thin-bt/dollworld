@@ -128,14 +128,15 @@ function initializeCompetitionState(
   worldSession: Sprint1RunSession,
   provider: Sha256Provider,
 ): CompetitionEngineOutcome {
-  const isolatedSession = cloneSessionJson(worldSession);
-  const acceptedPlan = buildAcceptedCompetitionParticipantPlan(isolatedSession, provider);
-  if (acceptedPlan === null || acceptedPlan.selectedPersonIds.length < 2) {
+  const resolved = buildAcceptedCompetitionParticipantPlan(worldSession, provider);
+  if (resolved === null || resolved.plan.selectedPersonIds.length < 2) {
     return {
       kind: "insufficient_participants",
       message: "公式戦可能な参加者が2名未満です。シミュレーションを進めてから再試行してください。",
     };
   }
+  const acceptedPlan = resolved.plan;
+  const isolatedSession = cloneSessionJson(resolved.planningSession);
 
   const participantIds = [...acceptedPlan.selectedPersonIds];
   const participantAId = participantIds[0]!;

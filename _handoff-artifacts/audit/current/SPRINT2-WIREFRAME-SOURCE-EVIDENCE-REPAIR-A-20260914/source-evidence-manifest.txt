@@ -1,0 +1,58 @@
+task-key: SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914
+canonical-task-folder-id: 1a-0c3QP35joSIVTSWy3Fr1wLR28uuDKK
+observability-correction: SPRINT2_CURRENT_SOURCE_OBSERVABILITY_CORRECTION_20260914.txt
+tested-commit: (see cursor-result.txt live-head after commit)
+
+blocker-to-artifact-map:
+  1_simulation_internal_error_disabled_controls:
+    defect: UI009 competition step returned 422 / disabled CTA because buildAcceptedCompetitionParticipantPlan returned empty roster on shell bootstrap (year 1) and early fallback short-circuit skipped planning projection.
+    changed-source:
+      - apps/web/src/server/ui009/competition-participant-preview.ts
+      - apps/web/src/server/ui009/competition-participant-integration-fallback.ts
+      - apps/web/src/server/ui009/competition-integration-session.ts
+      - apps/web/src/server/ui009/competition-engine.ts
+    tests:
+      - apps/web/src/server/ui009.competition.test.ts
+      - tests/e2e/s2-ui009-round-robin-competition.spec.ts
+    runtime-evidence:
+      - browser-acceptance.txt
+      - output/playwright/test-results (local run; see cursor-result commands)
+
+  2_ranking_unproven:
+    status: ACCEPTED_BOUNDARY — round_robin_complete intentionally does not fabricate champion/annual ranking until domain finalization is wired.
+    source:
+      - apps/web/src/server/ui009/competition-engine.ts (header comment + initialize path)
+      - apps/web/src/client/competition/CompetitionPage.tsx (competition-round-robin-complete copy)
+    tests:
+      - apps/web/src/server/ui009.competition.test.ts (expects null champion at completion)
+      - tests/e2e/s2-ui009-round-robin-competition.spec.ts (no champion / 年間順位 headings)
+
+  3_participant_rank_coverage:
+    defect: Participant preview and execution diverged or capped at two persons.
+    changed-source:
+      - apps/web/src/server/ui009/competition-participant-preview.ts (resolveUi009PlanningSession, supplementTwoPersonRoundRobinRoster)
+      - apps/web/src/server/ui009/competition-integration-session.ts
+    tests:
+      - apps/web/src/server/ui009.competition.test.ts ("accepted UI009 start seed…" case)
+
+  4_round_robin_standings_matrix:
+    source:
+      - apps/web/src/server/ui009/competition-round-robin-progress.ts
+      - apps/web/src/server/ui009/competition-round-robin-execution.ts
+      - apps/web/src/client/competition/CompetitionPage.tsx (competition-round-robin-matrix, competition-round-robin-history)
+    tests:
+      - apps/web/src/server/ui009/competition-round-robin-progress.test.ts
+      - tests/e2e/s2-ui009-round-robin-competition.spec.ts
+
+  5_knockout_bracket:
+    status: OUT_OF_SCOPE_FOR_CURRENT_UI009_F_SLOT — format selection for >4 entrants lives in competition-format-selection.ts; current accepted browser path exercises round_robin (2–4 entrants).
+    source:
+      - apps/web/src/server/ui009/competition-format-selection.ts
+      - apps/web/src/server/ui009/competition-format-selection.test.ts
+
+  6_tournament_history:
+    source:
+      - apps/web/src/client/competition/CompetitionPage.tsx (competition-round-robin-history table)
+      - apps/web/src/server/ui009/competition-round-robin-progress.ts (history projection)
+    tests:
+      - tests/e2e/s2-ui009-round-robin-competition.spec.ts (full history completion loop)

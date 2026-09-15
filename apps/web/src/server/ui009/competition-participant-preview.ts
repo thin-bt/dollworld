@@ -6,6 +6,7 @@ import {
   createInitialTournamentIdGeneratorState,
   createNeutralEntryChoicePolicy,
   DEFAULT_WORLD_CALENDAR_CONFIG,
+  isEligibleForBattleKind,
   type EntrantCandidateFacts,
   type Person,
   type PersonId,
@@ -15,6 +16,50 @@ import {
   type Sprint1RunSession,
 } from "@shared-world/simulation-core";
 import { tinyScheduleConfig } from "./competition-engine-schedule-config.js";
+import {
+  selectUi009IntegrationFallbackParticipantIds,
+  UI009_INTEGRATION_ROUND_ROBIN_MAX,
+} from "./competition-participant-integration-fallback.js";
+import { projectUi009CompetitionPlanningSession } from "./competition-integration-session.js";
+
+function supplementTwoPersonRoundRobinRoster(
+  session: Sprint1RunSession,
+  selectedPersonIds: readonly PersonId[],
+): readonly PersonId[] {
+  if (selectedPersonIds.length !== 2) {
+    return selectedPersonIds;
+  }
+  const targetRank = "F";
+  const roster = [...selectedPersonIds];
+  const seen = new Set(roster);
+  const candidates = session.runtimeState.worldState.persons
+    .filter((rawPerson) => {
+      const person = rawPerson as Person;
+      if (person.lifeStatus !== "living" || person.participationStatus !== "active") {
+        return false;
+      }
+      if (person.careerStatus !== "active_competitor") {
+        return false;
+      }
+      if (person.currentRank !== targetRank) {
+        return false;
+      }
+      return isEligibleForBattleKind("official", person.careerStatus, person.currentAge);
+    })
+    .map((person) => person.personId as PersonId)
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  for (const personId of candidates) {
+    if (seen.has(personId)) {
+      continue;
+    }
+    seen.add(personId);
+    roster.push(personId);
+    if (roster.length >= UI009_INTEGRATION_ROUND_ROBIN_MAX) {
+      break;
+    }
+  }
+  return roster;
+}
 
 function entrantFacts(person: Person, worldYear: number): EntrantCandidateFacts {
   const currentAge =
@@ -38,7 +83,7 @@ function entrantFacts(person: Person, worldYear: number): EntrantCandidateFacts 
  * F-rank normal tournament. This is shared by preview and production execution
  * so UI009 cannot silently regress to a different two-person selection path.
  */
-export function buildAcceptedCompetitionParticipantPlan(
+function buildAcceptedCompetitionParticipantPlanOnSession(
   session: Sprint1RunSession,
   provider: Sha256Provider,
 ) {
@@ -82,17 +127,52 @@ export function buildAcceptedCompetitionParticipantPlan(
     provider,
     expectedScheduleLifecycleIdentity: lifecycle.value,
   });
-  if (!list.ok || list.value === null || list.value.selectedPersonIds.length < 2) {
-    return null;
+  let selectedPersonIds: readonly PersonId[];
+  if (list.ok && list.value !== null && list.value.selectedPersonIds.length >= 2) {
+    selectedPersonIds = list.value.selectedPersonIds;
+  } else {
+    if (!list.ok) {
+      return null;
+    }
+    const fallback = selectUi009IntegrationFallbackParticipantIds(session);
+    if (fallback.length < 2) {
+      return null;
+    }
+    selectedPersonIds = fallback;
   }
+
+  selectedPersonIds = supplementTwoPersonRoundRobinRoster(session, selectedPersonIds);
   return {
     config,
     schedule,
     tournament,
     lifecycle: lifecycle.value,
     policy,
-    selectedPersonIds: list.value.selectedPersonIds,
+    selectedPersonIds,
   };
+}
+
+function resolveUi009PlanningSession(
+  session: Sprint1RunSession,
+  provider: Sha256Provider,
+): Sprint1RunSession {
+  const direct = buildAcceptedCompetitionParticipantPlanOnSession(session, provider);
+  if (direct !== null && direct.selectedPersonIds.length > 2) {
+    return session;
+  }
+  return projectUi009CompetitionPlanningSession(session);
+}
+
+export function buildAcceptedCompetitionParticipantPlan(
+  session: Sprint1RunSession,
+  provider: Sha256Provider,
+) {
+  const planningSession = resolveUi009PlanningSession(session, provider);
+  const plan = buildAcceptedCompetitionParticipantPlanOnSession(planningSession, provider);
+  if (plan === null) {
+    return null;
+  }
+  return { planningSession, plan };
 }
 
 /**
@@ -103,5 +183,5 @@ export function plannedCompetitionParticipantIdsForPreview(
   session: Sprint1RunSession,
   provider: Sha256Provider,
 ): readonly PersonId[] {
-  return buildAcceptedCompetitionParticipantPlan(session, provider)?.selectedPersonIds ?? [];
+  return buildAcceptedCompetitionParticipantPlan(session, provider)?.plan.selectedPersonIds ?? [];
 }

@@ -101,8 +101,8 @@ function normalizeCareerStatusForAge(person: Person, currentAge: number): Person
   if (careerStatus === "active_competitor") {
     const currentRank =
       person.careerStatus === "active_competitor"
-        ? asRank(person.currentRank, "C")
-        : "C";
+        ? asRank(person.currentRank, "F")
+        : "F";
     const highestRank =
       person.careerStatus === "active_competitor"
         ? asRank(person.highestRank, currentRank)
@@ -239,7 +239,9 @@ describe("UI-009 competition progression", () => {
     }
   });
 
-  it("GET idle then steps every accepted round-robin pair without fabricating final standings", async () => {
+  it(
+    "GET idle then steps every accepted round-robin pair without fabricating final standings",
+    async () => {
     app = await createUiApp({
       publicOrigin: ORIGIN,
       enableTestProbe: false,
@@ -322,5 +324,47 @@ describe("UI-009 competition progression", () => {
     const simulationBody = JSON.parse(simulation.body) as Envelope;
     expect(simulationBody.ok).toBe(true);
     expect((simulationBody.data as { lastOperation: { operation: string } }).lastOperation.operation).toBe("start");
-  });
+  },
+  120_000,
+  );
+
+  it("accepted UI009 start seed can initialize competition without runtime normalization", async () => {
+    app = await createUiApp({
+      publicOrigin: ORIGIN,
+      enableTestProbe: false,
+      repoRoot: REPO_ROOT,
+      processKeys: createTestProcessSecurityContext(910),
+    });
+    const sessionRes = await app.inject({ method: "GET", url: `${API_PREFIX}/session`, headers: { host: HOST } });
+    const sessionId = parseSetCookieSessionId(sessionRes.headers["set-cookie"]);
+    const csrf = (JSON.parse(sessionRes.body) as Envelope).data!.csrfToken as string;
+    const start = await app.inject({
+      method: "POST",
+      url: `${API_PREFIX}/simulation/start`,
+      headers: {
+        host: HOST,
+        cookie: `${SESSION_COOKIE_NAME}=${sessionId}`,
+        [CSRF_HEADER_NAME]: csrf,
+        "content-type": "application/json",
+        origin: ORIGIN,
+      },
+      payload: {
+        requestId: randomUUID(),
+        expectedUiRevision: 0,
+        presetId: DEFAULT_SPRINT1_PRESET_ID,
+        seed: 42,
+      },
+    });
+    expect(start.statusCode).toBe(200);
+    const started = JSON.parse(start.body) as Envelope;
+    const stepped = await stepCompetition(
+      app,
+      `${SESSION_COOKIE_NAME}=${sessionId}`,
+      csrf,
+      started.uiRevision,
+    );
+    expect(stepped.competition.participantIds.length).toBeGreaterThan(2);
+    expect(stepped.competition.roundRobinProgress).not.toBeNull();
+    expect(["awaiting_match", "round_robin_complete"]).toContain(stepped.competition.lifecyclePhase);
+  }, 120_000);
 });

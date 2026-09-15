@@ -1,0 +1,10 @@
+browser-acceptance.txt
+task-key: SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914
+tool: npx playwright test tests/e2e/s2-ui009-round-robin-competition.spec.ts --project=chrome
+page-url: http://127.0.0.1:8787/competition
+bootstrap: cleared cookies; POST /api/s1_5/simulation/start seed 42 sprint1-tiny-accepted
+
+== PASS ==
+PASS — UI009 round-robin competition advances every accepted pair; matrix + history visible; >2 participants; no fabricated champion/annual ranking at completion; GET /api/s1_5/simulation remains 200.
+
+evidence-screenshots: output/playwright/test-results (retain-on-failure only; run was green)

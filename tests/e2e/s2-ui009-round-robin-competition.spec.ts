@@ -1,16 +1,50 @@
+import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 
+const UI009_ACCEPTED_START_SEED = 42;
+
+async function bootstrapAcceptedCompetitionSession(
+  page: import("@playwright/test").Page,
+  context: import("@playwright/test").BrowserContext,
+): Promise<void> {
+  await context.clearCookies();
+  const sessionResponse = await page.request.get("/api/s1_5/session");
+  expect(sessionResponse.ok()).toBeTruthy();
+  const sessionEnvelope = (await sessionResponse.json()) as {
+    data: { csrfToken: string };
+    uiRevision: number;
+  };
+  const startResponse = await page.request.post("/api/s1_5/simulation/start", {
+    headers: {
+      "content-type": "application/json",
+      "x-dollworld-csrf": sessionEnvelope.data.csrfToken,
+      origin: "http://127.0.0.1:8787",
+    },
+    data: {
+      requestId: randomUUID(),
+      expectedUiRevision: sessionEnvelope.uiRevision,
+      presetId: "sprint1-tiny-accepted",
+      seed: UI009_ACCEPTED_START_SEED,
+    },
+  });
+  expect(startResponse.ok()).toBeTruthy();
+}
+
 test.describe("Sprint2 UI009 round-robin competition", () => {
-  test("advances every accepted round-robin pair in the real competition UI", async ({ page }) => {
+  test("advances every accepted round-robin pair in the real competition UI", async ({
+    page,
+    context,
+  }) => {
     test.setTimeout(180_000);
     await page.setViewportSize({ width: 1440, height: 1000 });
 
+    await bootstrapAcceptedCompetitionSession(page, context);
     await page.goto("/competition");
     await expect(page.getByTestId("ui001-shell")).toBeVisible();
     await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
       timeout: 60_000,
     });
-    await expect(page.getByRole("heading", { name: "大会" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "大会", exact: true })).toBeVisible();
 
     const step = page.getByTestId("competition-step-cta");
     await expect(step).toBeEnabled({ timeout: 60_000 });
