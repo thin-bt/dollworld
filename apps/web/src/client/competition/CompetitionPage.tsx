@@ -145,7 +145,11 @@ function TournamentDetailPanel(props: {
           ) : null}
 
           {showProgress && view.lastMatchPlayerLabels !== null ? (
-            <section className="competition-match-result" aria-labelledby="competition-last-match">
+            <section
+              className="competition-match-result"
+              aria-labelledby="competition-last-match"
+              data-testid="competition-match-result"
+            >
               <h4 id="competition-last-match" className="competition-section-heading">
                 最新試合
               </h4>
