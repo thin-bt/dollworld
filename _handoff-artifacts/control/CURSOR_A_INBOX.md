@@ -3,7 +3,7 @@ state: PREPARED
 lane: A
 task-key: SPRINT2-BROWSER-FIX-A-20260917
 mode: SOURCE_PRODUCT_REPAIR
-updatedAt: 2026-09-17T17:03:52+09:00
+updatedAt: 2026-09-17T17:35:16+09:00
 sprint: Sprint2
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-FIX-A-20260917/instruction.md
@@ -14,7 +14,7 @@ predecessor-task: SPRINT2-FULL-PRODUCT-BROWSER-REACCEPTANCE-B2-20260917
 last-consumed-task-key: GITHUB-CONTROL-PLANE-MIGRATION-A-20260917
 last-terminal: READY / GITHUB_CONTROL_PLANE_MIGRATION_A_READY / COMMITTED
 last-commit-sha: 07c0472e569a482bb505db2acaa530cb55f12bdd
-recovery: PM_RETRIGGER_PREPARED_AFTER_STALE_PICKUP
+recovery: ROLE3_RETRIGGER_PREPARED_AFTER_NO_GITHUB_PICKUP
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - preserve existing dirty Sprint2 worktree
