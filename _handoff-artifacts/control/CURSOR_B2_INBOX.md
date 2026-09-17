@@ -3,7 +3,7 @@ state: PREPARED
 lane: B2
 task-key: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4
 mode: BROWSER_ACCEPTANCE_PREP
-updatedAt: 2026-09-18T07:38:00+09:00
+updatedAt: 2026-09-18T08:04:11+09:00
 sprint: Sprint2
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4/instruction.md
@@ -12,7 +12,7 @@ required-repository: thin-bt/dollworld
 required-branch: master
 non-overlap: TEST_ACCEPTANCE_ONLY_NO_A_PRODUCT_SURFACES
 predecessor-task: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260917-R3
-recovery: ROLE3_RETRIGGER_STALE_PREPARED_R4_NO_ACTIVE_OR_TERMINAL_0738
+recovery: PM_FAILOVER_RETRIGGER_STALE_PREPARED_R4_NO_ACTIVE_OR_TERMINAL_0804
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - do not edit A-owned product implementation
