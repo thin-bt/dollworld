@@ -1,0 +1,8 @@
+task-key: GITHUB-CONTROL-PLANE-MIGRATION-A-20260917
+lane: A
+terminal: READY / GITHUB_CONTROL_PLANE_MIGRATION_A_READY
+updatedAt: 2026-09-17T16:12:00+09:00
+
+Implemented GitHub-first executor control-plane (control/*.md inbox, tasks/*/instruction.md, results/*/result.md).
+Tests: npm test in cursor-inbox-executor (4/4 pass).
+Canonical result: _handoff-artifacts/results/GITHUB-CONTROL-PLANE-MIGRATION-A-20260917/result.md

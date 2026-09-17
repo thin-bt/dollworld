@@ -1,0 +1,36 @@
+﻿# GITHUB-CONTROL-PLANE-MIGRATION-A-20260917
+
+sprint: Sprint2
+lane: A
+mode: CONTROL_INFRASTRUCTURE
+priority: IMMEDIATE
+control-authority: GitHub
+
+## Objective
+
+Migrate dollworld PM/Role/Cursor operational handoff from Google Drive/local-path authority to GitHub canonical files under `_handoff-artifacts/`, without stopping current Sprint2 work.
+
+## Required behavior
+
+1. Inspect the current local Cursor SDK executor and handoff materialization scripts.
+2. Add GitHub-first control-plane support for repository `thin-bt/dollworld`, branch `master`.
+3. Poll/read `_handoff-artifacts/control/CURSOR_A_INBOX.md` and `_handoff-artifacts/control/CURSOR_B2_INBOX.md` as canonical lane state, plus task instructions under `_handoff-artifacts/tasks/<task-key>/instruction.md`.
+4. Preserve existing local/Drive handling only as a temporary compatibility fallback/mirror. Local or Drive absence/search miss must never be terminal and must never disable loops.
+5. Result publication must be capable of writing canonical result content under `_handoff-artifacts/results/<task-key>/result.md` or otherwise provide a deterministic GitHub write path that PM can consume.
+6. Do not require user interaction for recovery.
+7. Do not stop or disable PM/Role automation.
+8. Keep Sprint2 implementation worktree changes intact; do not discard or overwrite unrelated dirty source.
+
+## Acceptance
+
+- GitHub canonical inbox can cause executor pickup without Drive being authoritative.
+- Missing Drive/local mirror does not stop the executor or automation.
+- Exact task-key is claimed ACTIVE and terminal result is published/readable from GitHub canonical state.
+- Existing Sprint2 task state is preserved.
+- Build/test any touched executor/control scripts as appropriate.
+
+## Non-goals
+
+- No Sprint3/4 work.
+- No redesign of product features.
+- No cleanup that risks current uncommitted Sprint2 source changes.
