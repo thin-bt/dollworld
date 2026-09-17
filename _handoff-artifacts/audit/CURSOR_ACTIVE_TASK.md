@@ -4,10 +4,11 @@ state: IDLE
 lane: A
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-16T01:22:00+09:00
+updatedAt: 2026-09-17T16:20:00+09:00
 pickup: (none)
-last-completed-task-key: SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914
-last-terminal: READY / SPRINT2_WIREFRAME_SOURCE_EVIDENCE_REPAIR_A_READY / COMMITTED
+last-completed-task-key: GITHUB-CONTROL-PLANE-MIGRATION-A-20260917
+last-terminal: READY / GITHUB_CONTROL_PLANE_MIGRATION_A_READY / COMMITTED
+last-commit-sha: 07c0472e569a482bb505db2acaa530cb55f12bdd
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.

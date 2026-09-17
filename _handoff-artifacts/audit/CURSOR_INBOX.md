@@ -1,8 +1,21 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-16T01:22:00+09:00
-last-completed-task-key: SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914
-last-terminal: READY / SPRINT2_WIREFRAME_SOURCE_EVIDENCE_REPAIR_A_READY
+task-key: SPRINT2-BROWSER-FIX-A-20260917
+mode: SOURCE_PRODUCT_REPAIR
+updatedAt: 2026-09-17T16:20:00+09:00
+sprint: Sprint2
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-FIX-A-20260917/instruction.md
+control-authority: GitHub
+required-repository: thin-bt/dollworld
+required-branch: master
+predecessor-task: SPRINT2-FULL-PRODUCT-BROWSER-REACCEPTANCE-B2-20260917
+last-consumed-task-key: GITHUB-CONTROL-PLANE-MIGRATION-A-20260917
+last-terminal: READY / GITHUB_CONTROL_PLANE_MIGRATION_A_READY / COMMITTED
+last-commit-sha: 07c0472e569a482bb505db2acaa530cb55f12bdd
+pickup-requirements:
+- fresh-read GitHub canonical instruction
+- preserve existing dirty Sprint2 worktree
+- claim ACTIVE before changes
+- publish terminal result to GitHub canonical result path

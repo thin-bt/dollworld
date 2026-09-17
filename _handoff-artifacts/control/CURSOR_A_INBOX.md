@@ -11,6 +11,9 @@ control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 predecessor-task: SPRINT2-FULL-PRODUCT-BROWSER-REACCEPTANCE-B2-20260917
+last-consumed-task-key: GITHUB-CONTROL-PLANE-MIGRATION-A-20260917
+last-terminal: READY / GITHUB_CONTROL_PLANE_MIGRATION_A_READY / COMMITTED
+last-commit-sha: 07c0472e569a482bb505db2acaa530cb55f12bdd
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - preserve existing dirty Sprint2 worktree
