@@ -1,17 +1,18 @@
 # Cursor B2 Inbox
 state: PREPARED
 lane: B2
-task-key: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260917
+task-key: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260917-R2
 mode: BROWSER_ACCEPTANCE_PREP
-updatedAt: 2026-09-17T22:03:50+09:00
+updatedAt: 2026-09-17T22:35:48+09:00
 sprint: Sprint2
 priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-REGRESSION-PREP-B2-20260917/instruction.md
+instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-REGRESSION-PREP-B2-20260917-R2/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 non-overlap: TEST_ACCEPTANCE_ONLY_NO_A_PRODUCT_SURFACES
-recovery: PM_RETRIGGER_STALE_PREPARED_NO_ACTIVE_OR_TERMINAL_2203
+predecessor-task: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260917
+recovery: ROLE3_RETRIGGER_STALE_PREPARED_NO_ACTIVE_OR_TERMINAL_2235
 last-completed-task-key: SPRINT2-FULL-PRODUCT-BROWSER-REACCEPTANCE-B2-20260917
 last-terminal: FIX_REQUIRED / SPRINT2_FULL_PRODUCT_BROWSER_REACCEPTANCE_B2 / ab1202f7027493d34c16f82906bf7b0454597a4a
 pickup-requirements:
