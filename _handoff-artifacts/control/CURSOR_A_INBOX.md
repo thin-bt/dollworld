@@ -1,17 +1,17 @@
 # Cursor A Inbox
 state: PREPARED
 lane: A
-task-key: SPRINT2-BROWSER-FIX-A-20260917-R8
+task-key: SPRINT2-BROWSER-FIX-A-20260917-R9
 mode: SOURCE_PRODUCT_REPAIR
-updatedAt: 2026-09-17T22:03:50+09:00
+updatedAt: 2026-09-17T22:21:10+09:00
 sprint: Sprint2
 priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-FIX-A-20260917-R8/instruction.md
+instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-FIX-A-20260917-R9/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-predecessor-task: SPRINT2-BROWSER-FIX-A-20260917-R7
-recovery: PM_FAILOVER_STALE_PREPARED_R7_NO_ACTIVE_OR_TERMINAL_2203
+predecessor-task: SPRINT2-BROWSER-FIX-A-20260917-R8
+recovery: PM_FAILOVER_STALE_PREPARED_R8_NO_ACTIVE_OR_TERMINAL_2221
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - preserve existing dirty Sprint2 worktree
