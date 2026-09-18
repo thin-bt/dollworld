@@ -15,8 +15,33 @@ export function isStaleActive(active, staleMinutes = 30) {
 }
 
 /**
+ * Explicit PM/Role redispatch of the same task-key after a prior terminal.
+ * Detected when Inbox carries a redispatch/recovery marker AND updatedAt is
+ * newer than the local Active completion timestamp.
+ *
+ * @param {Record<string, string>} inbox
+ * @param {Record<string, string>} active
+ */
+export function isExplicitSameTaskRedispatch(inbox, active) {
+  const recovery = `${inbox.recovery ?? ""} ${inbox["recovery-request"] ?? ""} ${inbox["runtime-status"] ?? ""}`;
+  if (!/(REDISPATCH|RETRIGGER|FAILOVER|RE-?DISPATCH)/i.test(recovery)) {
+    return false;
+  }
+  const inboxUpdated = Date.parse(inbox.updatedAt ?? "");
+  const activeDone = Date.parse(
+    active.completedAt ?? active.updatedAt ?? active["last-terminal-at"] ?? "",
+  );
+  if (Number.isNaN(inboxUpdated) || Number.isNaN(activeDone)) {
+    // Recovery marker alone is enough when timestamps are unparsable.
+    return true;
+  }
+  return inboxUpdated > activeDone;
+}
+
+/**
  * Active IDLE after READY/COMPLETE for the same Inbox task-key must not re-invoke.
  * That is WRONG_TASK_REINVOKE / stale PREPARED re-verify, not a fresh claim.
+ * Explicit newer redispatch/recovery PREPARED of the same key is allowed.
  *
  * @param {Record<string, string>} inbox
  * @param {Record<string, string>} active
@@ -36,13 +61,17 @@ export function isAlreadyCompleteSameTask(inbox, active) {
   }
   const completedKey =
     active.lastCompletedTask ??
+    active["last-completed-task-key"] ??
     active["task-key"] ??
     active["last-task-key"] ??
     "";
   if (completedKey !== inboxKey) {
     return false;
   }
-  const terminal = `${active.terminal ?? ""} ${active["recovery-terminal"] ?? ""}`;
+  if (isExplicitSameTaskRedispatch(inbox, active)) {
+    return false;
+  }
+  const terminal = `${active.terminal ?? ""} ${active["last-terminal"] ?? ""} ${active["recovery-terminal"] ?? ""}`;
   return /\bREADY\b|\bCOMPLETE\b|\bFIX_REQUIRED\b|\bBLOCKED\b/.test(terminal);
 }
 
@@ -88,8 +117,15 @@ export function evaluatePickup(inbox, active, opts = {}) {
   }
 
   // Stale PREPARED pointing at an already-terminal same task must not loop.
+  // Explicit newer redispatch/recovery of the same key is a fresh claim.
   if (isAlreadyCompleteSameTask(inbox, active)) {
     return { invoke: false, reason: "ALREADY_COMPLETE_SAME_TASK" };
+  }
+  if (
+    isExplicitSameTaskRedispatch(inbox, active) &&
+    (activeState.length === 0 || activeState === "IDLE" || activeState === "READY" || activeState === "COMPLETE")
+  ) {
+    return { invoke: true, reason: "REDISPATCH_SAME_TASK" };
   }
 
   if (activeState.length === 0 || activeState === "IDLE") {

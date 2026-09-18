@@ -130,3 +130,43 @@ test("GitHub instruction fetch miss keeps missing (no false local invent)", asyn
 
   await rm(root, { recursive: true, force: true });
 });
+
+test("same-task READY then plain PREPARED => ALREADY_COMPLETE (no loop)", () => {
+  const pickup = evaluatePickup(
+    {
+      state: "PREPARED",
+      "task-key": "TASK-R13",
+      updatedAt: "2026-09-18T17:00:00+09:00",
+    },
+    {
+      state: "IDLE",
+      lastCompletedTask: "TASK-R13",
+      terminal: "READY / TASK_R13_READY",
+      completedAt: "2026-09-18T17:26:00+09:00",
+      updatedAt: "2026-09-18T17:26:00+09:00",
+    },
+  );
+  assert.equal(pickup.invoke, false);
+  assert.equal(pickup.reason, "ALREADY_COMPLETE_SAME_TASK");
+});
+
+test("same-task READY then newer REDISPATCH PREPARED => invoke", () => {
+  const pickup = evaluatePickup(
+    {
+      state: "PREPARED",
+      "task-key": "TASK-R13",
+      updatedAt: "2026-09-19T00:23:48+09:00",
+      recovery: "PM_FAILOVER_GITHUB_FIRST_REDISPATCH_R13_0023_NO_ACTIVE_OR_TERMINAL",
+    },
+    {
+      state: "IDLE",
+      lastCompletedTask: "TASK-R13",
+      "last-completed-task-key": "TASK-R13",
+      terminal: "READY / TASK_R13_READY",
+      completedAt: "2026-09-18T17:26:00+09:00",
+      updatedAt: "2026-09-18T17:26:00+09:00",
+    },
+  );
+  assert.equal(pickup.invoke, true);
+  assert.equal(pickup.reason, "REDISPATCH_SAME_TASK");
+});
