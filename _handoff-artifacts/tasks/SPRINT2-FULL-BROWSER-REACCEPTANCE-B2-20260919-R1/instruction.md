@@ -9,13 +9,13 @@ control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 predecessor-task: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4
-paired-a-terminal: SPRINT2-B2-ACCEPTANCE-UNBLOCK-A-20260919-R1
+paired-a-terminal: SPRINT2-LINT-CLOSURE-A-20260919-R1
 non-overlap: TEST_ACCEPTANCE_ONLY_NO_PRODUCT_EDITS
-recovery: ROLE3_GITHUB_FIRST_RETRIGGER_0436_AFTER_A_UNBLOCK_READY
+recovery: ROLE3_GITHUB_FIRST_RETRIGGER_0740_AFTER_A_LINT_CLOSURE_READY
 
 ## Objective
 
-Run the mandatory fresh full Sprint2 browser reacceptance against the current host worktree after A acceptance-unblock READY. A reproduced and fixed the false-finished 0/0 bootstrap defect and verified focused vitest 7/7 plus prep Chrome test 1 PASS on dirty HEAD aa500b60e2c041548b42909fea23a6ae59f3373e. The prior B2 R4 FIX_REQUIRED and any B2 run predating this A terminal are not final acceptance.
+Run the mandatory fresh full Sprint2 browser reacceptance against the current host worktree after the latest A terminal `SPRINT2-LINT-CLOSURE-A-20260919-R1` READY. That terminal closed the two focused ESLint gaps and reports bounded ui009 Vitest 29/29 PASS, post-wiring recheck 6/6 PASS, and focused ESLint exit 0 on dirty HEAD aa500b60e2c041548b42909fea23a6ae59f3373e. Any B2 run predating this latest A terminal is not final acceptance.
 
 ## Required verification
 
@@ -40,7 +40,7 @@ Verify especially:
 ## Rules
 
 1. Test/acceptance lane only. Do not modify A-owned product implementation.
-2. Fresh-run against the current host worktree; do not reuse the old R4 FIX_REQUIRED as the new verdict.
+2. Fresh-run against the current host worktree; do not reuse any pre-lint-closure B2 verdict as the new verdict.
 3. On failure, report the first reproducible product-visible blocker with screenshot/log path, exact assertion, current HEAD/worktree binding, and whether it overlaps A-owned surfaces.
 4. Do not fabricate unsupported browser fixtures for future-reserve scope.
 5. No Sprint3/4.
