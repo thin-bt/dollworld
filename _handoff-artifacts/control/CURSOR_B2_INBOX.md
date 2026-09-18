@@ -1,20 +1,17 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4
-mode: BROWSER_ACCEPTANCE_PREP
-updatedAt: 2026-09-19T00:37:29+09:00
-sprint: Sprint2
-priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-19T00:39:33+09:00
+last-consumed-task-key: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4
+last-terminal: READY
+last-result-path: _handoff-artifacts/results/SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-non-overlap: TEST_ACCEPTANCE_ONLY_NO_A_PRODUCT_SURFACES
-predecessor-task: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260917-R3
-recovery: ROLE3_RETRIGGER_STALE_PREPARED_R4_NO_ACTIVE_OR_TERMINAL_0037
+sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
-- do not edit A-owned product implementation
 - claim ACTIVE before changes
 - publish terminal result to GitHub canonical result path
