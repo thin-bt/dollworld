@@ -29,6 +29,7 @@ import {
 } from "../ui-session.js";
 import { fixReadSnapshot } from "../ui004/list-get-common.js";
 import { assertWorldUnchanged, projectIsolationSnapshot } from "../ui006/compare-world-isolation.js";
+import { finalizeRoundRobinCompetitionStore } from "./competition-round-robin-finalize.js";
 import { rankingFactsForStore, runCompetitionProgressionStep } from "./competition-engine.js";
 import { getCompetitionStore, setCompetitionStore } from "./competition-session-registry.js";
 import { buildStepDataView, mapCompetitionProgressView } from "./map-competition-view.js";
@@ -184,9 +185,8 @@ export async function handlePostCompetitionStep(
   reply: FastifyReply,
   deps: CompetitionRouteDeps,
 ): Promise<void> {
-  const session = request.uiSession;
-  if (session === undefined) {
-    sendSessionRequired(reply);
+  const session = loadSession(request, reply, deps);
+  if (session === null) {
     return;
   }
   if (!requireReadySession(session, reply)) {
@@ -390,14 +390,51 @@ export async function handlePostCompetitionStep(
     return;
   }
 
+  let committedStorePayload = outcome.store;
+  if (committedStorePayload.state?.phase === "round_robin_complete") {
+    const finalized = finalizeRoundRobinCompetitionStore(committedStorePayload, provider);
+    if (finalized.kind === "domain_failure") {
+      const rev = deriveEnvelopeRevision(session);
+      const body = serializeEnvelope(
+        buildFailureEnvelope({
+          error: {
+            code: "DOMAIN_VALIDATION_FAILED",
+            message: "competition finalization failed",
+            commitState: "none",
+            validation: finalized.issues.map((issue) => ({ ...issue })),
+          },
+          uiRevision: rev.uiRevision,
+          isUpdating: true,
+          refreshRequired: false,
+        }),
+      );
+      completeJournalRecord({
+        session,
+        requestId,
+        httpStatus: 422,
+        responseBody: body,
+        committedWeeks: 0,
+        completedUiRevision: expectedUiRevision,
+        replaceLastOperation: false,
+      });
+      sendApiJson(reply, 422, body);
+      return;
+    }
+    if (finalized.kind === "ok") {
+      committedStorePayload = finalized.store;
+    }
+  }
+
   const resultUiRevision = expectedUiRevision + 1;
-  setCompetitionStore(session.sessionId, outcome.store);
+  setCompetitionStore(session.sessionId, committedStorePayload);
   session.uiRevision = resultUiRevision;
   const committedStore = getCompetitionStore(session.sessionId);
+  const stepKind =
+    committedStore.state?.phase === "finished" ? ("already_finished" as const) : outcome.stepKind;
   const data = buildStepDataView(
     committedStore,
     rankingFactsForStore(committedStore),
-    outcome.stepKind,
+    stepKind,
     session.worldEngineRuntime!,
   );
   const responseBody = serializeEnvelope(

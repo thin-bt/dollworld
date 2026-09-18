@@ -812,6 +812,97 @@ export function runSprint1Weeks(
 }
 
 /**
+ * G296 verification-path only: same trust boundary as {@link runSprint1Weeks} but
+ * accepts a prebuilt owned event stream (e.g. disk-spilled prefix + live tail).
+ */
+export type RunSprint1WeeksWithOwnedStreamOptions = RunSprint1YearsOptions & {
+  /** G296 verification-path only: skip O(history) start/end full session rescans when prefix is disk-spilled. */
+  trustValidatedWeeklyTransitionsWithoutFinalRescan?: boolean;
+};
+
+export function runSprint1WeeksWithPrebuiltOwnedEventStream(
+  session: Sprint1RunSession,
+  weeks: number,
+  ownedEventStream: Sprint1EventEnvelope[],
+  provider: Sha256Provider,
+  options: RunSprint1WeeksWithOwnedStreamOptions = {},
+): ValidationResult<Sprint1RunSession> {
+  const validated =
+    options.trustValidatedWeeklyTransitionsWithoutFinalRescan === true
+      ? success(session)
+      : validateSessionAtBoundary(session, provider);
+  if (!validated.ok) {
+    return failure(prefixIssues(validated.issues, "/session"));
+  }
+  const validatedLegacyProcessors = validateLegacyProcessors(options.legacyProcessors ?? []);
+  if (!validatedLegacyProcessors.ok) {
+    return failure(validatedLegacyProcessors.issues);
+  }
+  const legacyProcessors = options.legacyProcessors ?? [];
+  const onAfterValidatedWeek = options.onAfterValidatedWeek;
+  const onBeforeYearStartPhase = options.onBeforeYearStartPhase;
+
+  if (!Number.isSafeInteger(weeks) || weeks < 0) {
+    return failure([
+      {
+        path: "/weeks",
+        message: "weeks must be a non-negative safe integer",
+        actual: weeks,
+      },
+    ]);
+  }
+
+  if (weeks === 0) {
+    return success(validated.value);
+  }
+
+  let current: Sprint1RunSession = {
+    context: validated.value.context,
+    runtimeState: {
+      ...validated.value.runtimeState,
+      eventStream: ownedEventStream,
+    },
+  };
+
+  for (let weekIndex = 0; weekIndex < weeks; weekIndex += 1) {
+    const eventCountBefore = ownedEventStream.length;
+    const step = runValidatedSprint1WeeklyStep(
+      current,
+      provider,
+      legacyProcessors,
+      ownedEventStream,
+      onBeforeYearStartPhase,
+    );
+    if (!step.ok) {
+      return step;
+    }
+    current = step.value;
+    if (onAfterValidatedWeek !== undefined) {
+      const observation = buildValidatedWeekObservation({
+        worldDate: current.runtimeState.worldState.worldDate,
+        eventCountCumulative: ownedEventStream.length,
+        appendedEvents: ownedEventStream.slice(eventCountBefore),
+      });
+      try {
+        onAfterValidatedWeek(observation);
+      } catch (error) {
+        return failure(observerFailureIssues(error));
+      }
+    }
+  }
+
+  if (options.trustValidatedWeeklyTransitionsWithoutFinalRescan === true) {
+    return success(current);
+  }
+
+  const finalValidated = validateSessionAtBoundary(current, provider);
+  if (!finalValidated.ok) {
+    return failure(prefixIssues(finalValidated.issues, "/finalSession"));
+  }
+  return success(finalValidated.value);
+}
+
+/**
  * Advance the session by `years * 48` weeks using {@link runSprint1Weeks}.
  */
 export function runSprint1Years(

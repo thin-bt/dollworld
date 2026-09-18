@@ -185,6 +185,58 @@ function lifecyclePhaseFromState(state: CompetitionPersistedState): CompetitionL
   return "awaiting_match";
 }
 
+function bracketFormatKind(state: CompetitionPersistedState): string | null {
+  const formatKind = (state.bracketDefinition as { formatKind?: unknown } | undefined)?.formatKind;
+  return typeof formatKind === "string" ? formatKind : null;
+}
+
+function roundRobinCompletionCoherent(
+  roundRobinProgress: CompetitionRoundRobinProgressView | null,
+): boolean {
+  if (roundRobinProgress === null) {
+    return false;
+  }
+  if (roundRobinProgress.matchesTotal <= 0) {
+    return false;
+  }
+  return roundRobinProgress.matchesCompleted >= roundRobinProgress.matchesTotal;
+}
+
+function tournamentCompletionCoherent(
+  state: CompetitionPersistedState,
+  roundRobinProgress: CompetitionRoundRobinProgressView | null,
+): boolean {
+  if (
+    roundRobinProgress !== null &&
+    roundRobinProgress.matchesTotal === 0 &&
+    roundRobinProgress.matchesCompleted === 0
+  ) {
+    return false;
+  }
+  if (bracketFormatKind(state) === "round_robin") {
+    return roundRobinCompletionCoherent(roundRobinProgress);
+  }
+  return state.matchesCompleted > 0 && state.lastMatch !== null;
+}
+
+/**
+ * Maps persisted phase to player-facing lifecycle. Terminal "finished" requires factual
+ * match completion so the step CTA is not hidden by a false terminal mapping.
+ */
+function effectiveLifecyclePhase(
+  state: CompetitionPersistedState,
+  roundRobinProgress: CompetitionRoundRobinProgressView | null,
+): CompetitionLifecyclePhase {
+  const stored = lifecyclePhaseFromState(state);
+  if (stored !== "finished") {
+    return stored;
+  }
+  if (tournamentCompletionCoherent(state, roundRobinProgress)) {
+    return "finished";
+  }
+  return "awaiting_match";
+}
+
 export function mapCompetitionProgressView(
   store: CompetitionSessionStore,
   rankingFacts: readonly AnnualRankingDisplayFacts[],
@@ -225,6 +277,8 @@ export function mapCompetitionProgressView(
 
   const finalResult = state.finalResult as { winnerPersonId?: string; resultHash?: string } | null;
   const roundRobinProgress = roundRobinProgressFromState(state);
+  const lifecyclePhase = effectiveLifecyclePhase(state, roundRobinProgress);
+  const presentAsFinished = lifecyclePhase === "finished";
   const participantIds = roundRobinProgress?.participantIds ?? [state.participantAId, state.participantBId];
   const participantDisplayNames = participantIds.map((id) =>
     displayNameInIsolatedState(state, id),
@@ -234,12 +288,15 @@ export function mapCompetitionProgressView(
 
   return {
     schemaVersion: COMPETITION_VIEW_SCHEMA_VERSION,
-    lifecyclePhase: lifecyclePhaseFromState(state),
+    lifecyclePhase,
     tournamentId: state.tournamentId,
     tournamentKind: state.tournamentKind,
     targetRank: state.targetRank,
     participantIds,
-    matchesCompleted: roundRobinProgress?.matchesCompleted ?? state.matchesCompleted,
+    matchesCompleted:
+      roundRobinProgress !== null && roundRobinProgress.matchesTotal > 0
+        ? roundRobinProgress.matchesCompleted
+        : state.matchesCompleted,
     lastMatch:
       state.lastMatch === null
         ? null
@@ -249,7 +306,9 @@ export function mapCompetitionProgressView(
             loserPersonId: state.lastMatch.loserPersonId,
           },
     finalResultSummary:
-      finalResult?.winnerPersonId !== undefined && finalResult.resultHash !== undefined
+      presentAsFinished &&
+      finalResult?.winnerPersonId !== undefined &&
+      finalResult.resultHash !== undefined
         ? {
             winnerPersonId: finalResult.winnerPersonId,
             resultHash: finalResult.resultHash,
@@ -268,7 +327,7 @@ export function mapCompetitionProgressView(
             loserDisplayName: displayNameInIsolatedState(state, state.lastMatch.loserPersonId),
           },
     championDisplayName:
-      finalResult?.winnerPersonId !== undefined
+      presentAsFinished && finalResult?.winnerPersonId !== undefined
         ? displayNameInIsolatedState(state, finalResult.winnerPersonId)
         : null,
     roundRobinProgress,

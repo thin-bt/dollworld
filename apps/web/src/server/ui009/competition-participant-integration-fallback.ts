@@ -7,8 +7,11 @@ import {
 import { buildMockCandidateSourceRows } from "../ui004/source-from-runtime.js";
 import { mockCandidateEligible } from "../ui004/mock-candidates/mock-candidate-eligible.js";
 
-/** Accepted UI009 round-robin upper bound (must match competition-format-selection config). */
-export const UI009_INTEGRATION_ROUND_ROBIN_MAX = 4;
+/** Accepted UI009 integration participant cap (round-robin max and knockout minimum range). */
+export const UI009_INTEGRATION_PARTICIPANT_CAP = 16;
+
+/** @deprecated use UI009_INTEGRATION_PARTICIPANT_CAP */
+export const UI009_INTEGRATION_ROUND_ROBIN_MAX = UI009_INTEGRATION_PARTICIPANT_CAP;
 
 function isOfficialBattleEligiblePerson(person: Person, worldYear: number): boolean {
   if (person.lifeStatus !== "living" || person.participationStatus !== "active") {
@@ -45,12 +48,12 @@ export function selectUi009IntegrationFallbackParticipantIds(
     .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
   if (eligible.length >= 2) {
-    return eligible.slice(0, UI009_INTEGRATION_ROUND_ROBIN_MAX);
+    return eligible.slice(0, UI009_INTEGRATION_PARTICIPANT_CAP);
   }
 
   const fallback = session.runtimeState.worldState.persons
     .filter((person) => isOfficialBattleEligiblePerson(person as Person, worldYear))
     .map((person) => person.personId as PersonId)
     .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-  return fallback.slice(0, UI009_INTEGRATION_ROUND_ROBIN_MAX);
+  return fallback.slice(0, UI009_INTEGRATION_PARTICIPANT_CAP);
 }

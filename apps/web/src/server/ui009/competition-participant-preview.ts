@@ -18,7 +18,7 @@ import {
 import { tinyScheduleConfig } from "./competition-engine-schedule-config.js";
 import {
   selectUi009IntegrationFallbackParticipantIds,
-  UI009_INTEGRATION_ROUND_ROBIN_MAX,
+  UI009_INTEGRATION_PARTICIPANT_CAP,
 } from "./competition-participant-integration-fallback.js";
 import { projectUi009CompetitionPlanningSession } from "./competition-integration-session.js";
 
@@ -54,7 +54,7 @@ function supplementTwoPersonRoundRobinRoster(
     }
     seen.add(personId);
     roster.push(personId);
-    if (roster.length >= UI009_INTEGRATION_ROUND_ROBIN_MAX) {
+    if (roster.length >= UI009_INTEGRATION_PARTICIPANT_CAP) {
       break;
     }
   }
@@ -142,6 +142,9 @@ function buildAcceptedCompetitionParticipantPlanOnSession(
   }
 
   selectedPersonIds = supplementTwoPersonRoundRobinRoster(session, selectedPersonIds);
+  if (selectedPersonIds.length > config.format.roundRobinMaximum) {
+    selectedPersonIds = selectedPersonIds.slice(0, config.format.roundRobinMaximum);
+  }
   return {
     config,
     schedule,

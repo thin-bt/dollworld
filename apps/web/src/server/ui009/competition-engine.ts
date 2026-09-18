@@ -28,8 +28,15 @@ import {
   plannedCompetitionParticipantIdsForPreview,
 } from "./competition-participant-preview.js";
 import { persistDetailedLogPayloadStore } from "./competition-payload-store.js";
-import { executeNextRoundRobinMatch } from "./competition-round-robin-execution.js";
-import { projectRoundRobinProgress } from "./competition-round-robin-progress.js";
+import { executeNextBracketMatch } from "./competition-bracket-match-execution.js";
+import {
+  isBracketStructurallyComplete,
+  projectBracketProgress,
+} from "./competition-bracket-progress.js";
+import { selectUi009GroupAdvancers } from "./competition-group-advancers.js";
+import { selectUi009TournamentFormat } from "./competition-format-selection.js";
+import { buildUi009StructuralPolicy } from "./competition-structural-policy.js";
+import { resolveKnockoutByeAdvancements } from "./competition-bracket-runtime.js";
 import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
 import { COMPETITION_STORE_SCHEMA_VERSION } from "./competition-store.js";
 
@@ -43,23 +50,21 @@ export type CompetitionEngineOutcome =
   | { kind: "domain_failure"; issues: readonly ValidationIssue[] }
   | { kind: "corrupt" };
 
-const STRUCTURAL_POLICY = {
-  formatSelection: {
-    formatKind: "round_robin" as const,
-    policyIdentity: {
-      policyVersion: "ui009-format-selection-0.1.0",
-      configVersion: "ui009-format-config-a",
-    },
+
+function groupAdvanceCount(
+  participantCount: number,
+  config: {
+    format: { groupAdvanceCount17to24: number; groupAdvanceCount25to32: number };
   },
-  knockoutSeedByePolicyIdentity: {
-    policyVersion: "ui009-knockout-seed-bye-0.1.0",
-    configVersion: "ui009-knockout-seed-bye-config-a",
-  },
-  standingsTieBreakPolicyIdentity: {
-    policyVersion: "ui009-standings-tie-break-0.1.0",
-    configVersion: "ui009-standings-tie-break-config-a",
-  },
-};
+): number {
+  if (participantCount >= 25) {
+    return config.format.groupAdvanceCount25to32;
+  }
+  if (participantCount >= 17) {
+    return config.format.groupAdvanceCount17to24;
+  }
+  return 1;
+}
 
 function cloneSessionJson(session: Sprint1RunSession): Sprint1RunSession {
   return JSON.parse(toCanonicalJson(session)) as Sprint1RunSession;
@@ -154,6 +159,29 @@ function initializeCompetitionState(
     return { kind: "domain_failure", issues: participantListHash.issues };
   }
 
+  const formatSelection = selectUi009TournamentFormat(
+    participantIds.length,
+    acceptedPlan.tournament.kind,
+    acceptedPlan.config.format,
+  );
+  if (formatSelection === null) {
+    return {
+      kind: "domain_failure",
+      issues: [
+        {
+          path: "/formatSelection",
+          message: "participant count is outside accepted Sprint2 format thresholds",
+          actual: participantIds.length,
+        },
+      ],
+    };
+  }
+  const structuralPolicy = buildUi009StructuralPolicy(
+    formatSelection,
+    participantIds,
+    acceptedPlan.config,
+  );
+
   const built = buildStructuralBracketDefinition(
     {
       tournamentId: acceptedPlan.tournament.tournamentId,
@@ -161,13 +189,18 @@ function initializeCompetitionState(
       participantListHash: participantListHash.value,
       scheduleLifecycleIdentity: acceptedPlan.lifecycle,
       entryChoicePolicyIdentity: acceptedPlan.policy.identity,
-      policy: STRUCTURAL_POLICY,
+      policy: structuralPolicy,
     },
     provider,
   );
   if (!built.ok) {
     return { kind: "domain_failure", issues: built.issues };
   }
+
+  const seededRuntime = resolveKnockoutByeAdvancements(
+    built.value.definition,
+    built.value.runtimeState,
+  );
 
   const competitiveRecordByPersonId: Record<string, Record<string, unknown>> = {};
   for (const personId of participantIds) {
@@ -208,10 +241,11 @@ function initializeCompetitionState(
     >,
     participantListHash: participantListHash.value,
     bracketDefinition: JSON.parse(toCanonicalJson(built.value.definition)) as Record<string, unknown>,
-    bracketRuntimeState: JSON.parse(toCanonicalJson(built.value.runtimeState)) as Record<string, unknown>,
+    bracketRuntimeState: JSON.parse(toCanonicalJson(seededRuntime)) as Record<string, unknown>,
     isolatedSession: JSON.parse(toCanonicalJson(isolatedSession)) as Record<string, unknown>,
     payloadStore: persistDetailedLogPayloadStore(createEmptyDetailedLogPayloadStore()),
     storedRecords: [],
+    slotBindings: [],
     matchesCompleted: 0,
     lastMatch: null,
     competitiveRecordByPersonId,
@@ -240,7 +274,46 @@ function playNextMatch(
     return { kind: "corrupt" };
   }
 
-  const executed = executeNextRoundRobinMatch({ state, session, provider });
+  const bracketDefinition = state.bracketDefinition as unknown as TournamentBracketDefinition;
+  const storedRecords = state.storedRecords as unknown as import("@shared-world/simulation-core").StoredBattleResultRecord[];
+  const slotBindings = (state.slotBindings ?? []) as unknown as import("@shared-world/simulation-core").TournamentSlotMatchBinding[];
+
+  let knockoutSeedPersonIds: readonly PersonId[] | undefined;
+  if (bracketDefinition.formatKind === "group_round_robin_knockout") {
+    const groupProgress = projectBracketProgress({
+      bracketDefinition,
+      bracketRuntimeState: state.bracketRuntimeState as unknown as import("@shared-world/simulation-core").BracketRuntimeSlotState,
+      storedRecords,
+      slotBindings,
+    });
+    if (groupProgress.groupPhaseComplete && !groupProgress.knockoutPhaseComplete) {
+      const resolved = buildAcceptedCompetitionParticipantPlan(session, provider);
+      const advanceCount =
+        resolved === null
+          ? 1
+          : groupAdvanceCount(resolved.plan.selectedPersonIds.length, resolved.plan.config);
+      knockoutSeedPersonIds = selectUi009GroupAdvancers(
+        bracketDefinition,
+        storedRecords,
+        advanceCount,
+      );
+    }
+  }
+
+  const executed = executeNextBracketMatch({
+    state: {
+      tournamentId: state.tournamentId,
+      scheduleLifecycleIdentity: state.scheduleLifecycleIdentity,
+      bracketDefinition: state.bracketDefinition,
+      bracketRuntimeState: state.bracketRuntimeState,
+      payloadStore: state.payloadStore,
+      storedRecords: state.storedRecords,
+      slotBindings,
+    },
+    session,
+    provider,
+    ...(knockoutSeedPersonIds !== undefined ? { knockoutSeedPersonIds } : {}),
+  });
   if (executed.kind === "complete") {
     return {
       kind: "ok",
@@ -256,33 +329,32 @@ function playNextMatch(
   }
 
   const atomic = executed.atomic;
-  if (atomic.kind !== "completed") {
-    const issues =
-      "issues" in atomic && atomic.issues !== undefined
-        ? atomic.issues
-        : "validation" in atomic && atomic.validation !== undefined && !atomic.validation.ok
-          ? atomic.validation.issues
-          : [{ path: "", message: atomic.kind }];
-    return { kind: "domain_failure", issues };
-  }
-
   const winnerPersonId = atomic.applicationFact.handoffResult.winnerPersonId;
   const loserPersonId = atomic.applicationFact.handoffResult.loserPersonId;
   if (winnerPersonId === null || loserPersonId === null) {
     return {
       kind: "domain_failure",
-      issues: [{ path: "", message: "round-robin match produced no winner" }],
+      issues: [{ path: "", message: "tournament match produced no winner" }],
     };
   }
 
-  const progress = projectRoundRobinProgress({
-    bracketDefinition: state.bracketDefinition as unknown as TournamentBracketDefinition,
+  const progress = projectBracketProgress({
+    bracketDefinition,
+    bracketRuntimeState: executed.bracketRuntimeState,
     storedRecords: atomic.storedRecords,
+    slotBindings: executed.slotBindings,
   });
-  const roundRobinComplete = progress.nextPairIndex === null;
+  const structurallyComplete = isBracketStructurallyComplete(progress);
   const nextState: CompetitionPersistedState = {
     ...state,
-    phase: roundRobinComplete ? "round_robin_complete" : "awaiting_match",
+    phase: structurallyComplete ? "round_robin_complete" : "awaiting_match",
+    bracketRuntimeState: JSON.parse(toCanonicalJson(executed.bracketRuntimeState)) as Record<
+      string,
+      unknown
+    >,
+    slotBindings: executed.slotBindings.map(
+      (row) => JSON.parse(toCanonicalJson(row)) as Record<string, unknown>,
+    ),
     isolatedSession: JSON.parse(toCanonicalJson(atomic.session)) as Record<string, unknown>,
     payloadStore: persistDetailedLogPayloadStore(atomic.payloadStore),
     storedRecords: atomic.storedRecords.map(
@@ -294,8 +366,6 @@ function playNextMatch(
       winnerPersonId,
       loserPersonId,
     },
-    // No finalResult/earnings/ranking mutation here. Accepted standings and
-    // tie-break semantics have not yet been identified for Sprint2.
     finalResult: null,
     rankingDisplayFacts: [],
   };

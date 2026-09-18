@@ -47,6 +47,7 @@ import {
   type UiSession,
 } from "./ui-session.js";
 import { buildProductionCreateSprint1RunSessionInput } from "./create-sprint1-run-session-input.js";
+import { syncCompetitionAutoProgressionForWeek } from "./ui009/competition-auto-progression.js";
 import { resetCompetitionStore } from "./ui009/competition-session-registry.js";
 import {
   createValidationStoreFromInitialization,
@@ -1341,6 +1342,7 @@ export async function handlePostSimulationStep(
     committedWeeks += 1;
     current = stepResult.value;
     session.worldEngineRuntime = current;
+    syncCompetitionAutoProgressionForWeek(session.sessionId, current, sha256);
     session.uiRevision = expectedUiRevision + committedWeeks;
     session.committedValidationStore = validationStore;
     updateRunningWeekProgress({

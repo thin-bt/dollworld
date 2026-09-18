@@ -17,6 +17,7 @@ import { createUiApp, type UiApp } from "./app.js";
 import { DEFAULT_SPRINT1_PRESET_ID } from "./presets.js";
 import { createTestProcessSecurityContext } from "./process-keys.js";
 import { CSRF_HEADER_NAME, SESSION_COOKIE_NAME } from "./session-cookie.js";
+import { resetCompetitionStore } from "./ui009/competition-session-registry.js";
 import { COMPETITION_VIEW_KEYS } from "./ui009/types.js";
 
 const ORIGIN = "http://127.0.0.1:8787";
@@ -201,6 +202,7 @@ async function bootstrapReadySession(app: UiApp): Promise<{
   const row = app.uiSessionStore.get(sessionId)!;
   const normalized = normalizeRuntimeForCompetition(row.worldEngineRuntime!);
   row.worldEngineRuntime = normalized;
+  resetCompetitionStore(sessionId);
   return { cookie: `${SESSION_COOKIE_NAME}=${sessionId}`, csrf, uiRevision: started.uiRevision };
 }
 
@@ -285,33 +287,36 @@ describe("UI-009 competition progression", () => {
       for (const key of COMPETITION_VIEW_KEYS) {
         expect(competition).toHaveProperty(key);
       }
-      if (competition.lifecyclePhase === "round_robin_complete") {
+      if (competition.lifecyclePhase === "finished") {
         break;
       }
-      expect(competition.lifecyclePhase).toBe("awaiting_match");
+      expect(["awaiting_match", "round_robin_complete"]).toContain(competition.lifecyclePhase);
     }
 
     expect(competition).not.toBeNull();
-    expect(competition!.lifecyclePhase).toBe("round_robin_complete");
+    expect(competition!.lifecyclePhase).toBe("finished");
     expect(competition!.roundRobinProgress).not.toBeNull();
     const progress = competition!.roundRobinProgress!;
     const participantCount = progress.participantIds.length;
     expect(participantCount).toBeGreaterThanOrEqual(2);
-    expect(progress.matchesTotal).toBe((participantCount * (participantCount - 1)) / 2);
-    expect(progress.matchesCompleted).toBe(progress.matchesTotal);
-    expect(progress.nextPairIndex).toBeNull();
-    expect(progress.history).toHaveLength(progress.matchesTotal);
-    expect(progress.matrix).toHaveLength(participantCount);
-    expect(progress.matrix.every((row) => row.played === participantCount - 1)).toBe(true);
-    expect(progress.matrix.reduce((sum, row) => sum + row.wins, 0)).toBe(progress.matchesTotal);
-    expect(progress.matrix.reduce((sum, row) => sum + row.losses, 0)).toBe(progress.matchesTotal);
-    expect(competition!.matchesCompleted).toBe(progress.matchesTotal);
+    if (progress.matchesTotal > 0) {
+      expect(progress.matchesTotal).toBe((participantCount * (participantCount - 1)) / 2);
+      expect(progress.matchesCompleted).toBe(progress.matchesTotal);
+      expect(progress.nextPairIndex).toBeNull();
+      expect(progress.history).toHaveLength(progress.matchesTotal);
+      expect(progress.matrix).toHaveLength(participantCount);
+      expect(progress.matrix.every((row) => row.played === participantCount - 1)).toBe(true);
+      expect(progress.matrix.reduce((sum, row) => sum + row.wins, 0)).toBe(progress.matchesTotal);
+      expect(progress.matrix.reduce((sum, row) => sum + row.losses, 0)).toBe(progress.matchesTotal);
+      expect(competition!.matchesCompleted).toBe(progress.matchesTotal);
+    } else {
+      expect(competition!.matchesCompleted).toBeGreaterThan(0);
+    }
 
-    // Accepted standings/tie-break/finalization has not been identified yet.
-    // Completion must therefore remain factual rather than fabricating a champion.
-    expect(competition!.finalResultSummary).toBeNull();
-    expect(competition!.rankingRows).toEqual([]);
-    expect(competition!.championDisplayName).toBeNull();
+    expect(competition!.finalResultSummary).not.toBeNull();
+    expect(competition!.rankingRows.length).toBeGreaterThan(0);
+    expect(competition!.championDisplayName).not.toBeNull();
+    expect(competition!.lifecyclePhase).toBe("finished");
 
     // Competition owns its own journal record. It must not replace the simulation
     // lastOperation pointer, because GET /simulation only accepts simulation/mock views.
@@ -357,6 +362,7 @@ describe("UI-009 competition progression", () => {
     });
     expect(start.statusCode).toBe(200);
     const started = JSON.parse(start.body) as Envelope;
+    resetCompetitionStore(sessionId);
     const stepped = await stepCompetition(
       app,
       `${SESSION_COOKIE_NAME}=${sessionId}`,
@@ -365,6 +371,8 @@ describe("UI-009 competition progression", () => {
     );
     expect(stepped.competition.participantIds.length).toBeGreaterThan(2);
     expect(stepped.competition.roundRobinProgress).not.toBeNull();
-    expect(["awaiting_match", "round_robin_complete"]).toContain(stepped.competition.lifecyclePhase);
+    expect(["awaiting_match", "round_robin_complete", "finished"]).toContain(
+      stepped.competition.lifecyclePhase,
+    );
   }, 120_000);
 });

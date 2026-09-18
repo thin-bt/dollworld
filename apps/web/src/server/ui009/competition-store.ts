@@ -20,6 +20,7 @@ export type CompetitionPersistedState = {
   readonly isolatedSession: Record<string, unknown>;
   readonly payloadStore: Record<string, unknown>;
   readonly storedRecords: readonly Record<string, unknown>[];
+  readonly slotBindings: readonly Record<string, unknown>[];
   readonly matchesCompleted: number;
   readonly lastMatch: {
     matchId: string;
