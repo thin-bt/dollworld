@@ -1,18 +1,16 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT2-AUTO-PROGRESSION-BROWSER-CONTRACT-A-20260919-R1
-mode: PRODUCT_CONTRACT_RECONCILIATION
-updatedAt: 2026-09-19T05:54:46+09:00
-sprint: Sprint2
-priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-AUTO-PROGRESSION-BROWSER-CONTRACT-A-20260919-R1/instruction.md
-predecessor-task: SPRINT2-A-R14-FIX-INTEGRITY-AUDIT-20260919-R1
-paired-b2-task: SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1
-non-overlap: A_OWNS_PRODUCT_FIX_B2_OWNS_BROWSER_ACCEPTANCE
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-19T06:05:03+09:00
+last-consumed-task-key: SPRINT2-AUTO-PROGRESSION-BROWSER-CONTRACT-A-20260919-R1
+last-terminal: READY / SPRINT2_AUTO_PROGRESSION_BROWSER_CONTRACT_READY
+last-result-path: _handoff-artifacts/results/SPRINT2-AUTO-PROGRESSION-BROWSER-CONTRACT-A-20260919-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
+sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
