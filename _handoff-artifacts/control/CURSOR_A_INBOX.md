@@ -3,7 +3,7 @@ state: PREPARED
 lane: A
 task-key: SPRINT2-BROWSER-FIX-A-20260918-R13
 mode: SOURCE_PRODUCT_REPAIR
-updatedAt: 2026-09-18T23:59:16+09:00
+updatedAt: 2026-09-19T00:23:48+09:00
 sprint: Sprint2
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-FIX-A-20260918-R13/instruction.md
@@ -11,7 +11,7 @@ control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 predecessor-task: SPRINT2-BROWSER-FIX-A-20260918-R12
-recovery: PM_FAILOVER_GITHUB_FIRST_REDISPATCH_R13_2359_NO_ACTIVE_OR_TERMINAL
+recovery: PM_FAILOVER_GITHUB_FIRST_REDISPATCH_R13_0023_NO_ACTIVE_OR_TERMINAL
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - preserve existing dirty Sprint2 worktree
