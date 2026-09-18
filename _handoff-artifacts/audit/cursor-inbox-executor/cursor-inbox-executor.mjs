@@ -10,7 +10,7 @@ import { fetchGitHubFileText, parseControlText } from "./lib/github-remote.mjs";
 import { selectAuthoritativeInbox } from "./lib/authoritative-inbox.mjs";
 import { ensureInstructionAvailable } from "./lib/ensure-instruction.mjs";
 import { evaluatePickup, isInCooldown, isRecoveryPickup } from "./lib/pickup.mjs";
-import { writeExecutorAlert, clearExecutorAlert } from "./lib/alert.mjs";
+import { publishTerminalToGitHub } from "./lib/publish-terminal-github.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const auditDir = path.resolve(__dirname, "..");
@@ -47,9 +47,10 @@ const LANES = {
         "1) Read Inbox and Active.",
         "2) If Inbox is PREPARED and pickup is valid, read the canonical instruction file and EXECUTE the task.",
         "3) Write ACTIVE lock before implementation per CURSOR-START-001.",
-        "4) Complete required checks/evidence and write final result; return Active to IDLE when done.",
+        "4) Complete required checks/evidence and write final result to _handoff-artifacts/results/<task-key>/result.md; return Active to IDLE when done.",
         "5) Never read or rewrite Cursor B2 control files.",
         "6) If authority/blocker prevents work, STOP with exact blocker; do not invent work.",
+        "7) Executor will consume GitHub Inbox to IDLE and push result.md after your terminal; still write the local result file first.",
         ...recovery,
       ].join("\n");
     },
@@ -85,6 +86,7 @@ const LANES = {
         "4) Never read or rewrite Cursor A control files (CURSOR_INBOX.md / CURSOR_ACTIVE_TASK.md).",
         "5) Apply CURSOR-B2-001 bounded verification recovery. Do not continue a same-case retry ladder after its allowed bounded retry is exhausted; finalize the exact verification outcome instead.",
         "6) If SETUP_PENDING / IDLE / NO_SAFE_PARALLEL_TASK / no executable work, report briefly only.",
+        "7) Write terminal result to _handoff-artifacts/results/<task-key>/result.md; executor will consume GitHub Inbox to IDLE and push it.",
         ...recovery,
       ].join("\n");
     },
@@ -443,11 +445,46 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
 
   const terminalOk =
     pollResult === "INVOKED" || pollResult === "RECOVERY_INVOKED";
+
+  /** @type {object | null} */
+  let githubPublish = null;
+  if (terminalOk) {
+    // Agent may finish writing result/Active slightly after prompt resolves.
+    for (let i = 0; i < 8; i += 1) {
+      githubPublish = await publishTerminalToGitHub({
+        lane: config.lane,
+        taskKey: inboxKey,
+        auditDir,
+        repoRoot,
+        updatedAt: formatJst(),
+      });
+      if (githubPublish.ok || githubPublish.reason === "NO_RESULT_FILE") {
+        if (githubPublish.ok) break;
+        await new Promise((r) => setTimeout(r, 1500));
+        continue;
+      }
+      break;
+    }
+    if (githubPublish && !githubPublish.ok) {
+      lastError = [
+        lastError,
+        `githubPublish:${githubPublish.reason}${githubPublish.error ? `:${githubPublish.error}` : ""}`,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+    }
+  }
+
   await writeExecutorHeartbeat({
     lane: config.lane,
     filePath: heartbeatPath,
     status: terminalOk ? "IDLE" : "ERROR",
-    pollResult,
+    pollResult:
+      terminalOk && githubPublish?.pushed
+        ? `${pollResult}_GITHUB_PUBLISHED`
+        : terminalOk && githubPublish?.ok
+          ? `${pollResult}_GITHUB_${githubPublish.reason}`
+          : pollResult,
     lastInvokedTaskKey: inboxKey,
     lastInvokedAt: invokedAt,
     lastAgentRunId: agentRunId,
@@ -462,6 +499,7 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
     agentRunId,
     pollResult,
     error: lastError,
+    githubPublish,
   };
 }
 
