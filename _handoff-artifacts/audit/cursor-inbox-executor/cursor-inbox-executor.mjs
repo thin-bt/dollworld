@@ -1,15 +1,14 @@
-import { access, readFile, stat } from "node:fs/promises";
+import { access, mkdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { writeExecutorHeartbeat } from "./lib/heartbeat.mjs";
-import {
-  parseControlFile,
-  resolveInstructionPath,
-} from "./lib/parse-control.mjs";
+import { parseControlFile } from "./lib/parse-control.mjs";
 import { readLaneActive, readLaneInbox, laneControlPaths } from "./lib/lane-control.mjs";
 import { fetchGitHubFileText, parseControlText } from "./lib/github-remote.mjs";
+import { selectAuthoritativeInbox } from "./lib/authoritative-inbox.mjs";
+import { ensureInstructionAvailable } from "./lib/ensure-instruction.mjs";
 import { evaluatePickup, isInCooldown, isRecoveryPickup } from "./lib/pickup.mjs";
 import { writeExecutorAlert, clearExecutorAlert } from "./lib/alert.mjs";
 
@@ -197,23 +196,28 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
   const heartbeatPath = path.join(auditDir, config.heartbeat);
   const controlPaths = laneControlPaths(laneKey, auditDir);
 
-  let inboxRead = await readLaneInbox(laneKey, auditDir);
-  if (
-    (inboxRead.fields.state ?? "") !== "PREPARED" &&
-    (inboxRead.fields["task-key"] ?? "").length === 0
-  ) {
-    const remoteText = await fetchGitHubFileText({
-      repoPath: `_handoff-artifacts/control/${controlPaths.lane === "A" ? "CURSOR_A_INBOX.md" : "CURSOR_B2_INBOX.md"}`,
-    });
-    if (remoteText) {
-      const remoteFields = parseControlText(remoteText);
-      if ((remoteFields.state ?? "").length > 0) {
-        inboxRead = {
-          fields: { ...inboxRead.fields, ...remoteFields },
-          source: "github-remote",
-          inboxPathForPrompt: controlPaths.inboxCanonicalPath,
-        };
-      }
+  // Always attempt GitHub canonical inbox first. Stale local PREPARED must not
+  // shadow a newer remote PREPARED/task-key (SPRINT2-CONTROL-PLANE-PICKUP-REPAIR).
+  const localInboxRead = await readLaneInbox(laneKey, auditDir);
+  const remoteControlPath =
+    controlPaths.lane === "A" ? "CURSOR_A_INBOX.md" : "CURSOR_B2_INBOX.md";
+  const remoteText = await fetchGitHubFileText({
+    repoPath: `_handoff-artifacts/control/${remoteControlPath}`,
+  });
+  const remoteFields = remoteText ? parseControlText(remoteText) : null;
+  let inboxRead = selectAuthoritativeInbox({
+    localRead: localInboxRead,
+    remoteFields,
+    canonicalPath: controlPaths.inboxCanonicalPath,
+  });
+  if (inboxRead.source === "github-remote" && remoteText) {
+    try {
+      await mkdir(path.dirname(controlPaths.inboxCanonicalPath), {
+        recursive: true,
+      });
+      await writeFile(controlPaths.inboxCanonicalPath, remoteText, "utf8");
+    } catch {
+      // Mirror write is best-effort; remote fields already drive pickup.
     }
   }
 
@@ -293,7 +297,8 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
     };
   }
 
-  let instructionPath = await resolveInstructionPath(inbox, auditDir);
+  let ensured = await ensureInstructionAvailable({ inbox, auditDir });
+  let instructionPath = ensured.instructionPath;
   if (!instructionPath || !(await fileExists(instructionPath))) {
     try {
       const { attemptLocalMirrorRecovery, createLocalSyncFetch } = await import(
@@ -305,7 +310,8 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
         fetchDriveInstruction: createLocalSyncFetch(auditDir),
       });
       if (recovery.recovered) {
-        instructionPath = await resolveInstructionPath(inbox, auditDir);
+        ensured = await ensureInstructionAvailable({ inbox, auditDir });
+        instructionPath = ensured.instructionPath;
       }
     } catch {
       // recovery module optional at bootstrap; fail closed below
@@ -330,9 +336,9 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
       severity: "HIGH",
       code: "INSTRUCTION_MISSING",
       taskKey: inboxKey,
-      detail: `Lane ${config.lane}: PREPARED but canonical instruction missing at ${instructionPath ?? "(unresolved)"}. Pickup cannot start.`,
+      detail: `Lane ${config.lane}: PREPARED but canonical instruction missing at ${instructionPath ?? "(unresolved)"} (ensure source=${ensured.source}). Pickup cannot start.`,
       action:
-        "Place gpt-to-cursor-instruction.txt under _handoff-artifacts/audit/current/<task-key>/ then restart or wait for next 5m poll. Check CURSOR_*_INBOX.md instruction-path.",
+        "Ensure GitHub has _handoff-artifacts/tasks/<task-key>/instruction.md (or instruction-path). Local/Drive prepopulation is no longer required when GitHub is reachable.",
     });
     return {
       lane: laneKey,
