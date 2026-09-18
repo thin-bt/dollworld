@@ -3,7 +3,7 @@ state: PREPARED
 lane: B2
 task-key: SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1
 mode: FULL_BROWSER_REACCEPTANCE
-updatedAt: 2026-09-19T06:23:12+09:00
+updatedAt: 2026-09-19T07:40:15+09:00
 sprint: Sprint2
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1/instruction.md
@@ -11,9 +11,9 @@ control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 predecessor-task: SPRINT2-BROWSER-REGRESSION-PREP-B2-20260918-R4
-paired-a-terminal: SPRINT2-AUTO-PROGRESSION-BROWSER-CONTRACT-A-20260919-R1
+paired-a-terminal: SPRINT2-LINT-CLOSURE-A-20260919-R1
 non-overlap: TEST_ACCEPTANCE_ONLY_NO_PRODUCT_EDITS
-recovery: ROLE2_GITHUB_FIRST_RETRIGGER_0623_AFTER_A_CONTRACT_READY
+recovery: ROLE3_GITHUB_FIRST_RETRIGGER_0740_AFTER_A_LINT_CLOSURE_READY
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
