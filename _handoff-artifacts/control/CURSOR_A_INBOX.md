@@ -1,18 +1,16 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT2-ACCEPTED-SCOPE-CLOSURE-A-20260919-R1
-mode: ACCEPTED_SCOPE_CLOSURE
-updatedAt: 2026-09-19T01:01:16+09:00
-sprint: Sprint2
-priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-ACCEPTED-SCOPE-CLOSURE-A-20260919-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-19T01:24:12+09:00
+last-consumed-task-key: SPRINT2-ACCEPTED-SCOPE-CLOSURE-A-20260919-R1
+last-terminal: READY / SPRINT2_ACCEPTED_SCOPE_CLOSURE_A_READY
+last-result-path: _handoff-artifacts/results/SPRINT2-ACCEPTED-SCOPE-CLOSURE-A-20260919-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-predecessor-task: SPRINT2-BROWSER-FIX-A-20260918-R13
-paired-b2-task: SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1
-recovery: PM_FAILOVER_REDISPATCH_0101_NO_GITHUB_TERMINAL_OR_CONSUMPTION
+sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
