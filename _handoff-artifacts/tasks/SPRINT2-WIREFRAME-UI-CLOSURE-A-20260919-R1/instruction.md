@@ -5,55 +5,35 @@ sprint: Sprint2
 lane: A
 priority: IMMEDIATE
 control-authority: GitHub
-updatedAt: 2026-09-19T17:25:00+09:00
+updatedAt: 2026-09-19T18:21:00+09:00
 authority-correction: _handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md
-predecessor: SPRINT2-SPEC-WIDE-UI-CLOSURE-A-20260919-R1
-recovery: PM_FAILOVER_CORRECT_SCOPE_TO_SPRINT2_WIREFRAME
+predecessor-terminal: FIX_REQUIRED / WIREFRAME_UI_SLICE_SCHEDULE_PARTICIPANTS_MATRIX_HISTORY_RANKING_NAV
+recovery: CONTINUE_SAME_TASK_PROMOTION_RANK_HISTORY_AND_BROWSER_CLOSURE
 
 ## Objective
 
-Finish the actual Sprint2 UI wireframe. Preserve useful predecessor work (knockout/ranking/match navigation), but stop unrelated full-SPEC expansion.
+Continue the actual Sprint2 wireframe closure from the latest terminal result. Preserve completed schedule/participant/matrix/history/ranking navigation work and close only the uniquely identified remaining Sprint2 gaps. Do not expand into Sprint3/4 or unrelated full-SPEC work.
 
-## Required wireframe/gap-map coverage
+## Required next implementation slice
 
-1. annual tournament schedule
-   - year overview, current time, rank/category-by-week readability
-   - previous/current/next year switching
-2. tournament detail
-3. participant list
-   - dense comparison list; person, rank, age and available comparison facts from canonical projection
-4. round-robin standings and actual pair-result matrix
-5. knockout bracket / match results
-6. tournament result / winner / placements
-7. tournament series history / historical winners
-8. annual ranking
-   - earnings-based per user decision
-   - year-selectable current/history
-   - position/person/current competitive rank/appearances/wins/official W-L where canonical facts support
-   - person-detail navigation
-9. promotion result
-10. person rank history with source tournament/qualification navigation where available
-11. tournament match -> battle detail navigation and person detail navigation
+1. Wire promotion result commit/projection on ui009 finalize when `tournamentKind === "promotion"`, using the existing domain promotion/rank-history mechanisms (`buildRankPromotionResult` / `commitPromotionWithRankHistory`) where applicable rather than inventing parallel state.
+2. Persist/project person rank history from that finalize path, including source tournament/qualification navigation when canonical identifiers exist.
+3. Surface promotion result and person rank history in the wireframe UI required by completion-guard items 9–10; add the person-detail rank-history panel when that is the canonical route for the data.
+4. Finish item 11 detailed battle-log presentation if the current match page remains summary-only; preserve real match/person navigation.
+5. Exercise annual-ranking history across additional simulated years so year selection/history is browser-proven rather than only structurally present.
 
-## Known mismatches to verify/fix first
+## Verification / completion gate
 
-- Current schedule renderer is a single 48-week horizontal table and lacks prev/current/next-year controls; reconcile to wireframe readability/interaction.
-- Current participant table only shows name + detail link; wireframe requires dense comparison information.
-- Existing annual ranking embedded in competition detail is not sufficient if it lacks year selection/history, appearances/wins, and person navigation.
-- Round-robin UI must expose pair-result matrix semantics, not merely W/L totals + separate history.
-- Tournament series history/historical winners must be implemented from stable history identity/projection; never group by display name.
-- Promotion result and person rank-history presentation must be visible where the wireframe requires.
-- Full battle detail navigation must resolve real tournament match detail/log data.
-- Preserve new predecessor knockout bracket and ranking route if correct; rebind them to this wireframe scope.
+- Add/extend browser assertions for promotion result, rank history/source navigation, detailed battle log, and multi-year ranking history.
+- Re-run `tests/e2e/s2-wireframe-ui-closure-a.spec.ts` in Chrome and record terminal PASS evidence.
+- Re-run mandatory Sprint2 regression browser specs affected by this slice.
+- Re-run focused ui009 Vitest plus web client/build TypeScript checks.
+- Publish the exact tested/published HEAD and working-tree status in the canonical result.
 
-## Verification
+READY only when every Sprint2 wireframe completion-guard item from the original instruction is implemented/browser-accepted or explicitly user-deferred. Otherwise publish FIX_REQUIRED with the next concrete gap.
 
-Add/extend browser acceptance so every completion-guard item is reached and asserted from the real UI. Existing reduced Chrome 7/7 alone is not sufficient.
-
-No Sprint3/4.
+No Sprint3/4. Do not pause/disable. Do not wait on Drive/local mirrors.
 
 ## Output
 
 Publish `_handoff-artifacts/results/SPRINT2-WIREFRAME-UI-CLOSURE-A-20260919-R1/result.md`.
-
-READY only when every Sprint2 wireframe completion-guard item is implemented/browser-accepted or explicitly user-deferred.
