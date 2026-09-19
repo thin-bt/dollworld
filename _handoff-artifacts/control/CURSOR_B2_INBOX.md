@@ -1,22 +1,21 @@
 # Cursor B2 Inbox
 state: PREPARED
 lane: B2
-task-key: SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1
-mode: CLEAN_REACCEPTANCE_AND_CANONICAL_TERMINAL_PUBLICATION
-updatedAt: 2026-09-19T16:59:18+09:00
+task-key: SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260919-R1
+mode: WIREFRAME_BROWSER_ACCEPTANCE
+updatedAt: 2026-09-19T17:36:00+09:00
 sprint: Sprint2
 priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1/instruction.md
+instruction-path: _handoff-artifacts/tasks/SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260919-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-published-browser-spec-head: 0fcd7a8c297f2f854306dd2d855e9c54acf3b169
-paired-a-terminal: READY_FOR_B2_CLEAN_TERMINAL_CONSUMPTION
-non-overlap: ACCEPTANCE_VERIFICATION_ONLY_NO_PRODUCT_EDITS
-recovery: PM_FAILOVER_CANONICAL_RESULT_MISSING_1659_RETRIGGER
+paired-a-task: SPRINT2-WIREFRAME-UI-CLOSURE-A-20260919-R1
+non-overlap: ACCEPTANCE_TESTS_ONLY_NO_PRODUCT_EDITS
+recovery: PM_FAILOVER_SUPERSEDE_REDUCED_7_OF_7_WITH_WIREFRAME_GATE
 pickup-requirements:
-- fresh-read GitHub canonical instruction
+- fresh-read GitHub canonical instruction and scope authority
 - claim ACTIVE before changes
-- verify CLEAN published-head Chrome 7/7 evidence or rerun if binding is not provable
+- preserve old reduced 7/7 as regression evidence only
+- build/run Sprint2 wireframe browser acceptance against published master
 - publish terminal result to GitHub canonical result path
-- READY only with commit-status CLEAN and exact published verified head
