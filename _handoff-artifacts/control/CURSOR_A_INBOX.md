@@ -1,17 +1,23 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-20T01:12:40+09:00
-last-consumed-task-key: SPRINT2-WIREFRAME-CANONICAL-PUBLICATION-A-20260919-R1
-last-terminal: READY / WIREFRAME_CANONICAL_PUBLICATION
-last-result-path: _handoff-artifacts/results/SPRINT2-WIREFRAME-CANONICAL-PUBLICATION-A-20260919-R1/result.md
+task-key: SPRINT2-FORMAL-COMPLETION-GATE-A-20260920-R1
+mode: SPRINT2_FORMAL_COMPLETION_GATE
+updatedAt: 2026-09-20T02:02:16+09:00
+sprint: Sprint2
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT2-FORMAL-COMPLETION-GATE-A-20260920-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2
+product-baseline: 92f2a09d1e5f1da18b30ee6a4f2fb3756d980d5a
+paired-b2-task: SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260919-R2
+non-overlap: COMPLETION_EVIDENCE_AND_FIX_ONLY_IF_CANONICAL_NONBROWSER_GAP_FOUND
 pickup-requirements:
-- fresh-read GitHub canonical instruction
+- fresh-read GitHub canonical instruction and scope authority
 - claim ACTIVE before changes
+- fresh-sync canonical master and verify baseline ancestry/clean HEAD
+- reconcile all Sprint2 completion guards and non-browser verification
+- consume B2 R2 terminal result if it appears; do not duplicate B2 browser work
 - publish terminal result to GitHub canonical result path
+- do not pause/disable for Drive/local mirror absence
