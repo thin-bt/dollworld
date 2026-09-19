@@ -5,21 +5,18 @@ sprint: Sprint2
 owner: Role2
 priority: IMMEDIATE
 control-authority: GitHub
-updatedAt: 2026-09-19T17:02:00+09:00
-recovery: PM_FAILOVER_RESUME_UNFINISHED_ROLE2_1702
+updatedAt: 2026-09-19T17:04:00+09:00
+recovery: PM_FAILOVER_SCOPE_AUTHORITY_CORRECTION_ROLE2
 
-## Objective
-Resume and finish the Sprint2 source/data-path map now. Do not wait for B2 and do not spend the run only retriggering Cursor lanes.
+## Authority correction
+Use `docs/SPEC.md` §6 and 第2段階 plus `_handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md` as completion authority.
+Do NOT narrow scope to the current UI009/F-slot implementation or existing acceptance tests.
 
 ## Required work
-1. Fresh-read current master and accepted Sprint2 wireframe/source authority.
-2. Inventory every browser route/page/component in the accepted Sprint2 flow and map it to server handlers, stores/projections and tests.
-3. Flag stubs, placeholder data, unreachable UI, dead CTAs, missing detail/navigation routes, missing loading/empty/error states, and acceptance holes.
-4. Separate current B2-owned browser acceptance surfaces from non-conflicting implementation gaps.
-5. Produce task-ready slices for every unique accepted gap.
-6. DIRECT-DISPATCH any unique non-conflicting executable slice to a free Cursor lane in the same run instead of merely reporting it.
-7. No unrelated UI and no Sprint3/4.
-
-## Output
-Publish `_handoff-artifacts/results/SPRINT2-WIREFRAME-SOURCE-MAP-ROLE2-20260917/result.md`.
-READY requires repository-backed source mapping and disposition of all task-ready gaps.
+1. Map every required Sprint2 UI surface to current routes/components/server projections/tests.
+2. Explicitly cover ranking, champions, win rate/streak/generation comparison, tournament/bracket, competition history, battle-log navigation, lineage, teacher-lineage, historical champions, search/follow, world news, people/detail.
+3. Mark IMPLEMENTED / PARTIAL / MISSING with exact repository evidence.
+4. For non-overlapping executable gaps, DIRECT-DISPATCH to a free Cursor lane in the same run.
+5. Do not spend the run only retriggering B2.
+6. Publish `_handoff-artifacts/results/SPRINT2-WIREFRAME-SOURCE-MAP-ROLE2-20260917/result.md`.
+READY requires full corrected-scope source/data-path mapping and gap disposition.
