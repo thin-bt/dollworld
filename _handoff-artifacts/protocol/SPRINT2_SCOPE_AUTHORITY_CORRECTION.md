@@ -64,3 +64,19 @@ The older wireframe label `Points` is superseded by the explicit user decision:
 Do **not** add unrelated long-term SPEC screens (family tree, teacher lineage, generic search/follow, etc.) merely because they appear in `docs/SPEC.md`; they are not part of this Sprint2 wireframe completion gate unless another accepted Sprint2 authority explicitly includes them.
 
 Prior reduced acceptance that treated knockout UI or history->battle detail as FUTURE_RESERVE is superseded by this wireframe completion guard.
+
+
+## Visual completion correction (2026-09-20)
+
+The prior formal-close path verified functional/wireframe presence and navigation but did not establish visual-quality completion.
+
+Sprint2 must NOT be treated as fully UI-complete until visual acceptance is also READY. Visual acceptance must cover, at minimum:
+- layout integrity and overflow at the actual supported application widths, including the narrow-width constraints used by the product UI
+- spacing, typography, hierarchy, alignment, table/matrix readability, and button/control clarity
+- no unintended internal scrolling or clipped content where the wireframe/product direction expects full visibility
+- coherent treatment of active/inactive/extinct/status states and controls
+- visual consistency across annual schedule, tournament detail, participant comparison, round-robin, knockout bracket, result/history, ranking, promotion result, person rank history, person detail, and battle detail
+- screenshot evidence from the canonical product build for representative states
+- explicit visual-review terminal READY or FIX_REQUIRED; functional Playwright presence/navigation PASS alone is insufficient
+
+The historical terminal `SPRINT2_FORMAL_CLOSE_READY` from `SPRINT2-FORMAL-CLOSE-A-20260920-R1` remains an audit record of the earlier gate, but is superseded for current completion status by this visual-completion correction. Sprint2 is REOPENED until visual acceptance reaches READY.
