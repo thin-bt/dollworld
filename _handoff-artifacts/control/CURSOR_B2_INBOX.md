@@ -2,24 +2,21 @@
 state: PREPARED
 lane: B2
 task-key: SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1
-mode: PUBLISH_RECONCILED_SPEC_AND_CLEAN_REACCEPTANCE
-updatedAt: 2026-09-19T12:24:11+09:00
+mode: CLEAN_REACCEPTANCE_AND_CANONICAL_TERMINAL_PUBLICATION
+updatedAt: 2026-09-19T13:04:20+09:00
 sprint: Sprint2
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-predecessor-task: SPRINT2-FINAL-COMPLETION-CONTROL-AUDIT-A-20260919-R1
-paired-a-terminal: SPRINT2_FINAL_COMPLETION_CONTROL_AUDIT_FIX_REQUIRED
-required-master-head: 3215dec98a060b28e9627004323300a7bf20d324
-non-overlap: ACCEPTANCE_SPEC_MAINTENANCE_ONLY_NO_PRODUCT_EDITS
-recovery: ROLE2_REDISPATCH_PUBLISHED_CLEAN_BROWSER_GATE_1224
+published-browser-spec-head: 0fcd7a8c297f2f854306dd2d855e9c54acf3b169
+paired-a-terminal: READY_FOR_B2_CLEAN_TERMINAL_CONSUMPTION
+non-overlap: ACCEPTANCE_VERIFICATION_ONLY_NO_PRODUCT_EDITS
+recovery: PM_FAILOVER_CANONICAL_RESULT_MISSING_1304
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
-- publish reconciled mandatory round-robin spec to GitHub master
-- fresh-sync clean worktree to resulting published HEAD
-- run mandatory Chrome 7/7 against that published HEAD
-- READY only with commit-status CLEAN and exact published HEAD
+- verify CLEAN published-head Chrome 7/7 evidence or rerun if binding is not provable
 - publish terminal result to GitHub canonical result path
+- READY only with commit-status CLEAN and exact published verified head
