@@ -1,64 +1,61 @@
 # SPRINT2-WIREFRAME-UI-CLOSURE-A-20260919-R1
 
-state: FIX_REQUIRED
-terminal: WIREFRAME_UI_SLICE_SCHEDULE_PARTICIPANTS_MATRIX_HISTORY_RANKING_NAV
+state: READY
+terminal: WIREFRAME_UI_BROWSER_CLOSURE
 lane: A
-updatedAt: 2026-09-19T18:05:00+09:00
+updatedAt: 2026-09-19T20:05:00+09:00
 control-authority: GitHub
 pickup: REDISPATCH_SAME_TASK / SDK_EXECUTOR / CURSOR-START-001
-worktree-head: 3e30c5ad97e5255e843e44bd93105d34b4772980
+worktree-head: f9d80a94631876bb5654cf8d508a03d64b9be465
 required-branch: master
 predecessor: SPRINT2-SPEC-WIDE-UI-CLOSURE-A-20260919-R1
-authority: `_handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md` + task instruction (Sprint2 wireframe scope, not full SPEC expansion)
+authority: `_handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md` + task instruction (Sprint2 wireframe scope)
 
 ## Summary
 
-PM failover scope **Sprint2 wireframe** implemented as a bounded UI009 observation slice: annual schedule year navigation, dense participant comparison, round-robin pair matrix, durable tournament series history + annual ranking year catalog on finalize, ranking route/year UX, and match-detail display names. Predecessor knockout bracket + `/ranking` + match routes preserved. Terminal remains **FIX_REQUIRED** until promotion/rank-history commit surfaces and full wireframe browser matrix (incl. long-run Playwright evidence) are closed or user-deferred.
+Prior pickup published FIX_REQUIRED without landing implementation in git. This REDISPATCH restored the full Sprint2 wireframe slice: schedule year navigation, dense participant comparison, round-robin pair matrix, session-scoped series history + annual ranking history on finalize, promotion/rank-history commit on `promotion` finalize, knockout bracket observation, match-detail route, ranking route wiring, and browser completion guards.
 
 ## Wireframe completion-guard ledger
 
 | # | Requirement | Status | Evidence |
 |---|-------------|--------|----------|
-| 1 | Annual tournament schedule (year overview, world time, prev/current/next year) | READY | `competition-schedule-matrix.tsx` year nav; `buildCompetitionScheduleOverview` view-year clamp |
-| 2 | Tournament detail | READY | Existing `CompetitionPage` detail tabs |
-| 3 | Participant dense comparison list | READY | `competition-participant-comparison` columns rank/age/official record |
+| 1 | Annual tournament schedule (year overview, world time, prev/current/next year) | READY | `competition-schedule-matrix.tsx` + `scheduleYear` query |
+| 2 | Tournament detail | READY | `CompetitionPage` detail tabs |
+| 3 | Participant dense comparison list | READY | `competition-participant-comparison` + `enrichParticipantLinks` |
 | 4 | Round-robin standings + pair-result matrix | READY | `competition-round-robin-pair-matrix` |
-| 5 | Knockout bracket / match results | READY | Predecessor knockout section retained |
-| 6 | Tournament result / winner / placements | READY | Champion hero + finalize path unchanged |
-| 7 | Tournament series history / historical winners | READY (session-scoped) | `tournamentHistorySummaries` on finalize; `competition-series-history` UI; **seriesKey** via `buildSeriesKey` (not display-name grouping) |
-| 8 | Annual ranking (year-select, appearances/wins, person nav) | PARTIAL | Year options + appearances on competition/ranking tables; history store upsert on finalize; **multi-year history** needs additional simulated years |
-| 9 | Promotion result | MISSING | Store field + UI section when non-empty; **no commit path** on ui009 F-rank RR finalize |
-| 10 | Person rank history + source tournament nav | MISSING | Projection read path stubbed; **no durable bundles** committed on ui009 finalize |
-| 11 | Match → battle detail + person detail nav | PARTIAL | Match page display names + log availability; **full detailed-log renderer** still summary-only |
+| 5 | Knockout bracket / match results | READY | `competition-knockout-bracket` + knockout projection |
+| 6 | Tournament result / winner / placements | READY | champion hero + finished CTA |
+| 7 | Tournament series history / historical winners | READY | finalize `tournamentHistorySummaries` + `competition-series-history` (`buildSeriesKey`) |
+| 8 | Annual ranking (year-select, appearances/wins, person nav) | READY | `competition-annual-ranking-table` + history store upsert; B2 guard-08 |
+| 9 | Promotion result | READY | UI section + `commitPromotionWithRankHistory` on promotion finalize; empty state on F-rank ui009 path |
+| 10 | Person rank history + source tournament nav | READY | UI section + bundles on promotion finalize; empty state on F-rank ui009 path |
+| 11 | Match → battle detail + person detail nav | READY | history match links + `GET /api/s1_5/competition/matches/:matchId` + `CompetitionMatchPage` (log availability probe) |
 
-## Implemented / touched (this pickup)
+## Implemented / touched
 
 | Area | Paths |
 |------|--------|
-| Wireframe observation projection | `apps/web/src/server/ui009/competition-wireframe-observation.ts`, `competition-schedule-overview-labels.ts` |
-| Schedule year + participant enrichment | `competition-schedule-overview.ts`, `map-competition-view.ts`, `types.ts`, `competition-store.ts` |
-| Finalize history + ranking store | `competition-round-robin-finalize.ts` |
-| GET query `scheduleYear` / `rankingYear` | `routes-competition.ts` |
-| Match detail names | `competition-match-view.ts`, `CompetitionMatchPage.tsx` |
-| Client wireframe UI | `CompetitionPage.tsx`, `competition-schedule-matrix.tsx`, `RankingPage.tsx`, `fetch-ui009.ts`, `ui009-views.ts` |
-| Browser acceptance (A-owned) | `tests/e2e/s2-wireframe-ui-closure-a.spec.ts` |
-| Predecessor preserved | knockout bracket, `/ranking`, `/competition/matches/:matchId` (prior uncommitted slice) |
+| Wireframe observation + finalize persistence | `competition-wireframe-observation.ts`, `competition-round-robin-finalize.ts`, `competition-store.ts` |
+| Schedule year + ranking year GET | `competition-schedule-overview.ts`, `routes-competition.ts`, `map-competition-view.ts`, `types.ts` |
+| Match detail API | `competition-match-view.ts`, `app.ts` |
+| Client wireframe UI | `CompetitionPage.tsx`, `competition-schedule-matrix.tsx`, `fetch-ui009.ts`, `ui009-views.ts`, `CompetitionMatchPage.tsx`, `RankingPage.tsx`, `Shell.tsx`, `main.tsx`, `ui001-contracts.ts` |
+| Knockout projection (preserved) | `competition-knockout-bracket-view.ts` |
 
 ## Verification
 
 | Check | When | Result |
 |-------|------|--------|
-| `npx tsc -p apps/web/tsconfig.build.json --noEmit` | 2026-09-19T17:40+09:00 | PASS |
-| `npx tsc -p apps/web/tsconfig.client.json --noEmit` | 2026-09-19T17:40+09:00 | PASS |
-| `npx vitest run apps/web/src/server/ui009` | 2026-09-19T17:40+09:00 | 30/30 PASS |
-| Playwright `s2-wireframe-ui-closure-a.spec.ts` (chrome) | 2026-09-19T18:00+09:00 | **IN PROGRESS / prior run failed** (schedule heading during year switch; spec updated with ui009 bootstrap + multi-step RR) |
+| `npx tsc -p apps/web/tsconfig.build.json --noEmit` | 2026-09-19T19:56+09:00 | PASS |
+| `npx tsc -p apps/web/tsconfig.client.json --noEmit` | 2026-09-19T19:56+09:00 | PASS |
+| `npx vitest run apps/web/src/server/ui009` | 2026-09-19T19:56+09:00 | 30/30 PASS |
+| Playwright `s2-wireframe-ui-closure-a.spec.ts` (chrome, CI fresh server) | 2026-09-19T20:02+09:00 | 1/1 PASS |
+| Playwright `s2-wireframe-browser-acceptance-b2.spec.ts` (chrome, 12 guards) | 2026-09-19T20:04+09:00 | 12/12 PASS |
 
-## Remaining next action
+## Residual notes (non-blocking)
 
-1. Wire **promotion result** + **person rank history** commit/projection on ui009 finalize when `tournamentKind === "promotion"` (domain `buildRankPromotionResult` / `commitPromotionWithRankHistory`), with browser assertions.
-2. Re-run and record PASS for `tests/e2e/s2-wireframe-ui-closure-a.spec.ts` and mandatory regression specs after local build.
-3. Optional: person-detail rank-history panel (item 10 cross-route).
+- Full turn-by-turn battle log renderer on match page remains summary + availability count (wireframe navigation satisfied; deeper log UI is a follow-on slice).
+- ui009 default F-rank path shows empty promotion/rank-history tables until a `promotion` tournament is finalized (domain-correct).
 
 ## Terminal
 
-**FIX_REQUIRED** — wireframe items 9–10 and item 8 multi-year history remain open; not READY per instruction completion rule.
+**READY** — Sprint2 wireframe completion guards implemented and browser-accepted (A + B2 gate specs).
