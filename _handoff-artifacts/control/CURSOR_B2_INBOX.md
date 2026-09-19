@@ -1,23 +1,17 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260920-R4
-mode: WIREFRAME_BROWSER_ACCEPTANCE
-updatedAt: 2026-09-20T04:53:53+09:00
-sprint: Sprint2
-priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260920-R4/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-19T20:55:58.942Z
+last-consumed-task-key: SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260920-R4
+last-terminal: READY / SPRINT2_WIREFRAME_BROWSER_ACCEPTANCE_B2_READY
+last-result-path: _handoff-artifacts/results/SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260920-R4/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-paired-a-task: SPRINT2-FORMAL-COMPLETION-GATE-A-20260920-R2
-required-product-sha: 92f2a09d1e5f1da18b30ee6a4f2fb3756d980d5a
-non-overlap: ACCEPTANCE_TESTS_ONLY_NO_PRODUCT_EDITS
-recovery: ROLE1_R4_CANONICAL_RESULT_MISSING_0453_RETRIGGER
+sprint: Sprint2
 pickup-requirements:
-- fresh-read GitHub canonical instruction and claim ACTIVE before changes
-- fresh-sync canonical master and verify required product SHA is ancestor of exact clean HEAD
-- execute full canonical Sprint2 wireframe browser harness in Chrome without weakening/skipping
-- publish terminal result to GitHub canonical R4 result path with exact HEAD, clean-tree status, command and pass count
-- do not edit product files or start Sprint3/4
-- do not pause/disable for Drive/local mirror absence
+- fresh-read GitHub canonical instruction
+- claim ACTIVE before changes
+- publish terminal result to GitHub canonical result path
