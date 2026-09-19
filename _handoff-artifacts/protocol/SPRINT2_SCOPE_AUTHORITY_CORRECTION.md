@@ -3,34 +3,64 @@
 status: ACTIVE
 sprint: Sprint2
 control-authority: GitHub
-updatedAt: 2026-09-19T17:03:00+09:00
+updatedAt: 2026-09-19T17:25:00+09:00
 
-## Authority correction
+## User clarification
 
-Sprint2 UI completion must be judged against the user-defined observation UI requirements in `docs/SPEC.md`, especially **§6 観察画面の構成** and **第2段階：観察用Web画面**.
+Sprint2 UI completion is judged against the **Sprint2 UI wireframe set**, not the whole long-term `docs/SPEC.md` observation-screen list.
 
-The following requirements may NOT be downgraded to FUTURE_RESERVE or OUT_OF_SCOPE solely by handoff artifacts, source-evidence manifests, existing tests, current implementation shape, or a narrower UI009/F-slot acceptance path:
+Authoritative product-direction inputs for this completion check:
+- Google Drive `TOURNAMENT_UI_WIREFRAME_DRAFT.md` (file id `1gHpjYuYWwug85_Sr4VXMSFTvqBPqBVvd`)
+- Google Drive `SPRINT2_UI_DATA_CONTRACT_GAP_MAP.md` (file id `1wmgHM6B96SN7PihbaDhy3XhI7efaCYwG`)
+- Google Drive `S02-008_ANNUAL_EARNINGS_RANKING_USER_DECISION_20260901` (file id `1G9G0MTUpuyeIhBDlKEQ7bkxgfYilj_gMMjmxASQYdf4`)
+- accepted Sprint2 domain/runtime contracts
 
-- 世界ニュース
-- ランキング: 共通ランク別一覧、総合戦王者、各限定戦王者、勝率、連勝、世代別比較
-- 人物一覧・人物詳細
-- 家系図
-- 師弟系譜
-- 歴代王者
-- 大会履歴
-- 総当たり順位表
-- トーナメント表
-- 対戦概要
-- 詳細戦闘ログ
-- 人物・家系・師系の検索とフォロー
-- the navigation/state needed to reach and use those surfaces
+Drive remains a specification/reference source here; GitHub `_handoff-artifacts/` remains the canonical control plane for deciding work/lane/task/result state.
 
-Prior artifacts such as `SPRINT2-WIREFRAME-SOURCE-EVIDENCE-REPAIR-A-20260914/source-evidence-manifest.txt` and `SPRINT2-ACCEPTED-SCOPE-CLOSURE-A-20260919-R1/result.md` are evidence of what was tested at that time, but they are **not authority to narrow the user's specification**.
+## Sprint2 wireframe surfaces
 
-In particular, prior classifications of knockout browser UI and competition-history -> battle-log navigation as FUTURE_RESERVE are superseded for Sprint2 completion unless an explicit user-approved specification change says otherwise.
+The wireframe/gap-map requires at least:
+1. annual tournament schedule
+2. tournament detail
+3. participant list
+4. round-robin standings / pair-result matrix
+5. knockout bracket / match results
+6. tournament result
+7. tournament series history / historical winners
+8. annual ranking
+9. promotion result
+10. person rank history
+11. person-detail and battle-detail navigation
 
-## Completion rule
+## Completion guard
 
-Sprint2 is not complete merely because the reduced mandatory Chrome set passes. Completion requires a repository-backed specification-to-implementation ledger covering all user-defined Sprint2 UI requirements, with each requirement implemented and browser-accepted, or explicitly deferred by a user-approved spec change.
+Before Sprint2 UI-ready completion, each of these must have a direct canonical source, accepted read projection, or explicit user-approved deferral:
+- annual schedule
+- tournament detail
+- participant list
+- round-robin standings
+- round-robin match results
+- knockout bracket
+- tournament winner / placements
+- historical tournament editions
+- historical winners
+- annual ranking history
+- promotion result
+- person rank history
+- match detail navigation
+- person detail navigation
 
-No Sprint3/4 production before this corrected Sprint2 completion gate is satisfied.
+## Ranking decision
+
+The older wireframe label `Points` is superseded by the explicit user decision:
+- annual ranking orders by yearly cumulative tournament earnings
+- year-selectable current/history view
+- display, where canonical data supports it: position, person, competitive rank, tournament appearances, tournament wins, official match wins/losses
+- equal earnings share the same annual rank; stable PersonId ordering is display determinism only
+- no browser-side ranking reconstruction
+
+## Important correction
+
+Do **not** add unrelated long-term SPEC screens (family tree, teacher lineage, generic search/follow, etc.) merely because they appear in `docs/SPEC.md`; they are not part of this Sprint2 wireframe completion gate unless another accepted Sprint2 authority explicitly includes them.
+
+Prior reduced acceptance that treated knockout UI or history->battle detail as FUTURE_RESERVE is superseded by this wireframe completion guard.
