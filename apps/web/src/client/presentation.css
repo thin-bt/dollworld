@@ -18,6 +18,10 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: clip;
+}
+
 html,
 body {
   margin: 0;
@@ -25,6 +29,7 @@ body {
 }
 
 body {
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 30% -10%, rgba(199, 164, 106, 0.1), transparent 35%),
     linear-gradient(180deg, #151715, var(--dw-bg-2));
@@ -102,9 +107,11 @@ summary:focus-visible,
 }
 
 .dw-shell {
-  max-width: 1440px;
+  max-width: min(1440px, 100%);
   margin: 0 auto;
   min-height: 100vh;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .dw-header {
@@ -185,6 +192,9 @@ summary:focus-visible,
 
 .dw-main {
   padding: 24px;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .dw-card {
@@ -1600,6 +1610,9 @@ a.dw-person-name-link:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .competition-header h2 {
@@ -1716,21 +1729,31 @@ a.dw-person-name-link:focus-visible {
   }
 }
 
+.competition-schedule {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .competition-schedule-time {
   margin: 0 0 0.65rem;
   font-size: 0.95rem;
 }
 
 .competition-schedule-scroll {
+  display: block;
+  width: 100%;
   overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+  contain: inline-size;
   border: 1px solid var(--dw-line);
   border-radius: 10px;
   background: var(--dw-panel);
+  -webkit-overflow-scrolling: touch;
 }
 
 .competition-schedule-table {
   width: max-content;
-  min-width: 100%;
   border-collapse: collapse;
   font-size: 0.72rem;
 }
@@ -1868,4 +1891,186 @@ a.dw-person-name-link:focus-visible {
   margin: 0;
   color: var(--dw-muted);
   font-size: 0.92rem;
+}
+
+.competition-layout > * {
+  min-width: 0;
+}
+
+.competition-schedule-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.competition-schedule-year-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.competition-schedule-year-nav button {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 8px;
+  background: #2b302b;
+  color: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.competition-schedule-year-nav button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.competition-schedule-year-nav button:not(:disabled):hover {
+  border-color: var(--dw-accent);
+}
+
+.competition-detail-body,
+.competition-ranking,
+.competition-knockout,
+.competition-series-history,
+.competition-match-page,
+.competition-match-turn-order,
+section[data-testid="competition-promotion-results"],
+section[data-testid="competition-person-rank-history"] {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.45rem 0.55rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table thead th {
+  background: rgba(0, 0, 0, 0.14);
+  color: var(--dw-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.data-table tbody th[scope="row"] {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.competition-participant-table td,
+.competition-participant-table th {
+  white-space: nowrap;
+}
+
+.competition-ranking-year {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.competition-ranking-year button {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 8px;
+  background: #2b302b;
+  color: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.competition-ranking-year button[aria-pressed="true"] {
+  border-color: var(--dw-accent);
+  background: rgba(199, 164, 106, 0.12);
+}
+
+.competition-ranking-year button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.competition-knockout-round {
+  margin-bottom: 0.85rem;
+}
+
+.competition-knockout-round h5 {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+  color: var(--dw-muted);
+}
+
+.competition-series-group {
+  margin-bottom: 0.85rem;
+}
+
+.competition-series-group h5 {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+}
+
+.competition-actions {
+  margin-top: 0.25rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--dw-line);
+}
+
+.competition-actions button[data-testid="competition-step-cta"] {
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 9px;
+  background: #2b302b;
+  cursor: pointer;
+}
+
+.competition-actions button[data-testid="competition-step-cta"]:not(:disabled):hover {
+  border-color: var(--dw-accent);
+  background: #3a4138;
+}
+
+.competition-actions button[data-testid="competition-step-cta"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.competition-finished-actions .competition-next-link {
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.competition-match-turn-order {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .dw-nav ul {
+    flex-wrap: wrap;
+  }
+
+  .competition-section-heading {
+    font-size: 0.95rem;
+  }
+
+  table.data-table {
+    font-size: 0.78rem;
+  }
 }
