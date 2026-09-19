@@ -31,6 +31,7 @@ const REGISTERED = [
   "/api/s1_5/validation-results",
   "/api/s1_5/competition",
   "/api/s1_5/competition/step",
+  "/api/s1_5/competition/matches/:matchId",
 ];
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");

@@ -206,7 +206,18 @@ function TournamentDetailPanel(props: {
                           : null;
                     return (
                       <tr key={row.pairIndex}>
-                        <td>{row.pairIndex + 1}</td>
+                        <td>
+                          {row.matchId !== null ? (
+                            <a
+                              href={`/competition/matches/${encodeURIComponent(row.matchId)}`}
+                              data-testid={`competition-history-match-${row.matchId}`}
+                            >
+                              {row.pairIndex + 1}
+                            </a>
+                          ) : (
+                            row.pairIndex + 1
+                          )}
+                        </td>
                         <td>
                           {row.participantADisplayName} vs {row.participantBDisplayName}
                         </td>

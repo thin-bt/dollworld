@@ -1,7 +1,11 @@
 import { API_PREFIX } from "../../shared/ui001-contracts.js";
 import { decodeApiResponse } from "../api-client.js";
 import { CLIENT_CSRF_HEADER_NAME, type FetchLike } from "../session-client.js";
-import type { CompetitionProgressView, CompetitionStepDataView } from "./ui009-views.js";
+import type {
+  CompetitionMatchDetailView,
+  CompetitionProgressView,
+  CompetitionStepDataView,
+} from "./ui009-views.js";
 
 export async function loadCompetitionState(options?: {
   fetchImpl?: FetchLike;
@@ -89,6 +93,42 @@ export async function postCompetitionStep(input: {
       acceptedUiRevision: number;
       completedUiRevision: number;
     },
+    uiRevision: decoded.envelope.uiRevision,
+  };
+}
+
+export async function loadCompetitionMatch(
+  matchId: string,
+  options?: { fetchImpl?: FetchLike },
+): Promise<
+  | { kind: "success"; data: CompetitionMatchDetailView; uiRevision: number }
+  | { kind: "failure"; code: string | null; message: string }
+> {
+  const fetchImpl = options?.fetchImpl ?? fetch;
+  const encoded = encodeURIComponent(matchId);
+  let response: { status: number; text: () => Promise<string> };
+  try {
+    response = await fetchImpl(`${API_PREFIX}/competition/matches/${encoded}`, {
+      credentials: "include",
+    });
+  } catch {
+    return { kind: "failure", code: null, message: "transport_error" };
+  }
+  const text = await response.text();
+  const decoded = decodeApiResponse(text);
+  if (decoded.kind === "transport_error") {
+    return { kind: "failure", code: null, message: decoded.reason };
+  }
+  if (decoded.kind === "failure") {
+    return {
+      kind: "failure",
+      code: decoded.envelope.error.code,
+      message: decoded.envelope.error.message,
+    };
+  }
+  return {
+    kind: "success",
+    data: decoded.envelope.data as CompetitionMatchDetailView,
     uiRevision: decoded.envelope.uiRevision,
   };
 }

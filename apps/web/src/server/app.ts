@@ -51,6 +51,7 @@ import { handleGetEvents, type EventsRouteDeps } from "./ui008/routes-events.js"
 import { handleGetValidationResults, type ValidationRouteDeps } from "./ui008/routes-validation.js";
 import {
   handleGetCompetition,
+  handleGetCompetitionMatch,
   handlePostCompetitionStep,
   type CompetitionRouteDeps,
 } from "./ui009/routes-competition.js";
@@ -368,6 +369,7 @@ export async function createUiApp(options: CreateUiAppOptions = {}): Promise<UiA
   const validationResultsPath = `${API_PREFIX}/validation-results`;
   const competitionPath = `${API_PREFIX}/competition`;
   const competitionStepPath = `${API_PREFIX}/competition/step`;
+  const competitionMatchPath = `${API_PREFIX}/competition/matches/:matchId`;
   registeredApiPaths.push(
     sessionPath,
     presetsPath,
@@ -386,6 +388,7 @@ export async function createUiApp(options: CreateUiAppOptions = {}): Promise<UiA
     validationResultsPath,
     competitionPath,
     competitionStepPath,
+    competitionMatchPath,
   );
 
   app.get(sessionPath, async (request, reply) => {
@@ -508,6 +511,13 @@ export async function createUiApp(options: CreateUiAppOptions = {}): Promise<UiA
   });
   app.get(competitionPath, async (request, reply) => {
     await handleGetCompetition(request, reply, competitionDeps());
+  });
+  app.get(competitionMatchPath, async (request, reply) => {
+    await handleGetCompetitionMatch(
+      request as Parameters<typeof handleGetCompetitionMatch>[0],
+      reply,
+      competitionDeps(),
+    );
   });
   app.post(competitionStepPath, async (request, reply) => {
     await handlePostCompetitionStep(request, reply, competitionDeps());

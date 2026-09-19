@@ -27,6 +27,16 @@ function parseClientRoute(pathname: string, search: string): { kind: "dev-viewer
   if (path === "/competition") {
     return { kind: "competition" };
   }
+  if (path.startsWith("/competition/matches/")) {
+    const rest = path.slice("/competition/matches/".length);
+    if (rest.length > 0 && !rest.includes("/")) {
+      try {
+        return { kind: "competition-match", matchId: decodeURIComponent(rest) };
+      } catch {
+        return { kind: "competition-match", matchId: rest };
+      }
+    }
+  }
   if (path === "/people") {
     return { kind: "people" };
   }

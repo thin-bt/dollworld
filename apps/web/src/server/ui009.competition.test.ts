@@ -333,6 +333,60 @@ describe("UI-009 competition progression", () => {
   120_000,
   );
 
+  it(
+    "GET competition match detail exposes retained detailed log items after a played match",
+    async () => {
+      app = await createUiApp({
+        publicOrigin: ORIGIN,
+        enableTestProbe: false,
+        repoRoot: REPO_ROOT,
+        processKeys: createTestProcessSecurityContext(911),
+      });
+      const { cookie, csrf, uiRevision } = await bootstrapReadySession(app);
+      let revision = uiRevision;
+      let competition: CompetitionView | null = null;
+      for (let guard = 0; guard < 128; guard += 1) {
+        const stepped = await stepCompetition(app, cookie, csrf, revision);
+        revision = stepped.envelope.uiRevision;
+        competition = stepped.competition;
+        if (competition.lifecyclePhase === "finished") {
+          break;
+        }
+      }
+      expect(competition).not.toBeNull();
+      expect(competition!.roundRobinProgress).not.toBeNull();
+      const played = competition!.roundRobinProgress!.history.find(
+        (row) =>
+          typeof row === "object" &&
+          row !== null &&
+          (row as { matchId?: string | null }).matchId !== null &&
+          (row as { matchId?: string | null }).matchId !== undefined,
+      ) as { matchId: string } | undefined;
+      expect(played).toBeDefined();
+      const matchId = played!.matchId;
+      const detailRes = await app!.inject({
+        method: "GET",
+        url: `${API_PREFIX}/competition/matches/${encodeURIComponent(matchId)}`,
+        headers: { host: HOST, cookie },
+      });
+      expect(detailRes.statusCode).toBe(200);
+      const detailBody = JSON.parse(detailRes.body) as Envelope;
+      expect(detailBody.ok).toBe(true);
+      const view = detailBody.data as {
+        matchId: string;
+        detailedLogAvailable: boolean;
+        logItems: unknown[];
+        detailedLogActionCount: number;
+      };
+      expect(view.matchId).toBe(matchId);
+      if (view.detailedLogAvailable) {
+        expect(view.logItems.length).toBeGreaterThan(0);
+        expect(view.detailedLogActionCount).toBeGreaterThan(0);
+      }
+    },
+    120_000,
+  );
+
   it("accepted UI009 start seed can initialize competition without runtime normalization", async () => {
     app = await createUiApp({
       publicOrigin: ORIGIN,

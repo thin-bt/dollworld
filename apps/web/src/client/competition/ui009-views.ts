@@ -131,3 +131,30 @@ export type CompetitionStepDataView = {
   competition: CompetitionProgressView;
   stepKind: "initialized" | "match_played" | "already_finished" | "noop";
 };
+
+export type CompetitionMatchDetailUnavailableReason =
+  | "not_retained"
+  | "pruned"
+  | "missing_payload"
+  | null;
+
+export type CompetitionTurnOrderLogView = Record<string, unknown>;
+
+export type CompetitionMatchDetailView = {
+  matchId: string;
+  participantAId: string;
+  participantBId: string;
+  participantADisplayName: string;
+  participantBDisplayName: string;
+  winnerPersonId: string | null;
+  loserPersonId: string | null;
+  winnerDisplayName: string | null;
+  loserDisplayName: string | null;
+  resultKind: string;
+  tournamentId: string | null;
+  detailedLogAvailable: boolean;
+  detailedLogUnavailableReason: CompetitionMatchDetailUnavailableReason;
+  detailedLogActionCount: number;
+  turnOrderLogs: readonly CompetitionTurnOrderLogView[];
+  logItems: readonly Record<string, unknown>[];
+};

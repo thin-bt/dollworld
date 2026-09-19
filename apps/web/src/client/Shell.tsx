@@ -4,6 +4,7 @@ import { BattleLogPage } from "./battle-log/BattleLogPage.js";
 import { PeopleViewer } from "./dev-viewer/PeopleViewer.js";
 import { SimulationPanel } from "./dev-viewer/SimulationPanel.js";
 import { EventsPage, type EventsTab } from "./events/EventsPage.js";
+import { CompetitionMatchPage } from "./competition/CompetitionMatchPage.js";
 import { CompetitionPage } from "./competition/CompetitionPage.js";
 import { MockBattlePage } from "./mock-battle/MockBattlePage.js";
 import { PersonDetailPage } from "./person-detail/PersonDetailPage.js";
@@ -18,6 +19,7 @@ export type ShellRoute =
   | { kind: "mock-battle" }
   | { kind: "mock-battle-result" }
   | { kind: "competition" }
+  | { kind: "competition-match"; matchId: string }
   | { kind: "events"; tab: EventsTab };
 
 export type ShellProps = {
@@ -130,7 +132,7 @@ export function Shell({
 
   const peopleActive = route.kind === "people" || route.kind === "person-detail";
   const mockActive = route.kind === "mock-battle" || route.kind === "mock-battle-result";
-  const competitionActive = route.kind === "competition";
+  const competitionActive = route.kind === "competition" || route.kind === "competition-match";
   const eventsActive = route.kind === "events";
   const homeActive = route.kind === "home";
 
@@ -231,6 +233,9 @@ export function Shell({
         {sessionState === "ready" && route.kind === "mock-battle" ? <MockBattlePage /> : null}
         {sessionAllowsReadRoutes(sessionState) && route.kind === "competition" ? (
           <CompetitionPage />
+        ) : null}
+        {sessionAllowsReadRoutes(sessionState) && route.kind === "competition-match" ? (
+          <CompetitionMatchPage matchId={route.matchId} />
         ) : null}
         {sessionAllowsReadRoutes(sessionState) && route.kind === "mock-battle-result" ? (
           <BattleLogPage />
