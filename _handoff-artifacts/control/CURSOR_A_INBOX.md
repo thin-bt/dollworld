@@ -1,17 +1,22 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-20T03:08:31+09:00
-last-consumed-task-key: SPRINT2-FORMAL-COMPLETION-GATE-A-20260920-R2
-last-terminal: FIX_REQUIRED / SPRINT2_FORMAL_COMPLETION_GATE_FIX_REQUIRED
-last-result-path: _handoff-artifacts/results/SPRINT2-FORMAL-COMPLETION-GATE-A-20260920-R2/result.md
+task-key: SPRINT2-B2-PICKUP-RECOVERY-A-20260920-R1
+mode: B2_PICKUP_RECOVERY
+updatedAt: 2026-09-20T05:48:00+09:00
+sprint: Sprint2
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT2-B2-PICKUP-RECOVERY-A-20260920-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2
+paired-b2-task: SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260920-R4
+non-overlap: CONTROL_PLANE_RECOVERY_ONLY_NO_PRODUCT_OR_BROWSER_ACCEPTANCE_EDITS
+recovery: PM_FAILOVER_B2_PREPARED_UNPICKED
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- diagnose and repair/retrigger B2 canonical pickup path
 - publish terminal result to GitHub canonical result path
+- do not edit product files or duplicate browser acceptance
+- do not start Sprint3/4
