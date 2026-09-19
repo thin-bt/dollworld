@@ -5,18 +5,17 @@ sprint: Sprint2
 owner: Role2
 priority: IMMEDIATE
 control-authority: GitHub
-updatedAt: 2026-09-19T17:04:00+09:00
-recovery: PM_FAILOVER_SCOPE_AUTHORITY_CORRECTION_ROLE2
+updatedAt: 2026-09-19T17:25:30+09:00
+recovery: PM_FAILOVER_REBIND_ROLE2_TO_SPRINT2_WIREFRAME
 
-## Authority correction
-Use `docs/SPEC.md` §6 and 第2段階 plus `_handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md` as completion authority.
-Do NOT narrow scope to the current UI009/F-slot implementation or existing acceptance tests.
+## Authority
+Use `_handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md`.
+Map only the Sprint2 wireframe/gap-map product surfaces and their canonical/read-projection data.
 
 ## Required work
-1. Map every required Sprint2 UI surface to current routes/components/server projections/tests.
-2. Explicitly cover ranking, champions, win rate/streak/generation comparison, tournament/bracket, competition history, battle-log navigation, lineage, teacher-lineage, historical champions, search/follow, world news, people/detail.
-3. Mark IMPLEMENTED / PARTIAL / MISSING with exact repository evidence.
-4. For non-overlapping executable gaps, DIRECT-DISPATCH to a free Cursor lane in the same run.
-5. Do not spend the run only retriggering B2.
-6. Publish `_handoff-artifacts/results/SPRINT2-WIREFRAME-SOURCE-MAP-ROLE2-20260917/result.md`.
-READY requires full corrected-scope source/data-path mapping and gap disposition.
+1. Map annual schedule, tournament detail, participant comparison facts, RR standings/pair matrix, knockout bracket/results, tournament result, series history/historical winners, annual ranking current/history, promotion result, person rank history, match/person detail links.
+2. For ranking, bind the earnings-based user decision (not generic Points): year selection/history, position, person, competitive rank, appearances, wins, official W/L where supported.
+3. Identify exact missing source/projection/API contracts; no browser-side reconstruction.
+4. DIRECT-DISPATCH non-overlapping executable gaps immediately.
+5. Do not expand into unrelated long-term SPEC screens.
+6. Publish the canonical result; READY only with full wireframe data-path disposition.
