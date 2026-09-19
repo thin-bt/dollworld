@@ -1,17 +1,20 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-20T06:02:06+09:00
-last-consumed-task-key: SPRINT2-FORMAL-CLOSE-A-20260920-R1
-last-terminal: READY / SPRINT2_FORMAL_CLOSE_READY
-last-result-path: _handoff-artifacts/results/SPRINT2-FORMAL-CLOSE-A-20260920-R1/result.md
+task-key: SPRINT2-VISUAL-QUALITY-REVIEW-A-20260920-R1
+mode: VISUAL_QUALITY_REVIEW_AND_FIX
+updatedAt: 2026-09-20T07:20:00+09:00
+sprint: Sprint2
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT2-VISUAL-QUALITY-REVIEW-A-20260920-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2
+reopened-from: SPRINT2-FORMAL-CLOSE-A-20260920-R1
 pickup-requirements:
-- fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- fresh-read updated Sprint2 visual completion protocol
+- claim ACTIVE before work
+- inspect actual rendered UI including narrow supported widths
+- fix concrete Sprint2 visual defects and publish screenshot evidence
 - publish terminal result to GitHub canonical result path
+- do not start Sprint3/4
