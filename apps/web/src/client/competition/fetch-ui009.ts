@@ -1,10 +1,7 @@
 import { API_PREFIX } from "../../shared/ui001-contracts.js";
+import { decodeApiResponse } from "../api-client.js";
 import { CLIENT_CSRF_HEADER_NAME, type FetchLike } from "../session-client.js";
 import type { CompetitionProgressView, CompetitionStepDataView } from "./ui009-views.js";
-
-type ApiEnvelope<T> =
-  | { ok: true; data: T; uiRevision: number }
-  | { ok: false; error: { code: string; message: string }; uiRevision: number | null };
 
 export async function loadCompetitionState(options?: {
   fetchImpl?: FetchLike;
@@ -13,16 +10,29 @@ export async function loadCompetitionState(options?: {
   | { kind: "failure"; code: string | null; message: string }
 > {
   const fetchImpl = options?.fetchImpl ?? fetch;
-  const response = await fetchImpl(`${API_PREFIX}/competition`, { credentials: "include" });
-  const json = (await response.json()) as ApiEnvelope<CompetitionProgressView>;
-  if (!json.ok) {
+  let response: { status: number; text: () => Promise<string> };
+  try {
+    response = await fetchImpl(`${API_PREFIX}/competition`, { credentials: "include" });
+  } catch {
+    return { kind: "failure", code: null, message: "transport_error" };
+  }
+  const text = await response.text();
+  const decoded = decodeApiResponse(text);
+  if (decoded.kind === "transport_error") {
+    return { kind: "failure", code: null, message: decoded.reason };
+  }
+  if (decoded.kind === "failure") {
     return {
       kind: "failure",
-      code: json.error.code,
-      message: json.error.message,
+      code: decoded.envelope.error.code,
+      message: decoded.envelope.error.message,
     };
   }
-  return { kind: "success", data: json.data, uiRevision: json.uiRevision };
+  return {
+    kind: "success",
+    data: decoded.envelope.data as CompetitionProgressView,
+    uiRevision: decoded.envelope.uiRevision,
+  };
 }
 
 export async function postCompetitionStep(input: {
@@ -43,31 +53,42 @@ export async function postCompetitionStep(input: {
   | { kind: "failure"; code: string | null; message: string }
 > {
   const fetchImpl = input.fetchImpl ?? fetch;
-  const response = await fetchImpl(`${API_PREFIX}/competition/step`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "content-type": "application/json",
-      [CLIENT_CSRF_HEADER_NAME]: input.csrfToken,
-    },
-    body: JSON.stringify({
-      requestId: input.requestId,
-      expectedUiRevision: input.expectedUiRevision,
-    }),
-  });
-  const json = (await response.json()) as ApiEnvelope<
-    CompetitionStepDataView & {
+  let response: { status: number; text: () => Promise<string> };
+  try {
+    response = await fetchImpl(`${API_PREFIX}/competition/step`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json",
+        [CLIENT_CSRF_HEADER_NAME]: input.csrfToken,
+      },
+      body: JSON.stringify({
+        requestId: input.requestId,
+        expectedUiRevision: input.expectedUiRevision,
+      }),
+    });
+  } catch {
+    return { kind: "failure", code: null, message: "transport_error" };
+  }
+  const text = await response.text();
+  const decoded = decodeApiResponse(text);
+  if (decoded.kind === "transport_error") {
+    return { kind: "failure", code: null, message: decoded.reason };
+  }
+  if (decoded.kind === "failure") {
+    return {
+      kind: "failure",
+      code: decoded.envelope.error.code,
+      message: decoded.envelope.error.message,
+    };
+  }
+  return {
+    kind: "success",
+    data: decoded.envelope.data as CompetitionStepDataView & {
       durationMs: number;
       acceptedUiRevision: number;
       completedUiRevision: number;
-    }
-  >;
-  if (!json.ok) {
-    return {
-      kind: "failure",
-      code: json.error.code,
-      message: json.error.message,
-    };
-  }
-  return { kind: "success", data: json.data, uiRevision: json.uiRevision };
+    },
+    uiRevision: decoded.envelope.uiRevision,
+  };
 }
