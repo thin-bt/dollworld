@@ -5,17 +5,21 @@ sprint: Sprint2
 owner: Role2
 priority: IMMEDIATE
 control-authority: GitHub
+updatedAt: 2026-09-19T17:02:00+09:00
+recovery: PM_FAILOVER_RESUME_UNFINISHED_ROLE2_1702
 
 ## Objective
-In parallel with Role3 coverage audit, inspect current master and build a concrete source/data-path map for Sprint2 UI surfaces so missing/partial wireframe screens can be assigned without blocking Cursor A's tournament repair.
+Resume and finish the Sprint2 source/data-path map now. Do not wait for B2 and do not spend the run only retriggering Cursor lanes.
 
 ## Required work
-1. Inventory current browser routes/pages/components used by Sprint2 product flow.
-2. Map each route/page to server handlers, stores/projections and tests.
-3. Flag obvious stubs, placeholder data, unreachable UI, dead CTAs, missing detail/navigation routes, missing loading/empty/error states, and components with no acceptance coverage.
-4. Separate findings that overlap Cursor A R3 tournament lifecycle files from non-overlapping UI work; do not edit A-owned files.
-5. Cross-reference accepted wireframe/source-evidence artifacts only; do not invent requirements and do not import unrelated project UI.
-6. Produce task-ready non-overlap slices that can be handed to a free implementation lane immediately.
+1. Fresh-read current master and accepted Sprint2 wireframe/source authority.
+2. Inventory every browser route/page/component in the accepted Sprint2 flow and map it to server handlers, stores/projections and tests.
+3. Flag stubs, placeholder data, unreachable UI, dead CTAs, missing detail/navigation routes, missing loading/empty/error states, and acceptance holes.
+4. Separate current B2-owned browser acceptance surfaces from non-conflicting implementation gaps.
+5. Produce task-ready slices for every unique accepted gap.
+6. DIRECT-DISPATCH any unique non-conflicting executable slice to a free Cursor lane in the same run instead of merely reporting it.
+7. No unrelated UI and no Sprint3/4.
 
 ## Output
-Publish `_handoff-artifacts/results/SPRINT2-WIREFRAME-SOURCE-MAP-ROLE2-20260917/result.md` with exact source paths, evidence, overlap classification, and executable task slices. READY only with repository-backed evidence.
+Publish `_handoff-artifacts/results/SPRINT2-WIREFRAME-SOURCE-MAP-ROLE2-20260917/result.md`.
+READY requires repository-backed source mapping and disposition of all task-ready gaps.
