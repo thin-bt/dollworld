@@ -4,11 +4,22 @@ state: IDLE
 lane: A
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-17T16:20:00+09:00
+updatedAt: 2026-09-19T10:30:00+09:00
 pickup: (none)
-last-completed-task-key: GITHUB-CONTROL-PLANE-MIGRATION-A-20260917
-last-terminal: READY / GITHUB_CONTROL_PLANE_MIGRATION_A_READY / COMMITTED
-last-commit-sha: 07c0472e569a482bb505db2acaa530cb55f12bdd
+startedAt: (none)
+branch: master
+HEAD: 3215dec98a060b28e9627004323300a7bf20d324
+completedAt: 2026-09-19T10:30:00+09:00
+lastCompletedTask: SPRINT2-NONBROWSER-PUBLICATION-SLICE-A-20260919-R1
+last-consumed-task-key: SPRINT2-NONBROWSER-PUBLICATION-SLICE-A-20260919-R1
+terminal: READY / SPRINT2_NONBROWSER_PUBLICATION_SLICE_COMPLETE
+last-terminal: READY / SPRINT2_NONBROWSER_PUBLICATION_SLICE_COMPLETE
+last-worktree-head: 3215dec98a060b28e9627004323300a7bf20d324
+result-path: _handoff-artifacts/results/SPRINT2-NONBROWSER-PUBLICATION-SLICE-A-20260919-R1/result.md
+instruction-path: _handoff-artifacts/tasks/SPRINT2-NONBROWSER-PUBLICATION-SLICE-A-20260919-R1/instruction.md
+control-authority: GitHub
+predecessor-task: SPRINT2-NONBROWSER-REMAINING-GAP-SCAN-A-20260919-R1
+paired-b2-task: SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
