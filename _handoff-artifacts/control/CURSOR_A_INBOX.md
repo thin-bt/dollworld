@@ -1,19 +1,17 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT2-SPEC-WIDE-UI-CLOSURE-A-20260919-R1
-mode: SPEC_WIDE_UI_IMPLEMENTATION_AND_ACCEPTANCE
-updatedAt: 2026-09-19T17:03:45+09:00
-sprint: Sprint2
-priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT2-SPEC-WIDE-UI-CLOSURE-A-20260919-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-19T17:16:37+09:00
+last-consumed-task-key: SPRINT2-SPEC-WIDE-UI-CLOSURE-A-20260919-R1
+last-terminal: FIX_REQUIRED / SPEC_WIDE_UI_SLICE1_KNOCKOUT_RANKING_MATCH_NAV
+last-result-path: _handoff-artifacts/results/SPRINT2-SPEC-WIDE-UI-CLOSURE-A-20260919-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-authority-correction: _handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md
-recovery: PM_FAILOVER_CORRECT_REDUCED_SCOPE_AND_RESUME_FULL_SPEC
+sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
-- implement against user-defined docs/SPEC.md UI scope, not reduced UI009/F-slot scope
 - publish terminal result to GitHub canonical result path
