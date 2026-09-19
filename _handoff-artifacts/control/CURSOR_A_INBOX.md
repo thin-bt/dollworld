@@ -1,9 +1,10 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-19T18:07:42+09:00
+task-key: SPRINT2-WIREFRAME-UI-CLOSURE-A-20260919-R1
+mode: PROMOTION_RANK_HISTORY_AND_BROWSER_CLOSURE
+priority: IMMEDIATE
+updatedAt: 2026-09-19T18:21:00+09:00
 last-consumed-task-key: SPRINT2-WIREFRAME-UI-CLOSURE-A-20260919-R1
 last-terminal: FIX_REQUIRED / WIREFRAME_UI_SLICE_SCHEDULE_PARTICIPANTS_MATRIX_HISTORY_RANKING_NAV
 last-result-path: _handoff-artifacts/results/SPRINT2-WIREFRAME-UI-CLOSURE-A-20260919-R1/result.md
@@ -14,4 +15,6 @@ sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- continue only the remaining Sprint2 wireframe gaps from latest FIX_REQUIRED
 - publish terminal result to GitHub canonical result path
+- do not pause/disable for Drive/local mirror absence
