@@ -5,16 +5,16 @@ sprint: Sprint2
 lane: B2
 priority: IMMEDIATE
 control-authority: GitHub
-updatedAt: 2026-09-20T04:01:34+09:00
+updatedAt: 2026-09-20T04:21:31+09:00
 required-product-sha: 92f2a09d1e5f1da18b30ee6a4f2fb3756d980d5a
 supersedes-unpicked: SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260920-R3
 paired-a-task: SPRINT2-FORMAL-COMPLETION-GATE-A-20260920-R2
 non-overlap: ACCEPTANCE_TESTS_ONLY_NO_PRODUCT_EDITS
-recovery: PM_FAILOVER_FRESH_TASK_KEY_AFTER_R3_PREPARED_NO_TERMINAL
+recovery: ROLE2_R4_CANONICAL_RESULT_MISSING_0421_RETRIGGER
 
 ## Objective
 
-Produce the missing canonical browser terminal required to close overdue Sprint2. R3 remained PREPARED without a canonical terminal result. This fresh key must be picked up immediately. Do not edit production files and do not start Sprint3/4.
+Produce the missing canonical browser terminal required to close overdue Sprint2. R4 is still PREPARED and its canonical result is absent as of this fresh GitHub read. Pick up this exact key immediately. Do not edit production files and do not start Sprint3/4.
 
 ## Required work
 
