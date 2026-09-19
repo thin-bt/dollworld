@@ -84,15 +84,11 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
       }
     }
 
-    await expect(page.getByTestId("competition-round-robin-complete")).toBeVisible();
-    await expect(page.getByTestId("competition-finished")).toContainText("総当たり戦の全試合を消化しました。");
-    await expect(page.getByText("総当たり戦終了", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("competition-finished")).toContainText("この大会は終了しました。");
+    await expect(page.getByTestId("competition-champion")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "年間順位" })).toBeVisible();
+    expect(await historyRows.count()).toBe(matchesTotal);
     await expect(step).toHaveCount(0);
-
-    // Accepted standings/finalization is not wired yet: the UI must not invent these facts.
-    await expect(page.getByTestId("competition-champion")).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: "年間順位" })).toHaveCount(0);
-    await expect(page.getByText("順位・優勝者はまだ確定していません。")).toBeVisible();
 
     // Competition mutations must not corrupt the simulation read path.
     const simulationStatus = await page.evaluate(async () => {
