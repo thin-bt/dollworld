@@ -4,63 +4,48 @@ state: PREPARED
 lane: B2
 sprint: Sprint2
 priority: IMMEDIATE
-mode: BROWSER_CONTRACT_RECONCILIATION_AND_REACCEPTANCE
+mode: PUBLISH_RECONCILED_SPEC_AND_CLEAN_REACCEPTANCE
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-predecessor-task: SPRINT2-NONBROWSER-PUBLICATION-SLICE-A-20260919-R1
-paired-a-terminal: SPRINT2_NONBROWSER_PUBLICATION_SLICE_COMPLETE
+predecessor-task: SPRINT2-FINAL-COMPLETION-CONTROL-AUDIT-A-20260919-R1
+paired-a-terminal: SPRINT2_FINAL_COMPLETION_CONTROL_AUDIT_FIX_REQUIRED
 required-master-head: 3215dec98a060b28e9627004323300a7bf20d324
 non-overlap: ACCEPTANCE_SPEC_MAINTENANCE_ONLY_NO_PRODUCT_EDITS
-recovery: ROLE3_REBIND_LATEST_PUBLISHED_A_SLICE_1036
+recovery: ROLE2_REQUIRE_PUBLISHED_CLEAN_BROWSER_GATE_1120
 
 ## Objective
 
-Resolve the single Sprint2 mandatory-browser contract conflict previously reported by the A completion-evidence audit, then rerun the mandatory Chrome 7/7 set against current GitHub master containing the latest published A non-browser slice at `3215dec`.
+Close the remaining formal Sprint2 browser gate identified by the latest A completion-control audit. The prior B2 7/7 READY is not consumable because the reconciled mandatory Playwright spec remained an unpublished local diff. Publish that acceptance-spec reconciliation to GitHub master, then rerun the mandatory Chrome 7/7 set from a clean tree on the published HEAD and replace the canonical B2 terminal with evidence bound to that HEAD.
 
-Canonical reconciliation decision: the published Sprint2 product behavior is the accepted terminal contract. After the final real round-robin match, the same manual competition step finalizes the competition and exposes coherent champion/standings/final result. The older assertion in `tests/e2e/s2-ui009-round-robin-competition.spec.ts` saying accepted standings/finalization "is not wired yet" is stale relative to the now-published Sprint2 implementation and the browser-prep contract. Do not regress product code to recreate the obsolete intermediate `round_robin_complete` hold.
+Canonical reconciliation decision remains unchanged: after the final real round-robin match, the same manual competition step finalizes the competition and exposes coherent champion/standings/final result. The older `round_robin_complete`/champion-count-0 terminal assertion is stale. Do not regress product code.
 
-The latest A publication additionally put the previously missing ui009 production modules and bounded tests on master and corrected `fetch-ui009.ts` for `FetchLike`; its focused eslint, ui009 Vitest 29/29, simulation-core Sprint2 Vitest 29/29, client typecheck, and web build all PASS. Browser acceptance must therefore bind to this published tree, not the older `e40c60f` head.
+## Required work
 
-## Required fix
-
-1. Fresh-read the current versions of:
-   - `tests/e2e/s2-browser-regression-acceptance-prep.spec.ts`
-   - `tests/e2e/s2-ui009-round-robin-competition.spec.ts`
-   - `apps/web/src/server/ui009/routes-competition.ts`
-   - latest A result `_handoff-artifacts/results/SPRINT2-NONBROWSER-PUBLICATION-SLICE-A-20260919-R1/result.md`.
-2. Update only the stale round-robin Playwright terminal assertions/comments if still required so they expect the accepted finalized state after the last manual step: finished state, champion, and annual standings/final result as exposed by the published UI. Preserve all earlier assertions proving >2 participants, real match progression, CTA gating, history, and simulation-read integrity.
-3. Do not edit A-owned production implementation unless a new independent product defect is discovered; if so, publish FIX_REQUIRED with exact evidence instead of making a product edit in B2.
-4. Run the full mandatory Chrome set:
+1. Fresh-read current GitHub master and the latest A audit result.
+2. Reconcile only `tests/e2e/s2-ui009-round-robin-competition.spec.ts` terminal assertions/comments with the accepted finalized-state contract, preserving all earlier progression/CTA/history/read-integrity assertions.
+3. Commit and push that spec-only reconciliation to `thin-bt/dollworld` `master`. No product implementation edits.
+4. Fresh-sync to the resulting published master HEAD and ensure the verification worktree is CLEAN before the mandatory run.
+5. Run:
 
 ```powershell
 cd D:\xampp\htdocs\dollworld
 npx playwright test tests/e2e/s2-browser-regression-acceptance-prep.spec.ts tests/e2e/s2-ui009-round-robin-competition.spec.ts tests/e2e/s2-full-product-browser-closure.spec.ts --project=chrome
 ```
 
-Expected accepted set: 7/7.
+6. Publish the canonical terminal result at `_handoff-artifacts/results/SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1/result.md`.
 
-## Acceptance checks
+## READY requirements
 
-Verify especially:
-- no false `finished` at 0/0 after accepted bootstrap
-- real match progression remains observable
-- final manual round-robin step produces the accepted finalized competition state
-- champion/standings/history/finalResult are coherent and based on processed matches
-- CTA gating is coherent through active/finished states
-- post-tournament next-week simulation continues
-- retry/idempotency remains valid
-- no INTERNAL_ERROR on the supported path
+READY is allowed only when all are true:
+- reconciled spec is present on GitHub `master` (not only local/untracked/dirty)
+- mandatory Chrome set is 7/7 PASS against that published HEAD
+- result records exact published HEAD
+- result records `commit-status: CLEAN`
+- no contradictory older READY is presented as the current consumable terminal
+
+If publication or clean 7/7 fails, return FIX_REQUIRED with the first reproducible blocker and exact evidence. Do not leave a DIRTY_TEST_ONLY READY terminal.
 
 ## Rules
 
-1. Sprint2 only. No Sprint3/4.
-2. Acceptance-spec maintenance is allowed only for the stale contradictory terminal expectation identified above.
-3. No product implementation edits in B2.
-4. Bind verification to current master containing `3215dec98a060b28e9627004323300a7bf20d324`; report exact HEAD.
-5. Publish terminal result to the canonical GitHub result path. READY requires 7/7 PASS after the contract reconciliation; otherwise FIX_REQUIRED with the first reproducible blocker and evidence.
-
-## Terminal output
-
-Publish:
-`_handoff-artifacts/results/SPRINT2-FULL-BROWSER-REACCEPTANCE-B2-20260919-R1/result.md`
+Sprint2 only. No Sprint3/4. Acceptance-spec maintenance only; no product edits. GitHub is canonical; Drive/local are compatibility mirrors only and their absence is non-terminal. Only explicit user PAUSE/STOP may disable execution.
