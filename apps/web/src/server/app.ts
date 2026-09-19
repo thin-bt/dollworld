@@ -514,7 +514,7 @@ export async function createUiApp(options: CreateUiAppOptions = {}): Promise<UiA
   });
   app.get(competitionMatchPath, async (request, reply) => {
     await handleGetCompetitionMatch(
-      request as Parameters<typeof handleGetCompetitionMatch>[0],
+      request as FastifyRequest<{ Params: { matchId: string } }>,
       reply,
       competitionDeps(),
     );

@@ -32,6 +32,10 @@ export type CompetitionPersistedState = {
   readonly finalResult: Record<string, unknown> | null;
   readonly worldYear: number;
   readonly rankingDisplayFacts: readonly Record<string, unknown>[];
+  readonly tournamentHistorySummaries: readonly Record<string, unknown>[];
+  readonly annualRankingHistoryStore: Record<string, unknown>;
+  readonly promotionResultSummaries: readonly Record<string, unknown>[];
+  readonly personRankHistoryBundles: readonly Record<string, unknown>[];
 };
 
 export type CompetitionSessionStore = {

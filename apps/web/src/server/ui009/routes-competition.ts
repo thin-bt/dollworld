@@ -1,7 +1,6 @@
 /**
  * UI-009 Sprint2 competition progression routes.
  * GET  /api/s1_5/competition
- * GET  /api/s1_5/competition/matches/:matchId
  * POST /api/s1_5/competition/step
  */
 import type { FastifyReply, FastifyRequest } from "fastify";
@@ -20,7 +19,6 @@ import {
   REQUEST_ID_UUID_V4,
 } from "../mutation-pipeline.js";
 import { createNodeSha256Provider } from "../presets.js";
-import { mapCompetitionMatchDetailView } from "./competition-match-view.js";
 import { allocateServerErrorReference, type ProcessSecurityContext } from "../process-keys.js";
 import { parseSessionCookieHeader } from "../session-cookie.js";
 import type { SessionStore } from "../session-store.js";
@@ -35,11 +33,11 @@ import { finalizeRoundRobinCompetitionStore } from "./competition-round-robin-fi
 import { rankingFactsForStore, runCompetitionProgressionStep } from "./competition-engine.js";
 import { getCompetitionStore, setCompetitionStore } from "./competition-session-registry.js";
 import { buildStepDataView, mapCompetitionProgressView } from "./map-competition-view.js";
+import { mapCompetitionMatchDetailView } from "./competition-match-view.js";
 
 export const COMPETITION_GET_ENDPOINT = "GET /api/s1_5/competition" as const;
 export const COMPETITION_STEP_ENDPOINT = "POST /api/s1_5/competition/step" as const;
-export const COMPETITION_MATCH_GET_ENDPOINT =
-  "GET /api/s1_5/competition/matches/:matchId" as const;
+export const COMPETITION_MATCH_GET_ENDPOINT = "GET /api/s1_5/competition/matches/:matchId" as const;
 
 export type CompetitionRouteDeps = {
   store: SessionStore;
@@ -131,26 +129,6 @@ function requireReadySession(session: UiSession, reply: FastifyReply): boolean {
   return true;
 }
 
-function sendCompetitionMatchNotFound(reply: FastifyReply, session: UiSession): void {
-  const rev = deriveEnvelopeRevision(session);
-  sendApiJson(
-    reply,
-    404,
-    serializeEnvelope(
-      buildFailureEnvelope({
-        error: {
-          code: "NOT_FOUND",
-          message: "competition match not found",
-          commitState: "none",
-        },
-        uiRevision: rev.uiRevision,
-        isUpdating: rev.isUpdating,
-        refreshRequired: false,
-      }),
-    ),
-  );
-}
-
 export async function handleGetCompetitionMatch(
   request: FastifyRequest<{ Params: { matchId: string } }>,
   reply: FastifyReply,
@@ -163,26 +141,40 @@ export async function handleGetCompetitionMatch(
   if (!requireReadySession(session, reply)) {
     return;
   }
-  fixReadSnapshot(session);
   const matchId = request.params.matchId;
   if (typeof matchId !== "string" || matchId.length === 0) {
-    const rev = deriveEnvelopeRevision(session);
     sendApiJson(
       reply,
       400,
       serializeEnvelope(
         invalidRequestEnvelope({
           message: "matchId is required",
-          uiRevision: rev.uiRevision,
-          isUpdating: rev.isUpdating,
+          uiRevision: deriveEnvelopeRevision(session).uiRevision,
+          isUpdating: deriveEnvelopeRevision(session).isUpdating,
         }),
       ),
     );
     return;
   }
+  fixReadSnapshot(session);
   const store = getCompetitionStore(session.sessionId);
   if (store.state === null) {
-    sendCompetitionMatchNotFound(reply, session);
+    sendApiJson(
+      reply,
+      404,
+      serializeEnvelope(
+        buildFailureEnvelope({
+          error: {
+            code: "NOT_FOUND",
+            message: "competition match not found",
+            commitState: "none",
+          },
+          uiRevision: deriveEnvelopeRevision(session).uiRevision,
+          isUpdating: deriveEnvelopeRevision(session).isUpdating,
+          refreshRequired: false,
+        }),
+      ),
+    );
     return;
   }
   const mapped = mapCompetitionMatchDetailView({
@@ -190,26 +182,22 @@ export async function handleGetCompetitionMatch(
     matchId,
     provider: createNodeSha256Provider(),
   });
-  if (mapped.kind === "not_found") {
-    sendCompetitionMatchNotFound(reply, session);
-    return;
-  }
-  if (mapped.kind === "log_projection_failed") {
-    const errorReference = allocateServerErrorReference(deps.processKeys);
-    const rev = deriveEnvelopeRevision(session);
+  if (mapped.kind !== "found") {
     sendApiJson(
       reply,
-      500,
+      mapped.kind === "not_found" ? 404 : 500,
       serializeEnvelope(
         buildFailureEnvelope({
           error: {
-            code: "INTERNAL_ERROR",
-            message: mapped.message,
+            code: mapped.kind === "not_found" ? "NOT_FOUND" : "INTERNAL_ERROR",
+            message:
+              mapped.kind === "log_projection_failed"
+                ? mapped.message
+                : "competition match not found",
             commitState: "none",
-            errorReference,
           },
-          uiRevision: rev.uiRevision,
-          isUpdating: rev.isUpdating,
+          uiRevision: deriveEnvelopeRevision(session).uiRevision,
+          isUpdating: deriveEnvelopeRevision(session).isUpdating,
           refreshRequired: false,
         }),
       ),
@@ -230,6 +218,31 @@ export async function handleGetCompetitionMatch(
   );
 }
 
+function parseOptionalWorldYear(value: unknown): number | undefined {
+  if (typeof value !== "string" || !/^\d+$/.test(value)) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function competitionViewOptions(request: FastifyRequest): {
+  scheduleViewYear?: number;
+  rankingViewYear?: number;
+} {
+  const query = request.query as { scheduleYear?: unknown; rankingYear?: unknown };
+  const scheduleViewYear = parseOptionalWorldYear(query.scheduleYear);
+  const rankingViewYear = parseOptionalWorldYear(query.rankingYear);
+  const mapped: { scheduleViewYear?: number; rankingViewYear?: number } = {};
+  if (scheduleViewYear !== undefined) {
+    mapped.scheduleViewYear = scheduleViewYear;
+  }
+  if (rankingViewYear !== undefined) {
+    mapped.rankingViewYear = rankingViewYear;
+  }
+  return mapped;
+}
+
 export async function handleGetCompetition(
   request: FastifyRequest,
   reply: FastifyReply,
@@ -248,6 +261,7 @@ export async function handleGetCompetition(
     store,
     rankingFactsForStore(store),
     session.worldEngineRuntime!,
+    competitionViewOptions(request),
   );
   const rev = deriveEnvelopeRevision(session);
   sendApiJson(

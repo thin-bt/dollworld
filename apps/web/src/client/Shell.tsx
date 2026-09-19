@@ -4,8 +4,9 @@ import { BattleLogPage } from "./battle-log/BattleLogPage.js";
 import { PeopleViewer } from "./dev-viewer/PeopleViewer.js";
 import { SimulationPanel } from "./dev-viewer/SimulationPanel.js";
 import { EventsPage, type EventsTab } from "./events/EventsPage.js";
-import { CompetitionMatchPage } from "./competition/CompetitionMatchPage.js";
 import { CompetitionPage } from "./competition/CompetitionPage.js";
+import { CompetitionMatchPage } from "./competition/CompetitionMatchPage.js";
+import { RankingPage } from "./ranking/RankingPage.js";
 import { MockBattlePage } from "./mock-battle/MockBattlePage.js";
 import { PersonDetailPage } from "./person-detail/PersonDetailPage.js";
 import { ensureReadySimulation, loadUiSession } from "./session-client.js";
@@ -20,6 +21,7 @@ export type ShellRoute =
   | { kind: "mock-battle-result" }
   | { kind: "competition" }
   | { kind: "competition-match"; matchId: string }
+  | { kind: "ranking" }
   | { kind: "events"; tab: EventsTab };
 
 export type ShellProps = {
@@ -40,6 +42,9 @@ function menuHref(item: (typeof MENU_ITEMS)[number]): string | null {
   }
   if (item === "大会") {
     return "/competition";
+  }
+  if (item === "ランキング") {
+    return "/ranking";
   }
   if (item === "イベント") {
     return "/events";
@@ -132,7 +137,9 @@ export function Shell({
 
   const peopleActive = route.kind === "people" || route.kind === "person-detail";
   const mockActive = route.kind === "mock-battle" || route.kind === "mock-battle-result";
-  const competitionActive = route.kind === "competition" || route.kind === "competition-match";
+  const competitionActive =
+    route.kind === "competition" || route.kind === "competition-match";
+  const rankingActive = route.kind === "ranking";
   const eventsActive = route.kind === "events";
   const homeActive = route.kind === "home";
 
@@ -166,6 +173,7 @@ export function Shell({
               const isPeople = item === "人物";
               const isMock = item === "模擬戦";
               const isCompetition = item === "大会";
+              const isRanking = item === "ランキング";
               const isEvents = item === "イベント";
               const isHome = item === "シミュレーション";
               const active =
@@ -173,6 +181,7 @@ export function Shell({
                 (isPeople && peopleActive) ||
                 (isMock && mockActive) ||
                 (isCompetition && competitionActive) ||
+                (isRanking && rankingActive) ||
                 (isEvents && eventsActive);
               return (
                 <li key={item}>
@@ -236,6 +245,9 @@ export function Shell({
         ) : null}
         {sessionAllowsReadRoutes(sessionState) && route.kind === "competition-match" ? (
           <CompetitionMatchPage matchId={route.matchId} />
+        ) : null}
+        {sessionAllowsReadRoutes(sessionState) && route.kind === "ranking" ? (
+          <RankingPage />
         ) : null}
         {sessionAllowsReadRoutes(sessionState) && route.kind === "mock-battle-result" ? (
           <BattleLogPage />

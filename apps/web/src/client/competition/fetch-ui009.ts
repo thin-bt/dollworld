@@ -9,6 +9,8 @@ import type {
 
 export async function loadCompetitionState(options?: {
   fetchImpl?: FetchLike;
+  scheduleYear?: number;
+  rankingYear?: number;
 }): Promise<
   | { kind: "success"; data: CompetitionProgressView; uiRevision: number }
   | { kind: "failure"; code: string | null; message: string }
@@ -16,7 +18,16 @@ export async function loadCompetitionState(options?: {
   const fetchImpl = options?.fetchImpl ?? fetch;
   let response: { status: number; text: () => Promise<string> };
   try {
-    response = await fetchImpl(`${API_PREFIX}/competition`, { credentials: "include" });
+    const params = new URLSearchParams();
+    if (options?.scheduleYear !== undefined) {
+      params.set("scheduleYear", String(options.scheduleYear));
+    }
+    if (options?.rankingYear !== undefined) {
+      params.set("rankingYear", String(options.rankingYear));
+    }
+    const query = params.toString();
+    const url = query.length > 0 ? `${API_PREFIX}/competition?${query}` : `${API_PREFIX}/competition`;
+    response = await fetchImpl(url, { credentials: "include" });
   } catch {
     return { kind: "failure", code: null, message: "transport_error" };
   }
@@ -105,12 +116,12 @@ export async function loadCompetitionMatch(
   | { kind: "failure"; code: string | null; message: string }
 > {
   const fetchImpl = options?.fetchImpl ?? fetch;
-  const encoded = encodeURIComponent(matchId);
   let response: { status: number; text: () => Promise<string> };
   try {
-    response = await fetchImpl(`${API_PREFIX}/competition/matches/${encoded}`, {
-      credentials: "include",
-    });
+    response = await fetchImpl(
+      `${API_PREFIX}/competition/matches/${encodeURIComponent(matchId)}`,
+      { credentials: "include" },
+    );
   } catch {
     return { kind: "failure", code: null, message: "transport_error" };
   }

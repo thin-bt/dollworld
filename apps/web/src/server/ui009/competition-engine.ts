@@ -39,6 +39,7 @@ import { buildUi009StructuralPolicy } from "./competition-structural-policy.js";
 import { resolveKnockoutByeAdvancements } from "./competition-bracket-runtime.js";
 import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
 import { COMPETITION_STORE_SCHEMA_VERSION } from "./competition-store.js";
+import { EMPTY_OBSERVATION_PERSISTENCE } from "./competition-wireframe-observation.js";
 
 export type CompetitionEngineOutcome =
   | {
@@ -256,6 +257,7 @@ function initializeCompetitionState(
     finalResult: null,
     worldYear: isolatedSession.runtimeState.worldState.worldDate.year,
     rankingDisplayFacts: [],
+    ...EMPTY_OBSERVATION_PERSISTENCE,
   };
 
   return {

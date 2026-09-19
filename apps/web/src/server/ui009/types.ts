@@ -20,12 +20,18 @@ export const COMPETITION_VIEW_KEYS = [
   "lastMatchPlayerLabels",
   "championDisplayName",
   "roundRobinProgress",
+  "knockoutBracket",
+  "bracketFormatKind",
   "scheduleOverview",
+  "wireframeObservation",
 ] as const;
 
 export type CompetitionParticipantLinkView = {
   displayName: string;
   personId: string;
+  currentRankLabel?: string | null;
+  ageLabel?: string | null;
+  officialRecordLabel?: string | null;
 };
 
 export type CompetitionScheduleEntryView = {
@@ -47,6 +53,10 @@ export type CompetitionScheduleEntryView = {
 
 export type CompetitionScheduleOverviewView = {
   worldYear: number;
+  currentWorldYear: number;
+  isViewingCurrentWorldYear: boolean;
+  prevViewYear: number | null;
+  nextViewYear: number | null;
   worldTimeLabel: string;
   currentAbsoluteWeek: number;
   currentWeekColumn: number;
@@ -83,9 +93,72 @@ export type CompetitionRankingRowView = {
   currentRank: string;
   currentRankLabel: string;
   tournamentWins: number;
+  tournamentAppearances: number;
   officialWins: number;
   officialLosses: number;
   officialRecordLabel: string;
+};
+
+export type TournamentHistorySummaryView = {
+  seriesKey: string;
+  seriesDisplayLabel: string;
+  tournamentId: string;
+  worldYear: number;
+  timingLabel: string;
+  rankOrCategoryLabel: string;
+  kindLabel: string;
+  winnerPersonId: string;
+  winnerDisplayName: string;
+  participantCount: number;
+};
+
+export type TournamentSeriesHistoryEditionView = {
+  tournamentId: string;
+  worldYear: number;
+  timingLabel: string;
+  winnerDisplayName: string;
+  winnerPersonId: string;
+  participantCount: number;
+};
+
+export type TournamentSeriesHistoryGroupView = {
+  seriesKey: string;
+  seriesDisplayLabel: string;
+  editions: readonly TournamentSeriesHistoryEditionView[];
+};
+
+export type AnnualRankingYearOptionView = {
+  worldYear: number;
+  label: string;
+  isCurrentWorldYear: boolean;
+  hasData: boolean;
+};
+
+export type PromotionResultSummaryView = {
+  promotionResultHash: string;
+  personId: string;
+  personDisplayName: string;
+  previousRank: string;
+  newRank: string;
+  sourceTournamentId: string;
+};
+
+export type PersonRankHistoryEntryView = {
+  personId: string;
+  personDisplayName: string;
+  previousRank: string;
+  newRank: string;
+  sourceTournamentId: string;
+  worldYear: number;
+  timingLabel: string;
+};
+
+export type CompetitionWireframeObservationView = {
+  tournamentSeriesHistory: readonly TournamentSeriesHistoryGroupView[];
+  promotionResults: readonly PromotionResultSummaryView[];
+  personRankHistory: readonly PersonRankHistoryEntryView[];
+  annualRankingYearOptions: readonly AnnualRankingYearOptionView[];
+  selectedRankingYear: number;
 };
 
 export type CompetitionPreStartPreviewView = {
@@ -137,6 +210,29 @@ export type CompetitionRoundRobinProgressView = {
   matrix: readonly CompetitionRoundRobinMatrixRowView[];
 };
 
+export type KnockoutBracketMatchRowView = {
+  roundIndex: number;
+  slotId: string;
+  participantAId: string | null;
+  participantBId: string | null;
+  participantADisplayName: string;
+  participantBDisplayName: string;
+  matchId: string | null;
+  winnerPersonId: string | null;
+  status: "pending" | "ready" | "completed";
+};
+
+export type KnockoutBracketProgressView = {
+  formatKind: string;
+  matchesTotal: number;
+  matchesCompleted: number;
+  rounds: readonly {
+    roundIndex: number;
+    label: string;
+    matches: readonly KnockoutBracketMatchRowView[];
+  }[];
+};
+
 export type CompetitionProgressView = {
   schemaVersion: typeof COMPETITION_VIEW_SCHEMA_VERSION;
   lifecyclePhase: CompetitionLifecyclePhase;
@@ -155,7 +251,10 @@ export type CompetitionProgressView = {
   lastMatchPlayerLabels: CompetitionLastMatchPlayerLabels | null;
   championDisplayName: string | null;
   roundRobinProgress: CompetitionRoundRobinProgressView | null;
+  knockoutBracket: KnockoutBracketProgressView | null;
+  bracketFormatKind: string | null;
   scheduleOverview: CompetitionScheduleOverviewView;
+  wireframeObservation: CompetitionWireframeObservationView;
 };
 
 export type CompetitionStepDataView = {

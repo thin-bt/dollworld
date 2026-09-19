@@ -18,6 +18,9 @@ export type CompetitionLastMatchPlayerLabels = {
 export type CompetitionParticipantLink = {
   displayName: string;
   personId: string;
+  currentRankLabel?: string | null;
+  ageLabel?: string | null;
+  officialRecordLabel?: string | null;
 };
 
 export type CompetitionScheduleEntry = {
@@ -39,6 +42,10 @@ export type CompetitionScheduleEntry = {
 
 export type CompetitionScheduleOverview = {
   worldYear: number;
+  currentWorldYear: number;
+  isViewingCurrentWorldYear: boolean;
+  prevViewYear: number | null;
+  nextViewYear: number | null;
   worldTimeLabel: string;
   currentAbsoluteWeek: number;
   currentWeekColumn: number;
@@ -86,6 +93,70 @@ export type CompetitionRoundRobinProgress = {
   matrix: readonly CompetitionRoundRobinMatrixRow[];
 };
 
+export type KnockoutBracketMatchRow = {
+  roundIndex: number;
+  slotId: string;
+  participantAId: string | null;
+  participantBId: string | null;
+  participantADisplayName: string;
+  participantBDisplayName: string;
+  matchId: string | null;
+  winnerPersonId: string | null;
+  status: "pending" | "ready" | "completed";
+};
+
+export type KnockoutBracketProgress = {
+  formatKind: string;
+  matchesTotal: number;
+  matchesCompleted: number;
+  rounds: readonly {
+    roundIndex: number;
+    label: string;
+    matches: readonly KnockoutBracketMatchRow[];
+  }[];
+};
+
+export type TournamentSeriesHistoryGroup = {
+  seriesKey: string;
+  seriesDisplayLabel: string;
+  editions: readonly {
+    tournamentId: string;
+    worldYear: number;
+    timingLabel: string;
+    winnerDisplayName: string;
+    winnerPersonId: string;
+    participantCount: number;
+  }[];
+};
+
+export type CompetitionWireframeObservation = {
+  tournamentSeriesHistory: readonly TournamentSeriesHistoryGroup[];
+  promotionResults: readonly {
+    promotionResultHash: string;
+    personId: string;
+    personDisplayName: string;
+    previousRank: string;
+    newRank: string;
+    sourceTournamentId: string;
+  }[];
+  personRankHistory: readonly {
+    personId: string;
+    personDisplayName: string;
+    previousRank: string;
+    newRank: string;
+    sourceTournamentId: string;
+    worldYear: number;
+    timingLabel: string;
+  }[];
+  annualRankingYearOptions: readonly {
+    worldYear: number;
+    label: string;
+    isCurrentWorldYear: boolean;
+    hasData: boolean;
+  }[];
+  selectedRankingYear: number;
+};
+
 export type CompetitionProgressView = {
   schemaVersion: string;
   lifecyclePhase: CompetitionLifecyclePhase;
@@ -113,6 +184,7 @@ export type CompetitionProgressView = {
     currentRank: string;
     currentRankLabel: string;
     tournamentWins: number;
+    tournamentAppearances: number;
     officialWins: number;
     officialLosses: number;
     officialRecordLabel: string;
@@ -124,12 +196,10 @@ export type CompetitionProgressView = {
   lastMatchPlayerLabels: CompetitionLastMatchPlayerLabels | null;
   championDisplayName: string | null;
   roundRobinProgress: CompetitionRoundRobinProgress | null;
+  knockoutBracket: KnockoutBracketProgress | null;
+  bracketFormatKind: string | null;
   scheduleOverview: CompetitionScheduleOverview;
-};
-
-export type CompetitionStepDataView = {
-  competition: CompetitionProgressView;
-  stepKind: "initialized" | "match_played" | "already_finished" | "noop";
+  wireframeObservation: CompetitionWireframeObservation;
 };
 
 export type CompetitionMatchDetailUnavailableReason =
@@ -157,4 +227,9 @@ export type CompetitionMatchDetailView = {
   detailedLogActionCount: number;
   turnOrderLogs: readonly CompetitionTurnOrderLogView[];
   logItems: readonly Record<string, unknown>[];
+};
+
+export type CompetitionStepDataView = {
+  competition: CompetitionProgressView;
+  stepKind: "initialized" | "match_played" | "already_finished" | "noop";
 };

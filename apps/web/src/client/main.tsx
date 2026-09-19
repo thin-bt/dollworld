@@ -28,14 +28,17 @@ function parseClientRoute(pathname: string, search: string): { kind: "dev-viewer
     return { kind: "competition" };
   }
   if (path.startsWith("/competition/matches/")) {
-    const rest = path.slice("/competition/matches/".length);
-    if (rest.length > 0 && !rest.includes("/")) {
+    const matchId = path.slice("/competition/matches/".length);
+    if (matchId.length > 0 && !matchId.includes("/")) {
       try {
-        return { kind: "competition-match", matchId: decodeURIComponent(rest) };
+        return { kind: "competition-match", matchId: decodeURIComponent(matchId) };
       } catch {
-        return { kind: "competition-match", matchId: rest };
+        return { kind: "competition-match", matchId };
       }
     }
+  }
+  if (path === "/ranking") {
+    return { kind: "ranking" };
   }
   if (path === "/people") {
     return { kind: "people" };

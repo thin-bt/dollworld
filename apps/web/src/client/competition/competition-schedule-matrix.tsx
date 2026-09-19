@@ -38,10 +38,11 @@ export type CompetitionScheduleMatrixProps = {
   overview: CompetitionScheduleOverview;
   selectedKey: string | null;
   onSelect: (selectionKey: string) => void;
+  onViewYear?: (worldYear: number) => void;
 };
 
 export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps) {
-  const { overview, selectedKey, onSelect } = props;
+  const { overview, selectedKey, onSelect, onViewYear } = props;
   if (overview.entries.length === 0) {
     return (
       <p className="competition-schedule-empty" data-testid="competition-schedule-empty">
@@ -58,9 +59,53 @@ export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps)
 
   return (
     <section className="competition-schedule" aria-labelledby="competition-schedule-heading">
-      <h3 id="competition-schedule-heading" className="competition-section-heading">
-        {overview.worldYear}年 大会日程
-      </h3>
+      <div className="competition-schedule-header">
+        <h3
+          id="competition-schedule-heading"
+          className="competition-section-heading"
+          data-testid="competition-schedule-heading"
+        >
+          {overview.worldYear}年 大会日程
+        </h3>
+        <div className="competition-schedule-year-nav" data-testid="competition-schedule-year-nav">
+          <button
+            type="button"
+            disabled={overview.prevViewYear === null || onViewYear === undefined}
+            data-testid="competition-schedule-prev-year"
+            onClick={() => {
+              if (overview.prevViewYear !== null && onViewYear !== undefined) {
+                onViewYear(overview.prevViewYear);
+              }
+            }}
+          >
+            前年
+          </button>
+          <button
+            type="button"
+            disabled={overview.isViewingCurrentWorldYear || onViewYear === undefined}
+            data-testid="competition-schedule-current-year"
+            onClick={() => {
+              if (onViewYear !== undefined) {
+                onViewYear(overview.currentWorldYear);
+              }
+            }}
+          >
+            今年
+          </button>
+          <button
+            type="button"
+            disabled={overview.nextViewYear === null || onViewYear === undefined}
+            data-testid="competition-schedule-next-year"
+            onClick={() => {
+              if (overview.nextViewYear !== null && onViewYear !== undefined) {
+                onViewYear(overview.nextViewYear);
+              }
+            }}
+          >
+            翌年
+          </button>
+        </div>
+      </div>
       <p className="competition-schedule-time" data-testid="competition-world-time">
         現在: <strong>{overview.worldTimeLabel}</strong>
       </p>
@@ -98,7 +143,9 @@ export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps)
                     const columnWeek = index + 1;
                     const entry = rowEntries?.get(columnWeek);
                     if (entry === undefined) {
-                      const isNow = columnWeek === overview.currentWeekColumn;
+                      const isNow =
+                        overview.isViewingCurrentWorldYear &&
+                        columnWeek === overview.currentWeekColumn;
                       return (
                         <td
                           key={columnWeek}

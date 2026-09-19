@@ -49,8 +49,9 @@ function TournamentDetailPanel(props: {
   detailPane: "overview" | "participants";
   onDetailPane: (pane: "overview" | "participants") => void;
   onBackToSchedule: () => void;
+  onRankingYearChange?: (worldYear: number) => void;
 }) {
-  const { view, entry, detailPane, onDetailPane, onBackToSchedule } = props;
+  const { view, entry, detailPane, onDetailPane, onBackToSchedule, onRankingYearChange } = props;
   const showProgress =
     entry !== null &&
     (entry.isActiveCompetition || entry.isPlayable) &&
@@ -178,10 +179,40 @@ function TournamentDetailPanel(props: {
                 <tbody>
                   {view.roundRobinProgress.matrix.map((row) => (
                     <tr key={row.personId}>
-                      <td>{row.displayName}</td>
+                      <td>
+                        <a href={`/people/${encodeURIComponent(row.personId)}`}>{row.displayName}</a>
+                      </td>
                       <td>{row.wins}</td>
                       <td>{row.losses}</td>
                       <td>{row.played}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <h4 className="competition-section-heading">対戦マトリクス</h4>
+              <table className="data-table" data-testid="competition-round-robin-pair-matrix">
+                <thead>
+                  <tr>
+                    <th>選手</th>
+                    {view.roundRobinProgress.matrix.map((col) => (
+                      <th key={col.personId}>{col.displayName}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {view.roundRobinProgress.matrix.map((row) => (
+                    <tr key={row.personId}>
+                      <th scope="row">{row.displayName}</th>
+                      {row.cells.map((cell) => (
+                        <td key={cell.opponentPersonId}>
+                          {cell.outcome === "pending"
+                            ? "—"
+                            : cell.outcome === "win"
+                              ? "勝"
+                              : "敗"}
+                        </td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -206,27 +237,90 @@ function TournamentDetailPanel(props: {
                           : null;
                     return (
                       <tr key={row.pairIndex}>
-                        <td>
-                          {row.matchId !== null ? (
-                            <a
-                              href={`/competition/matches/${encodeURIComponent(row.matchId)}`}
-                              data-testid={`competition-history-match-${row.matchId}`}
-                            >
-                              {row.pairIndex + 1}
-                            </a>
-                          ) : (
-                            row.pairIndex + 1
-                          )}
-                        </td>
+                        <td>{row.pairIndex + 1}</td>
                         <td>
                           {row.participantADisplayName} vs {row.participantBDisplayName}
                         </td>
-                        <td>{winnerName === null ? "未消化" : `${winnerName} 勝利`}</td>
+                        <td>
+                          {winnerName === null ? "未消化" : `${winnerName} 勝利`}
+                          {row.matchId !== null ? (
+                            <>
+                              {" · "}
+                              <a
+                                href={`/competition/matches/${encodeURIComponent(row.matchId)}`}
+                                data-testid="competition-history-match-link"
+                              >
+                                試合詳細
+                              </a>
+                            </>
+                          ) : null}
+                        </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+            </section>
+          ) : null}
+
+          {showProgress && (view.knockoutBracket !== null || finished) ? (
+            <section
+              className="competition-knockout"
+              aria-labelledby="competition-knockout-heading"
+              data-testid="competition-knockout-bracket"
+            >
+              <h4 id="competition-knockout-heading" className="competition-section-heading">
+                トーナメント表
+              </h4>
+              {view.knockoutBracket === null ? (
+                <p className="competition-detail-hint">本大会は総当たり形式のためトーナメント表はありません。</p>
+              ) : null}
+              {view.knockoutBracket !== null ? (
+              <p className="competition-detail-meta">
+                {view.knockoutBracket.matchesCompleted}/{view.knockoutBracket.matchesTotal} 試合消化
+              </p>
+              ) : null}
+              {view.knockoutBracket?.rounds.map((round) => (
+                <div key={round.roundIndex} className="competition-knockout-round">
+                  <h5>{round.label}</h5>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>対戦</th>
+                        <th>状態</th>
+                        <th>詳細</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {round.matches.map((match) => (
+                        <tr key={match.slotId}>
+                          <td>
+                            {match.participantADisplayName} vs {match.participantBDisplayName}
+                          </td>
+                          <td>
+                            {match.status === "completed"
+                              ? "終了"
+                              : match.status === "ready"
+                                ? "未消化"
+                                : "待機"}
+                          </td>
+                          <td>
+                            {match.matchId !== null ? (
+                              <a
+                                href={`/competition/matches/${encodeURIComponent(match.matchId)}`}
+                              >
+                                試合詳細
+                              </a>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )) ?? null}
             </section>
           ) : null}
 
@@ -238,13 +332,30 @@ function TournamentDetailPanel(props: {
               <p className="competition-ranking-note">
                 公式戦戦績は本大会の結果を含まない通算記録です。
               </p>
-              <table className="data-table">
+              <div className="competition-ranking-year" data-testid="competition-ranking-year-nav">
+                {view.wireframeObservation.annualRankingYearOptions.map((option) => (
+                  <button
+                    key={option.worldYear}
+                    type="button"
+                    data-testid="competition-ranking-year-option"
+                    data-year={option.worldYear}
+                    aria-pressed={option.worldYear === view.wireframeObservation.selectedRankingYear}
+                    disabled={!option.hasData && option.worldYear !== view.scheduleOverview.currentWorldYear}
+                    onClick={() => onRankingYearChange?.(option.worldYear)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <table className="data-table" data-testid="competition-annual-ranking-table">
                 <thead>
                   <tr>
                     <th>順位</th>
                     <th>選手</th>
                     <th>年間獲得金</th>
                     <th>ランク</th>
+                    <th>出場</th>
+                    <th>優勝</th>
                     <th>公式戦戦績（本大会除く）</th>
                   </tr>
                 </thead>
@@ -252,9 +363,13 @@ function TournamentDetailPanel(props: {
                   {view.rankingRows.map((row) => (
                     <tr key={row.personId}>
                       <td>{row.annualRank}</td>
-                      <td>{row.displayName}</td>
+                      <td>
+                        <a href={`/people/${encodeURIComponent(row.personId)}`}>{row.displayName}</a>
+                      </td>
                       <td>{row.yearlyCumulativeEarningsLabel}</td>
                       <td>{row.currentRankLabel}</td>
+                      <td>{row.tournamentAppearances}</td>
+                      <td>{row.tournamentWins}</td>
                       <td>{row.officialRecordLabel}</td>
                     </tr>
                   ))}
@@ -262,14 +377,130 @@ function TournamentDetailPanel(props: {
               </table>
             </section>
           ) : null}
+
+          {view.wireframeObservation.tournamentSeriesHistory.length > 0 ? (
+            <section
+              className="competition-series-history"
+              data-testid="competition-series-history"
+              aria-labelledby="competition-series-history-heading"
+            >
+              <h4 id="competition-series-history-heading" className="competition-section-heading">
+                大会シリーズ履歴 / 歴代王者
+              </h4>
+              {view.wireframeObservation.tournamentSeriesHistory.map((group) => (
+                <div key={group.seriesKey} className="competition-series-group">
+                  <h5>{group.seriesDisplayLabel}</h5>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>開催</th>
+                        <th>優勝</th>
+                        <th>参加</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.editions.map((edition) => (
+                        <tr key={edition.tournamentId}>
+                          <td>
+                            {edition.worldYear}年 {edition.timingLabel}
+                          </td>
+                          <td>
+                            <a href={`/people/${encodeURIComponent(edition.winnerPersonId)}`}>
+                              {edition.winnerDisplayName}
+                            </a>
+                          </td>
+                          <td>{edition.participantCount}名</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </section>
+          ) : null}
+
+          {finished ? (
+            <section data-testid="competition-promotion-results" aria-labelledby="competition-promotion-heading">
+              <h4 id="competition-promotion-heading" className="competition-section-heading">
+                昇格結果
+              </h4>
+              {view.wireframeObservation.promotionResults.length === 0 ? (
+                <p className="competition-detail-hint">昇格大会の確定結果はまだありません。</p>
+              ) : (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>選手</th>
+                      <th>昇格</th>
+                      <th>大会</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {view.wireframeObservation.promotionResults.map((row) => (
+                      <tr key={row.promotionResultHash}>
+                        <td>
+                          <a href={`/people/${encodeURIComponent(row.personId)}`}>{row.personDisplayName}</a>
+                        </td>
+                        <td>
+                          {row.previousRank} → {row.newRank}
+                        </td>
+                        <td>{row.sourceTournamentId}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </section>
+          ) : null}
+
+          {finished ? (
+            <section data-testid="competition-person-rank-history" aria-labelledby="competition-rank-history-heading">
+              <h4 id="competition-rank-history-heading" className="competition-section-heading">
+                人物ランク履歴
+              </h4>
+              {view.wireframeObservation.personRankHistory.length === 0 ? (
+                <p className="competition-detail-hint">ランク変動履歴はまだありません。</p>
+              ) : (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>選手</th>
+                      <th>変動</th>
+                      <th>時期</th>
+                      <th>由来大会</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {view.wireframeObservation.personRankHistory.map((row, index) => (
+                      <tr key={`${row.personId}-${index}`}>
+                        <td>
+                          <a href={`/people/${encodeURIComponent(row.personId)}`}>{row.personDisplayName}</a>
+                        </td>
+                        <td>
+                          {row.previousRank} → {row.newRank}
+                        </td>
+                        <td>
+                          {row.worldYear}年 {row.timingLabel}
+                        </td>
+                        <td>{row.sourceTournamentId}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </section>
+          ) : null}
         </div>
       ) : (
         <div className="competition-detail-body" data-testid="competition-participants">
           {canShowParticipants ? (
-            <table className="data-table competition-participant-table">
+            <table className="data-table competition-participant-table" data-testid="competition-participant-comparison">
               <thead>
                 <tr>
                   <th>選手</th>
+                  <th>ランク</th>
+                  <th>年齢</th>
+                  <th>公式戦</th>
                   <th>詳細</th>
                 </tr>
               </thead>
@@ -277,6 +508,9 @@ function TournamentDetailPanel(props: {
                 {entry.participantLinks.map((link) => (
                   <tr key={link.personId}>
                     <td>{link.displayName}</td>
+                    <td>{link.currentRankLabel ?? "—"}</td>
+                    <td>{link.ageLabel ?? "—"}</td>
+                    <td>{link.officialRecordLabel ?? "—"}</td>
                     <td>
                       <a href={`/people/${encodeURIComponent(link.personId)}`}>人物詳細</a>
                     </td>
@@ -310,9 +544,11 @@ export function CompetitionPage(props: CompetitionPageProps) {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [detailPane, setDetailPane] = useState<"overview" | "participants">("overview");
   const [scheduleFocus, setScheduleFocus] = useState(true);
+  const [scheduleViewYear, setScheduleViewYear] = useState<number | undefined>(undefined);
+  const [rankingViewYear, setRankingViewYear] = useState<number | undefined>(undefined);
 
   const refresh = useCallback(async () => {
-    setLoadStatus("loading");
+    setLoadStatus((current) => (current === "ready" ? "ready" : "loading"));
     setLoadError(null);
     const fetchOpts = props.fetchImpl !== undefined ? { fetchImpl: props.fetchImpl } : {};
     const session = await loadUiSession(fetchOpts);
@@ -327,7 +563,14 @@ export function CompetitionPage(props: CompetitionPageProps) {
     }
     setCsrfToken(session.csrfToken);
     setUiRevision(session.uiRevision);
-    const page = await loadCompetitionState(fetchOpts);
+    const loadOpts = { ...fetchOpts };
+    if (scheduleViewYear !== undefined) {
+      Object.assign(loadOpts, { scheduleYear: scheduleViewYear });
+    }
+    if (rankingViewYear !== undefined) {
+      Object.assign(loadOpts, { rankingYear: rankingViewYear });
+    }
+    const page = await loadCompetitionState(loadOpts);
     if (page.kind === "failure") {
       setLoadStatus("error");
       setLoadError(page.message || "大会情報の読み込みに失敗しました。");
@@ -337,7 +580,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
     setSelectedKey((prev) => prev ?? defaultSelectedKey(page.data));
     setUiRevision(page.uiRevision);
     setLoadStatus("ready");
-  }, [props.fetchImpl]);
+  }, [props.fetchImpl, rankingViewYear, scheduleViewYear]);
 
   useEffect(() => {
     void refresh();
@@ -437,6 +680,9 @@ export function CompetitionPage(props: CompetitionPageProps) {
               setSelectedKey(key);
               setDetailPane("overview");
             }}
+            onViewYear={(year) => {
+              setScheduleViewYear(year);
+            }}
           />
         ) : null}
 
@@ -446,6 +692,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
           detailPane={detailPane}
           onDetailPane={setDetailPane}
           onBackToSchedule={() => setScheduleFocus(true)}
+          onRankingYearChange={(year) => setRankingViewYear(year)}
         />
       </div>
 

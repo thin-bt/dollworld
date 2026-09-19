@@ -22,6 +22,13 @@ import { projectRoundRobinProgress } from "./competition-round-robin-progress.js
 import { canonicalStructuralSlotKey } from "@shared-world/simulation-core";
 import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
 import { COMPETITION_STORE_SCHEMA_VERSION } from "./competition-store.js";
+import { buildAnnualSchedule } from "./competition-schedule-overview.js";
+import {
+  appendTournamentHistorySummary,
+  buildTournamentHistorySummaryOnFinalize,
+  findScheduleEntryForTournament,
+  upsertAnnualRankingHistoryForFinalize,
+} from "./competition-wireframe-observation.js";
 
 const UI009_STANDINGS_TIE_BREAK_POLICY = {
   policyVersion: "ui009-standings-tie-break-0.1.0",
@@ -284,6 +291,30 @@ export function finalizeRoundRobinCompetitionStore(
     >;
   }
 
+  const winnerPersonId =
+    finalResult.winnerPersonId ?? finalResult.placements[0]?.personId ?? placements[0]!.personId;
+  const scheduleEntry = findScheduleEntryForTournament(
+    state.tournamentId,
+    state.worldYear,
+    buildAnnualSchedule,
+  );
+  const historySummary = buildTournamentHistorySummaryOnFinalize({
+    state,
+    winnerPersonId,
+    participantCount: placements.length,
+    scheduleEntry,
+  });
+  const priorSummaries = state.tournamentHistorySummaries ?? [];
+  const rankingHistoryStore = upsertAnnualRankingHistoryForFinalize(
+    (state.annualRankingHistoryStore ?? { entries: [] }) as import("@shared-world/simulation-core").AnnualRankingHistoryStore,
+    {
+      worldYear: state.worldYear,
+      ledger,
+      competitiveRecords: recordMap,
+    },
+    provider,
+  );
+
   const nextState: CompetitionPersistedState = {
     ...state,
     phase: "finished",
@@ -293,6 +324,13 @@ export function finalizeRoundRobinCompetitionStore(
     rankingDisplayFacts: ranking.value.map(
       (row) => JSON.parse(toCanonicalJson(row)) as Record<string, unknown>,
     ),
+    tournamentHistorySummaries: appendTournamentHistorySummary(priorSummaries, historySummary),
+    annualRankingHistoryStore: JSON.parse(toCanonicalJson(rankingHistoryStore)) as Record<
+      string,
+      unknown
+    >,
+    promotionResultSummaries: state.promotionResultSummaries ?? [],
+    personRankHistoryBundles: state.personRankHistoryBundles ?? [],
   };
 
   return {

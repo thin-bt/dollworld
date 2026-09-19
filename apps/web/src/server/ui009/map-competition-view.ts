@@ -15,7 +15,16 @@ import {
   type RoundRobinMatchHistoryRow,
   type RoundRobinParticipantMatrixRow,
 } from "./competition-round-robin-progress.js";
-import { buildCompetitionScheduleOverview } from "./competition-schedule-overview.js";
+import { buildAnnualSchedule, buildCompetitionScheduleOverview } from "./competition-schedule-overview.js";
+import {
+  annualRankingHistoryStoreFromState,
+  buildAnnualRankingYearOptions,
+  groupTournamentSeriesHistory,
+  personRankHistoryEntriesFromState,
+  promotionSummariesFromState,
+  tournamentHistorySummariesFromState,
+} from "./competition-wireframe-observation.js";
+import { projectKnockoutBracketProgressView } from "./competition-knockout-bracket-view.js";
 import {
   formatYenForPlayer,
   officialRecordPlayerLabel,
@@ -64,9 +73,88 @@ function mapRankingRow(
     currentRank: facts.currentRank,
     currentRankLabel: rankLabel,
     tournamentWins: facts.tournamentWins,
+    tournamentAppearances: facts.tournamentAppearances,
     officialWins: facts.officialWins,
     officialLosses: facts.officialLosses,
     officialRecordLabel: officialRecordPlayerLabel(facts.officialWins, facts.officialLosses),
+  };
+}
+
+function emptyScheduleOverview(): CompetitionProgressView["scheduleOverview"] {
+  return {
+    worldYear: 0,
+    currentWorldYear: 0,
+    isViewingCurrentWorldYear: true,
+    prevViewYear: null,
+    nextViewYear: null,
+    worldTimeLabel: "—",
+    currentAbsoluteWeek: 0,
+    currentWeekColumn: 0,
+    matrixRowOrder: [],
+    entries: [],
+    playableSelectionKey: null,
+    activeSelectionKey: null,
+  };
+}
+
+function rankingRowsForSelectedYear(input: {
+  state: CompetitionPersistedState | null;
+  rankingFacts: readonly AnnualRankingDisplayFacts[];
+  selectedRankingYear: number;
+  currentWorldYear: number;
+}): CompetitionProgressView["rankingRows"] {
+  const { state, rankingFacts, selectedRankingYear, currentWorldYear } = input;
+  if (state === null || selectedRankingYear === currentWorldYear) {
+    if (state === null) {
+      return [];
+    }
+    return rankingFacts.map((row) => mapRankingRow(row, state));
+  }
+  const historyStore = annualRankingHistoryStoreFromState(state);
+  const entry = historyStore.entries.find((row) => row.worldYear === selectedRankingYear);
+  if (entry === undefined) {
+    return [];
+  }
+  return entry.rows.map((row: (typeof entry.rows)[number]) => {
+    const rankLabel = rankBandPlayerLabel(row.currentRank) ?? row.currentRank;
+    return {
+      personId: row.personId,
+      displayName: displayNameInIsolatedState(state, row.personId),
+      displayOrder: row.displayOrder,
+      annualRank: row.annualRank,
+      yearlyCumulativeEarnings: row.yearlyCumulativeEarnings,
+      yearlyCumulativeEarningsLabel: formatYenForPlayer(row.yearlyCumulativeEarnings),
+      currentRank: row.currentRank,
+      currentRankLabel: rankLabel,
+      tournamentWins: row.tournamentWins,
+      tournamentAppearances: row.tournamentAppearances,
+      officialWins: row.officialWins,
+      officialLosses: row.officialLosses,
+      officialRecordLabel: officialRecordPlayerLabel(row.officialWins, row.officialLosses),
+    };
+  });
+}
+
+function buildWireframeObservation(input: {
+  store: CompetitionSessionStore;
+  participantIds: readonly string[];
+  rankingFacts: readonly AnnualRankingDisplayFacts[];
+  currentWorldYear: number;
+  selectedRankingYear: number;
+}): CompetitionProgressView["wireframeObservation"] {
+  const state = input.store.state;
+  const summaries = tournamentHistorySummariesFromState(state);
+  const historyStore = annualRankingHistoryStoreFromState(state);
+  return {
+    tournamentSeriesHistory: groupTournamentSeriesHistory(summaries),
+    promotionResults: promotionSummariesFromState(state),
+    personRankHistory: personRankHistoryEntriesFromState(state, input.participantIds),
+    annualRankingYearOptions: buildAnnualRankingYearOptions(
+      historyStore,
+      input.currentWorldYear,
+      input.rankingFacts,
+    ),
+    selectedRankingYear: input.selectedRankingYear,
   };
 }
 
@@ -99,20 +187,16 @@ function plannedPreviewParticipantIds(worldSession: Sprint1RunSession): readonly
 function scheduleOverviewForSession(
   worldSession: Sprint1RunSession | null,
   store: CompetitionSessionStore,
+  options?: { viewWorldYear?: number },
 ): CompetitionProgressView["scheduleOverview"] {
   if (worldSession === null) {
-    return {
-      worldYear: 0,
-      worldTimeLabel: "—",
-      currentAbsoluteWeek: 0,
-      currentWeekColumn: 0,
-      matrixRowOrder: [],
-      entries: [],
-      playableSelectionKey: null,
-      activeSelectionKey: null,
-    };
+    return emptyScheduleOverview();
   }
   const persisted = store.state;
+  const rosterSession =
+    persisted !== null
+      ? (persisted.isolatedSession as unknown as Sprint1RunSession)
+      : worldSession;
   const playableIds = persisted === null ? plannedPreviewParticipantIds(worldSession) : [];
   const playableLinks = playableIds.map((personId) => ({
     personId,
@@ -122,12 +206,35 @@ function scheduleOverviewForSession(
     persisted === null
       ? []
       : participantLinksFromIds(persisted, activeParticipantIds(persisted));
+  const scheduleOptions: { viewWorldYear?: number; rosterSession: Sprint1RunSession } = {
+    rosterSession,
+  };
+  if (options?.viewWorldYear !== undefined) {
+    scheduleOptions.viewWorldYear = options.viewWorldYear;
+  }
   return buildCompetitionScheduleOverview(
     worldSession,
     persisted,
     playableLinks,
     activeLinks,
+    scheduleOptions,
   );
+}
+
+function knockoutBracketFromState(
+  state: CompetitionPersistedState,
+): ReturnType<typeof projectKnockoutBracketProgressView> {
+  try {
+    return projectKnockoutBracketProgressView({
+      bracketDefinition: state.bracketDefinition as unknown as TournamentBracketDefinition,
+      bracketRuntimeState: state.bracketRuntimeState as unknown as import("@shared-world/simulation-core").BracketRuntimeSlotState,
+      storedRecords: state.storedRecords as unknown as readonly StoredBattleResultRecord[],
+      slotBindings: (state.slotBindings ?? []) as unknown as import("@shared-world/simulation-core").TournamentSlotMatchBinding[],
+      displayNameForPersonId: (personId) => displayNameInIsolatedState(state, personId),
+    });
+  } catch {
+    return null;
+  }
 }
 
 function roundRobinProgressFromState(
@@ -237,11 +344,22 @@ function effectiveLifecyclePhase(
   return "awaiting_match";
 }
 
+export type MapCompetitionProgressOptions = {
+  scheduleViewYear?: number;
+  rankingViewYear?: number;
+};
+
 export function mapCompetitionProgressView(
   store: CompetitionSessionStore,
   rankingFacts: readonly AnnualRankingDisplayFacts[],
   worldSession: Sprint1RunSession | null,
+  options?: MapCompetitionProgressOptions,
 ): CompetitionProgressView {
+  const currentWorldYear =
+    worldSession?.runtimeState.worldState.worldDate.year ??
+    store.state?.worldYear ??
+    new Date().getFullYear();
+  const selectedRankingYear = options?.rankingViewYear ?? currentWorldYear;
   const state = store.state;
   if (state === null) {
     const preStartPreview =
@@ -271,12 +389,26 @@ export function mapCompetitionProgressView(
       tournamentKindLabel: preStartPreview?.tournamentKindLabel ?? null,
       targetRankLabel: preStartPreview?.targetRankLabel ?? null,
       roundRobinProgress: null,
-      scheduleOverview: scheduleOverviewForSession(worldSession, store),
+      knockoutBracket: null,
+      bracketFormatKind: null,
+      scheduleOverview: scheduleOverviewForSession(
+        worldSession,
+        store,
+        options?.scheduleViewYear !== undefined ? { viewWorldYear: options.scheduleViewYear } : undefined,
+      ),
+      wireframeObservation: buildWireframeObservation({
+        store,
+        participantIds: plannedIds,
+        rankingFacts,
+        currentWorldYear,
+        selectedRankingYear,
+      }),
     };
   }
 
   const finalResult = state.finalResult as { winnerPersonId?: string; resultHash?: string } | null;
   const roundRobinProgress = roundRobinProgressFromState(state);
+  const knockoutBracket = knockoutBracketFromState(state);
   const lifecyclePhase = effectiveLifecyclePhase(state, roundRobinProgress);
   const presentAsFinished = lifecyclePhase === "finished";
   const participantIds = roundRobinProgress?.participantIds ?? [state.participantAId, state.participantBId];
@@ -314,7 +446,12 @@ export function mapCompetitionProgressView(
             resultHash: finalResult.resultHash,
           }
         : null,
-    rankingRows: rankingFacts.map((row) => mapRankingRow(row, state)),
+    rankingRows: rankingRowsForSelectedYear({
+      state,
+      rankingFacts,
+      selectedRankingYear,
+      currentWorldYear,
+    }),
     tournamentKindLabel: kindLabel,
     targetRankLabel: rankLabel,
     participantDisplayNames,
@@ -331,7 +468,20 @@ export function mapCompetitionProgressView(
         ? displayNameInIsolatedState(state, finalResult.winnerPersonId)
         : null,
     roundRobinProgress,
-    scheduleOverview: scheduleOverviewForSession(worldSession, store),
+    knockoutBracket,
+    bracketFormatKind: bracketFormatKind(state),
+    scheduleOverview: scheduleOverviewForSession(
+      worldSession,
+      store,
+      options?.scheduleViewYear !== undefined ? { viewWorldYear: options.scheduleViewYear } : undefined,
+    ),
+    wireframeObservation: buildWireframeObservation({
+      store,
+      participantIds,
+      rankingFacts,
+      currentWorldYear,
+      selectedRankingYear,
+    }),
   };
 }
 
@@ -340,12 +490,15 @@ export function buildStepDataView(
   rankingFacts: readonly AnnualRankingDisplayFacts[],
   stepKind: CompetitionStepDataView["stepKind"],
   worldSession: Sprint1RunSession | null,
+  options?: MapCompetitionProgressOptions,
 ): CompetitionStepDataView {
   return {
-    competition: mapCompetitionProgressView(store, rankingFacts, worldSession),
+    competition: mapCompetitionProgressView(store, rankingFacts, worldSession, options),
     stepKind,
   };
 }
+
+export { buildAnnualSchedule };
 
 export function rankingFactsFromState(state: CompetitionPersistedState | null): readonly AnnualRankingDisplayFacts[] {
   if (state === null) {
