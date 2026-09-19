@@ -5,21 +5,19 @@ sprint: Sprint2
 owner: Role1
 priority: IMMEDIATE
 control-authority: GitHub
-updatedAt: 2026-09-19T17:02:00+09:00
-recovery: PM_FAILOVER_RESUME_UNFINISHED_ROLE1_1702
+updatedAt: 2026-09-19T17:04:00+09:00
+recovery: PM_FAILOVER_SCOPE_AUTHORITY_CORRECTION_ROLE1
 
-## Current authority
-The separate GitHub pickup repair is already READY and must not be repeated. Resume the unfinished completion-gap audit now. Do not wait for B2.
+## Authority correction
+The completion authority is the user's actual UI specification in `docs/SPEC.md` §6 and 第2段階, plus `_handoff-artifacts/protocol/SPRINT2_SCOPE_AUTHORITY_CORRECTION.md`.
+Do NOT use the narrower UI009/F-slot browser set, source-evidence manifest, or existing tests to downgrade defined UI requirements to FUTURE_RESERVE.
 
 ## Required work
-1. Fresh-read GitHub canonical protocol, current master, current A/B2 state, accepted Sprint2 authority, and all current Sprint2 results.
-2. Build the complete accepted Sprint2 completion checklist and disposition every item.
-3. Identify any missing acceptance evidence, untested transitions, UI/state/navigation gaps, stale contradictory terminal claims, or unpublished required evidence.
-4. Cross-check Role2/Role3 scopes and avoid duplicate work.
-5. For every unique non-conflicting executable gap, DIRECT-DISPATCH it to a free Cursor lane in the same run. Do not merely report it.
-6. If the only remaining gate is B2 browser acceptance, prove that from current GitHub evidence and identify any independent work that can still proceed while B2 runs.
-7. No Sprint3/4.
-
-## Output
-Publish `_handoff-artifacts/results/SPRINT2-COMPLETION-GAP-AUDIT-ROLE1-20260918/result.md`.
-READY only when the checklist is fully dispositioned and every executable non-conflicting gap is dispatched or explicitly proven dependent.
+1. Build the full Sprint2 spec-to-implementation completion checklist from the corrected authority.
+2. Cross-check every required UI, route, state, navigation, data projection, and browser acceptance.
+3. Treat missing ranking, tournament/bracket, history->battle-log, lineage/teacher-lineage/champions/history/search/follow surfaces as real gaps when required by SPEC and not implemented.
+4. For every unique non-conflicting executable gap, DIRECT-DISPATCH it immediately; do not merely report.
+5. Cross-check A/Role2/Role3 to avoid duplicate edits.
+6. No Sprint3/4.
+7. Publish `_handoff-artifacts/results/SPRINT2-COMPLETION-GAP-AUDIT-ROLE1-20260918/result.md`.
+READY only when all corrected-scope items are implemented/accepted or explicitly deferred by user-approved spec change.
