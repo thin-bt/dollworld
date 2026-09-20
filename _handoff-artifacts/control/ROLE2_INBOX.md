@@ -3,7 +3,7 @@ state: PREPARED
 lane: ROLE2
 task-key: SPRINT2-BROWSER-HARNESS-CONTRACT-AUDIT-ROLE2-20260920-R1
 mode: SPRINT2_BROWSER_HARNESS_CONTRACT_AUDIT
-updatedAt: 2026-09-20T08:00:31+09:00
+updatedAt: 2026-09-20T14:00:13+09:00
 sprint: Sprint2
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT2-BROWSER-HARNESS-CONTRACT-AUDIT-ROLE2-20260920-R1/instruction.md
@@ -15,5 +15,6 @@ pickup-requirements:
 - claim ACTIVE before work
 - stay within declared non-overlap scope
 - publish terminal result to GitHub canonical result path
-- do not start Sprint3/4
+- do not start Sprint4
 - do not treat Drive/local mirror absence as terminal
+- pickup-recovery: canonical PREPARED remains unclaimed; immediate re-dispatch at 2026-09-20T14:00:13+09:00
