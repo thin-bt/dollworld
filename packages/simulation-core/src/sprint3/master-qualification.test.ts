@@ -77,7 +77,6 @@ describe("S03-002 master qualification", () => {
       config.value,
       retiredRecord({
         careerStatus: "active_competitor",
-        retirementRank: undefined,
         highestRank: "S",
       }),
     );
@@ -98,7 +97,7 @@ describe("S03-002 master qualification", () => {
     for (const careerStatus of ["child", "trainee"] as const) {
       const outcome = evaluateMasterQualificationEligibility(
         config.value,
-        retiredRecord({ careerStatus, retirementRank: undefined }),
+        retiredRecord({ careerStatus }),
       );
       expect(outcome.ok).toBe(true);
       if (!outcome.ok) {
@@ -180,6 +179,12 @@ describe("S03-002 master qualification", () => {
   it("MQ-010 rejects tampering sprint3-balance-0.2.0 registered body", () => {
     validateSprint3Config(createSprint3Balance020ConfigInput(), provider);
     const tampered = createSprint3Balance020ConfigInput();
+    if (
+      tampered.masterQualification.evaluationPolicyVersion !==
+      "master-qualification-rank-and-records-0.1.0"
+    ) {
+      throw new Error("unexpected policy fixture");
+    }
     tampered.masterQualification.eligibilityThresholds.minimumRetirementRank = "B";
     expect(validateNormalizedSprint3Config(tampered).ok).toBe(false);
   });

@@ -3,9 +3,7 @@ import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixt
 import { asMatchId, asPersonId, asTournamentId } from "../ids.js";
 import { DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
 import { createDefaultSprint2ConfigInput } from "./sprint2-config-defaults.js";
-import {
-  commitSchedulePlan,
-} from "./tournament-schedule-state.js";
+import { commitSchedulePlan } from "./tournament-schedule-state.js";
 import { buildTournamentScheduleReadModel } from "./tournament-schedule-read-model.js";
 import { createInitialTournamentIdGeneratorState } from "./tournament-id-registry.js";
 import type { EntrantCandidateFacts, Sprint2Config } from "./types.js";
@@ -69,7 +67,9 @@ function commitTinySchedule() {
   return { schedule: buildTournamentScheduleReadModel(committed.scheduleState), config };
 }
 
-function basePolicy(overrides?: Partial<InjectedStructuralPolicyInput>): InjectedStructuralPolicyInput {
+function basePolicy(
+  overrides?: Partial<InjectedStructuralPolicyInput>,
+): InjectedStructuralPolicyInput {
   return {
     formatSelection: {
       formatKind: "round_robin",
@@ -95,7 +95,10 @@ function buildParticipantFixture(personIds: string[] = ["person_a", "person_b", 
   const tournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F")!;
   const policy = createNeutralEntryChoicePolicy(config);
   const facts = new Map(
-    personIds.map((id) => [asPersonId(id), activeCompetitor({ personId: asPersonId(id), currentRank: "F" })]),
+    personIds.map((id) => [
+      asPersonId(id),
+      activeCompetitor({ personId: asPersonId(id), currentRank: "F" }),
+    ]),
   );
   const list = buildPlannedParticipantList({
     tournamentId: tournament.tournamentId,
@@ -164,7 +167,6 @@ describe("S02-004 policy-injected structural framework", () => {
           configVersion: "format-selection-config-a",
         },
       },
-      knockoutSeedByeMapping: undefined,
     });
     const knockoutMissingB = buildStructuralBracketDefinition(
       {
@@ -294,8 +296,16 @@ describe("S02-004 policy-injected structural framework", () => {
 
   it("BRK-006 changes canonical identity when participant ordering or policy identity is material", () => {
     const fixture = buildParticipantFixture(["person_a", "person_b", "person_c"]);
-    const orderingA = [asPersonId("person_a"), asPersonId("person_b"), asPersonId("person_c")] as const;
-    const orderingB = [asPersonId("person_c"), asPersonId("person_b"), asPersonId("person_a")] as const;
+    const orderingA = [
+      asPersonId("person_a"),
+      asPersonId("person_b"),
+      asPersonId("person_c"),
+    ] as const;
+    const orderingB = [
+      asPersonId("person_c"),
+      asPersonId("person_b"),
+      asPersonId("person_a"),
+    ] as const;
     const hashA = computeParticipantListHash(
       {
         tournamentId: fixture.tournament.tournamentId,
@@ -492,7 +502,12 @@ describe("S02-004 policy-injected structural framework", () => {
               configVersion: "knockout-seed-bye-config-a",
             },
             slots: [
-              { slotId: "s1", roundIndex: 0, slotIndex: 0, participantPersonId: asPersonId("person_a") },
+              {
+                slotId: "s1",
+                roundIndex: 0,
+                slotIndex: 0,
+                participantPersonId: asPersonId("person_a"),
+              },
             ],
           },
         }),
@@ -555,7 +570,9 @@ describe("S02-004 policy-injected structural framework", () => {
     if (!valid.ok) {
       return;
     }
-    expect(valid.value.definition.knockoutSlots.some((slot) => slot.isByeAdvancement === true)).toBe(true);
+    expect(
+      valid.value.definition.knockoutSlots.some((slot) => slot.isByeAdvancement === true),
+    ).toBe(true);
 
     const cyclic = buildStructuralBracketDefinition(
       {

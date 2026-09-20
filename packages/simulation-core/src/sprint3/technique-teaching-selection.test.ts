@@ -9,6 +9,7 @@ import {
   type TeacherCanTeachContext,
   type TechniqueDefinition,
 } from "../index.js";
+import { asTechniqueId } from "../ids.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import { computeWeeklyTeachCompositeScore } from "./evaluate-explicit-weekly-teach.js";
 import {
@@ -27,7 +28,7 @@ import { validateSprint3Config } from "./validate-sprint3-config.js";
 const provider = createNodeSha256Provider();
 
 function statTriple(surfaceValue: number): StatValueTriple {
-  return { surfaceValue, geneticValue: surfaceValue, growthPotential: surfaceValue };
+  return { surfaceValue, expressedGeneticValue: surfaceValue, latentGeneticValue: surfaceValue };
 }
 
 function buildAbilities(overrides: Partial<Record<AbilityKey, number>> = {}): AbilityScores {
@@ -59,7 +60,7 @@ function techniqueState(
   overrides: Partial<PersonTechniqueState> = {},
 ): PersonTechniqueState {
   return {
-    techniqueId,
+    techniqueId: asTechniqueId(techniqueId),
     acquiredAbsoluteWeek: 1,
     masteryHundredths: 8000,
     learningProgressTenths: 0,

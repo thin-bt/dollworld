@@ -60,7 +60,9 @@ describe("S02-002 TournamentId allocator", () => {
       return;
     }
     const first = reserveNextTournamentId(initial.value);
-    const second = reserveNextTournamentId(first.kind === "success" ? first.nextState : initial.value);
+    const second = reserveNextTournamentId(
+      first.kind === "success" ? first.nextState : initial.value,
+    );
     expect(first.kind).toBe("success");
     expect(second.kind).toBe("success");
     if (first.kind !== "success" || second.kind !== "success") {
@@ -106,8 +108,8 @@ describe("S02-002 schedule plan", () => {
     expect(planA.value).toEqual(planB.value);
     expect(planA.value.length).toBeGreaterThan(0);
     for (let index = 1; index < planA.value.length; index += 1) {
-      const prev = planA.value[index - 1];
-      const current = planA.value[index];
+      const prev = planA.value[index - 1]!;
+      const current = planA.value[index]!;
       if (prev.monthOffset === current.monthOffset) {
         expect(prev.weekOfMonth <= current.weekOfMonth).toBe(true);
       } else {
@@ -179,12 +181,7 @@ describe("S02-002 schedule commit and rollback", () => {
     if (!initial.ok) {
       return;
     }
-    const committed = commitSchedulePlan(
-      config,
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-      1,
-      initial.value,
-    );
+    const committed = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
     expect(committed.kind).toBe("success");
     if (committed.kind !== "success") {
       return;
@@ -212,12 +209,7 @@ describe("S02-002 schedule commit and rollback", () => {
     if (!initial.ok) {
       return;
     }
-    const committed = commitSchedulePlan(
-      config,
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-      1,
-      initial.value,
-    );
+    const committed = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
     expect(committed.kind).toBe("failure");
     if (committed.kind !== "failure") {
       return;
@@ -246,12 +238,7 @@ describe("S02-002 postpone merge cancel", () => {
     if (!initial.ok) {
       return;
     }
-    const committed = commitSchedulePlan(
-      config,
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-      1,
-      initial.value,
-    );
+    const committed = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
     expect(committed.kind).toBe("success");
     if (committed.kind !== "success") {
       return;
@@ -260,8 +247,8 @@ describe("S02-002 postpone merge cancel", () => {
       (entry) => entry.kind === "normal" && entry.targetRank === "F",
     );
     expect(fSlots.length).toBe(2);
-    const source = fSlots[0];
-    const target = fSlots[1];
+    const source = fSlots[0]!;
+    const target = fSlots[1]!;
     const transitioned = applyFailureToStart(committed.scheduleState, source.tournamentId);
     expect(transitioned.ok).toBe(true);
     if (!transitioned.ok) {
@@ -297,12 +284,7 @@ describe("S02-002 postpone merge cancel", () => {
     if (!initial.ok) {
       return;
     }
-    const committed = commitSchedulePlan(
-      config,
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-      1,
-      initial.value,
-    );
+    const committed = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
     expect(committed.kind).toBe("success");
     if (committed.kind !== "success") {
       return;
@@ -344,12 +326,7 @@ describe("S02-002 postpone merge cancel", () => {
     if (!initial.ok) {
       return;
     }
-    const committed = commitSchedulePlan(
-      config,
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-      1,
-      initial.value,
-    );
+    const committed = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
     expect(committed.kind).toBe("success");
     if (committed.kind !== "success") {
       return;
@@ -357,14 +334,15 @@ describe("S02-002 postpone merge cancel", () => {
     const fSlots = committed.scheduleState.entries.filter(
       (entry) => entry.kind === "normal" && entry.targetRank === "F",
     );
-    const merged = applyFailureToStart(committed.scheduleState, fSlots[0].tournamentId);
+    const firstFSlot = fSlots[0]!;
+    const merged = applyFailureToStart(committed.scheduleState, firstFSlot.tournamentId);
     expect(merged.ok).toBe(true);
     if (!merged.ok) {
       return;
     }
-    const second = applyFailureToStart(merged.value, fSlots[0].tournamentId);
+    const second = applyFailureToStart(merged.value, firstFSlot.tournamentId);
     expect(second.ok).toBe(false);
-    expect(rejectInvalidScheduleTransition(merged.value, fSlots[0].tournamentId).ok).toBe(false);
+    expect(rejectInvalidScheduleTransition(merged.value, firstFSlot.tournamentId).ok).toBe(false);
   });
 
   it("does not carry unresolved tournaments across world years in schedule generation", () => {
@@ -374,12 +352,7 @@ describe("S02-002 postpone merge cancel", () => {
     if (!initial.ok) {
       return;
     }
-    const year1 = commitSchedulePlan(
-      config,
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-      1,
-      initial.value,
-    );
+    const year1 = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
     expect(year1.kind).toBe("success");
     if (year1.kind !== "success") {
       return;
@@ -396,8 +369,8 @@ describe("S02-002 postpone merge cancel", () => {
     }
     expect(year2.scheduleState.worldYear).toBe(2);
     expect(year2.scheduleState.entries.every((entry) => entry.worldYear === 2)).toBe(true);
-    expect(year2.scheduleState.entries[0].tournamentId).not.toBe(
-      year1.scheduleState.entries[0].tournamentId,
+    expect(year2.scheduleState.entries[0]!.tournamentId).not.toBe(
+      year1.scheduleState.entries[0]!.tournamentId,
     );
   });
 });
@@ -410,12 +383,7 @@ describe("S02-002 schedule read-model", () => {
     if (!initial.ok) {
       return;
     }
-    const committed = commitSchedulePlan(
-      config,
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-      1,
-      initial.value,
-    );
+    const committed = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
     expect(committed.kind).toBe("success");
     if (committed.kind !== "success") {
       return;
@@ -423,13 +391,14 @@ describe("S02-002 schedule read-model", () => {
     const readModel = buildTournamentScheduleReadModel(committed.scheduleState);
     expect(readModel.length).toBe(committed.scheduleState.entries.length);
     for (let index = 0; index < readModel.length; index += 1) {
-      expect(readModel[index].scheduleOrdinal).toBe(index);
-      expect(readModel[index].tournamentId).toMatch(/^tournament_[0-9]{12}$/);
-      expect(readModel[index].worldYear).toBe(1);
-      expect(readModel[index].month).toBeGreaterThanOrEqual(1);
-      expect(readModel[index].weekOfMonth).toBeGreaterThanOrEqual(1);
-      expect(readModel[index].lifecycleState).toBe("scheduled");
-      expect(readModel[index].championshipCycleClassification).toBe("championship_year");
+      const entry = readModel[index]!;
+      expect(entry.scheduleOrdinal).toBe(index);
+      expect(entry.tournamentId).toMatch(/^tournament_[0-9]{12}$/);
+      expect(entry.worldYear).toBe(1);
+      expect(entry.month).toBeGreaterThanOrEqual(1);
+      expect(entry.weekOfMonth).toBeGreaterThanOrEqual(1);
+      expect(entry.lifecycleState).toBe("scheduled");
+      expect(entry.championshipCycleClassification).toBe("championship_year");
     }
   });
 

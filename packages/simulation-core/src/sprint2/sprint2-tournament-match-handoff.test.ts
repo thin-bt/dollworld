@@ -34,9 +34,7 @@ import { withDefaultSprint2BindingsForRunSessionInput } from "../test-fixtures/s
 import { asMatchId, asPersonId } from "../ids.js";
 import { reserveNextMatchId } from "../sprint1/match-id-generator.js";
 import { createDefaultSprint2ConfigInput } from "./sprint2-config-defaults.js";
-import {
-  commitSchedulePlan,
-} from "./tournament-schedule-state.js";
+import { commitSchedulePlan } from "./tournament-schedule-state.js";
 import { buildTournamentScheduleReadModel } from "./tournament-schedule-read-model.js";
 import { createInitialTournamentIdGeneratorState } from "./tournament-id-registry.js";
 import type { EntrantCandidateFacts, Sprint2Config } from "./types.js";
@@ -47,13 +45,9 @@ import {
   createNeutralEntryChoicePolicy,
 } from "./tournament-entry-selection.js";
 import type { InjectedStructuralPolicyInput } from "./tournament-bracket-policy.js";
-import {
-  buildStructuralBracketDefinition,
-} from "./tournament-bracket-definition.js";
-import {
-  buildTournamentMatchPlan,
-  canonicalStructuralSlotKey,
-} from "./tournament-match-plan.js";
+import { buildStructuralBracketDefinition } from "./tournament-bracket-definition.js";
+import { buildTournamentMatchPlan, canonicalStructuralSlotKey } from "./tournament-match-plan.js";
+import { defaultTournamentBattleActionsSource } from "./tournament-battle-atomic.fixture.js";
 import { executeTournamentBattleHandoff } from "./tournament-battle-handoff.js";
 
 const provider = createNodeSha256Provider();
@@ -111,7 +105,9 @@ function commitTinySchedule() {
   return { schedule: buildTournamentScheduleReadModel(committed.scheduleState), config };
 }
 
-function basePolicy(overrides?: Partial<InjectedStructuralPolicyInput>): InjectedStructuralPolicyInput {
+function basePolicy(
+  overrides?: Partial<InjectedStructuralPolicyInput>,
+): InjectedStructuralPolicyInput {
   return {
     formatSelection: {
       formatKind: "round_robin",
@@ -137,7 +133,10 @@ function buildParticipantFixture(personIds: string[] = ["person_a", "person_b", 
   const tournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F")!;
   const policy = createNeutralEntryChoicePolicy(config);
   const facts = new Map(
-    personIds.map((id) => [asPersonId(id), activeCompetitor({ personId: asPersonId(id), currentRank: "F" })]),
+    personIds.map((id) => [
+      asPersonId(id),
+      activeCompetitor({ personId: asPersonId(id), currentRank: "F" }),
+    ]),
   );
   const list = buildPlannedParticipantList({
     tournamentId: tournament.tournamentId,
@@ -879,13 +878,15 @@ describe("S02-005 tournament match plan / battle handoff", () => {
         session,
         participantAActionSourceIdentity: actionIdentity,
         participantBActionSourceIdentity: actionIdentity,
-        participantAActionsSource: { identity: actionIdentity },
-        participantBActionsSource: { identity: actionIdentity },
+        participantAActionsSource: defaultTournamentBattleActionsSource(session),
+        participantBActionsSource: defaultTournamentBattleActionsSource(session),
         slotBindings: [],
       },
       provider,
     );
-    expect(handoff.kind === "pre_start_failure" || handoff.kind === "plan_validation_failure").toBe(true);
+    expect(handoff.kind === "pre_start_failure" || handoff.kind === "plan_validation_failure").toBe(
+      true,
+    );
     expect(toCanonicalJson(session.runtimeState.matchIdGeneratorState)).toBe(generatorBefore);
   });
 
@@ -920,8 +921,8 @@ describe("S02-005 tournament match plan / battle handoff", () => {
         session,
         participantAActionSourceIdentity: actionIdentity,
         participantBActionSourceIdentity: actionIdentity,
-        participantAActionsSource: { identity: actionIdentity },
-        participantBActionsSource: { identity: actionIdentity },
+        participantAActionsSource: defaultTournamentBattleActionsSource(session),
+        participantBActionsSource: defaultTournamentBattleActionsSource(session),
         slotBindings: [],
       },
       provider,
@@ -933,19 +934,25 @@ describe("S02-005 tournament match plan / battle handoff", () => {
       if (handoff.kind === "pre_start_failure") {
         throw new Error(JSON.stringify(handoff.validation.issues));
       }
-      throw new Error(`unexpected handoff kind: ${handoff.kind}`);
+      throw new Error(`unexpected handoff kind: ${(handoff as { kind: string }).kind}`);
     }
     expect(handoff.kind).toBe("completed");
     expect(handoff.result.matchId).toBe(plan.reservedMatchId);
     expect(handoff.result.tournamentId).toBe(bracket.tournament.tournamentId);
-    expect(handoff.result.bracketDefinitionHash).toBe(bracket.built.definition.bracketDefinitionHash);
+    expect(handoff.result.bracketDefinitionHash).toBe(
+      bracket.built.definition.bracketDefinitionHash,
+    );
     expect(handoff.result.executionPlanIdentityHash).toBe(handoff.commitPlan.commitPlanHash);
-    expect(handoff.result.battleResultFinalStateHash).toBe(handoff.commitPlan.battleResult.finalStateHash);
+    expect(handoff.result.battleResultFinalStateHash).toBe(
+      handoff.commitPlan.battleResult.finalStateHash,
+    );
     expect(handoff.result.winnerPersonId).not.toBeNull();
     expect(handoff.result.loserPersonId).not.toBeNull();
     expect(handoff.slotBindings).toHaveLength(1);
     expect(toCanonicalJson(handoff.session.runtimeState.worldRngState)).not.toBe(beforeRng);
-    expect(toCanonicalJson(handoff.session.runtimeState.matchIdGeneratorState)).not.toBe(beforeGenerator);
+    expect(toCanonicalJson(handoff.session.runtimeState.matchIdGeneratorState)).not.toBe(
+      beforeGenerator,
+    );
     const reservation = reserveNextMatchId(handoff.session.runtimeState.matchIdGeneratorState);
     expect(reservation.kind).toBe("success");
     if (reservation.kind !== "success") {

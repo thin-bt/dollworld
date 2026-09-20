@@ -5,9 +5,9 @@ import {
   type TeacherCanTeachContext,
   type TechniqueDefinition,
 } from "../index.js";
+import { asTechniqueId } from "../ids.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import {
-  computeWeeklyTeachCompositeScore,
   computeWeeklyTeachingAllocationSlots,
   evaluateExplicitWeeklyTeachAction,
   evaluateWeeklyTeachRefusal,
@@ -35,7 +35,7 @@ function techniqueState(
   overrides: Partial<PersonTechniqueState> = {},
 ): PersonTechniqueState {
   return {
-    techniqueId,
+    techniqueId: asTechniqueId(techniqueId),
     acquiredAbsoluteWeek: 1,
     masteryHundredths: 8000,
     learningProgressTenths: 0,
@@ -46,9 +46,7 @@ function techniqueState(
   };
 }
 
-function teacherContext(
-  overrides: Partial<TeacherCanTeachContext> = {},
-): TeacherCanTeachContext {
+function teacherContext(overrides: Partial<TeacherCanTeachContext> = {}): TeacherCanTeachContext {
   return {
     activeMentorshipExists: true,
     masterLifeStatus: "living",
