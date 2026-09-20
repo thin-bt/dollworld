@@ -7,7 +7,8 @@
   - **S03-001 implemented**（`SPRINT3-FIRST-SLICE-AUTHORITY-AND-IMPLEMENTATION-A-20260920-R1`）
   - **S03-002 implemented**（`SPRINT3-S03-002-MASTER-QUALIFICATION-A-20260920-R1`）
   - **S03-003 implemented**（`SPRINT3-S03-003-ENROLLMENT-A-20260920-R1`）
-  - S03-004〜S03-008 **planned**
+  - **S03-004 implemented**（`SPRINT3-S03-004-INTAKE-A-20260920-R1`）
+  - S03-005〜S03-008 **planned**
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -115,6 +116,13 @@ S03-002（師匠資格フラグ）、S03-004（受入上限）と整合。
 ### 目的
 
 師匠ごとの自律的上限設定・拒否/保留の状態機械（世界共通固定上限なし）。
+
+### 受入チェック（概要）
+
+- `sprint3-balance-0.4.0` + `masterIntake` 自律上限 formula（config 保持、コード直書きなし）
+- Pure 関数 `evaluateMasterIntakeDecision` → `accept` / `reject` / `defer`（S03-003 `intakeAcceptance` へ供給）
+- 師匠ごとに上限が異なり、世界共通固定門下上限は導入しない
+- `evaluateMasterIntakeDecision` テスト（IN-001〜010）および CFG-009
 
 ---
 

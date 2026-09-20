@@ -38,6 +38,8 @@ Sprint3Config
 | Sprint3Config.configVersion（S03-002 資格閾値付き） | `sprint3-balance-0.2.0` |
 | masterQualification.evaluationPolicyVersion（0.2.0） | `master-qualification-rank-and-records-0.1.0` |
 | Sprint3Config.configVersion（S03-003 入門 AI 有効） | `sprint3-balance-0.3.0` |
+| Sprint3Config.configVersion（S03-004 門下受入自律上限） | `sprint3-balance-0.4.0` |
+| masterIntake.evaluationPolicyVersion（0.4.0） | `master-intake-autonomous-limit-0.1.0` |
 
 ## 2. セクション定義
 
@@ -78,7 +80,16 @@ Sprint3Config
 
 数値はすべて config 保持。評価 pure 関数 `evaluateMasterQualificationEligibility` は引退後（`careerStatus=retired`）かつ存命のみ合格し得る。
 
-### 2.4 mentorshipFeatures
+### 2.4 masterIntake（S03-004、`sprint3-balance-0.4.0` のみ必須）
+
+| evaluationPolicyVersion | 意味 |
+|---|---|
+| `master-intake-deferred-0.1.0` | S03-001〜003 互換。`masterIntake` キーなし。評価関数は fail-closed。 |
+| `master-intake-autonomous-limit-0.1.0` | S03-004。`limitFormula` と `deferApplicantAptitudeThreshold` 必須。 |
+
+`limitFormula` は師匠 traits から **師匠ごと** の `autonomousMaxDisciples` を決定的に算出する（世界共通固定上限なし）。`currentFormalDiscipleCount` が上限未満なら `accept`、上限到達かつ高適性 applicant なら `defer`、それ以外は `reject`。
+
+### 2.5 mentorshipFeatures
 
 後続スライスの機能ゲート。S03-001 では `explicitWeeklyTeachActionEnabled=true` を拒否。S03-003 以降 `enrollmentAssignmentAiEnabled=true` を受理（`sprint3-balance-0.3.0`）。
 
@@ -98,6 +109,13 @@ Sprint3Config
 - 入力 `EnrollmentAssignmentRecord`: 子の年齢、特別理由、師匠候補（資格 record + スコア + **S03-004 境界** `intakeAcceptance`）
 - 出力 kind: `not_at_enrollment_boundary` / `parent_master_assigned` / `formal_master_assigned` / `parent_temporary_guidance` / `no_eligible_or_accepted_master`
 - 世界状態は変更しない（師弟関係の永続化は後続 WorldEngine 統合）
+
+### 3.2 S03-004 master intake processor I/O
+
+- Processor id: `sprint3-master-intake-0.1.0`
+- Pure 関数: `evaluateMasterIntakeDecision(config, record)` → `MasterIntakeEvaluationOutcome`
+- 出力 `acceptance` は S03-003 候補 `intakeAcceptance` へそのまま渡せる
+- 世界状態は変更しない
 
 ## 4. 参照
 

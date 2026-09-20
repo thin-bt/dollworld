@@ -6,7 +6,9 @@ import {
   MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
+  MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
   SPRINT3_CONFIG_VERSION_ENROLLMENT,
+  SPRINT3_CONFIG_VERSION_INTAKE,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./constants.js";
 import type { Sprint3ConfigInput } from "./types.js";
@@ -86,6 +88,26 @@ export function createSprint3Balance030ConfigInput(): Sprint3ConfigInput {
     mentorshipFeatures: {
       explicitWeeklyTeachActionEnabled: false,
       enrollmentAssignmentAiEnabled: true,
+    },
+  };
+}
+
+/** S03-004 canonical balance pack with autonomous per-master intake limit policy. */
+export function createSprint3Balance040ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance030ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_INTAKE,
+    masterIntake: {
+      evaluationPolicyVersion: MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
+      limitFormula: {
+        baseAutonomousMaxDisciples: 3,
+        teachingAbilityBonusPerTenPoints: 1,
+        massDiscipleToleranceBonusPerTenPoints: 2,
+        successorOrientationPenaltyPerTenPoints: 1,
+        minimumAutonomousMaxDisciples: 1,
+        maximumAutonomousMaxDisciples: 40,
+      },
+      deferApplicantAptitudeThreshold: 80,
     },
   };
 }

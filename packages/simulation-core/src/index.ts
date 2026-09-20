@@ -1206,8 +1206,13 @@ export {
   createDefaultSprint3ConfigInput,
   createSprint3Balance020ConfigInput,
   createSprint3Balance030ConfigInput,
+  createSprint3Balance040ConfigInput,
 } from "./sprint3/sprint3-config-defaults.js";
 export { evaluateEnrollmentAssignment } from "./sprint3/evaluate-enrollment-assignment.js";
+export {
+  computeAutonomousMaxDisciples,
+  evaluateMasterIntakeDecision,
+} from "./sprint3/evaluate-master-intake.js";
 export { evaluateMasterQualificationEligibility } from "./sprint3/evaluate-master-qualification.js";
 export {
   computeSprint3ConfigHash,
@@ -1217,11 +1222,15 @@ export {
 } from "./sprint3/validate-sprint3-config.js";
 export {
   ENROLLMENT_ASSIGNMENT_PROCESSOR_ID,
+  MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
+  MASTER_INTAKE_EVALUATION_POLICY_DEFERRED,
+  MASTER_INTAKE_EVALUATION_PROCESSOR_ID,
   MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
   MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
   SPRINT3_CONFIG_VERSION_ENROLLMENT,
+  SPRINT3_CONFIG_VERSION_INTAKE,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./sprint3/constants.js";
 export type {
@@ -1233,6 +1242,9 @@ export type {
   EnrollmentSpecialReason,
   ExplicitWeeklyTeachActionContract,
   MasterIntakeAcceptance,
+  MasterIntakeEvaluationOutcome,
+  MasterIntakeEvaluationRecord,
+  MasterIntakeLimitFormula,
   MentorshipRelationKind,
   Sprint3Config,
   Sprint3ConfigInput,
@@ -1241,6 +1253,9 @@ export type {
   MasterQualificationEvaluationOutcome,
   MasterQualificationEvaluationRecord,
   Sprint3MasterQualificationConfig,
+  Sprint3MasterIntakeConfig,
+  Sprint3MasterIntakeConfigAutonomousLimit,
+  Sprint3MasterIntakeConfigDeferred,
   Sprint3MasterQualificationConfigDeferred,
   Sprint3MasterQualificationConfigWithThresholds,
   Sprint3MentorshipFeatureFlags,

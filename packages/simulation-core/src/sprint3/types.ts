@@ -1,5 +1,7 @@
 import type { CareerStatus, LifeStatus, Rank } from "../enums.js";
 import type {
+  MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
+  MASTER_INTAKE_EVALUATION_POLICY_DEFERRED,
   MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
   MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
@@ -42,6 +44,30 @@ export type Sprint3MasterQualificationConfigWithThresholds = {
 export type Sprint3MasterQualificationConfig =
   Sprint3MasterQualificationConfigDeferred | Sprint3MasterQualificationConfigWithThresholds;
 
+/** Config-held weights for deterministic per-master max disciple count (S03-004). */
+export type MasterIntakeLimitFormula = {
+  baseAutonomousMaxDisciples: number;
+  teachingAbilityBonusPerTenPoints: number;
+  massDiscipleToleranceBonusPerTenPoints: number;
+  successorOrientationPenaltyPerTenPoints: number;
+  minimumAutonomousMaxDisciples: number;
+  maximumAutonomousMaxDisciples: number;
+};
+
+export type Sprint3MasterIntakeConfigDeferred = {
+  evaluationPolicyVersion: typeof MASTER_INTAKE_EVALUATION_POLICY_DEFERRED;
+};
+
+export type Sprint3MasterIntakeConfigAutonomousLimit = {
+  evaluationPolicyVersion: typeof MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT;
+  limitFormula: MasterIntakeLimitFormula;
+  /** Applicant lineage aptitude at or above this yields defer (hold) instead of reject at limit. */
+  deferApplicantAptitudeThreshold: number;
+};
+
+export type Sprint3MasterIntakeConfig =
+  Sprint3MasterIntakeConfigDeferred | Sprint3MasterIntakeConfigAutonomousLimit;
+
 /** Pure evaluation input at retirement boundary (processor wiring in later slices). */
 export type MasterQualificationEvaluationRecord = {
   careerStatus: CareerStatus;
@@ -71,6 +97,8 @@ export type Sprint3ConfigInput = {
   teachingEfficiency: Sprint3TeachingEfficiencyConfig;
   masterQualification: Sprint3MasterQualificationConfig;
   mentorshipFeatures: Sprint3MentorshipFeatureFlags;
+  /** Present from sprint3-balance-0.4.0 (S03-004); omitted on earlier configVersion bodies. */
+  masterIntake?: Sprint3MasterIntakeConfig;
 };
 
 export type Sprint3Config = Sprint3ConfigInput;
@@ -90,6 +118,26 @@ export type ExplicitWeeklyTeachActionContract = {
 
 /** Per-master intake decision supplied by caller; S03-004 owns autonomous limit policy. */
 export type MasterIntakeAcceptance = "accept" | "reject" | "defer";
+
+/** Processor input for autonomous intake limit evaluation (no world-state mutation). */
+export type MasterIntakeEvaluationRecord = {
+  masterPersonId: string;
+  currentFormalDiscipleCount: number;
+  teachingAbilityScore: number;
+  successorOrientationScore: number;
+  massDiscipleToleranceScore: number;
+  applicant?: {
+    childPersonId: string;
+    lineageAptitudeScore: number;
+    parentChildCompatibilityScore: number;
+  };
+};
+
+export type MasterIntakeEvaluationOutcome = {
+  acceptance: MasterIntakeAcceptance;
+  autonomousMaxDisciples: number;
+  reasons: readonly string[];
+};
 
 /** SPEC §8歳時の師匠決定 — reasons that permit a non-default formal master. */
 export type EnrollmentSpecialReason =

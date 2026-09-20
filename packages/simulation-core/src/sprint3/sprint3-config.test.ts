@@ -3,6 +3,7 @@ import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixt
 import {
   createDefaultSprint3ConfigInput,
   createSprint3Balance030ConfigInput,
+  createSprint3Balance040ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   computeSprint3ConfigHash,
@@ -73,5 +74,9 @@ describe("S03-001 Sprint3Config", () => {
 
   it("CFG-008 accepts enrollmentAssignmentAiEnabled on sprint3-balance-0.3.0", () => {
     expect(validateSprint3Config(createSprint3Balance030ConfigInput(), provider).ok).toBe(true);
+  });
+
+  it("CFG-009 accepts masterIntake autonomous policy on sprint3-balance-0.4.0", () => {
+    expect(validateSprint3Config(createSprint3Balance040ConfigInput(), provider).ok).toBe(true);
   });
 });

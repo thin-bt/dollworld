@@ -17,5 +17,18 @@ export const SPRINT3_CONFIG_VERSION_QUALIFICATION = "sprint3-balance-0.2.0" as c
 /** S03-003 enrollment assignment AI enabled (same balance body as 0.2.0 + feature gate). */
 export const SPRINT3_CONFIG_VERSION_ENROLLMENT = "sprint3-balance-0.3.0" as const;
 
+/** S03-004 per-master autonomous intake limit policy enabled. */
+export const SPRINT3_CONFIG_VERSION_INTAKE = "sprint3-balance-0.4.0" as const;
+
+/** S03-001 legacy: no autonomous intake limit formula (sprint3-balance-0.1.0..0.3.0). */
+export const MASTER_INTAKE_EVALUATION_POLICY_DEFERRED = "master-intake-deferred-0.1.0" as const;
+
+/** S03-004 config-driven autonomous per-master disciple cap (not world-global). */
+export const MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT =
+  "master-intake-autonomous-limit-0.1.0" as const;
+
 /** Pure enrollment processor contract id (world step 4 wiring in later slices). */
 export const ENROLLMENT_ASSIGNMENT_PROCESSOR_ID = "sprint3-enrollment-assignment-0.1.0" as const;
+
+/** Pure master intake decision processor contract id (world step 4 / enrollment boundary). */
+export const MASTER_INTAKE_EVALUATION_PROCESSOR_ID = "sprint3-master-intake-0.1.0" as const;

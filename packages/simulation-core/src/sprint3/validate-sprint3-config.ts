@@ -11,13 +11,17 @@ import {
   MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
+  MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
+  MASTER_INTAKE_EVALUATION_POLICY_DEFERRED,
   SPRINT3_CONFIG_VERSION_ENROLLMENT,
+  SPRINT3_CONFIG_VERSION_INTAKE,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./constants.js";
 import {
   createDefaultSprint3ConfigInput,
   createSprint3Balance020ConfigInput,
   createSprint3Balance030ConfigInput,
+  createSprint3Balance040ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   getExpectedCanonicalJsonForSprint3ConfigVersion,
@@ -26,9 +30,11 @@ import {
 } from "./sprint3-config-version-registry.js";
 import type {
   DiscipleCountFactorBracket,
+  MasterIntakeLimitFormula,
   MasterQualificationEligibilityThresholds,
   Sprint3Config,
   Sprint3ConfigInput,
+  Sprint3MasterIntakeConfig,
 } from "./types.js";
 import {
   deepFreezePlainJson,
@@ -48,6 +54,7 @@ const ROOT_KEYS = [
   "teachingEfficiency",
   "masterQualification",
   "mentorshipFeatures",
+  "masterIntake",
 ] as const;
 
 function requireSafeInteger(
@@ -449,6 +456,178 @@ function parseMasterQualification(
   return undefined;
 }
 
+function parseLimitFormula(
+  value: unknown,
+  issues: ValidationIssue[],
+): MasterIntakeLimitFormula | undefined {
+  const object = snapshotPlainObjectOrFail(value, "/masterIntake/limitFormula", issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(
+    object,
+    [
+      "baseAutonomousMaxDisciples",
+      "teachingAbilityBonusPerTenPoints",
+      "massDiscipleToleranceBonusPerTenPoints",
+      "successorOrientationPenaltyPerTenPoints",
+      "minimumAutonomousMaxDisciples",
+      "maximumAutonomousMaxDisciples",
+    ],
+    "/masterIntake/limitFormula",
+    issues,
+  );
+  const baseAutonomousMaxDisciples = requireSafeInteger(
+    object,
+    "baseAutonomousMaxDisciples",
+    "/masterIntake/limitFormula",
+    issues,
+  );
+  const teachingAbilityBonusPerTenPoints = requireSafeInteger(
+    object,
+    "teachingAbilityBonusPerTenPoints",
+    "/masterIntake/limitFormula",
+    issues,
+  );
+  const massDiscipleToleranceBonusPerTenPoints = requireSafeInteger(
+    object,
+    "massDiscipleToleranceBonusPerTenPoints",
+    "/masterIntake/limitFormula",
+    issues,
+  );
+  const successorOrientationPenaltyPerTenPoints = requireSafeInteger(
+    object,
+    "successorOrientationPenaltyPerTenPoints",
+    "/masterIntake/limitFormula",
+    issues,
+  );
+  const minimumAutonomousMaxDisciples = requireSafeInteger(
+    object,
+    "minimumAutonomousMaxDisciples",
+    "/masterIntake/limitFormula",
+    issues,
+  );
+  const maximumAutonomousMaxDisciples = requireSafeInteger(
+    object,
+    "maximumAutonomousMaxDisciples",
+    "/masterIntake/limitFormula",
+    issues,
+  );
+  if (
+    baseAutonomousMaxDisciples === undefined ||
+    teachingAbilityBonusPerTenPoints === undefined ||
+    massDiscipleToleranceBonusPerTenPoints === undefined ||
+    successorOrientationPenaltyPerTenPoints === undefined ||
+    minimumAutonomousMaxDisciples === undefined ||
+    maximumAutonomousMaxDisciples === undefined
+  ) {
+    return undefined;
+  }
+  if (minimumAutonomousMaxDisciples < 1) {
+    issues.push({
+      path: "/masterIntake/limitFormula/minimumAutonomousMaxDisciples",
+      message: "minimumAutonomousMaxDisciples must be at least 1",
+      actual: minimumAutonomousMaxDisciples,
+      expected: ">= 1",
+    });
+    return undefined;
+  }
+  if (maximumAutonomousMaxDisciples < minimumAutonomousMaxDisciples) {
+    issues.push({
+      path: "/masterIntake/limitFormula/maximumAutonomousMaxDisciples",
+      message: "maximumAutonomousMaxDisciples must be >= minimumAutonomousMaxDisciples",
+      actual: maximumAutonomousMaxDisciples,
+      expected: `>= ${minimumAutonomousMaxDisciples}`,
+    });
+    return undefined;
+  }
+  return {
+    baseAutonomousMaxDisciples,
+    teachingAbilityBonusPerTenPoints,
+    massDiscipleToleranceBonusPerTenPoints,
+    successorOrientationPenaltyPerTenPoints,
+    minimumAutonomousMaxDisciples,
+    maximumAutonomousMaxDisciples,
+  };
+}
+
+function parseMasterIntake(
+  value: unknown,
+  configVersion: string,
+  issues: ValidationIssue[],
+): Sprint3MasterIntakeConfig | undefined {
+  if (value === undefined) {
+    if (configVersion === SPRINT3_CONFIG_VERSION_INTAKE) {
+      issues.push({
+        path: "/masterIntake",
+        message: "masterIntake is required for sprint3-balance-0.4.0",
+        actual: undefined,
+        expected: "object",
+      });
+    }
+    return undefined;
+  }
+  const object = snapshotPlainObjectOrFail(value, "/masterIntake", issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  const evaluationPolicyVersionRaw = object["evaluationPolicyVersion"];
+  if (typeof evaluationPolicyVersionRaw !== "string") {
+    issues.push({
+      path: "/masterIntake/evaluationPolicyVersion",
+      message: "evaluationPolicyVersion must be a string literal",
+      actual: evaluationPolicyVersionRaw,
+      expected: "string",
+    });
+    return undefined;
+  }
+  if (evaluationPolicyVersionRaw === MASTER_INTAKE_EVALUATION_POLICY_DEFERRED) {
+    rejectUnknownKeys(object, ["evaluationPolicyVersion"], "/masterIntake", issues);
+    return { evaluationPolicyVersion: MASTER_INTAKE_EVALUATION_POLICY_DEFERRED };
+  }
+  if (evaluationPolicyVersionRaw === MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT) {
+    rejectUnknownKeys(
+      object,
+      ["evaluationPolicyVersion", "limitFormula", "deferApplicantAptitudeThreshold"],
+      "/masterIntake",
+      issues,
+    );
+    if (!("limitFormula" in object)) {
+      issues.push({
+        path: "/masterIntake/limitFormula",
+        message: "limitFormula is required for autonomous limit intake policy",
+        actual: undefined,
+        expected: "object",
+      });
+      return undefined;
+    }
+    const limitFormula = parseLimitFormula(object["limitFormula"], issues);
+    const deferApplicantAptitudeThreshold = requireIntegerInRange(
+      object,
+      "deferApplicantAptitudeThreshold",
+      "/masterIntake",
+      0,
+      100,
+      issues,
+    );
+    if (limitFormula === undefined || deferApplicantAptitudeThreshold === undefined) {
+      return undefined;
+    }
+    return {
+      evaluationPolicyVersion: MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
+      limitFormula,
+      deferApplicantAptitudeThreshold,
+    };
+  }
+  issues.push({
+    path: "/masterIntake/evaluationPolicyVersion",
+    message: "unsupported masterIntake.evaluationPolicyVersion",
+    actual: evaluationPolicyVersionRaw,
+    expected: `${MASTER_INTAKE_EVALUATION_POLICY_DEFERRED}|${MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT}`,
+  });
+  return undefined;
+}
+
 function parseMentorshipFeatures(
   value: unknown,
   issues: ValidationIssue[],
@@ -528,6 +707,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
   const teachingEfficiency = parseTeachingEfficiency(object["teachingEfficiency"], issues);
   const masterQualification = parseMasterQualification(object["masterQualification"], issues);
   const mentorshipFeatures = parseMentorshipFeatures(object["mentorshipFeatures"], issues);
+  const masterIntake = parseMasterIntake(object["masterIntake"], configVersion, issues);
 
   if (
     schemaVersion === undefined ||
@@ -541,6 +721,10 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     return failure(issues);
   }
 
+  if (configVersion === SPRINT3_CONFIG_VERSION_INTAKE && masterIntake === undefined) {
+    return failure(issues);
+  }
+
   const normalized: Sprint3Config = {
     schemaVersion,
     configVersion,
@@ -548,6 +732,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     teachingEfficiency,
     masterQualification,
     mentorshipFeatures,
+    ...(masterIntake !== undefined ? { masterIntake } : {}),
   };
 
   if (isKnownSprint3ConfigVersion(configVersion)) {
@@ -597,15 +782,21 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
     SPRINT3_CONFIG_VERSION_QUALIFICATION,
     toCanonicalJson(qualificationValidated.value),
   );
-  const enrollmentValidated = validateNormalizedSprint3Config(
-    createSprint3Balance030ConfigInput(),
-  );
+  const enrollmentValidated = validateNormalizedSprint3Config(createSprint3Balance030ConfigInput());
   if (!enrollmentValidated.ok) {
     throw new Error("Sprint3 balance 0.3.0 config failed validation during registry bootstrap");
   }
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_ENROLLMENT,
     toCanonicalJson(enrollmentValidated.value),
+  );
+  const intakeValidated = validateNormalizedSprint3Config(createSprint3Balance040ConfigInput());
+  if (!intakeValidated.ok) {
+    throw new Error("Sprint3 balance 0.4.0 config failed validation during registry bootstrap");
+  }
+  registerKnownSprint3ConfigVersion(
+    SPRINT3_CONFIG_VERSION_INTAKE,
+    toCanonicalJson(intakeValidated.value),
   );
   defaultRegistryInitialized = true;
   void provider;
