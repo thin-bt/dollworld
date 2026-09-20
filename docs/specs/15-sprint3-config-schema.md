@@ -40,6 +40,8 @@ Sprint3Config
 | Sprint3Config.configVersion（S03-003 入門 AI 有効） | `sprint3-balance-0.3.0` |
 | Sprint3Config.configVersion（S03-004 門下受入自律上限） | `sprint3-balance-0.4.0` |
 | masterIntake.evaluationPolicyVersion（0.4.0） | `master-intake-autonomous-limit-0.1.0` |
+| Sprint3Config.configVersion（S03-005 週間門下人数係数） | `sprint3-balance-0.5.0` |
+| Sprint3Config.configVersion（S03-006 親一時指導週間係数） | `sprint3-balance-0.6.0` |
 
 ## 2. セクション定義
 
@@ -97,7 +99,8 @@ Sprint3Config
 |---|---|
 | explicitWeeklyTeachActionEnabled | 週間 `teach` 行動（09/10 Sprint 3 予約） |
 | enrollmentAssignmentAiEnabled | 8歳師匠決定 AI（`docs/SPEC.md` world step 4） |
-| weeklyTrainingDiscipleCountTeachingEfficiencyEnabled | S03-005。`true` のとき週間訓練成果へ `teachingEfficiency` 門下人数 bracket を適用（`sprint3-balance-0.5.0` のみ `true` 可） |
+| weeklyTrainingDiscipleCountTeachingEfficiencyEnabled | S03-005。`true` のとき週間訓練成果へ `teachingEfficiency` 門下人数 bracket を適用（`sprint3-balance-0.5.0` / `0.6.0` のみ `true` 可） |
+| weeklyTrainingParentTemporaryGuidanceEnabled | S03-006。`true` のとき `parent_temporary_guidance` 週間 `train_stat` へ `parentTemporaryGuidanceFactorTenThousandths` を適用（`sprint3-balance-0.6.0` のみ `true` 可） |
 
 ### 3.3 S03-005 weekly training teachingEfficiency binding
 
@@ -105,6 +108,13 @@ Sprint3Config
 - Optional input: `processWeeklyTrainingWeek` / Sprint1 weekly adapter `sprint3Config`
 - `discipleCount === 0` は Sprint1 同様 neutral 1.00（10000 basis points）
 - `discipleCount >= 1` は validated `discipleCountFactorBrackets` から決定的に factor を選択
+
+### 3.4 S03-006 parent temporary guidance weekly binding
+
+- Binding id: `sprint3-weekly-training-parent-temporary-guidance-0.1.0`
+- Optional input: `processWeeklyTrainingWeek` / Sprint1 weekly adapter `sprint3Config` + person record `mentorshipRelationKind`
+- `parent_temporary_guidance` かつ `enrollment.parentTemporaryGuidanceAllowed` のとき `train_stat` 師匠係数に `parentTemporaryGuidanceFactorTenThousandths` を使用
+- `formal_master_disciple` / `parent_master_disciple` では Sprint1 `teacherFactorKey` を優先（一時指導を正式師匠関係と混同しない）
 
 ## 3. ドメイン型境界（config 外）
 

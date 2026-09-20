@@ -9,7 +9,8 @@
   - **S03-003 implemented**（`SPRINT3-S03-003-ENROLLMENT-A-20260920-R1`）
   - **S03-004 implemented**（`SPRINT3-S03-004-INTAKE-A-20260920-R1`）
   - **S03-005 implemented**（`SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1`）
-  - S03-006〜S03-008 **planned**
+  - **S03-006 implemented**（`SPRINT3-S03-006-PARENT-TEMP-GUIDANCE-A-20260920-R1`）
+  - S03-007〜S03-008 **planned**
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -147,6 +148,14 @@ S03-001 `teachingEfficiency` を Sprint 1 週間訓練成果計算へ接続（�
 ### 目的
 
 正式師匠不在時の親指導と、後の正式入門への移行境界。
+
+### 受入チェック（概要）
+
+- `sprint3-balance-0.6.0` + `weeklyTrainingParentTemporaryGuidanceEnabled: true`
+- `mentorshipRelationKind=parent_temporary_guidance` かつ正式師匠なしの週間 `train_stat` で `teachingEfficiency.parentTemporaryGuidanceFactorTenThousandths` を師匠係数として適用（正式師匠 kind では Sprint1 `teacherFactorKey` 優先）
+- 未绑定時は Sprint1 師匠係数契約を維持
+- Pure 関数 `selectWeeklyTrainingTeacherFactorBasisPoints`、binding id `sprint3-weekly-training-parent-temporary-guidance-0.1.0`
+- `parent-temporary-guidance-weekly` テスト（PTG-001〜010）および CFG-011
 
 ---
 

@@ -90,6 +90,8 @@ export type Sprint3MentorshipFeatureFlags = {
   enrollmentAssignmentAiEnabled: boolean;
   /** S03-005: bind teachingEfficiency disciple brackets into weekly training outcomes. */
   weeklyTrainingDiscipleCountTeachingEfficiencyEnabled?: boolean;
+  /** S03-006: bind parent temporary guidance teacher factor into weekly train_stat outcomes. */
+  weeklyTrainingParentTemporaryGuidanceEnabled?: boolean;
 };
 
 export type Sprint3ConfigInput = {

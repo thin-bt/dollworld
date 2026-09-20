@@ -69,7 +69,7 @@ import type {
   WeeklyTrainingResult,
 } from "./weekly-training-types.js";
 import { isWeeklyActionPipelineEligible } from "./weekly-update-eligibility.js";
-import { validateWeeklyTrainingSprint3ConfigBinding } from "../sprint3/resolve-weekly-disciple-count-teaching-efficiency.js";
+import { validateWeeklyTrainingSprint3ConfigBinding } from "../sprint3/resolve-weekly-parent-temporary-guidance.js";
 import type { Sprint3Config } from "../sprint3/types.js";
 
 export type WeeklyTrainingProcessorDependencies = {

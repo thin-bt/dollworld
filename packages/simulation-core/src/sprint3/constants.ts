@@ -23,9 +23,16 @@ export const SPRINT3_CONFIG_VERSION_INTAKE = "sprint3-balance-0.4.0" as const;
 /** S03-005 weekly training disciple-count teachingEfficiency binding enabled. */
 export const SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY = "sprint3-balance-0.5.0" as const;
 
+/** S03-006 parent temporary guidance teacher factor at weekly training boundary. */
+export const SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE = "sprint3-balance-0.6.0" as const;
+
 /** Sprint3 → Sprint1 weekly training disciple-count factor binding (S03-005). */
 export const WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID =
   "sprint3-weekly-training-disciple-count-0.1.0" as const;
+
+/** Sprint3 → Sprint1 weekly training parent temporary guidance teacher factor (S03-006). */
+export const WEEKLY_TRAINING_PARENT_TEMPORARY_GUIDANCE_BINDING_ID =
+  "sprint3-weekly-training-parent-temporary-guidance-0.1.0" as const;
 
 /** S03-001 legacy: no autonomous intake limit formula (sprint3-balance-0.1.0..0.3.0). */
 export const MASTER_INTAKE_EVALUATION_POLICY_DEFERRED = "master-intake-deferred-0.1.0" as const;

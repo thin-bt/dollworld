@@ -16,8 +16,8 @@ import {
 import {
   isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
   selectDiscipleCountTeachingEfficiencyFactor,
-  validateWeeklyTrainingSprint3ConfigBinding,
 } from "./resolve-weekly-disciple-count-teaching-efficiency.js";
+import { validateWeeklyTrainingSprint3ConfigBinding } from "./resolve-weekly-parent-temporary-guidance.js";
 import { validateSprint3Config } from "./validate-sprint3-config.js";
 
 const provider = createNodeSha256Provider();

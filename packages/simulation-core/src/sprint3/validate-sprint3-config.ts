@@ -16,6 +16,7 @@ import {
   SPRINT3_CONFIG_VERSION_ENROLLMENT,
   SPRINT3_CONFIG_VERSION_INTAKE,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
+  SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
 } from "./constants.js";
 import {
@@ -24,6 +25,7 @@ import {
   createSprint3Balance030ConfigInput,
   createSprint3Balance040ConfigInput,
   createSprint3Balance050ConfigInput,
+  createSprint3Balance060ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   getExpectedCanonicalJsonForSprint3ConfigVersion,
@@ -644,6 +646,7 @@ function parseMentorshipFeatures(
       "explicitWeeklyTeachActionEnabled",
       "enrollmentAssignmentAiEnabled",
       "weeklyTrainingDiscipleCountTeachingEfficiencyEnabled",
+      "weeklyTrainingParentTemporaryGuidanceEnabled",
     ],
     "/mentorshipFeatures",
     issues,
@@ -665,6 +668,15 @@ function parseMentorshipFeatures(
     weeklyTrainingDiscipleCountTeachingEfficiencyEnabled = requireBoolean(
       object,
       "weeklyTrainingDiscipleCountTeachingEfficiencyEnabled",
+      "/mentorshipFeatures",
+      issues,
+    );
+  }
+  let weeklyTrainingParentTemporaryGuidanceEnabled: boolean | undefined;
+  if ("weeklyTrainingParentTemporaryGuidanceEnabled" in object) {
+    weeklyTrainingParentTemporaryGuidanceEnabled = requireBoolean(
+      object,
+      "weeklyTrainingParentTemporaryGuidanceEnabled",
       "/mentorshipFeatures",
       issues,
     );
@@ -691,6 +703,9 @@ function parseMentorshipFeatures(
     ...(weeklyTrainingDiscipleCountTeachingEfficiencyEnabled === undefined
       ? {}
       : { weeklyTrainingDiscipleCountTeachingEfficiencyEnabled }),
+    ...(weeklyTrainingParentTemporaryGuidanceEnabled === undefined
+      ? {}
+      : { weeklyTrainingParentTemporaryGuidanceEnabled }),
   };
 }
 
@@ -747,14 +762,15 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     mentorshipFeatures.weeklyTrainingDiscipleCountTeachingEfficiencyEnabled === true;
   if (
     weeklyTeachingEfficiencyEnabled &&
-    configVersion !== SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY
+    configVersion !== SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY &&
+    configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE
   ) {
     issues.push({
       path: "/mentorshipFeatures/weeklyTrainingDiscipleCountTeachingEfficiencyEnabled",
       message:
-        "weekly training teachingEfficiency binding is only enabled on sprint3-balance-0.5.0",
+        "weekly training teachingEfficiency binding is only enabled on sprint3-balance-0.5.0 or sprint3-balance-0.6.0",
       actual: configVersion,
-      expected: SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+      expected: `${SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY}|${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}`,
     });
   }
   if (
@@ -767,6 +783,48 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
       actual: mentorshipFeatures.weeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
       expected: "true",
     });
+  }
+  const parentGuidanceWeeklyEnabled =
+    mentorshipFeatures.weeklyTrainingParentTemporaryGuidanceEnabled === true;
+  if (
+    parentGuidanceWeeklyEnabled &&
+    configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE
+  ) {
+    issues.push({
+      path: "/mentorshipFeatures/weeklyTrainingParentTemporaryGuidanceEnabled",
+      message: "parent temporary guidance weekly binding is only enabled on sprint3-balance-0.6.0",
+      actual: configVersion,
+      expected: SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+    });
+  }
+  if (
+    configVersion === SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE &&
+    !parentGuidanceWeeklyEnabled
+  ) {
+    issues.push({
+      path: "/mentorshipFeatures/weeklyTrainingParentTemporaryGuidanceEnabled",
+      message: "sprint3-balance-0.6.0 requires parent temporary guidance weekly binding",
+      actual: mentorshipFeatures.weeklyTrainingParentTemporaryGuidanceEnabled,
+      expected: "true",
+    });
+  }
+  if (configVersion === SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE) {
+    if (!weeklyTeachingEfficiencyEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/weeklyTrainingDiscipleCountTeachingEfficiencyEnabled",
+        message: "sprint3-balance-0.6.0 retains weekly disciple-count teachingEfficiency binding",
+        actual: mentorshipFeatures.weeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
+        expected: "true",
+      });
+    }
+    if (!mentorshipFeatures.enrollmentAssignmentAiEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/enrollmentAssignmentAiEnabled",
+        message: "sprint3-balance-0.6.0 retains enrollment assignment AI gate",
+        actual: mentorshipFeatures.enrollmentAssignmentAiEnabled,
+        expected: "true",
+      });
+    }
   }
   if (issues.length > 0) {
     return failure(issues);
@@ -856,6 +914,18 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
     toCanonicalJson(teachingEfficiencyValidated.value),
+  );
+  const parentGuidanceValidated = validateNormalizedSprint3Config(
+    createSprint3Balance060ConfigInput(),
+  );
+  if (!parentGuidanceValidated.ok) {
+    throw new Error(
+      "Sprint3 balance 0.6.0 config failed validation during registry bootstrap",
+    );
+  }
+  registerKnownSprint3ConfigVersion(
+    SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+    toCanonicalJson(parentGuidanceValidated.value),
   );
   defaultRegistryInitialized = true;
   void provider;

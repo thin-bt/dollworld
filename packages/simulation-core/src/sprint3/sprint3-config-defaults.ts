@@ -10,6 +10,7 @@ import {
   SPRINT3_CONFIG_VERSION_ENROLLMENT,
   SPRINT3_CONFIG_VERSION_INTAKE,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
+  SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
 } from "./constants.js";
 import type { Sprint3ConfigInput } from "./types.js";
@@ -122,6 +123,20 @@ export function createSprint3Balance050ConfigInput(): Sprint3ConfigInput {
       explicitWeeklyTeachActionEnabled: false,
       enrollmentAssignmentAiEnabled: true,
       weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
+    },
+  };
+}
+
+/** S03-006 canonical balance pack with parent temporary guidance weekly binding. */
+export function createSprint3Balance060ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance050ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: false,
+      enrollmentAssignmentAiEnabled: true,
+      weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
+      weeklyTrainingParentTemporaryGuidanceEnabled: true,
     },
   };
 }

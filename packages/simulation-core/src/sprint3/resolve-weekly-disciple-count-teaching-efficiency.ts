@@ -2,11 +2,10 @@
  * S03-005: map formal disciple count to Sprint3 teachingEfficiency brackets at weekly training boundary.
  */
 import { failure, success } from "../validation.js";
-import type { ValidationIssue, ValidationResult } from "../validation.js";
+import type { ValidationResult } from "../validation.js";
 import { BASIS_POINTS_SCALE } from "../sprint1/basis-points.js";
-import { SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY } from "./constants.js";
-import type { Sprint3Config, Sprint3TeachingEfficiencyConfig } from "./types.js";
-import { validateNormalizedSprint3Config } from "./validate-sprint3-config.js";
+import type { Sprint3TeachingEfficiencyConfig } from "./types.js";
+import type { Sprint3Config } from "./types.js";
 
 function requirePositiveDiscipleCount(discipleCount: number): ValidationResult<number> {
   if (
@@ -71,32 +70,3 @@ export function selectDiscipleCountTeachingEfficiencyFactor(
   ]);
 }
 
-export function validateWeeklyTrainingSprint3ConfigBinding(
-  sprint3Config: unknown,
-): ValidationResult<Sprint3Config | undefined> {
-  if (sprint3Config === undefined) {
-    return success(undefined);
-  }
-  const validated = validateNormalizedSprint3Config(sprint3Config);
-  if (!validated.ok) {
-    const issues: ValidationIssue[] = validated.issues.map((issue) => ({
-      ...issue,
-      path: issue.path === "" ? "/sprint3Config" : `/sprint3Config${issue.path}`,
-    }));
-    return failure(issues);
-  }
-  const config = validated.value;
-  const enabled = isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled(config);
-  if (enabled && config.configVersion !== SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY) {
-    return failure([
-      {
-        path: "/sprint3Config/configVersion",
-        message:
-          "weeklyTrainingDiscipleCountTeachingEfficiencyEnabled requires sprint3-balance-0.5.0",
-        actual: config.configVersion,
-        expected: SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
-      },
-    ]);
-  }
-  return success(config);
-}

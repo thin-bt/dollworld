@@ -21,12 +21,12 @@ import {
   selectCurrentValueGrowthFactor,
   selectDiscipleCountGrowthFactor,
   selectFatigueGrowthFactor,
-  selectTeacherGrowthFactor,
 } from "./growth-factor-selectors.js";
 import {
   isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
   selectDiscipleCountTeachingEfficiencyFactor,
 } from "../sprint3/resolve-weekly-disciple-count-teaching-efficiency.js";
+import { selectWeeklyTrainingTeacherFactorBasisPoints } from "../sprint3/resolve-weekly-parent-temporary-guidance.js";
 import type { Sprint3Config } from "../sprint3/types.js";
 import { deriveInjuryStage, selectInjuryGrowthFactor } from "./injury-stage.js";
 import { deriveMaxMental } from "./max-mental.js";
@@ -399,7 +399,11 @@ export function applyTrainStat(
   if (!currentValueFactor.ok) {
     return failure(currentValueFactor.issues);
   }
-  const teacherFactor = selectTeacherGrowthFactor(record.teacherFactorKey, config);
+  const teacherFactor = selectWeeklyTrainingTeacherFactorBasisPoints(
+    record,
+    config,
+    sprint3Config,
+  );
   if (!teacherFactor.ok) {
     return failure(teacherFactor.issues);
   }

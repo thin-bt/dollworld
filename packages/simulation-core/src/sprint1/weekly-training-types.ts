@@ -114,6 +114,13 @@ export const WEEKLY_TRAINING_PERSON_RECORD_KEYS = [
   "techniqueTargetContexts",
   "teacherFactorKey",
   "discipleCount",
+  "mentorshipRelationKind",
+] as const;
+
+const MENTORSHIP_RELATION_KINDS = [
+  "formal_master_disciple",
+  "parent_master_disciple",
+  "parent_temporary_guidance",
 ] as const;
 
 export type WeeklyTrainingPersonRecord = {
@@ -128,6 +135,7 @@ export type WeeklyTrainingPersonRecord = {
   techniqueTargetContexts: readonly TechniqueTargetContext[];
   teacherFactorKey: TeacherFactorKey;
   discipleCount: number;
+  mentorshipRelationKind?: (typeof MENTORSHIP_RELATION_KINDS)[number];
 };
 
 /** Ordered EventEnvelope candidate: no `eventId` / `simulationId` / `sequence` (10 §7, §11). */
@@ -521,6 +529,24 @@ export function validateWeeklyTrainingPersonRecord(
 
   const discipleCount = requireSafeIntegerAtLeast(object, "discipleCount", "", 0, issues);
 
+  let mentorshipRelationKind: WeeklyTrainingPersonRecord["mentorshipRelationKind"];
+  if (hasOwn(object, "mentorshipRelationKind")) {
+    const rawKind = object["mentorshipRelationKind"];
+    if (
+      typeof rawKind !== "string" ||
+      !(MENTORSHIP_RELATION_KINDS as readonly string[]).includes(rawKind)
+    ) {
+      issues.push({
+        path: "/mentorshipRelationKind",
+        message: "mentorshipRelationKind must be a known MentorshipRelationKind",
+        actual: rawKind,
+        expected: MENTORSHIP_RELATION_KINDS.join(" | "),
+      });
+    } else {
+      mentorshipRelationKind = rawKind as WeeklyTrainingPersonRecord["mentorshipRelationKind"];
+    }
+  }
+
   if (
     parsedPerson === undefined ||
     growthProfile === undefined ||
@@ -550,6 +576,7 @@ export function validateWeeklyTrainingPersonRecord(
     techniqueTargetContexts,
     teacherFactorKey,
     discipleCount,
+    ...(mentorshipRelationKind === undefined ? {} : { mentorshipRelationKind }),
   } satisfies WeeklyTrainingPersonRecord;
 
   return success({

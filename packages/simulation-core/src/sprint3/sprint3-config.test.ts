@@ -5,6 +5,7 @@ import {
   createSprint3Balance030ConfigInput,
   createSprint3Balance040ConfigInput,
   createSprint3Balance050ConfigInput,
+  createSprint3Balance060ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   computeSprint3ConfigHash,
@@ -83,5 +84,9 @@ describe("S03-001 Sprint3Config", () => {
 
   it("CFG-010 accepts weekly training teachingEfficiency binding on sprint3-balance-0.5.0", () => {
     expect(validateSprint3Config(createSprint3Balance050ConfigInput(), provider).ok).toBe(true);
+  });
+
+  it("CFG-011 accepts parent temporary guidance weekly binding on sprint3-balance-0.6.0", () => {
+    expect(validateSprint3Config(createSprint3Balance060ConfigInput(), provider).ok).toBe(true);
   });
 });
