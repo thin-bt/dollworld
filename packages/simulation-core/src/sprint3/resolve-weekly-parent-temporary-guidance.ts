@@ -9,6 +9,7 @@ import type { WeeklyTrainingPersonRecord } from "../sprint1/weekly-training-type
 import {
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
 } from "./constants.js";
 import type {
   MentorshipRelationKind,
@@ -108,28 +109,31 @@ export function validateWeeklyTrainingSprint3ConfigBinding(
   if (
     discipleBindingEnabled &&
     config.configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE &&
-    config.configVersion !== SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY
+    config.configVersion !== SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY &&
+    config.configVersion !== SPRINT3_CONFIG_VERSION_WEEKLY_TEACH
   ) {
     return failure([
       {
         path: "/sprint3Config/configVersion",
         message:
-          "weeklyTrainingDiscipleCountTeachingEfficiencyEnabled requires sprint3-balance-0.5.0 or sprint3-balance-0.6.0",
+          "weeklyTrainingDiscipleCountTeachingEfficiencyEnabled requires sprint3-balance-0.5.0 through sprint3-balance-0.7.0",
         actual: config.configVersion,
-        expected: `${SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY}|${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}`,
+        expected: `${SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY}|${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}|${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}`,
       },
     ]);
   }
   if (
     parentGuidanceEnabled &&
-    config.configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE
+    config.configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE &&
+    config.configVersion !== SPRINT3_CONFIG_VERSION_WEEKLY_TEACH
   ) {
     return failure([
       {
         path: "/sprint3Config/configVersion",
-        message: "weeklyTrainingParentTemporaryGuidanceEnabled requires sprint3-balance-0.6.0",
+        message:
+          "weeklyTrainingParentTemporaryGuidanceEnabled requires sprint3-balance-0.6.0 or sprint3-balance-0.7.0",
         actual: config.configVersion,
-        expected: SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+        expected: `${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}|${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}`,
       },
     ]);
   }

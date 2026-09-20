@@ -1209,6 +1209,7 @@ export {
   createSprint3Balance040ConfigInput,
   createSprint3Balance050ConfigInput,
   createSprint3Balance060ConfigInput,
+  createSprint3Balance070ConfigInput,
 } from "./sprint3/sprint3-config-defaults.js";
 export {
   isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
@@ -1224,6 +1225,13 @@ export {
 } from "./sprint3/resolve-weekly-parent-temporary-guidance.js";
 export { evaluateEnrollmentAssignment } from "./sprint3/evaluate-enrollment-assignment.js";
 export {
+  computeWeeklyTeachCompositeScore,
+  computeWeeklyTeachingAllocationSlots,
+  evaluateExplicitWeeklyTeachAction,
+  evaluateWeeklyTeachRefusal,
+  isExplicitWeeklyTeachActionEnabled,
+} from "./sprint3/evaluate-explicit-weekly-teach.js";
+export {
   computeAutonomousMaxDisciples,
   evaluateMasterIntakeDecision,
 } from "./sprint3/evaluate-master-intake.js";
@@ -1236,6 +1244,7 @@ export {
 } from "./sprint3/validate-sprint3-config.js";
 export {
   ENROLLMENT_ASSIGNMENT_PROCESSOR_ID,
+  EXPLICIT_WEEKLY_TEACH_ACTION_PROCESSOR_ID,
   MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
   MASTER_INTAKE_EVALUATION_POLICY_DEFERRED,
   MASTER_INTAKE_EVALUATION_PROCESSOR_ID,
@@ -1248,6 +1257,8 @@ export {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
   WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID,
   WEEKLY_TRAINING_PARENT_TEMPORARY_GUIDANCE_BINDING_ID,
 } from "./sprint3/constants.js";
@@ -1259,6 +1270,18 @@ export type {
   EnrollmentMasterCandidate,
   EnrollmentSpecialReason,
   ExplicitWeeklyTeachActionContract,
+  Sprint3WeeklyTeachActionConfig,
+  WeeklyTeachAllocationFormula,
+  WeeklyTeachDiscipleDecision,
+  WeeklyTeachDiscipleOutcome,
+  WeeklyTeachDiscipleRequest,
+  WeeklyTeachEvaluationInputScores,
+  WeeklyTeachEvaluationWeights,
+  WeeklyTeachTierThresholds,
+  ExplicitWeeklyTeachActionOutcome,
+  ExplicitWeeklyTeachActionOutcomeKind,
+  ExplicitWeeklyTeachActionRecord,
+  ExplicitWeeklyTeachMasterWeeklyAction,
   MasterIntakeAcceptance,
   MasterIntakeEvaluationOutcome,
   MasterIntakeEvaluationRecord,

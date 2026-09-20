@@ -10,7 +10,8 @@
   - **S03-004 implemented**（`SPRINT3-S03-004-INTAKE-A-20260920-R1`）
   - **S03-005 implemented**（`SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1`）
   - **S03-006 implemented**（`SPRINT3-S03-006-PARENT-TEMP-GUIDANCE-A-20260920-R1`）
-  - S03-007〜S03-008 **planned**
+  - S03-007 **implemented**（`master` product）
+  - S03-008 **planned**
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -35,7 +36,7 @@
 | S03-004 | 門下受入上限・師匠自律判断 | S03-001 |
 | S03-005 | 門下人数係数の週間訓練パイプライン接続 | S03-001、S01-004 既存契約 |
 | S03-006 | 親一時指導（正式師匠不在） | S03-001、S03-003 |
-| S03-007 | 明示的週間 `teach` 行動・教授拒否 | S03-001、09/10 契約 |
+| S03-007 | 明示的週間 `teach` 行動・教授拒否 | S03-001、09/10 契約 — **implemented** |
 | S03-008 | 教授技選択・技継承・独自技/失伝（Sprint 3 テーマ残） | S03-007 |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
@@ -161,9 +162,13 @@ S03-001 `teachingEfficiency` を Sprint 1 週間訓練成果計算へ接続（�
 
 ## S03-007 明示的週間 `teach`
 
-### 目的
+### 受入チェック（概要）
 
-`docs/specs/09-technique-system.md` / `10-training-and-learning.md` の Sprint 3 予約: 週間行動、教授拒否、指導人数配分。
+- `sprint3-balance-0.7.0` + `explicitWeeklyTeachActionEnabled: true` + `weeklyTeachAction` policy body
+- Pure 関数 `evaluateExplicitWeeklyTeachAction` / `evaluateWeeklyTeachRefusal` / `computeWeeklyTeachingAllocationSlots`（processor id `sprint3-explicit-weekly-teach-0.1.0`）
+- 09 §8.1 静的 `teacherCanTeach`、docs/SPEC.md 教授評価配点・段階閾値を config 保持（コード直書きなし）
+- 親一時指導は `basic` tier のみ（正式伝承境界）
+- `explicit-weekly-teach` テスト（WT-001〜010）および CFG-012
 
 ---
 

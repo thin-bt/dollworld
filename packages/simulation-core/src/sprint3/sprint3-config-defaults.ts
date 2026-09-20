@@ -12,6 +12,8 @@ import {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
 } from "./constants.js";
 import type { Sprint3ConfigInput } from "./types.js";
 
@@ -137,6 +139,51 @@ export function createSprint3Balance060ConfigInput(): Sprint3ConfigInput {
       enrollmentAssignmentAiEnabled: true,
       weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
       weeklyTrainingParentTemporaryGuidanceEnabled: true,
+    },
+  };
+}
+
+/** S03-007 canonical balance pack with explicit weekly teach action policy. */
+export function createSprint3Balance070ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance060ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: true,
+      enrollmentAssignmentAiEnabled: true,
+      weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
+      weeklyTrainingParentTemporaryGuidanceEnabled: true,
+    },
+    weeklyTeachAction: {
+      evaluationPolicyVersion: WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
+      evaluationWeights: {
+        styleMatchMaxPoints: 25,
+        requirementsMetMaxPoints: 20,
+        trustAndCompatibilityMaxPoints: 20,
+        tacticalNeedMaxPoints: 15,
+        successionPriorityMaxPoints: 20,
+        secrecyAndLoyaltyPenaltyMaxPoints: 40,
+      },
+      tierThresholds: {
+        basic: { minimumCompositeScore: 30 },
+        standard: { minimumCompositeScore: 45 },
+        advanced: {
+          minimumCompositeScore: 65,
+          minimumTrustScore: 40,
+          minimumMasterMasteryHundredths: 7000,
+        },
+        secret: {
+          minimumCompositeScore: 85,
+          minimumTrustScore: 70,
+          minimumMasterMasteryHundredths: 8500,
+        },
+      },
+      allocationFormula: {
+        baseWeeklyTeachSlots: 1,
+        teachingAbilityBonusPerTenPoints: 1,
+        minimumWeeklyTeachSlots: 1,
+        maximumWeeklyTeachSlots: 6,
+      },
     },
   };
 }

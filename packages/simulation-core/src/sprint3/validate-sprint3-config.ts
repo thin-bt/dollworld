@@ -18,6 +18,8 @@ import {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
 } from "./constants.js";
 import {
   createDefaultSprint3ConfigInput,
@@ -26,6 +28,7 @@ import {
   createSprint3Balance040ConfigInput,
   createSprint3Balance050ConfigInput,
   createSprint3Balance060ConfigInput,
+  createSprint3Balance070ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   getExpectedCanonicalJsonForSprint3ConfigVersion,
@@ -39,6 +42,10 @@ import type {
   Sprint3Config,
   Sprint3ConfigInput,
   Sprint3MasterIntakeConfig,
+  Sprint3WeeklyTeachActionConfig,
+  WeeklyTeachAllocationFormula,
+  WeeklyTeachEvaluationWeights,
+  WeeklyTeachTierThresholds,
 } from "./types.js";
 import {
   deepFreezePlainJson,
@@ -59,7 +66,10 @@ const ROOT_KEYS = [
   "masterQualification",
   "mentorshipFeatures",
   "masterIntake",
+  "weeklyTeachAction",
 ] as const;
+
+const LEARNING_TIER_KEYS = ["basic", "standard", "advanced", "secret"] as const;
 
 function requireSafeInteger(
   object: Record<string, unknown>,
@@ -632,6 +642,302 @@ function parseMasterIntake(
   return undefined;
 }
 
+function parseWeeklyTeachTierThresholds(
+  value: unknown,
+  tierPath: string,
+  issues: ValidationIssue[],
+): WeeklyTeachTierThresholds | undefined {
+  const object = snapshotPlainObjectOrFail(value, tierPath, issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(
+    object,
+    ["minimumCompositeScore", "minimumTrustScore", "minimumMasterMasteryHundredths"],
+    tierPath,
+    issues,
+  );
+  const minimumCompositeScore = requireIntegerInRange(
+    object,
+    "minimumCompositeScore",
+    tierPath,
+    0,
+    100,
+    issues,
+  );
+  let minimumTrustScore: number | undefined;
+  if ("minimumTrustScore" in object) {
+    minimumTrustScore = requireIntegerInRange(
+      object,
+      "minimumTrustScore",
+      tierPath,
+      0,
+      100,
+      issues,
+    );
+  }
+  let minimumMasterMasteryHundredths: number | undefined;
+  if ("minimumMasterMasteryHundredths" in object) {
+    minimumMasterMasteryHundredths = requireIntegerInRange(
+      object,
+      "minimumMasterMasteryHundredths",
+      tierPath,
+      0,
+      10_000,
+      issues,
+    );
+  }
+  if (minimumCompositeScore === undefined) {
+    return undefined;
+  }
+  return {
+    minimumCompositeScore,
+    ...(minimumTrustScore === undefined ? {} : { minimumTrustScore }),
+    ...(minimumMasterMasteryHundredths === undefined
+      ? {}
+      : { minimumMasterMasteryHundredths }),
+  };
+}
+
+function parseWeeklyTeachAction(
+  value: unknown,
+  configVersion: string,
+  issues: ValidationIssue[],
+): Sprint3WeeklyTeachActionConfig | undefined {
+  if (value === undefined) {
+    if (configVersion === SPRINT3_CONFIG_VERSION_WEEKLY_TEACH) {
+      issues.push({
+        path: "/weeklyTeachAction",
+        message: "weeklyTeachAction is required on sprint3-balance-0.7.0",
+        actual: undefined,
+        expected: "object",
+      });
+    }
+    return undefined;
+  }
+  if (configVersion !== SPRINT3_CONFIG_VERSION_WEEKLY_TEACH) {
+    issues.push({
+      path: "/weeklyTeachAction",
+      message: "weeklyTeachAction is only allowed on sprint3-balance-0.7.0",
+      actual: configVersion,
+      expected: SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+    });
+    return undefined;
+  }
+  const object = snapshotPlainObjectOrFail(value, "/weeklyTeachAction", issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(
+    object,
+    ["evaluationPolicyVersion", "evaluationWeights", "tierThresholds", "allocationFormula"],
+    "/weeklyTeachAction",
+    issues,
+  );
+  const evaluationPolicyVersion = requireLiteralString(
+    object,
+    "evaluationPolicyVersion",
+    "/weeklyTeachAction",
+    WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
+    issues,
+  );
+  const weightsObject = snapshotPlainObjectOrFail(
+    object["evaluationWeights"],
+    "/weeklyTeachAction/evaluationWeights",
+    issues,
+  );
+  let evaluationWeights: WeeklyTeachEvaluationWeights | undefined;
+  if (weightsObject !== undefined) {
+    rejectUnknownKeys(
+      weightsObject,
+      [
+        "styleMatchMaxPoints",
+        "requirementsMetMaxPoints",
+        "trustAndCompatibilityMaxPoints",
+        "tacticalNeedMaxPoints",
+        "successionPriorityMaxPoints",
+        "secrecyAndLoyaltyPenaltyMaxPoints",
+      ],
+      "/weeklyTeachAction/evaluationWeights",
+      issues,
+    );
+    const styleMatchMaxPoints = requireIntegerInRange(
+      weightsObject,
+      "styleMatchMaxPoints",
+      "/weeklyTeachAction/evaluationWeights",
+      0,
+      100,
+      issues,
+    );
+    const requirementsMetMaxPoints = requireIntegerInRange(
+      weightsObject,
+      "requirementsMetMaxPoints",
+      "/weeklyTeachAction/evaluationWeights",
+      0,
+      100,
+      issues,
+    );
+    const trustAndCompatibilityMaxPoints = requireIntegerInRange(
+      weightsObject,
+      "trustAndCompatibilityMaxPoints",
+      "/weeklyTeachAction/evaluationWeights",
+      0,
+      100,
+      issues,
+    );
+    const tacticalNeedMaxPoints = requireIntegerInRange(
+      weightsObject,
+      "tacticalNeedMaxPoints",
+      "/weeklyTeachAction/evaluationWeights",
+      0,
+      100,
+      issues,
+    );
+    const successionPriorityMaxPoints = requireIntegerInRange(
+      weightsObject,
+      "successionPriorityMaxPoints",
+      "/weeklyTeachAction/evaluationWeights",
+      0,
+      100,
+      issues,
+    );
+    const secrecyAndLoyaltyPenaltyMaxPoints = requireIntegerInRange(
+      weightsObject,
+      "secrecyAndLoyaltyPenaltyMaxPoints",
+      "/weeklyTeachAction/evaluationWeights",
+      0,
+      100,
+      issues,
+    );
+    if (
+      styleMatchMaxPoints === undefined ||
+      requirementsMetMaxPoints === undefined ||
+      trustAndCompatibilityMaxPoints === undefined ||
+      tacticalNeedMaxPoints === undefined ||
+      successionPriorityMaxPoints === undefined ||
+      secrecyAndLoyaltyPenaltyMaxPoints === undefined
+    ) {
+      evaluationWeights = undefined;
+    } else {
+      evaluationWeights = {
+        styleMatchMaxPoints,
+        requirementsMetMaxPoints,
+        trustAndCompatibilityMaxPoints,
+        tacticalNeedMaxPoints,
+        successionPriorityMaxPoints,
+        secrecyAndLoyaltyPenaltyMaxPoints,
+      };
+    }
+  }
+  const tierObject = snapshotPlainObjectOrFail(
+    object["tierThresholds"],
+    "/weeklyTeachAction/tierThresholds",
+    issues,
+  );
+  const tierThresholds: Partial<Record<(typeof LEARNING_TIER_KEYS)[number], WeeklyTeachTierThresholds>> =
+    {};
+  if (tierObject !== undefined) {
+    rejectUnknownKeys(tierObject, [...LEARNING_TIER_KEYS], "/weeklyTeachAction/tierThresholds", issues);
+    for (const tier of LEARNING_TIER_KEYS) {
+      const parsed = parseWeeklyTeachTierThresholds(
+        tierObject[tier],
+        `/weeklyTeachAction/tierThresholds/${tier}`,
+        issues,
+      );
+      if (parsed !== undefined) {
+        tierThresholds[tier] = parsed;
+      }
+    }
+  }
+  const allocationObject = snapshotPlainObjectOrFail(
+    object["allocationFormula"],
+    "/weeklyTeachAction/allocationFormula",
+    issues,
+  );
+  let allocationFormula: WeeklyTeachAllocationFormula | undefined;
+  if (allocationObject !== undefined) {
+    rejectUnknownKeys(
+      allocationObject,
+      [
+        "baseWeeklyTeachSlots",
+        "teachingAbilityBonusPerTenPoints",
+        "minimumWeeklyTeachSlots",
+        "maximumWeeklyTeachSlots",
+      ],
+      "/weeklyTeachAction/allocationFormula",
+      issues,
+    );
+    const baseWeeklyTeachSlots = requireIntegerInRange(
+      allocationObject,
+      "baseWeeklyTeachSlots",
+      "/weeklyTeachAction/allocationFormula",
+      0,
+      100,
+      issues,
+    );
+    const teachingAbilityBonusPerTenPoints = requireIntegerInRange(
+      allocationObject,
+      "teachingAbilityBonusPerTenPoints",
+      "/weeklyTeachAction/allocationFormula",
+      0,
+      100,
+      issues,
+    );
+    const minimumWeeklyTeachSlots = requireIntegerInRange(
+      allocationObject,
+      "minimumWeeklyTeachSlots",
+      "/weeklyTeachAction/allocationFormula",
+      0,
+      100,
+      issues,
+    );
+    const maximumWeeklyTeachSlots = requireIntegerInRange(
+      allocationObject,
+      "maximumWeeklyTeachSlots",
+      "/weeklyTeachAction/allocationFormula",
+      0,
+      100,
+      issues,
+    );
+    if (
+      baseWeeklyTeachSlots === undefined ||
+      teachingAbilityBonusPerTenPoints === undefined ||
+      minimumWeeklyTeachSlots === undefined ||
+      maximumWeeklyTeachSlots === undefined
+    ) {
+      allocationFormula = undefined;
+    } else if (minimumWeeklyTeachSlots > maximumWeeklyTeachSlots) {
+      issues.push({
+        path: "/weeklyTeachAction/allocationFormula/minimumWeeklyTeachSlots",
+        message: "minimumWeeklyTeachSlots must not exceed maximumWeeklyTeachSlots",
+        actual: minimumWeeklyTeachSlots,
+        expected: `<= ${String(maximumWeeklyTeachSlots)}`,
+      });
+    } else {
+      allocationFormula = {
+        baseWeeklyTeachSlots,
+        teachingAbilityBonusPerTenPoints,
+        minimumWeeklyTeachSlots,
+        maximumWeeklyTeachSlots,
+      };
+    }
+  }
+  if (
+    evaluationPolicyVersion === undefined ||
+    evaluationWeights === undefined ||
+    allocationFormula === undefined ||
+    LEARNING_TIER_KEYS.some((tier) => tierThresholds[tier] === undefined)
+  ) {
+    return undefined;
+  }
+  return {
+    evaluationPolicyVersion,
+    evaluationWeights,
+    tierThresholds: tierThresholds as Sprint3WeeklyTeachActionConfig["tierThresholds"],
+    allocationFormula,
+  };
+}
+
 function parseMentorshipFeatures(
   value: unknown,
   issues: ValidationIssue[],
@@ -681,20 +987,9 @@ function parseMentorshipFeatures(
       issues,
     );
   }
-  if (
-    explicitWeeklyTeachActionEnabled === undefined ||
+  if (explicitWeeklyTeachActionEnabled === undefined ||
     enrollmentAssignmentAiEnabled === undefined
   ) {
-    return undefined;
-  }
-  if (explicitWeeklyTeachActionEnabled) {
-    issues.push({
-      path: "/mentorshipFeatures/explicitWeeklyTeachActionEnabled",
-      message:
-        "explicit weekly teach action remains disabled until a later Sprint3 slice enables it",
-      actual: explicitWeeklyTeachActionEnabled,
-      expected: "false",
-    });
     return undefined;
   }
   return {
@@ -741,6 +1036,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
   const masterQualification = parseMasterQualification(object["masterQualification"], issues);
   const mentorshipFeatures = parseMentorshipFeatures(object["mentorshipFeatures"], issues);
   const masterIntake = parseMasterIntake(object["masterIntake"], configVersion, issues);
+  const weeklyTeachAction = parseWeeklyTeachAction(object["weeklyTeachAction"], configVersion, issues);
 
   if (
     schemaVersion === undefined ||
@@ -760,17 +1056,23 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
 
   const weeklyTeachingEfficiencyEnabled =
     mentorshipFeatures.weeklyTrainingDiscipleCountTeachingEfficiencyEnabled === true;
+  const weeklyTeachingEfficiencyConfigVersions = [
+    SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+    SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+    SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  ] as const;
   if (
     weeklyTeachingEfficiencyEnabled &&
-    configVersion !== SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY &&
-    configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE
+    !weeklyTeachingEfficiencyConfigVersions.includes(
+      configVersion as (typeof weeklyTeachingEfficiencyConfigVersions)[number],
+    )
   ) {
     issues.push({
       path: "/mentorshipFeatures/weeklyTrainingDiscipleCountTeachingEfficiencyEnabled",
       message:
-        "weekly training teachingEfficiency binding is only enabled on sprint3-balance-0.5.0 or sprint3-balance-0.6.0",
+        "weekly training teachingEfficiency binding is only enabled on sprint3-balance-0.5.0 through sprint3-balance-0.7.0",
       actual: configVersion,
-      expected: `${SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY}|${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}`,
+      expected: weeklyTeachingEfficiencyConfigVersions.join("|"),
     });
   }
   if (
@@ -786,15 +1088,22 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
   }
   const parentGuidanceWeeklyEnabled =
     mentorshipFeatures.weeklyTrainingParentTemporaryGuidanceEnabled === true;
+  const parentGuidanceConfigVersions = [
+    SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+    SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  ] as const;
   if (
     parentGuidanceWeeklyEnabled &&
-    configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE
+    !parentGuidanceConfigVersions.includes(
+      configVersion as (typeof parentGuidanceConfigVersions)[number],
+    )
   ) {
     issues.push({
       path: "/mentorshipFeatures/weeklyTrainingParentTemporaryGuidanceEnabled",
-      message: "parent temporary guidance weekly binding is only enabled on sprint3-balance-0.6.0",
+      message:
+        "parent temporary guidance weekly binding is only enabled on sprint3-balance-0.6.0 or sprint3-balance-0.7.0",
       actual: configVersion,
-      expected: SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+      expected: parentGuidanceConfigVersions.join("|"),
     });
   }
   if (
@@ -817,6 +1126,14 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
         expected: "true",
       });
     }
+    if (!parentGuidanceWeeklyEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/weeklyTrainingParentTemporaryGuidanceEnabled",
+        message: "sprint3-balance-0.6.0 requires parent temporary guidance weekly binding",
+        actual: mentorshipFeatures.weeklyTrainingParentTemporaryGuidanceEnabled,
+        expected: "true",
+      });
+    }
     if (!mentorshipFeatures.enrollmentAssignmentAiEnabled) {
       issues.push({
         path: "/mentorshipFeatures/enrollmentAssignmentAiEnabled",
@@ -825,6 +1142,67 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
         expected: "true",
       });
     }
+    if (mentorshipFeatures.explicitWeeklyTeachActionEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/explicitWeeklyTeachActionEnabled",
+        message: "explicit weekly teach action is only enabled on sprint3-balance-0.7.0",
+        actual: mentorshipFeatures.explicitWeeklyTeachActionEnabled,
+        expected: "false",
+      });
+    }
+  }
+  if (configVersion === SPRINT3_CONFIG_VERSION_WEEKLY_TEACH) {
+    if (!weeklyTeachingEfficiencyEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/weeklyTrainingDiscipleCountTeachingEfficiencyEnabled",
+        message: "sprint3-balance-0.7.0 retains weekly disciple-count teachingEfficiency binding",
+        actual: mentorshipFeatures.weeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
+        expected: "true",
+      });
+    }
+    if (!parentGuidanceWeeklyEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/weeklyTrainingParentTemporaryGuidanceEnabled",
+        message: "sprint3-balance-0.7.0 retains parent temporary guidance weekly binding",
+        actual: mentorshipFeatures.weeklyTrainingParentTemporaryGuidanceEnabled,
+        expected: "true",
+      });
+    }
+    if (!mentorshipFeatures.enrollmentAssignmentAiEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/enrollmentAssignmentAiEnabled",
+        message: "sprint3-balance-0.7.0 retains enrollment assignment AI gate",
+        actual: mentorshipFeatures.enrollmentAssignmentAiEnabled,
+        expected: "true",
+      });
+    }
+    if (!mentorshipFeatures.explicitWeeklyTeachActionEnabled) {
+      issues.push({
+        path: "/mentorshipFeatures/explicitWeeklyTeachActionEnabled",
+        message: "sprint3-balance-0.7.0 requires explicit weekly teach action gate",
+        actual: mentorshipFeatures.explicitWeeklyTeachActionEnabled,
+        expected: "true",
+      });
+    }
+    if (weeklyTeachAction === undefined) {
+      issues.push({
+        path: "/weeklyTeachAction",
+        message: "sprint3-balance-0.7.0 requires weeklyTeachAction policy body",
+        actual: undefined,
+        expected: "object",
+      });
+    }
+  }
+  if (
+    mentorshipFeatures.explicitWeeklyTeachActionEnabled &&
+    configVersion !== SPRINT3_CONFIG_VERSION_WEEKLY_TEACH
+  ) {
+    issues.push({
+      path: "/mentorshipFeatures/explicitWeeklyTeachActionEnabled",
+      message: "explicit weekly teach action remains disabled until sprint3-balance-0.7.0",
+      actual: configVersion,
+      expected: SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+    });
   }
   if (issues.length > 0) {
     return failure(issues);
@@ -838,6 +1216,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     masterQualification,
     mentorshipFeatures,
     ...(masterIntake !== undefined ? { masterIntake } : {}),
+    ...(weeklyTeachAction !== undefined ? { weeklyTeachAction } : {}),
   };
 
   if (isKnownSprint3ConfigVersion(configVersion)) {
@@ -926,6 +1305,14 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
     toCanonicalJson(parentGuidanceValidated.value),
+  );
+  const weeklyTeachValidated = validateNormalizedSprint3Config(createSprint3Balance070ConfigInput());
+  if (!weeklyTeachValidated.ok) {
+    throw new Error("Sprint3 balance 0.7.0 config failed validation during registry bootstrap");
+  }
+  registerKnownSprint3ConfigVersion(
+    SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+    toCanonicalJson(weeklyTeachValidated.value),
   );
   defaultRegistryInitialized = true;
   void provider;

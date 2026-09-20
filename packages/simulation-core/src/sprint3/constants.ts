@@ -26,6 +26,17 @@ export const SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY = "sprint3-balance-0.5.0
 /** S03-006 parent temporary guidance teacher factor at weekly training boundary. */
 export const SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE = "sprint3-balance-0.6.0" as const;
 
+/** S03-007 explicit weekly `teach` action, refusal, and allocation policy enabled. */
+export const SPRINT3_CONFIG_VERSION_WEEKLY_TEACH = "sprint3-balance-0.7.0" as const;
+
+/** Pure explicit weekly teach processor contract id (weekly adapter wiring in later slices). */
+export const EXPLICIT_WEEKLY_TEACH_ACTION_PROCESSOR_ID =
+  "sprint3-explicit-weekly-teach-0.1.0" as const;
+
+/** Config-held refusal / allocation policy for S03-007. */
+export const WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT =
+  "weekly-teach-action-explicit-0.1.0" as const;
+
 /** Sprint3 → Sprint1 weekly training disciple-count factor binding (S03-005). */
 export const WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID =
   "sprint3-weekly-training-disciple-count-0.1.0" as const;

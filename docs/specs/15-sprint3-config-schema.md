@@ -93,14 +93,29 @@ Sprint3Config
 
 ### 2.5 mentorshipFeatures
 
-後続スライスの機能ゲート。S03-001 では `explicitWeeklyTeachActionEnabled=true` を拒否。S03-003 以降 `enrollmentAssignmentAiEnabled=true` を受理（`sprint3-balance-0.3.0`）。
+後続スライスの機能ゲート。S03-001 では `explicitWeeklyTeachActionEnabled=true` を拒否。S03-003 以降 `enrollmentAssignmentAiEnabled=true` を受理（`sprint3-balance-0.3.0`）。S03-007 で `explicitWeeklyTeachActionEnabled=true` を `sprint3-balance-0.7.0` のみ受理。
 
 | キー | 意味 |
 |---|---|
 | explicitWeeklyTeachActionEnabled | 週間 `teach` 行動（09/10 Sprint 3 予約） |
 | enrollmentAssignmentAiEnabled | 8歳師匠決定 AI（`docs/SPEC.md` world step 4） |
-| weeklyTrainingDiscipleCountTeachingEfficiencyEnabled | S03-005。`true` のとき週間訓練成果へ `teachingEfficiency` 門下人数 bracket を適用（`sprint3-balance-0.5.0` / `0.6.0` のみ `true` 可） |
-| weeklyTrainingParentTemporaryGuidanceEnabled | S03-006。`true` のとき `parent_temporary_guidance` 週間 `train_stat` へ `parentTemporaryGuidanceFactorTenThousandths` を適用（`sprint3-balance-0.6.0` のみ `true` 可） |
+| weeklyTrainingDiscipleCountTeachingEfficiencyEnabled | S03-005。`true` のとき週間訓練成果へ `teachingEfficiency` 門下人数 bracket を適用（`sprint3-balance-0.5.0`〜`0.7.0` のみ `true` 可） |
+| weeklyTrainingParentTemporaryGuidanceEnabled | S03-006。`true` のとき `parent_temporary_guidance` 週間 `train_stat` へ `parentTemporaryGuidanceFactorTenThousandths` を適用（`sprint3-balance-0.6.0` / `0.7.0` のみ `true` 可） |
+
+### 2.6 weeklyTeachAction（S03-007、`sprint3-balance-0.7.0` のみ必須）
+
+| evaluationPolicyVersion | 意味 |
+|---|---|
+| `weekly-teach-action-explicit-0.1.0` | S03-007。教授評価 weight・段階別 refusal 閾値・週間指導人数 `allocationFormula` を config 保持。 |
+
+Pure 関数 `evaluateExplicitWeeklyTeachAction` は師匠が週間 `teach` を選択した週のみ受理し、門下リクエストを allocation 上限まで決定的に処理する（世界状態 mutation は後続 adapter）。
+
+### 3.5 S03-007 explicit weekly teach processor I/O
+
+- Processor id: `sprint3-explicit-weekly-teach-0.1.0`
+- Pure 関数: `evaluateExplicitWeeklyTeachAction(config, record, techniqueDefinitionsById)` → `ExplicitWeeklyTeachActionOutcome`
+- Refusal 補助: `evaluateWeeklyTeachRefusal`（09 §8.1 `teacherCanTeach` + config tier 閾値 + 親一時指導 tier cap）
+- Allocation: `computeWeeklyTeachingAllocationSlots`（config `allocationFormula` のみ）
 
 ### 3.3 S03-005 weekly training teachingEfficiency binding
 
