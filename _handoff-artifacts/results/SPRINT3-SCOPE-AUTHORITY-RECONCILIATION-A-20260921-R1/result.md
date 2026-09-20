@@ -8,7 +8,8 @@ updatedAt: 2026-09-21T03:48:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
-published-master-sha: (set after push readback)
+published-master-sha: 41055dd78d4ad5e23fb546a1cb6f235dd7b089a2
+product-commit-sha: 41055dd78d4ad5e23fb546a1cb6f235dd7b089a2
 pre-publication-origin-head: 1865bcdeb9bd5e446f6142211e68f9b3a08da4cc
 local-worktree-head-at-pickup: 6e515b3e8d242574f667e6c228bc4bbfb26c3583
 evidence-worktree: _handoff-artifacts/.tmp-scope-recon-publish @ origin/master
