@@ -769,10 +769,7 @@ export {
   DETAILED_LOG_RETENTION_STATUSES,
   IMPORTANT_BATTLE_REASONS,
 } from "./sprint2/constants.js";
-export type {
-  DetailedLogRetentionStatus,
-  ImportantBattleReason,
-} from "./sprint2/constants.js";
+export type { DetailedLogRetentionStatus, ImportantBattleReason } from "./sprint2/constants.js";
 export {
   computeCompetitionDomainRegistryHash,
   createDefaultCompetitionDomainRegistryInput,
@@ -998,11 +995,11 @@ export type {
   ApplyTournamentFinalResultEarningsInput,
   ApplyTournamentFinalResultEarningsOutput,
 } from "./sprint2/annual-earnings.js";
-export {
-  projectAnnualRanking,
-  projectAnnualRankingForBrowser,
+export { projectAnnualRanking, projectAnnualRankingForBrowser } from "./sprint2/annual-ranking.js";
+export type {
+  AnnualRankingDisplayFacts,
+  ProjectAnnualRankingInput,
 } from "./sprint2/annual-ranking.js";
-export type { AnnualRankingDisplayFacts, ProjectAnnualRankingInput } from "./sprint2/annual-ranking.js";
 export {
   createEmptyAnnualRankingHistoryStore,
   finalizeClosedYearHistory,
@@ -1205,6 +1202,29 @@ export {
   validateNormalizedSprint2Config,
   validateSprint2Config,
 } from "./sprint2/validate-sprint2-config.js";
+export { createDefaultSprint3ConfigInput } from "./sprint3/sprint3-config-defaults.js";
+export {
+  computeSprint3ConfigHash,
+  createDefaultSprint3Config,
+  validateNormalizedSprint3Config,
+  validateSprint3Config,
+} from "./sprint3/validate-sprint3-config.js";
+export {
+  MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
+  SPRINT3_CONFIG_SCHEMA_VERSION,
+  SPRINT3_CONFIG_VERSION_DEFAULT,
+} from "./sprint3/constants.js";
+export type {
+  DiscipleCountFactorBracket,
+  ExplicitWeeklyTeachActionContract,
+  MentorshipRelationKind,
+  Sprint3Config,
+  Sprint3ConfigInput,
+  Sprint3EnrollmentConfig,
+  Sprint3MasterQualificationConfig,
+  Sprint3MentorshipFeatureFlags,
+  Sprint3TeachingEfficiencyConfig,
+} from "./sprint3/types.js";
 export type {
   Sprint2Config,
   Sprint2ConfigInput,
