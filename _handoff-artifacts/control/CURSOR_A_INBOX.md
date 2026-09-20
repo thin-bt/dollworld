@@ -1,25 +1,17 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1
-mode: S03_005_TEACHING_EFFICIENCY_PIPELINE_INTEGRATION
-updatedAt: 2026-09-20T20:39:11+09:00
-sprint: Sprint3
-priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-20T20:46:00+09:00
+last-consumed-task-key: SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1
+last-terminal: READY / SPRINT3_S03_005_TEACHING_EFFICIENCY_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-predecessor: SPRINT3-S03-004-INTAKE-A-20260920-R1
+sprint: Sprint3
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
-- implement/test/publish S03-005 to canonical master
 - publish terminal result to GitHub canonical result path
-- do not start Sprint4
-- pickup-recovery: canonical PREPARED remains unclaimed and no terminal exists at 2026-09-20T20:39:11+09:00; immediate re-dispatch of the same authority; do not create a duplicate task
-- deadline-recovery: Sprint3 deadline is today; execute product work now rather than returning status-only
-- escalation: repeated PREPARED pickup failure; this lane must claim ACTIVE and perform the product implementation now, not merely rewrite control state
-- escalation-level: DEADLINE_CRITICAL
-- failover-trigger: if this lane cannot claim immediately, release/terminalize its lane state so another free lane can take the unique S03-005 product gap without authority collision
-- release-gate: after S03-005 READY, identify and immediately take the next unique Sprint3 release-gate/evidence gap rather than idling
