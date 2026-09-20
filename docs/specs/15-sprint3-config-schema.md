@@ -37,6 +37,7 @@ Sprint3Config
 | masterQualification.evaluationPolicyVersion | `master-qualification-deferred-0.1.0`（`sprint3-balance-0.1.0`） |
 | Sprint3Config.configVersion（S03-002 資格閾値付き） | `sprint3-balance-0.2.0` |
 | masterQualification.evaluationPolicyVersion（0.2.0） | `master-qualification-rank-and-records-0.1.0` |
+| Sprint3Config.configVersion（S03-003 入門 AI 有効） | `sprint3-balance-0.3.0` |
 
 ## 2. セクション定義
 
@@ -79,7 +80,7 @@ Sprint3Config
 
 ### 2.4 mentorshipFeatures
 
-後続スライスの機能ゲート。S03-001 では両方 `false` のみ受理する。
+後続スライスの機能ゲート。S03-001 では `explicitWeeklyTeachActionEnabled=true` を拒否。S03-003 以降 `enrollmentAssignmentAiEnabled=true` を受理（`sprint3-balance-0.3.0`）。
 
 | キー | 意味 |
 |---|---|
@@ -88,7 +89,15 @@ Sprint3Config
 
 ## 3. ドメイン型境界（config 外）
 
-`MentorshipRelationKind` および `ExplicitWeeklyTeachActionContract` は `packages/simulation-core` の公開型として S03-001 で固定する。永続化・processor I/O は後続タスク。
+`MentorshipRelationKind` および `ExplicitWeeklyTeachActionContract` は `packages/simulation-core` の公開型として S03-001 で固定する。
+
+### 3.1 S03-003 enrollment assignment processor I/O
+
+- Processor id: `sprint3-enrollment-assignment-0.1.0`
+- Pure 関数: `evaluateEnrollmentAssignment(config, record)` → `EnrollmentAssignmentOutcome`
+- 入力 `EnrollmentAssignmentRecord`: 子の年齢、特別理由、師匠候補（資格 record + スコア + **S03-004 境界** `intakeAcceptance`）
+- 出力 kind: `not_at_enrollment_boundary` / `parent_master_assigned` / `formal_master_assigned` / `parent_temporary_guidance` / `no_eligible_or_accepted_master`
+- 世界状態は変更しない（師弟関係の永続化は後続 WorldEngine 統合）
 
 ## 4. 参照
 

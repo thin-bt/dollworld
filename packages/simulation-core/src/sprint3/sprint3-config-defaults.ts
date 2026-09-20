@@ -6,6 +6,7 @@ import {
   MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
+  SPRINT3_CONFIG_VERSION_ENROLLMENT,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./constants.js";
 import type { Sprint3ConfigInput } from "./types.js";
@@ -73,6 +74,18 @@ export function createSprint3Balance020ConfigInput(): Sprint3ConfigInput {
     mentorshipFeatures: {
       explicitWeeklyTeachActionEnabled: false,
       enrollmentAssignmentAiEnabled: false,
+    },
+  };
+}
+
+/** S03-003 canonical balance pack with enrollment assignment AI gate enabled. */
+export function createSprint3Balance030ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance020ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_ENROLLMENT,
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: false,
+      enrollmentAssignmentAiEnabled: true,
     },
   };
 }

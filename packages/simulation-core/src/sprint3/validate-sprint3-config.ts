@@ -11,11 +11,13 @@ import {
   MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
+  SPRINT3_CONFIG_VERSION_ENROLLMENT,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./constants.js";
 import {
   createDefaultSprint3ConfigInput,
   createSprint3Balance020ConfigInput,
+  createSprint3Balance030ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   getExpectedCanonicalJsonForSprint3ConfigVersion,
@@ -489,16 +491,6 @@ function parseMentorshipFeatures(
     });
     return undefined;
   }
-  if (enrollmentAssignmentAiEnabled) {
-    issues.push({
-      path: "/mentorshipFeatures/enrollmentAssignmentAiEnabled",
-      message:
-        "enrollment assignment AI remains disabled until S03-003+ implements processor contracts",
-      actual: enrollmentAssignmentAiEnabled,
-      expected: "false",
-    });
-    return undefined;
-  }
   return {
     explicitWeeklyTeachActionEnabled,
     enrollmentAssignmentAiEnabled,
@@ -604,6 +596,16 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_QUALIFICATION,
     toCanonicalJson(qualificationValidated.value),
+  );
+  const enrollmentValidated = validateNormalizedSprint3Config(
+    createSprint3Balance030ConfigInput(),
+  );
+  if (!enrollmentValidated.ok) {
+    throw new Error("Sprint3 balance 0.3.0 config failed validation during registry bootstrap");
+  }
+  registerKnownSprint3ConfigVersion(
+    SPRINT3_CONFIG_VERSION_ENROLLMENT,
+    toCanonicalJson(enrollmentValidated.value),
   );
   defaultRegistryInitialized = true;
   void provider;

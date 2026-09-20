@@ -5,8 +5,9 @@
 - 対象 Sprint 3 ミニ仕様: `S3-SPEC-0.3.0-draft`（`docs/specs/15-sprint3-config-schema.md`）
 - 実装状態:
   - **S03-001 implemented**（`SPRINT3-FIRST-SLICE-AUTHORITY-AND-IMPLEMENTATION-A-20260920-R1`）
-  - **S03-002 implemented**（本タスク: `SPRINT3-S03-002-MASTER-QUALIFICATION-A-20260920-R1`）
-  - S03-003〜S03-008 **planned**
+  - **S03-002 implemented**（`SPRINT3-S03-002-MASTER-QUALIFICATION-A-20260920-R1`）
+  - **S03-003 implemented**（`SPRINT3-S03-003-ENROLLMENT-A-20260920-R1`）
+  - S03-004〜S03-008 **planned**
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -99,6 +100,13 @@
 ### 依存
 
 S03-002（師匠資格フラグ）、S03-004（受入上限）と整合。
+
+### 受入チェック（概要）
+
+- `formalEnrollmentMinAge` 到達時のみ評価（それ以外は `not_at_enrollment_boundary`）
+- S03-002 合格かつ `intakeAcceptance=accept` の師匠のみ選択候補（世界共通固定上限なし）
+- 親デフォルト / 特別理由時の非親師匠 / 親一時指導 / 割当不能を outcome kind で明示
+- `sprint3-balance-0.3.0` + `evaluateEnrollmentAssignment` テスト（EN-001〜010）
 
 ---
 

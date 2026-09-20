@@ -87,3 +87,49 @@ export type ExplicitWeeklyTeachActionContract = {
   readonly actionKind: "teach";
   readonly enabledByConfig: false;
 };
+
+/** Per-master intake decision supplied by caller; S03-004 owns autonomous limit policy. */
+export type MasterIntakeAcceptance = "accept" | "reject" | "defer";
+
+/** SPEC §8歳時の師匠決定 — reasons that permit a non-default formal master. */
+export type EnrollmentSpecialReason =
+  | "superior_master_invitation"
+  | "rebellion_against_parent"
+  | "poor_parent_child_compatibility"
+  | "aptitude_lineage_mismatch"
+  | "parent_intake_limit_reached";
+
+export type EnrollmentMasterCandidate = {
+  masterPersonId: string;
+  isBiologicalParent: boolean;
+  qualificationRecord: MasterQualificationEvaluationRecord;
+  parentChildCompatibilityScore: number;
+  lineageAptitudeScore: number;
+  schoolFitScore: number;
+  teachingEfficiencyScore: number;
+  intakeAcceptance: MasterIntakeAcceptance;
+};
+
+/** Processor input at the formal enrollment age boundary (no world-state mutation). */
+export type EnrollmentAssignmentRecord = {
+  childPersonId: string;
+  childAge: number;
+  activeSpecialReasons: readonly EnrollmentSpecialReason[];
+  masterCandidates: readonly EnrollmentMasterCandidate[];
+  /** Living parent for parent-temporary guidance when no formal master is assigned. */
+  temporaryGuidanceParentPersonId?: string;
+};
+
+export type EnrollmentAssignmentKind =
+  | "not_at_enrollment_boundary"
+  | "parent_master_assigned"
+  | "formal_master_assigned"
+  | "parent_temporary_guidance"
+  | "no_eligible_or_accepted_master";
+
+export type EnrollmentAssignmentOutcome = {
+  kind: EnrollmentAssignmentKind;
+  selectedMasterPersonId?: string;
+  mentorshipRelationKind?: MentorshipRelationKind;
+  reasons: readonly string[];
+};

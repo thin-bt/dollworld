@@ -13,3 +13,9 @@ export const MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS =
   "master-qualification-rank-and-records-0.1.0" as const;
 
 export const SPRINT3_CONFIG_VERSION_QUALIFICATION = "sprint3-balance-0.2.0" as const;
+
+/** S03-003 enrollment assignment AI enabled (same balance body as 0.2.0 + feature gate). */
+export const SPRINT3_CONFIG_VERSION_ENROLLMENT = "sprint3-balance-0.3.0" as const;
+
+/** Pure enrollment processor contract id (world step 4 wiring in later slices). */
+export const ENROLLMENT_ASSIGNMENT_PROCESSOR_ID = "sprint3-enrollment-assignment-0.1.0" as const;

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
-import { createDefaultSprint3ConfigInput } from "./sprint3-config-defaults.js";
+import {
+  createDefaultSprint3ConfigInput,
+  createSprint3Balance030ConfigInput,
+} from "./sprint3-config-defaults.js";
 import {
   computeSprint3ConfigHash,
   validateNormalizedSprint3Config,
@@ -66,5 +69,9 @@ describe("S03-001 Sprint3Config", () => {
     const input = createDefaultSprint3ConfigInput();
     input.teachingEfficiency.parentTemporaryGuidanceFactorTenThousandths = 7500.5;
     expect(validateSprint3Config(input, provider).ok).toBe(false);
+  });
+
+  it("CFG-008 accepts enrollmentAssignmentAiEnabled on sprint3-balance-0.3.0", () => {
+    expect(validateSprint3Config(createSprint3Balance030ConfigInput(), provider).ok).toBe(true);
   });
 });
