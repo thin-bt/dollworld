@@ -61,6 +61,7 @@ export function buildConsumedInboxMarkdown(input) {
 export function activeHasTerminalForTask(active, taskKey) {
   const completed =
     active.lastCompletedTask ??
+    active["last-completed-task"] ??
     active["last-completed-task-key"] ??
     "";
   if (completed !== taskKey) {
@@ -78,10 +79,18 @@ export function activeHasTerminalForTask(active, taskKey) {
  * @param {Record<string, string>} active
  */
 export function readActiveTerminal(active) {
-  const raw =
-    active["last-terminal"] ??
-    active.terminal ??
-    active["recovery-terminal"] ??
-    "";
-  return String(raw).trim();
+  const candidates = [
+    active["last-terminal"],
+    active.lastTerminal,
+    active["recovery-terminal"],
+    active.terminal,
+  ]
+    .map((v) => String(v ?? "").trim())
+    .filter((v) => v.length > 0);
+  if (candidates.length === 0) {
+    return "";
+  }
+  // Prefer the most specific terminal string.
+  candidates.sort((a, b) => b.length - a.length);
+  return candidates[0];
 }

@@ -61,6 +61,7 @@ export function isAlreadyCompleteSameTask(inbox, active) {
   }
   const completedKey =
     active.lastCompletedTask ??
+    active["last-completed-task"] ??
     active["last-completed-task-key"] ??
     active["task-key"] ??
     active["last-task-key"] ??
