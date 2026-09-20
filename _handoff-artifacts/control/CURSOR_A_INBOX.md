@@ -1,17 +1,21 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T00:45:32+09:00
-last-consumed-task-key: SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1
-last-terminal: READY / SPRINT3_S03_010_GENERATED_TECHNIQUE_REGISTRATION_CANONICAL_PUBLISHED
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1/result.md
+task-key: SPRINT3-S03-011-FIRST-USE-MATCHID-PERSISTENCE-A-20260921-R1
+mode: PRODUCT_IMPLEMENTATION
+updatedAt: 2026-09-21T01:02:00+09:00
+sprint: Sprint3
+priority: DEADLINE_CRITICAL
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-011-FIRST-USE-MATCHID-PERSISTENCE-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
+predecessor: SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1
 pickup-requirements:
-- fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- fresh-read GitHub canonical instruction and current master
+- claim ACTIVE before product changes
+- implement/test/publish bounded S03-011 first-use MatchId persistence
+- do not touch B2-owned S03-009 weekly runtime wiring or B2 control/task/result artifacts
+- rebase/fresh-read before publication if B2 lands first
 - publish terminal result to GitHub canonical result path
+- deadline-recovery: execute product work now; no status-only completion
