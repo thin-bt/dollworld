@@ -1207,7 +1207,13 @@ export {
   createSprint3Balance020ConfigInput,
   createSprint3Balance030ConfigInput,
   createSprint3Balance040ConfigInput,
+  createSprint3Balance050ConfigInput,
 } from "./sprint3/sprint3-config-defaults.js";
+export {
+  isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
+  selectDiscipleCountTeachingEfficiencyFactor,
+  validateWeeklyTrainingSprint3ConfigBinding,
+} from "./sprint3/resolve-weekly-disciple-count-teaching-efficiency.js";
 export { evaluateEnrollmentAssignment } from "./sprint3/evaluate-enrollment-assignment.js";
 export {
   computeAutonomousMaxDisciples,
@@ -1232,6 +1238,8 @@ export {
   SPRINT3_CONFIG_VERSION_ENROLLMENT,
   SPRINT3_CONFIG_VERSION_INTAKE,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
+  SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID,
 } from "./sprint3/constants.js";
 export type {
   DiscipleCountFactorBracket,

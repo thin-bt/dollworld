@@ -248,6 +248,7 @@ export function runSprint1WeeklyTrainingAdapter(
       catalog: input.techniqueCatalog,
       runtimeState: runtimeParts.value.specificState,
       rngState: runtimeParts.value.rngState,
+      ...(input.sprint3Config === undefined ? {} : { sprint3Config: input.sprint3Config }),
     },
     { sha256Provider: provider },
   );

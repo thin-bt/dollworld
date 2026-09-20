@@ -18,6 +18,7 @@ import type { EventAllocationState } from "./event-allocation-state.js";
 import type { MatchIdGeneratorState } from "./match-id-generator.js";
 import type { Sprint1RunContext } from "./sprint1-run-context.js";
 import type { TechniqueCatalog } from "./technique-catalog.js";
+import type { Sprint3Config } from "../sprint3/types.js";
 import type { Sprint1Config } from "./types.js";
 import type { WeeklyTrainingEventCandidate } from "./weekly-training-types.js";
 import type { WeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
@@ -63,6 +64,8 @@ export type Sprint1WeeklyTrainingAdapterInput = {
   sprint1Config: Sprint1Config;
   techniqueCatalog: TechniqueCatalog;
   processorRuntimeStates: ProcessorRuntimeState;
+  /** Optional S03-005 binding: teachingEfficiency disciple brackets for weekly outcomes. */
+  sprint3Config?: Sprint3Config;
 };
 
 /**

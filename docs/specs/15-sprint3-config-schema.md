@@ -97,6 +97,14 @@ Sprint3Config
 |---|---|
 | explicitWeeklyTeachActionEnabled | 週間 `teach` 行動（09/10 Sprint 3 予約） |
 | enrollmentAssignmentAiEnabled | 8歳師匠決定 AI（`docs/SPEC.md` world step 4） |
+| weeklyTrainingDiscipleCountTeachingEfficiencyEnabled | S03-005。`true` のとき週間訓練成果へ `teachingEfficiency` 門下人数 bracket を適用（`sprint3-balance-0.5.0` のみ `true` 可） |
+
+### 3.3 S03-005 weekly training teachingEfficiency binding
+
+- Binding id: `sprint3-weekly-training-disciple-count-0.1.0`
+- Optional input: `processWeeklyTrainingWeek` / Sprint1 weekly adapter `sprint3Config`
+- `discipleCount === 0` は Sprint1 同様 neutral 1.00（10000 basis points）
+- `discipleCount >= 1` は validated `discipleCountFactorBrackets` から決定的に factor を選択
 
 ## 3. ドメイン型境界（config 外）
 

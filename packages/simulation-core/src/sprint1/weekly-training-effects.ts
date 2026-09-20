@@ -23,6 +23,11 @@ import {
   selectFatigueGrowthFactor,
   selectTeacherGrowthFactor,
 } from "./growth-factor-selectors.js";
+import {
+  isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
+  selectDiscipleCountTeachingEfficiencyFactor,
+} from "../sprint3/resolve-weekly-disciple-count-teaching-efficiency.js";
+import type { Sprint3Config } from "../sprint3/types.js";
 import { deriveInjuryStage, selectInjuryGrowthFactor } from "./injury-stage.js";
 import { deriveMaxMental } from "./max-mental.js";
 import { drawInclusiveBasisPoints, multiplyBasisPointsFloor } from "./multiply-basis-points.js";
@@ -289,9 +294,19 @@ export function computeGrowthPotentialFactorBasisPoints(
 function selectDiscipleCountFactorOrNeutral(
   discipleCount: number,
   config: Sprint1Config,
+  sprint3Config?: Sprint3Config,
 ): ValidationResult<number> {
   if (discipleCount === 0) {
     return success(BASIS_POINTS_SCALE);
+  }
+  if (
+    sprint3Config !== undefined &&
+    isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled(sprint3Config)
+  ) {
+    return selectDiscipleCountTeachingEfficiencyFactor(
+      discipleCount,
+      sprint3Config.teachingEfficiency,
+    );
   }
   const factor = selectDiscipleCountGrowthFactor(discipleCount, config);
   if (!factor.ok) {
@@ -358,6 +373,7 @@ export function applyTrainStat(
   targetStat: AbilityKey,
   absoluteWeek: number,
   rng: WeeklyEffectRng,
+  sprint3Config?: Sprint3Config,
 ): ValidationResult<WeeklyEffectOutcome> {
   const conditionBefore = snapshotCondition(draft);
   const totals = emptyTotals();
@@ -387,7 +403,11 @@ export function applyTrainStat(
   if (!teacherFactor.ok) {
     return failure(teacherFactor.issues);
   }
-  const discipleCountFactor = selectDiscipleCountFactorOrNeutral(record.discipleCount, config);
+  const discipleCountFactor = selectDiscipleCountFactorOrNeutral(
+    record.discipleCount,
+    config,
+    sprint3Config,
+  );
   if (!discipleCountFactor.ok) {
     return failure(discipleCountFactor.issues);
   }
@@ -605,6 +625,7 @@ export function applyLearnTechniqueProgressing(
   config: Sprint1Config,
   absoluteWeek: number,
   rng: WeeklyEffectRng,
+  sprint3Config?: Sprint3Config,
 ): ValidationResult<WeeklyEffectOutcome> {
   const conditionBefore = snapshotCondition(draft);
   const totals = emptyTotals();
@@ -639,7 +660,11 @@ export function applyLearnTechniqueProgressing(
     resolveCompatibility(context),
     learning.compatibilityFactorRange,
   );
-  const discipleCountFactor = selectDiscipleCountFactorOrNeutral(record.discipleCount, config);
+  const discipleCountFactor = selectDiscipleCountFactorOrNeutral(
+    record.discipleCount,
+    config,
+    sprint3Config,
+  );
   if (!discipleCountFactor.ok) {
     return failure(discipleCountFactor.issues);
   }

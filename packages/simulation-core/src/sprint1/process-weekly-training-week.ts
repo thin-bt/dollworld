@@ -69,6 +69,8 @@ import type {
   WeeklyTrainingResult,
 } from "./weekly-training-types.js";
 import { isWeeklyActionPipelineEligible } from "./weekly-update-eligibility.js";
+import { validateWeeklyTrainingSprint3ConfigBinding } from "../sprint3/resolve-weekly-disciple-count-teaching-efficiency.js";
+import type { Sprint3Config } from "../sprint3/types.js";
 
 export type WeeklyTrainingProcessorDependencies = {
   sha256Provider?: Sha256Provider;
@@ -81,6 +83,7 @@ export const PROCESS_WEEKLY_TRAINING_WEEK_INPUT_KEYS = [
   "catalog",
   "runtimeState",
   "rngState",
+  "sprint3Config",
 ] as const;
 
 type ValidatedInput = {
@@ -91,6 +94,7 @@ type ValidatedInput = {
   provider: Sha256Provider;
   runtimeState: TrainingProcessorRuntimeState;
   rng: SeededRng;
+  sprint3Config?: Sprint3Config;
 };
 
 type WeekTotals = {
@@ -206,6 +210,13 @@ function validateInput(
     }
   }
 
+  const sprint3Binding = validateWeeklyTrainingSprint3ConfigBinding(object["sprint3Config"]);
+  if (!sprint3Binding.ok) {
+    for (const issue of sprint3Binding.issues) {
+      issues.push(issue);
+    }
+  }
+
   const rawRecords = snapshotDenseArrayOrFail(object["personRecords"], "/personRecords", issues);
   const entries: { record: WeeklyTrainingPersonRecord; view: WeeklyTrainingPersonView }[] = [];
   if (rawRecords !== undefined) {
@@ -247,6 +258,7 @@ function validateInput(
     catalog === undefined ||
     provider === undefined ||
     !runtimeStateResult.ok ||
+    !sprint3Binding.ok ||
     rawRecords === undefined ||
     issues.length > 0
   ) {
@@ -304,6 +316,7 @@ function validateInput(
     provider,
     runtimeState,
     rng,
+    ...(sprint3Binding.value === undefined ? {} : { sprint3Config: sprint3Binding.value }),
   });
 }
 
@@ -407,7 +420,7 @@ function processPerson(
   entry: { record: WeeklyTrainingPersonRecord; view: WeeklyTrainingPersonView },
   input: ValidatedInput,
 ): ValidationResult<PersonWeekOutcome> {
-  const { absoluteWeek, catalog, config, provider, rng } = input;
+  const { absoluteWeek, catalog, config, provider, rng, sprint3Config } = input;
 
   // 10 §6.2: the focus lifecycle is resolved from the weekStart snapshot before any
   // candidate is built, so a released focus is already `null` for every action path.
@@ -490,6 +503,7 @@ function processPerson(
         target.value.targetStat,
         absoluteWeek,
         rng,
+        sprint3Config,
       );
       if (!applied.ok) {
         return failure(applied.issues);
@@ -544,6 +558,7 @@ function processPerson(
               config,
               absoluteWeek,
               rng,
+              sprint3Config,
             );
       if (!applied.ok) {
         return failure(applied.issues);

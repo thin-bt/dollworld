@@ -88,6 +88,8 @@ export type MasterQualificationEvaluationOutcome = {
 export type Sprint3MentorshipFeatureFlags = {
   explicitWeeklyTeachActionEnabled: boolean;
   enrollmentAssignmentAiEnabled: boolean;
+  /** S03-005: bind teachingEfficiency disciple brackets into weekly training outcomes. */
+  weeklyTrainingDiscipleCountTeachingEfficiencyEnabled?: boolean;
 };
 
 export type Sprint3ConfigInput = {

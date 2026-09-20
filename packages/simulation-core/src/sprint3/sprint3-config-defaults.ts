@@ -10,6 +10,7 @@ import {
   SPRINT3_CONFIG_VERSION_ENROLLMENT,
   SPRINT3_CONFIG_VERSION_INTAKE,
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
+  SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
 } from "./constants.js";
 import type { Sprint3ConfigInput } from "./types.js";
 
@@ -108,6 +109,19 @@ export function createSprint3Balance040ConfigInput(): Sprint3ConfigInput {
         maximumAutonomousMaxDisciples: 40,
       },
       deferApplicantAptitudeThreshold: 80,
+    },
+  };
+}
+
+/** S03-005 canonical balance pack with weekly training teachingEfficiency binding. */
+export function createSprint3Balance050ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance040ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: false,
+      enrollmentAssignmentAiEnabled: true,
+      weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
     },
   };
 }

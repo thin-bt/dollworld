@@ -8,7 +8,8 @@
   - **S03-002 implemented**（`SPRINT3-S03-002-MASTER-QUALIFICATION-A-20260920-R1`）
   - **S03-003 implemented**（`SPRINT3-S03-003-ENROLLMENT-A-20260920-R1`）
   - **S03-004 implemented**（`SPRINT3-S03-004-INTAKE-A-20260920-R1`）
-  - S03-005〜S03-008 **planned**
+  - **S03-005 implemented**（`SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1`）
+  - S03-006〜S03-008 **planned**
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -131,6 +132,13 @@ S03-002（師匠資格フラグ）、S03-004（受入上限）と整合。
 ### 目的
 
 S03-001 `teachingEfficiency` を Sprint 1 週間訓練成果計算へ接続（既存 Sprint 1 係数契約を破壊しない）。
+
+### 受入チェック（概要）
+
+- `sprint3-balance-0.5.0` + `weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true`
+- `processWeeklyTrainingWeek` / `applyTrainStat` / `applyLearnTechniqueProgressing` が optional `sprint3Config` 绑定時に `teachingEfficiency.discipleCountFactorBrackets` を門下人数係数として適用（未绑定時は Sprint1 `growth.discipleCountFactors` 維持）
+- Pure 関数 `selectDiscipleCountTeachingEfficiencyFactor`、binding id `sprint3-weekly-training-disciple-count-0.1.0`
+- `teaching-efficiency-weekly` テスト（TE-001〜010）および CFG-010
 
 ---
 
