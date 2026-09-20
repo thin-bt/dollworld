@@ -1210,6 +1210,7 @@ export {
   createSprint3Balance050ConfigInput,
   createSprint3Balance060ConfigInput,
   createSprint3Balance070ConfigInput,
+  createSprint3Balance080ConfigInput,
 } from "./sprint3/sprint3-config-defaults.js";
 export {
   isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
@@ -1231,6 +1232,12 @@ export {
   evaluateWeeklyTeachRefusal,
   isExplicitWeeklyTeachActionEnabled,
 } from "./sprint3/evaluate-explicit-weekly-teach.js";
+export {
+  evaluateTeachingSelectionReEvaluationDue,
+  evaluateTechniqueTeachingSelection,
+  isTechniqueTeachingSelectionEnabled,
+  rankTeachableTechniqueCandidates,
+} from "./sprint3/evaluate-technique-teaching-selection.js";
 export {
   computeAutonomousMaxDisciples,
   evaluateMasterIntakeDecision,
@@ -1257,7 +1264,10 @@ export {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
+  TECHNIQUE_TEACHING_SELECTION_PROCESSOR_ID,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
   WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID,
   WEEKLY_TRAINING_PARENT_TEMPORARY_GUIDANCE_BINDING_ID,
@@ -1270,6 +1280,16 @@ export type {
   EnrollmentMasterCandidate,
   EnrollmentSpecialReason,
   ExplicitWeeklyTeachActionContract,
+  Sprint3TeachingSelectionConfig,
+  TeachingSelectionReEvaluationContext,
+  TeachingSelectionReEvaluationDueResult,
+  TeachingSelectionReEvaluationTriggers,
+  TechniqueTeachingSelectionCandidate,
+  TechniqueTeachingSelectionContract,
+  TechniqueTeachingSelectionExcludedCandidate,
+  TechniqueTeachingSelectionOutcome,
+  TechniqueTeachingSelectionRankedCandidate,
+  TechniqueTeachingSelectionRecord,
   Sprint3WeeklyTeachActionConfig,
   WeeklyTeachAllocationFormula,
   WeeklyTeachDiscipleDecision,

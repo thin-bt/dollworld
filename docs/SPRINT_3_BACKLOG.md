@@ -11,7 +11,7 @@
   - **S03-005 implemented**（`SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1`）
   - **S03-006 implemented**（`SPRINT3-S03-006-PARENT-TEMP-GUIDANCE-A-20260920-R1`）
   - S03-007 **implemented**（`master` product）
-  - S03-008 **planned**
+  - S03-008 **教授技選択 slice published**（`master` product）— **独自技研究・生成・失伝 remaining**
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -37,7 +37,7 @@
 | S03-005 | 門下人数係数の週間訓練パイプライン接続 | S03-001、S01-004 既存契約 |
 | S03-006 | 親一時指導（正式師匠不在） | S03-001、S03-003 |
 | S03-007 | 明示的週間 `teach` 行動・教授拒否 | S03-001、09/10 契約 — **implemented** |
-| S03-008 | 教授技選択・技継承・独自技/失伝（Sprint 3 テーマ残） | S03-007 |
+| S03-008 | 教授技選択（published）・技継承・独自技/失伝（**remaining**） | S03-007 |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
 
@@ -177,3 +177,15 @@ S03-001 `teachingEfficiency` を Sprint 1 週間訓練成果計算へ接続（�
 ### 目的
 
 SPEC 本文の教授方針・技段階・独自技研究値の Sprint 3 実装残（Sprint 4 引退/遺伝は対象外）。
+
+### 受入チェック（教授技選択 slice — published）
+
+- `sprint3-balance-0.8.0` + `techniqueTeachingSelectionEnabled: true` + config-held `teachingSelection` policy
+- Pure 関数 `evaluateTechniqueTeachingSelection` / `rankTeachableTechniqueCandidates` / `evaluateTeachingSelectionReEvaluationDue`（processor id `sprint3-technique-teaching-selection-0.1.0`）
+- `teacherCanTeach`・前提技・S03-007 tier/refusal・`parent_temporary_guidance => basic only` を gate 境界で維持
+- SPEC 評価配点・段階閾値・再評価トリガーを config 保持（コード直書きなし）
+- `technique-teaching-selection` テスト（TS-001〜010）および CFG-013
+
+### 残スコープ（未実装・Sprint 3 内 follow-up）
+
+- 独自技研究・生成・失伝（研究 180/320/550、生成成功率 20..80%、失敗時 80% 保持、24 週 cooldown、履歴要件）

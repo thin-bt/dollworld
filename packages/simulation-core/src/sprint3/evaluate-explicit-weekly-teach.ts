@@ -8,6 +8,7 @@ import type { TechniqueDefinition } from "../sprint1/technique-definition.js";
 import { teacherCanTeach } from "../sprint1/technique-teacher.js";
 import {
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
+  SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
 } from "./constants.js";
 import type {
@@ -31,9 +32,14 @@ function pushReason(reasons: string[], code: string): void {
   reasons.push(code);
 }
 
+const EXPLICIT_WEEKLY_TEACH_CONFIG_VERSIONS = new Set<string>([
+  SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
+]);
+
 export function isExplicitWeeklyTeachActionEnabled(config: Sprint3Config): boolean {
   return (
-    config.configVersion === SPRINT3_CONFIG_VERSION_WEEKLY_TEACH &&
+    EXPLICIT_WEEKLY_TEACH_CONFIG_VERSIONS.has(config.configVersion) &&
     config.mentorshipFeatures.explicitWeeklyTeachActionEnabled === true &&
     config.weeklyTeachAction !== undefined
   );
@@ -48,7 +54,7 @@ function resolveWeeklyTeachPolicy(
       path: "/mentorshipFeatures/explicitWeeklyTeachActionEnabled",
       message: "explicit weekly teach action is not enabled for this configVersion",
       actual: config.mentorshipFeatures.explicitWeeklyTeachActionEnabled,
-      expected: `true on ${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}`,
+      expected: `true on ${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH} or ${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}`,
     });
     return undefined;
   }

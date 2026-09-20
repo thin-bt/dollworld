@@ -29,6 +29,10 @@ export const SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE = "sprint3-balance
 /** S03-007 explicit weekly `teach` action, refusal, and allocation policy enabled. */
 export const SPRINT3_CONFIG_VERSION_WEEKLY_TEACH = "sprint3-balance-0.7.0" as const;
 
+/** S03-008 deterministic technique teaching-selection / re-evaluation contract enabled. */
+export const SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION =
+  "sprint3-balance-0.8.0" as const;
+
 /** Pure explicit weekly teach processor contract id (weekly adapter wiring in later slices). */
 export const EXPLICIT_WEEKLY_TEACH_ACTION_PROCESSOR_ID =
   "sprint3-explicit-weekly-teach-0.1.0" as const;
@@ -36,6 +40,14 @@ export const EXPLICIT_WEEKLY_TEACH_ACTION_PROCESSOR_ID =
 /** Config-held refusal / allocation policy for S03-007. */
 export const WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT =
   "weekly-teach-action-explicit-0.1.0" as const;
+
+/** Pure technique teaching-selection processor contract id (world wiring in later slices). */
+export const TECHNIQUE_TEACHING_SELECTION_PROCESSOR_ID =
+  "sprint3-technique-teaching-selection-0.1.0" as const;
+
+/** Config-held candidate scoring / tier thresholds for S03-008. */
+export const TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY =
+  "technique-teaching-selection-0.1.0" as const;
 
 /** Sprint3 → Sprint1 weekly training disciple-count factor binding (S03-005). */
 export const WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID =

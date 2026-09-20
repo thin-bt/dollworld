@@ -12,7 +12,9 @@ import {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
 } from "./constants.js";
 import type { Sprint3ConfigInput } from "./types.js";
@@ -183,6 +185,55 @@ export function createSprint3Balance070ConfigInput(): Sprint3ConfigInput {
         teachingAbilityBonusPerTenPoints: 1,
         minimumWeeklyTeachSlots: 1,
         maximumWeeklyTeachSlots: 6,
+      },
+    },
+  };
+}
+
+const SPEC_TEACHING_SELECTION_WEIGHTS = {
+  styleMatchMaxPoints: 25,
+  requirementsMetMaxPoints: 20,
+  trustAndCompatibilityMaxPoints: 20,
+  tacticalNeedMaxPoints: 15,
+  successionPriorityMaxPoints: 20,
+  secrecyAndLoyaltyPenaltyMaxPoints: 40,
+} as const;
+
+const SPEC_TEACHING_SELECTION_TIER_THRESHOLDS = {
+  basic: { minimumCompositeScore: 30 },
+  standard: { minimumCompositeScore: 45 },
+  advanced: {
+    minimumCompositeScore: 65,
+    minimumTrustScore: 40,
+    minimumMasterMasteryHundredths: 7000,
+  },
+  secret: {
+    minimumCompositeScore: 85,
+    minimumTrustScore: 70,
+    minimumMasterMasteryHundredths: 8500,
+  },
+} as const;
+
+/** S03-008 canonical balance pack with technique teaching-selection policy. */
+export function createSprint3Balance080ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance070ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: true,
+      enrollmentAssignmentAiEnabled: true,
+      weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
+      weeklyTrainingParentTemporaryGuidanceEnabled: true,
+      techniqueTeachingSelectionEnabled: true,
+    },
+    teachingSelection: {
+      evaluationPolicyVersion: TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
+      evaluationWeights: { ...SPEC_TEACHING_SELECTION_WEIGHTS },
+      tierThresholds: { ...SPEC_TEACHING_SELECTION_TIER_THRESHOLDS },
+      reEvaluationTriggers: {
+        fourWeekCadenceWeeks: 4,
+        triggerOnNewEnrollment: true,
+        triggerOnCurrentTechniqueAcquisitionComplete: true,
       },
     },
   };

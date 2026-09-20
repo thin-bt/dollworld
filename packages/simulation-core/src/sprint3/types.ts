@@ -1,7 +1,12 @@
+import type { TechniqueLearnerContext } from "../sprint1/technique-acquisition.js";
 import type { TeacherCanTeachContext } from "../sprint1/technique-teacher.js";
 import type { LearningTier } from "../sprint1/technique-enums.js";
 import type { CareerStatus, LifeStatus, Rank } from "../enums.js";
-import type { WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT } from "./constants.js";
+import type {
+  TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
+  TECHNIQUE_TEACHING_SELECTION_PROCESSOR_ID,
+  WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
+} from "./constants.js";
 import type {
   MASTER_INTAKE_EVALUATION_POLICY_AUTONOMOUS_LIMIT,
   MASTER_INTAKE_EVALUATION_POLICY_DEFERRED,
@@ -117,6 +122,19 @@ export type Sprint3WeeklyTeachActionConfig = {
   allocationFormula: WeeklyTeachAllocationFormula;
 };
 
+export type TeachingSelectionReEvaluationTriggers = {
+  fourWeekCadenceWeeks: number;
+  triggerOnNewEnrollment: boolean;
+  triggerOnCurrentTechniqueAcquisitionComplete: boolean;
+};
+
+export type Sprint3TeachingSelectionConfig = {
+  evaluationPolicyVersion: typeof TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY;
+  evaluationWeights: WeeklyTeachEvaluationWeights;
+  tierThresholds: Record<LearningTier, WeeklyTeachTierThresholds>;
+  reEvaluationTriggers: TeachingSelectionReEvaluationTriggers;
+};
+
 /** Feature gates for later Sprint3 slices; S03-001 validates structure only. */
 export type Sprint3MentorshipFeatureFlags = {
   explicitWeeklyTeachActionEnabled: boolean;
@@ -125,6 +143,8 @@ export type Sprint3MentorshipFeatureFlags = {
   weeklyTrainingDiscipleCountTeachingEfficiencyEnabled?: boolean;
   /** S03-006: bind parent temporary guidance teacher factor into weekly train_stat outcomes. */
   weeklyTrainingParentTemporaryGuidanceEnabled?: boolean;
+  /** S03-008: deterministic master→disciple teachable technique ranking. */
+  techniqueTeachingSelectionEnabled?: boolean;
 };
 
 export type Sprint3ConfigInput = {
@@ -138,6 +158,8 @@ export type Sprint3ConfigInput = {
   masterIntake?: Sprint3MasterIntakeConfig;
   /** Present from sprint3-balance-0.7.0 (S03-007); omitted on earlier configVersion bodies. */
   weeklyTeachAction?: Sprint3WeeklyTeachActionConfig;
+  /** Present from sprint3-balance-0.8.0 (S03-008); omitted on earlier configVersion bodies. */
+  teachingSelection?: Sprint3TeachingSelectionConfig;
 };
 
 export type Sprint3Config = Sprint3ConfigInput;
@@ -211,6 +233,59 @@ export type ExplicitWeeklyTeachActionOutcome = {
   weeklyTeachSlotLimit: number;
   discipleOutcomes: readonly WeeklyTeachDiscipleOutcome[];
   reasons: readonly string[];
+};
+
+/**
+ * Boundary for deterministic teachable-technique ranking (docs/SPEC.md §師匠が教える技の決定).
+ */
+export type TechniqueTeachingSelectionContract = {
+  readonly processorId: typeof TECHNIQUE_TEACHING_SELECTION_PROCESSOR_ID;
+};
+
+export type TechniqueTeachingSelectionCandidate = {
+  techniqueId: string;
+  teacherCanTeachContext: TeacherCanTeachContext;
+  evaluationInputs: WeeklyTeachEvaluationInputScores;
+  discipleHasIncompletePriorFocus?: boolean;
+};
+
+export type TechniqueTeachingSelectionRecord = {
+  masterPersonId: string;
+  disciplePersonId: string;
+  mentorshipRelationKind: MentorshipRelationKind;
+  discipleLearnerContext: TechniqueLearnerContext;
+  candidates: readonly TechniqueTeachingSelectionCandidate[];
+};
+
+export type TechniqueTeachingSelectionRankedCandidate = {
+  techniqueId: string;
+  compositeScore: number;
+  rank: number;
+};
+
+export type TechniqueTeachingSelectionExcludedCandidate = {
+  techniqueId: string;
+  reasons: readonly string[];
+};
+
+export type TechniqueTeachingSelectionOutcomeKind = "feature_disabled" | "selection_completed";
+
+export type TechniqueTeachingSelectionOutcome = {
+  kind: TechniqueTeachingSelectionOutcomeKind;
+  rankedCandidates: readonly TechniqueTeachingSelectionRankedCandidate[];
+  excludedCandidates: readonly TechniqueTeachingSelectionExcludedCandidate[];
+  reasons: readonly string[];
+};
+
+export type TeachingSelectionReEvaluationContext = {
+  weeksSinceLastTeachingSelectionEvaluation: number;
+  newEnrollmentThisEvaluation: boolean;
+  currentTechniqueAcquisitionCompleted: boolean;
+};
+
+export type TeachingSelectionReEvaluationDueResult = {
+  due: boolean;
+  matchedTriggers: readonly string[];
 };
 
 /** Per-master intake decision supplied by caller; S03-004 owns autonomous limit policy. */
