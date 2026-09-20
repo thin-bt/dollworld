@@ -16,6 +16,7 @@ import type { WorldEngineState } from "../world-engine/types.js";
 import { cloneValidatedPlainJson, deepFreezePlainJson } from "../sprint1/plain-data.js";
 import { isEnrollmentAssignmentAiEnabled } from "./evaluate-enrollment-assignment.js";
 import { isExplicitWeeklyTeachActionEnabled } from "./evaluate-explicit-weekly-teach.js";
+import { evaluateMasterIntakeDecision } from "./evaluate-master-intake.js";
 import {
   createInitialSprint3MentorshipEntrypointRuntimeState,
   validateSprint3MentorshipEntrypointRuntimeState,
@@ -122,7 +123,6 @@ function buildMasterCandidate(
       : Math.max(0, childAptitude - 10);
   const teachingEfficiencyScore =
     masterRecord === undefined ? masterAptitude : meanGrowthPotential(masterRecord);
-  const intakeAcceptance: MasterIntakeAcceptance = "accept";
   return {
     masterPersonId: masterPerson.personId,
     isBiologicalParent,
@@ -131,8 +131,91 @@ function buildMasterCandidate(
     lineageAptitudeScore: lineageAptitude,
     schoolFitScore: lineageAptitude,
     teachingEfficiencyScore,
-    intakeAcceptance,
+    intakeAcceptance: "accept" as MasterIntakeAcceptance,
   };
+}
+
+function discipleCountForMaster(
+  sidecars: WeeklyTrainingSidecarState,
+  masterPersonId: string,
+): number {
+  const entry = sidecars.entries.find((candidate) => candidate.personId === masterPersonId);
+  return entry?.discipleCount ?? 0;
+}
+
+function resolveLiveMaterializedIntakeAcceptance(
+  config: Sprint3Config,
+  childPersonId: PersonId,
+  candidate: EnrollmentMasterCandidate,
+  sidecars: WeeklyTrainingSidecarState,
+): ValidationResult<MasterIntakeAcceptance> {
+  if (config.masterIntake === undefined) {
+    return success("accept");
+  }
+  const intakeOutcome = evaluateMasterIntakeDecision(config, {
+    masterPersonId: candidate.masterPersonId,
+    currentFormalDiscipleCount: discipleCountForMaster(sidecars, candidate.masterPersonId),
+    teachingAbilityScore: candidate.teachingEfficiencyScore,
+    successorOrientationScore: 0,
+    massDiscipleToleranceScore: 0,
+    applicant: {
+      childPersonId,
+      lineageAptitudeScore: candidate.lineageAptitudeScore,
+      parentChildCompatibilityScore: candidate.parentChildCompatibilityScore,
+    },
+  });
+  if (!intakeOutcome.ok) {
+    return failure(intakeOutcome.issues);
+  }
+  return success(intakeOutcome.value.acceptance);
+}
+
+function isLivingParticipatingPerson(person: Person): boolean {
+  if (person.lifeStatus !== "living") {
+    return false;
+  }
+  if (person.participationStatus === "waiting" || person.participationStatus === "stopped") {
+    return false;
+  }
+  return true;
+}
+
+function parentIdsForChild(worldState: WorldEngineState, childPersonId: PersonId): Set<PersonId> {
+  const ids = new Set<PersonId>();
+  for (const relationship of worldState.relationships) {
+    if (relationship.kind === "parent_child" && relationship.childId === childPersonId) {
+      ids.add(relationship.parentId);
+    }
+  }
+  return ids;
+}
+
+function eligibleNonParentFormalMastersForChild(
+  worldState: WorldEngineState,
+  childPersonId: PersonId,
+): Person[] {
+  const parentIds = parentIdsForChild(worldState, childPersonId);
+  const masters: Person[] = [];
+  for (const person of worldState.persons) {
+    if (person.personId === childPersonId) {
+      continue;
+    }
+    if (parentIds.has(person.personId)) {
+      continue;
+    }
+    if (!isLivingParticipatingPerson(person)) {
+      continue;
+    }
+    if (person.careerStatus !== "retired") {
+      continue;
+    }
+    if (person.qualifiedMaster !== true) {
+      continue;
+    }
+    masters.push(person);
+  }
+  masters.sort((left, right) => compareUnicodeCodePoints(left.personId, right.personId));
+  return masters;
 }
 
 function livingParentsForChild(worldState: WorldEngineState, childPersonId: PersonId): Person[] {
@@ -287,8 +370,36 @@ export function materializeLiveEnrollmentQueueBoundaries(
       continue;
     }
     const parents = livingParentsForChild(input.worldState, child.personId);
-    const masterCandidates: EnrollmentMasterCandidate[] = parents.map((parent) =>
-      buildMasterCandidate(parent, child, true, recordByPersonId.get(parent.personId)),
+    const parentIdSet = parentIdsForChild(input.worldState, child.personId);
+    const nonParentMasters = eligibleNonParentFormalMastersForChild(
+      input.worldState,
+      child.personId,
+    );
+    const masterCandidates: EnrollmentMasterCandidate[] = [];
+    for (const masterPerson of [...parents, ...nonParentMasters]) {
+      const isBiologicalParent = parentIdSet.has(masterPerson.personId);
+      const baseCandidate = buildMasterCandidate(
+        masterPerson,
+        child,
+        isBiologicalParent,
+        recordByPersonId.get(masterPerson.personId),
+      );
+      const intakeResult = resolveLiveMaterializedIntakeAcceptance(
+        input.sprint3Config,
+        child.personId,
+        baseCandidate,
+        input.weeklyTrainingSidecars,
+      );
+      if (!intakeResult.ok) {
+        return failure(intakeResult.issues);
+      }
+      masterCandidates.push({
+        ...baseCandidate,
+        intakeAcceptance: intakeResult.value,
+      });
+    }
+    masterCandidates.sort((left, right) =>
+      compareUnicodeCodePoints(left.masterPersonId, right.masterPersonId),
     );
     const temporaryGuidanceParentPersonId = parents[0]?.personId;
     const childAge = child.currentAge;

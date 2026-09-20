@@ -74,6 +74,7 @@ function sidecarEntry(personId: string, discipleCount = 0): Record<string, unkno
 
 const CHILD_ID = asPersonId("child_enrollment_live_001");
 const PARENT_ID = asPersonId("parent_master_live_001");
+const EXTERNAL_MASTER_ID = asPersonId("external_master_live_001");
 const MASTER_ID = asPersonId("master_competitor_live_001");
 const DISCIPLE_ID = asPersonId("disciple_live_001");
 
@@ -97,7 +98,48 @@ function aptitudeBlock() {
   };
 }
 
-function enrollmentWorldWithParentLink(): WorldEngineState {
+function retiredQualifiedMasterPerson(
+  personId: PersonId,
+  sprint1State: ReturnType<typeof expectOk<unknown>>,
+  abilities: ReturnType<typeof abilityBlock>,
+  aptitudes: ReturnType<typeof aptitudeBlock>,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    personId,
+    displayName: "Master",
+    givenName: "Master",
+    familyName: "Test",
+    nameDataVersion: "0.1.0",
+    sex: "male" as const,
+    lifeStatus: "living" as const,
+    participationStatus: "active" as const,
+    careerStatus: "retired" as const,
+    birthYear: 1,
+    currentAge: 40,
+    familyId: "family_000002",
+    abilities,
+    aptitudes,
+    retirementRank: "C",
+    highestRank: "C",
+    qualifiedMaster: true,
+    sprint1State,
+    ...overrides,
+  };
+}
+
+function enrollmentWorldWithParentLink(
+  options: {
+    includeExternalMaster?: boolean;
+    parentCareerStatus?: "retired" | "active_competitor";
+    parentQualifiedMaster?: boolean;
+  } = {},
+): WorldEngineState {
+  const {
+    includeExternalMaster = false,
+    parentCareerStatus = "retired",
+    parentQualifiedMaster = true,
+  } = options;
   const sprint1State = expectOk(createInitialSprint1PersonState(50));
   const abilities = abilityBlock();
   const aptitudes = aptitudeBlock();
@@ -137,18 +179,21 @@ function enrollmentWorldWithParentLink(): WorldEngineState {
         sex: "male",
         lifeStatus: "living",
         participationStatus: "active",
-        careerStatus: "retired",
+        careerStatus: parentCareerStatus,
         birthYear: 1,
         currentAge: 35,
         familyId: "family_000001",
         abilities,
         aptitudes,
-        retirementRank: "C",
-        highestRank: "C",
-        qualifiedMaster: true,
+        ...(parentCareerStatus === "retired"
+          ? { retirementRank: "C", highestRank: "C", qualifiedMaster: parentQualifiedMaster }
+          : { currentRank: "C", highestRank: "C", qualifiedMaster: parentQualifiedMaster }),
         lineageId: "lineage_000001",
         sprint1State,
       },
+      ...(includeExternalMaster
+        ? [retiredQualifiedMasterPerson(EXTERNAL_MASTER_ID, sprint1State, abilities, aptitudes)]
+        : []),
     ],
     relationships: [
       {
@@ -426,5 +471,166 @@ describe("S03-013 live mentorship queue materialization", () => {
       }),
     );
     expect(rematerialized.pendingExplicitWeeklyTeachRecords).toHaveLength(0);
+  });
+
+  it("LEC-001 prefers qualified parent over eligible non-parent formal master", () => {
+    const world = enrollmentWorldWithParentLink({ includeExternalMaster: true });
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [
+          sidecarEntry(CHILD_ID),
+          sidecarEntry(EXTERNAL_MASTER_ID),
+          sidecarEntry(PARENT_ID),
+        ],
+      }),
+    );
+    const materialized = expectOk(
+      materializeLiveEnrollmentQueueBoundaries({
+        absoluteWeek: 384,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Enrollment,
+        runtimeState: createInitialSprint3MentorshipEntrypointRuntimeState(),
+      }),
+    );
+    const pending = materialized.pendingEnrollmentBoundaries[0];
+    expect(pending?.masterCandidates.length).toBeGreaterThanOrEqual(2);
+    const processed = expectOk(
+      processSprint3EnrollmentIntakeBoundary({
+        absoluteWeek: 384,
+        sprint3Config: sprint3Enrollment,
+        weeklyTrainingSidecars: sidecars,
+        runtimeState: materialized,
+      }),
+    );
+    expect(processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.kind).toBe(
+      "parent_master_assigned",
+    );
+    expect(
+      processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.selectedMasterPersonId,
+    ).toBe(PARENT_ID);
+  });
+
+  it("LEC-002 assigns formal non-parent master when no qualified parent exists", () => {
+    const world = enrollmentWorldWithParentLink({
+      includeExternalMaster: true,
+      parentCareerStatus: "active_competitor",
+      parentQualifiedMaster: false,
+    });
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [
+          sidecarEntry(CHILD_ID),
+          sidecarEntry(EXTERNAL_MASTER_ID),
+          sidecarEntry(PARENT_ID),
+        ],
+      }),
+    );
+    const materialized = expectOk(
+      materializeLiveEnrollmentQueueBoundaries({
+        absoluteWeek: 384,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Enrollment,
+        runtimeState: createInitialSprint3MentorshipEntrypointRuntimeState(),
+      }),
+    );
+    const candidateIds = materialized.pendingEnrollmentBoundaries[0]?.masterCandidates.map(
+      (candidate) => candidate.masterPersonId,
+    );
+    expect(candidateIds).toContain(EXTERNAL_MASTER_ID);
+
+    const processed = expectOk(
+      processSprint3EnrollmentIntakeBoundary({
+        absoluteWeek: 384,
+        sprint3Config: sprint3Enrollment,
+        weeklyTrainingSidecars: sidecars,
+        runtimeState: materialized,
+      }),
+    );
+    expect(processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.kind).toBe(
+      "formal_master_assigned",
+    );
+    expect(
+      processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.selectedMasterPersonId,
+    ).toBe(EXTERNAL_MASTER_ID);
+  });
+
+  it("LEC-003 excludes intake-rejected candidates from enrollment selection", () => {
+    const world = enrollmentWorldWithParentLink({ includeExternalMaster: true });
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [
+          sidecarEntry(CHILD_ID),
+          sidecarEntry(EXTERNAL_MASTER_ID),
+          sidecarEntry(PARENT_ID, 8),
+        ],
+      }),
+    );
+    const materialized = expectOk(
+      materializeLiveEnrollmentQueueBoundaries({
+        absoluteWeek: 384,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Enrollment,
+        runtimeState: createInitialSprint3MentorshipEntrypointRuntimeState(),
+      }),
+    );
+    const parentCandidate = materialized.pendingEnrollmentBoundaries[0]?.masterCandidates.find(
+      (candidate) => candidate.masterPersonId === PARENT_ID,
+    );
+    expect(parentCandidate?.intakeAcceptance).toBe("reject");
+
+    const processed = expectOk(
+      processSprint3EnrollmentIntakeBoundary({
+        absoluteWeek: 384,
+        sprint3Config: sprint3Enrollment,
+        weeklyTrainingSidecars: sidecars,
+        runtimeState: materialized,
+      }),
+    );
+    expect(processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.kind).toBe(
+      "formal_master_assigned",
+    );
+    expect(
+      processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.selectedMasterPersonId,
+    ).toBe(EXTERNAL_MASTER_ID);
+  });
+
+  it("LEC-004 materializes enrollment candidates deterministically for replay", () => {
+    const world = enrollmentWorldWithParentLink({ includeExternalMaster: true });
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [
+          sidecarEntry(CHILD_ID),
+          sidecarEntry(EXTERNAL_MASTER_ID),
+          sidecarEntry(PARENT_ID),
+        ],
+      }),
+    );
+    const runtime = createInitialSprint3MentorshipEntrypointRuntimeState();
+    const first = expectOk(
+      materializeLiveEnrollmentQueueBoundaries({
+        absoluteWeek: 384,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Enrollment,
+        runtimeState: runtime,
+      }),
+    );
+    const second = expectOk(
+      materializeLiveEnrollmentQueueBoundaries({
+        absoluteWeek: 384,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Enrollment,
+        runtimeState: runtime,
+      }),
+    );
+    expect(first.pendingEnrollmentBoundaries).toEqual(second.pendingEnrollmentBoundaries);
   });
 });
