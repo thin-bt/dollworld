@@ -8,11 +8,14 @@ import {
 import {
   buildTournamentBattleParticipantFixture,
   tournamentBattleFixtureProvider,
-} from "../../../../../packages/simulation-core/src/sprint2/tournament-battle-atomic.fixture.js";
+} from "@shared-world/simulation-core";
 import { resolveKnockoutByeAdvancements } from "./competition-bracket-runtime.js";
 import { buildUi009StructuralPolicy } from "./competition-structural-policy.js";
 import { selectUi009TournamentFormat } from "./competition-format-selection.js";
-import { isBracketStructurallyComplete, projectBracketProgress } from "./competition-bracket-progress.js";
+import {
+  isBracketStructurallyComplete,
+  projectBracketProgress,
+} from "./competition-bracket-progress.js";
 
 const provider = tournamentBattleFixtureProvider;
 
@@ -63,7 +66,10 @@ describe("competition bracket progress", () => {
     if (!built.ok) {
       return;
     }
-    const runtime = resolveKnockoutByeAdvancements(built.value.definition, built.value.runtimeState);
+    const runtime = resolveKnockoutByeAdvancements(
+      built.value.definition,
+      built.value.runtimeState,
+    );
     const progress = projectBracketProgress({
       bracketDefinition: built.value.definition,
       bracketRuntimeState: runtime,

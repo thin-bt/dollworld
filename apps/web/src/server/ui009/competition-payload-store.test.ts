@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createEmptyDetailedLogPayloadStore } from "@shared-world/simulation-core";
+import {
+  createEmptyDetailedLogPayloadStore,
+  type DetailedLogPayloadEntry,
+} from "@shared-world/simulation-core";
 import {
   persistDetailedLogPayloadStore,
   restoreDetailedLogPayloadStore,
@@ -8,7 +11,7 @@ import {
 describe("UI-009 competition detailed-log payload persistence", () => {
   it("preserves prior match payloads when the next match restores and persists the store", () => {
     const firstMatchStore = createEmptyDetailedLogPayloadStore();
-    firstMatchStore.entries.set("hash-match-1", {
+    (firstMatchStore.entries as Map<string, DetailedLogPayloadEntry>).set("hash-match-1", {
       detailedLogHash: "hash-match-1",
       canonicalUtf8Bytes: "payload-match-1",
     });
@@ -22,7 +25,7 @@ describe("UI-009 competition detailed-log payload persistence", () => {
       return;
     }
 
-    restoredForSecondMatch.entries.set("hash-match-2", {
+    (restoredForSecondMatch.entries as Map<string, DetailedLogPayloadEntry>).set("hash-match-2", {
       detailedLogHash: "hash-match-2",
       canonicalUtf8Bytes: "payload-match-2",
     });

@@ -3,13 +3,16 @@ import { createNodeSha256Provider } from "../presets.js";
 import {
   prepareTournamentBattleSession,
   tournamentBattleFixtureProvider,
-} from "../../../../../packages/simulation-core/src/sprint2/tournament-battle-atomic.fixture.js";
+} from "@shared-world/simulation-core";
 import { projectUi009CompetitionPlanningSession } from "./competition-integration-session.js";
 import { buildAcceptedCompetitionParticipantPlan } from "./competition-participant-preview.js";
 import { runCompetitionProgressionStep } from "./competition-engine.js";
 import { finalizeRoundRobinCompetitionStore } from "./competition-round-robin-finalize.js";
 import { runCompetitionThroughFinish } from "./competition-auto-progression.js";
-import { COMPETITION_STORE_SCHEMA_VERSION } from "./competition-store.js";
+import {
+  COMPETITION_STORE_SCHEMA_VERSION,
+  type CompetitionSessionStore,
+} from "./competition-store.js";
 
 describe("UI009 knockout auto progression (source-level)", () => {
   it("selects single elimination for five-person roster and finishes via progression loop", () => {
@@ -29,16 +32,23 @@ describe("UI009 knockout auto progression (source-level)", () => {
       }
       expect(finished.store.state?.phase).toBe("finished");
       expect(finished.store.state?.finalResult).not.toBeNull();
-      const bracket = finished.store.state?.bracketDefinition as { formatKind?: string } | undefined;
+      const bracket = finished.store.state?.bracketDefinition as
+        { formatKind?: string } | undefined;
       expect(bracket?.formatKind).toBe("knockout");
       return;
     }
 
-    let store = { schemaVersion: COMPETITION_STORE_SCHEMA_VERSION, state: null as never };
+    let store: CompetitionSessionStore = {
+      schemaVersion: COMPETITION_STORE_SCHEMA_VERSION,
+      state: null,
+    };
     for (let step = 0; step < 64; step += 1) {
       const outcome = runCompetitionProgressionStep(store, session, createNodeSha256Provider());
       expect(outcome.kind).toBe("ok");
-      store = outcome.store as typeof store;
+      if (outcome.kind !== "ok") {
+        return;
+      }
+      store = outcome.store;
       if (store.state?.phase === "round_robin_complete") {
         break;
       }

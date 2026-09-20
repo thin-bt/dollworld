@@ -31,6 +31,10 @@ function stubState(record: StoredBattleResultRecord): CompetitionPersistedState 
     finalResult: null,
     worldYear: 21,
     rankingDisplayFacts: [],
+    tournamentHistorySummaries: [],
+    annualRankingHistoryStore: {},
+    promotionResultSummaries: [],
+    personRankHistoryBundles: [],
   };
 }
 

@@ -11,7 +11,7 @@ import {
   defaultTournamentBattleActionIdentity,
   prepareTournamentBattleSession,
   tournamentBattleFixtureProvider,
-} from "../../../../../packages/simulation-core/src/sprint2/tournament-battle-atomic.fixture.js";
+} from "@shared-world/simulation-core";
 
 const provider = tournamentBattleFixtureProvider;
 

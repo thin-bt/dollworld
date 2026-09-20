@@ -8,7 +8,7 @@ import {
   buildTournamentBattleParticipantFixture,
   tournamentBattleBasePolicy,
   tournamentBattleFixtureProvider,
-} from "../../../../../packages/simulation-core/src/sprint2/tournament-battle-atomic.fixture.js";
+} from "@shared-world/simulation-core";
 import { buildUi009SingleEliminationKnockoutMapping } from "./competition-knockout-seed-mapping.js";
 import { buildUi009StructuralPolicy } from "./competition-structural-policy.js";
 import { selectUi009TournamentFormat } from "./competition-format-selection.js";
