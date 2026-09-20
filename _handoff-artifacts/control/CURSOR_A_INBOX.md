@@ -1,17 +1,19 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T03:04:46+09:00
-last-consumed-task-key: SPRINT3-POST-S03-014-RELEASE-GATE-A-20260921-R1
-last-terminal: READY / SPRINT3_POST_S03_014_RELEASE_GATE_EVIDENCE_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-POST-S03-014-RELEASE-GATE-A-20260921-R1/result.md
+task-key: SPRINT3-WEB-TEST-TYPECHECK-RECOVERY-A-20260921-R1
+mode: IMPLEMENTATION_VERIFICATION
+updatedAt: 2026-09-21T03:20:07+09:00
+sprint: Sprint3
+priority: DEADLINE_CRITICAL
+instruction-path: _handoff-artifacts/tasks/SPRINT3-WEB-TEST-TYPECHECK-RECOVERY-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
 pickup-requirements:
-- fresh-read GitHub canonical instruction
+- fresh-read GitHub canonical instruction and current master
 - claim ACTIVE before changes
+- repair apps/web test-project typecheck mechanically without weakening strict compiler safety
+- do not touch B2 S03-009 ownership or reconstruct S03-011
 - publish terminal result to GitHub canonical result path
+- no status-only completion
