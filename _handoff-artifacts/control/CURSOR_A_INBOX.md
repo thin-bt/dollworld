@@ -1,17 +1,20 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T02:44:20+09:00
-last-consumed-task-key: SPRINT3-S03-014-LIVE-ENROLLMENT-CANDIDATE-MATERIALIZATION-A-20260921-R1
-last-terminal: READY / SPRINT3_S03_014_LIVE_ENROLLMENT_CANDIDATE_MATERIALIZATION_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-014-LIVE-ENROLLMENT-CANDIDATE-MATERIALIZATION-A-20260921-R1/result.md
+task-key: SPRINT3-POST-S03-014-RELEASE-GATE-A-20260921-R1
+mode: RELEASE_GATE_EVIDENCE
+updatedAt: 2026-09-21T02:50:15+09:00
+instruction-path: _handoff-artifacts/tasks/SPRINT3-POST-S03-014-RELEASE-GATE-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
+priority: DEADLINE_CRITICAL
+runtime-status: DISPATCHED
 pickup-requirements:
-- fresh-read GitHub canonical instruction
+- fresh-read GitHub canonical instruction and current master
 - claim ACTIVE before changes
-- publish terminal result to GitHub canonical result path
+- execute release-gate checks/evidence now; no status-only completion
+- do not touch B2 S03-009 ownership/control/task/result artifacts
+- keep product/test gate separate from Sprint3 scope-completeness gate
+- publish terminal result to GitHub canonical result path and return lane A to IDLE
