@@ -1,18 +1,18 @@
 # Cursor B2 Active Task
 
-state: ACTIVE
+state: IDLE
 lane: B2
-task-key: SPRINT3-CANONICAL-BACKLOG-TRUTH-RECONCILIATION-B2-20260921-R1
-mode: SPEC_TO_SOURCE_RECONCILIATION
-updatedAt: 2026-09-21T05:58:00+09:00
-pickup: ACTIVE_IDLE
-startedAt: 2026-09-21T05:58:00+09:00
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T06:02:00+09:00
+pickup: (none)
+startedAt: (none)
 branch: master
-completedAt: (none)
-last-completed-task: (none)
-last-result-path: (none)
-last-terminal: (none)
-terminal: (none)
+completedAt: 2026-09-21T06:02:00+09:00
+last-completed-task: SPRINT3-CANONICAL-BACKLOG-TRUTH-RECONCILIATION-B2-20260921-R1
+last-result-path: _handoff-artifacts/results/SPRINT3-CANONICAL-BACKLOG-TRUTH-RECONCILIATION-B2-20260921-R1/result.md
+last-terminal: SPRINT3_CANONICAL_BACKLOG_TRUTH_RECONCILIATION_B2_READY
+terminal: READY
 control-authority: GitHub
 
 Rules:

@@ -10,7 +10,7 @@ canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: e44917647ce900af68128ecf677862e0b0b1e360
 pre-publication-origin-head: e44917647ce900af68128ecf677862e0b0b1e360
-publication-commit: (post-push SHA — see readback)
+publication-commit: 8f187567d2cee046c838bca5fe61932968fef60c
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 production-change: DOCS_ONLY (`docs/SPRINT_3_BACKLOG.md`, `docs/specs/15-sprint3-config-schema.md`)
 recovery: CURSOR-B2-001 — bounded attempt1 per check family; no same-case retry after exhaust
