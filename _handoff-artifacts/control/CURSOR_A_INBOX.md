@@ -1,20 +1,17 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1
-mode: PRODUCT_PUBLICATION_RECOVERY
-updatedAt: 2026-09-21T00:40:20+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T00:45:32+09:00
+last-consumed-task-key: SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1
+last-terminal: READY / SPRINT3_S03_010_GENERATED_TECHNIQUE_REGISTRATION_CANONICAL_PUBLISHED
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
-priority: DEADLINE_CRITICAL
-recovery-request: IMMEDIATE
 pickup-requirements:
-- fresh-read GitHub canonical instruction and current master
-- claim ACTIVE before product changes
-- recover and publish the already-implemented S03-010 product diff; READY requires real master SHA/readback
-- do not touch B2-owned S03-009 control/task/result authority
-- do not expand into S03-011
+- fresh-read GitHub canonical instruction
+- claim ACTIVE before changes
 - publish terminal result to GitHub canonical result path
