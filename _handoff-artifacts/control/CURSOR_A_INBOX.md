@@ -1,17 +1,20 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T01:04:09+09:00
-last-consumed-task-key: SPRINT3-S03-011-FIRST-USE-MATCHID-PERSISTENCE-A-20260921-R1
-last-terminal: BLOCKED / SPRINT3_S03_011_FIRST_USE_MATCHID_BLOCKED_MISSING_S03_009_CANONICAL
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-011-FIRST-USE-MATCHID-PERSISTENCE-A-20260921-R1/result.md
+task-key: SPRINT3-ROOT-CHECK-TYPECHECK-RECOVERY-A-20260921-R1
+mode: IMPLEMENTATION_VERIFICATION
+updatedAt: 2026-09-21T01:23:00+09:00
+instruction-path: _handoff-artifacts/tasks/SPRINT3-ROOT-CHECK-TYPECHECK-RECOVERY-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
+priority: DEADLINE_CRITICAL
 pickup-requirements:
-- fresh-read GitHub canonical instruction
+- fresh-read GitHub canonical instruction and current master
 - claim ACTIVE before changes
+- repair simulation-core test-project strict typing only; no gameplay semantic workaround
+- do not touch B2 S03-009 runtime wiring/control/result
+- do not publish S03-011 until S03-009 is canonical
 - publish terminal result to GitHub canonical result path
+- deadline-recovery: execute now; no status-only completion
