@@ -1,21 +1,17 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-013-LIVE-MENTORSHIP-QUEUE-MATERIALIZATION-A-20260921-R1
-mode: PRODUCT_IMPLEMENTATION
-updatedAt: 2026-09-21T02:02:00+09:00
-sprint: Sprint3
-priority: DEADLINE_CRITICAL
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-013-LIVE-MENTORSHIP-QUEUE-MATERIALIZATION-A-20260921-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T02:07:04+09:00
+last-consumed-task-key: SPRINT3-S03-013-LIVE-MENTORSHIP-QUEUE-MATERIALIZATION-A-20260921-R1
+last-terminal: READY / SPRINT3_S03_013_LIVE_MENTORSHIP_QUEUE_MATERIALIZATION_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-013-LIVE-MENTORSHIP-QUEUE-MATERIALIZATION-A-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-predecessor: SPRINT3-S03-012-RUNTIME-ENTRYPOINT-INTEGRATION-A-20260921-R1
+sprint: Sprint3
 pickup-requirements:
-- fresh-read GitHub canonical instruction and current master
-- claim ACTIVE before product changes
-- implement live enrollment + explicit-teach queue materialization only
-- preserve S03-012 queue-fed replay/test APIs
-- do not touch B2 S03-009 original-technique runtime scope or B2 control/task/result artifacts
+- fresh-read GitHub canonical instruction
+- claim ACTIVE before changes
 - publish terminal result to GitHub canonical result path
-- deadline-recovery: complete product wiring/tests/publication in this pickup where feasible; no status-only completion
