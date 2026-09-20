@@ -4,12 +4,14 @@ lane: A
 task-key: SPRINT3-PRE-S03-015-CANONICAL-EVIDENCE-MANIFEST-A-20260921-R1
 mode: RELEASE_EVIDENCE
 priority: DEADLINE_CRITICAL
-updatedAt: 2026-09-21T06:55:29+09:00
+updatedAt: 2026-09-21T07:00:58+09:00
 instruction-path: _handoff-artifacts/tasks/SPRINT3-PRE-S03-015-CANONICAL-EVIDENCE-MANIFEST-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
+recovery-request: REDISPATCH
+recovery-reason: canonical PREPARED since 06:55 has no ACTIVE lock/result evidence at 07:00; executor pickup recovery required
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before work
@@ -18,3 +20,4 @@ pickup-requirements:
 - do not take over B2 S03-015 generated-technique battle consumption work
 - publish terminal result to GitHub canonical result path
 - verify canonical master readback before READY
+- if executor cannot claim this REDISPATCH, expose pickup failure rather than silently leaving PREPARED
