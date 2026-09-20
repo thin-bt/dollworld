@@ -4,22 +4,20 @@ state: IDLE
 lane: A
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-19T21:42:00+09:00
+updatedAt: 2026-09-20T21:15:00+09:00
 pickup: (none)
 startedAt: (none)
 branch: master
-HEAD: e1d5b3bb4e2ed50ee14114cfaa61adf69deadeaa
-origin-master-head: e1d5b3bb4e2ed50ee14114cfaa61adf69deadeaa
-completedAt: 2026-09-19T21:42:00+09:00
-lastCompletedTask: SPRINT2-DETAILED-BATTLE-LOG-PUBLICATION-A-20260919-R2
-last-consumed-task-key: SPRINT2-DETAILED-BATTLE-LOG-PUBLICATION-A-20260919-R2
-terminal: READY / DETAILED_BATTLE_LOG_PUBLICATION
-last-terminal: READY / DETAILED_BATTLE_LOG_PUBLICATION
-last-worktree-head: e1d5b3bb4e2ed50ee14114cfaa61adf69deadeaa
-result-path: _handoff-artifacts/results/SPRINT2-DETAILED-BATTLE-LOG-PUBLICATION-A-20260919-R2/result.md
-instruction-path: _handoff-artifacts/tasks/SPRINT2-DETAILED-BATTLE-LOG-PUBLICATION-A-20260919-R2/instruction.md
+HEAD: 3b26a489da0693d0f282bcc3f361be4c221cd7f8
+origin-master-head: 3b26a489da0693d0f282bcc3f361be4c221cd7f8
+completedAt: 2026-09-20T21:15:00+09:00
+last-completed-task: SPRINT3-S03-007-WEEKLY-TEACH-A-20260920-R1
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-007-WEEKLY-TEACH-A-20260920-R1/result.md
+last-terminal: READY / SPRINT3_S03_007_WEEKLY_TEACH_READY
+terminal: READY / SPRINT3_S03_007_WEEKLY_TEACH_READY
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-007-WEEKLY-TEACH-A-20260920-R1/instruction.md
 control-authority: GitHub
-predecessor-task: SPRINT2-DETAILED-BATTLE-LOG-CLOSURE-A-20260919-R1
+predecessor: SPRINT3-S03-006-PARENT-TEMP-GUIDANCE-A-20260920-R1
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
