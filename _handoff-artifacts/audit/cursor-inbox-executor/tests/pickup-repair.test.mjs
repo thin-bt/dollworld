@@ -170,3 +170,36 @@ test("same-task READY then newer REDISPATCH PREPARED => invoke", () => {
   assert.equal(pickup.invoke, true);
   assert.equal(pickup.reason, "REDISPATCH_SAME_TASK");
 });
+
+test("REDISPATCH_SAME_TASK is cooldown-exempt", async () => {
+  const { isCooldownExemptPickup, isInCooldown } = await import("../lib/pickup.mjs");
+  assert.equal(isCooldownExemptPickup({ reason: "REDISPATCH_SAME_TASK" }), true);
+  assert.equal(isCooldownExemptPickup({ reason: "ACTIVE_IDLE" }), false);
+  assert.equal(isCooldownExemptPickup({ reason: "RECOVERY_SAME_TASK_ACTIVE" }), true);
+  // cooldown itself still true for recent invoke, but exempt gate must win in pollLane
+  assert.equal(
+    isInCooldown("TASK-R13", new Date().toISOString(), "TASK-R13", 30),
+    true,
+  );
+});
+
+test("PICKUP_RECOVERY runtime-status counts as explicit redispatch", () => {
+  const pickup = evaluatePickup(
+    {
+      state: "PREPARED",
+      "task-key": "TASK-009",
+      updatedAt: "2026-09-21T03:00:37+09:00",
+      "runtime-status": "PICKUP_RECOVERY_REQUIRED",
+      "recovery-request": "RETRIGGER",
+    },
+    {
+      state: "IDLE",
+      "last-completed-task": "TASK-009",
+      terminal: "READY / TASK_009_READY",
+      completedAt: "2026-09-21T02:00:00+09:00",
+      updatedAt: "2026-09-21T02:00:00+09:00",
+    },
+  );
+  assert.equal(pickup.invoke, true);
+  assert.equal(pickup.reason, "REDISPATCH_SAME_TASK");
+});

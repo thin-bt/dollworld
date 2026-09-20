@@ -9,7 +9,7 @@ import { readLaneActive, readLaneInbox, laneControlPaths } from "./lib/lane-cont
 import { fetchGitHubFileText, parseControlText } from "./lib/github-remote.mjs";
 import { selectAuthoritativeInbox } from "./lib/authoritative-inbox.mjs";
 import { ensureInstructionAvailable } from "./lib/ensure-instruction.mjs";
-import { evaluatePickup, isInCooldown, isRecoveryPickup } from "./lib/pickup.mjs";
+import { evaluatePickup, isInCooldown, isRecoveryPickup, isCooldownExemptPickup } from "./lib/pickup.mjs";
 import { publishTerminalToGitHub } from "./lib/publish-terminal-github.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -254,6 +254,7 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
 
   if (
     !isRecoveryPickup(pickup, active) &&
+    !isCooldownExemptPickup(pickup) &&
     isInCooldown(
       prior.lastInvokedTaskKey,
       prior.lastInvokedAt,
