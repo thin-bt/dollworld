@@ -1,5 +1,7 @@
+import type { CareerStatus, LifeStatus, Rank } from "../enums.js";
 import type {
   MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
+  MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
 } from "./constants.js";
 
@@ -20,8 +22,40 @@ export type Sprint3TeachingEfficiencyConfig = {
   parentTemporaryGuidanceFactorTenThousandths: number;
 };
 
-export type Sprint3MasterQualificationConfig = {
+/** Balance-tuning numeric gates live in config only (S3-SPEC §2.3 / S03-002). */
+export type MasterQualificationEligibilityThresholds = {
+  minimumRetirementRank: Rank;
+  minimumOfficialWins: number;
+  minimumLimitedOfficialWins: number;
+  minimumTournamentTitles: number;
+};
+
+export type Sprint3MasterQualificationConfigDeferred = {
   evaluationPolicyVersion: typeof MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED;
+};
+
+export type Sprint3MasterQualificationConfigWithThresholds = {
+  evaluationPolicyVersion: typeof MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS;
+  eligibilityThresholds: MasterQualificationEligibilityThresholds;
+};
+
+export type Sprint3MasterQualificationConfig =
+  Sprint3MasterQualificationConfigDeferred | Sprint3MasterQualificationConfigWithThresholds;
+
+/** Pure evaluation input at retirement boundary (processor wiring in later slices). */
+export type MasterQualificationEvaluationRecord = {
+  careerStatus: CareerStatus;
+  lifeStatus: LifeStatus;
+  retirementRank?: Rank;
+  highestRank: Rank;
+  officialWins: number;
+  limitedOfficialWins: number;
+  tournamentTitles: number;
+};
+
+export type MasterQualificationEvaluationOutcome = {
+  eligible: boolean;
+  reasons: readonly string[];
 };
 
 /** Feature gates for later Sprint3 slices; S03-001 validates structure only. */

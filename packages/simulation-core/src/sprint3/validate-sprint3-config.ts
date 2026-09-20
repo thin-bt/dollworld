@@ -5,18 +5,29 @@ import { toCanonicalJson } from "../canonical-json.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
+import { RANK_ORDER, type Rank } from "../enums.js";
 import {
   MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
+  MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
+  SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./constants.js";
-import { createDefaultSprint3ConfigInput } from "./sprint3-config-defaults.js";
+import {
+  createDefaultSprint3ConfigInput,
+  createSprint3Balance020ConfigInput,
+} from "./sprint3-config-defaults.js";
 import {
   getExpectedCanonicalJsonForSprint3ConfigVersion,
   isKnownSprint3ConfigVersion,
   registerKnownSprint3ConfigVersion,
 } from "./sprint3-config-version-registry.js";
-import type { DiscipleCountFactorBracket, Sprint3Config, Sprint3ConfigInput } from "./types.js";
+import type {
+  DiscipleCountFactorBracket,
+  MasterQualificationEligibilityThresholds,
+  Sprint3Config,
+  Sprint3ConfigInput,
+} from "./types.js";
 import {
   deepFreezePlainJson,
   rejectUnknownKeys,
@@ -271,6 +282,108 @@ function parseTeachingEfficiency(
   };
 }
 
+function parseEligibilityThresholds(
+  value: unknown,
+  issues: ValidationIssue[],
+): MasterQualificationEligibilityThresholds | undefined {
+  const object = snapshotPlainObjectOrFail(
+    value,
+    "/masterQualification/eligibilityThresholds",
+    issues,
+  );
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(
+    object,
+    [
+      "minimumRetirementRank",
+      "minimumOfficialWins",
+      "minimumLimitedOfficialWins",
+      "minimumTournamentTitles",
+    ],
+    "/masterQualification/eligibilityThresholds",
+    issues,
+  );
+  const minimumRetirementRankRaw = object["minimumRetirementRank"];
+  if (typeof minimumRetirementRankRaw !== "string") {
+    issues.push({
+      path: "/masterQualification/eligibilityThresholds/minimumRetirementRank",
+      message: "minimumRetirementRank must be a rank literal",
+      actual: minimumRetirementRankRaw,
+      expected: RANK_ORDER.join("|"),
+    });
+    return undefined;
+  }
+  if (!(RANK_ORDER as readonly string[]).includes(minimumRetirementRankRaw)) {
+    issues.push({
+      path: "/masterQualification/eligibilityThresholds/minimumRetirementRank",
+      message: "minimumRetirementRank must be a known rank",
+      actual: minimumRetirementRankRaw,
+      expected: RANK_ORDER.join("|"),
+    });
+    return undefined;
+  }
+  const minimumOfficialWins = requireSafeInteger(
+    object,
+    "minimumOfficialWins",
+    "/masterQualification/eligibilityThresholds",
+    issues,
+  );
+  const minimumLimitedOfficialWins = requireSafeInteger(
+    object,
+    "minimumLimitedOfficialWins",
+    "/masterQualification/eligibilityThresholds",
+    issues,
+  );
+  const minimumTournamentTitles = requireSafeInteger(
+    object,
+    "minimumTournamentTitles",
+    "/masterQualification/eligibilityThresholds",
+    issues,
+  );
+  if (
+    minimumOfficialWins === undefined ||
+    minimumLimitedOfficialWins === undefined ||
+    minimumTournamentTitles === undefined
+  ) {
+    return undefined;
+  }
+  if (minimumOfficialWins < 0 || minimumOfficialWins > 1_000_000) {
+    issues.push({
+      path: "/masterQualification/eligibilityThresholds/minimumOfficialWins",
+      message: "minimumOfficialWins must be in 0..1000000",
+      actual: minimumOfficialWins,
+      expected: "0..1000000",
+    });
+    return undefined;
+  }
+  if (minimumLimitedOfficialWins < 0 || minimumLimitedOfficialWins > 1_000_000) {
+    issues.push({
+      path: "/masterQualification/eligibilityThresholds/minimumLimitedOfficialWins",
+      message: "minimumLimitedOfficialWins must be in 0..1000000",
+      actual: minimumLimitedOfficialWins,
+      expected: "0..1000000",
+    });
+    return undefined;
+  }
+  if (minimumTournamentTitles < 0 || minimumTournamentTitles > 10_000) {
+    issues.push({
+      path: "/masterQualification/eligibilityThresholds/minimumTournamentTitles",
+      message: "minimumTournamentTitles must be in 0..10000",
+      actual: minimumTournamentTitles,
+      expected: "0..10000",
+    });
+    return undefined;
+  }
+  return {
+    minimumRetirementRank: minimumRetirementRankRaw as Rank,
+    minimumOfficialWins,
+    minimumLimitedOfficialWins,
+    minimumTournamentTitles,
+  };
+}
+
 function parseMasterQualification(
   value: unknown,
   issues: ValidationIssue[],
@@ -279,18 +392,59 @@ function parseMasterQualification(
   if (object === undefined) {
     return undefined;
   }
-  rejectUnknownKeys(object, ["evaluationPolicyVersion"], "/masterQualification", issues);
-  const evaluationPolicyVersion = requireLiteralString(
-    object,
-    "evaluationPolicyVersion",
-    "/masterQualification",
-    MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
-    issues,
-  );
-  if (evaluationPolicyVersion === undefined) {
+
+  const evaluationPolicyVersionRaw = object["evaluationPolicyVersion"];
+  if (typeof evaluationPolicyVersionRaw !== "string") {
+    issues.push({
+      path: "/masterQualification/evaluationPolicyVersion",
+      message: "evaluationPolicyVersion must be a string literal",
+      actual: evaluationPolicyVersionRaw,
+      expected: "string",
+    });
     return undefined;
   }
-  return { evaluationPolicyVersion };
+
+  if (evaluationPolicyVersionRaw === MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED) {
+    rejectUnknownKeys(object, ["evaluationPolicyVersion"], "/masterQualification", issues);
+    return { evaluationPolicyVersion: MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED };
+  }
+
+  if (evaluationPolicyVersionRaw === MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS) {
+    rejectUnknownKeys(
+      object,
+      ["evaluationPolicyVersion", "eligibilityThresholds"],
+      "/masterQualification",
+      issues,
+    );
+    if (!("eligibilityThresholds" in object)) {
+      issues.push({
+        path: "/masterQualification/eligibilityThresholds",
+        message: "eligibilityThresholds is required for rank-and-records evaluation policy",
+        actual: undefined,
+        expected: "object",
+      });
+      return undefined;
+    }
+    const eligibilityThresholds = parseEligibilityThresholds(
+      object["eligibilityThresholds"],
+      issues,
+    );
+    if (eligibilityThresholds === undefined) {
+      return undefined;
+    }
+    return {
+      evaluationPolicyVersion: MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
+      eligibilityThresholds,
+    };
+  }
+
+  issues.push({
+    path: "/masterQualification/evaluationPolicyVersion",
+    message: "unsupported masterQualification.evaluationPolicyVersion",
+    actual: evaluationPolicyVersionRaw,
+    expected: `${MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED}|${MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS}`,
+  });
+  return undefined;
 }
 
 function parseMentorshipFeatures(
@@ -441,6 +595,16 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
   }
   const canonical = toCanonicalJson(validated.value);
   registerKnownSprint3ConfigVersion(SPRINT3_CONFIG_VERSION_DEFAULT, canonical);
+  const qualificationValidated = validateNormalizedSprint3Config(
+    createSprint3Balance020ConfigInput(),
+  );
+  if (!qualificationValidated.ok) {
+    throw new Error("Sprint3 balance 0.2.0 config failed validation during registry bootstrap");
+  }
+  registerKnownSprint3ConfigVersion(
+    SPRINT3_CONFIG_VERSION_QUALIFICATION,
+    toCanonicalJson(qualificationValidated.value),
+  );
   defaultRegistryInitialized = true;
   void provider;
 }

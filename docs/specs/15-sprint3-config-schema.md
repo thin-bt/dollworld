@@ -21,7 +21,7 @@ Sprint3Config
 
 - 未知キーは拒否する
 - 必須キー欠落を暗黙補完しない
-- 師匠資格の**具体的合格基準**（ランク・勝数・王座等）は `docs/SPEC.md` どおりバランス調整項目のため、S03-001 では `masterQualification.evaluationPolicyVersion` のみを保持し、数値閾値フィールドを設けない
+- 師匠資格の**具体的合格基準**（ランク・勝数・王座等）は `docs/SPEC.md` どおりバランス調整項目のため、S03-001 では `masterQualification.evaluationPolicyVersion` のみを保持し、数値閾値フィールドを設けない（S03-002 で `master-qualification-rank-and-records-0.1.0` ポリシーと `eligibilityThresholds` を追加）
 - 同じ `configVersion` の canonical 内容は不変（Sprint1/2 と同契約）
 
 ### 1.1 設定識別
@@ -34,7 +34,9 @@ Sprint3Config
 |---|---|
 | Sprint3Config.schemaVersion | `0.1.0` |
 | Sprint3Config.configVersion | `sprint3-balance-0.1.0` |
-| masterQualification.evaluationPolicyVersion | `master-qualification-deferred-0.1.0` |
+| masterQualification.evaluationPolicyVersion | `master-qualification-deferred-0.1.0`（`sprint3-balance-0.1.0`） |
+| Sprint3Config.configVersion（S03-002 資格閾値付き） | `sprint3-balance-0.2.0` |
+| masterQualification.evaluationPolicyVersion（0.2.0） | `master-qualification-rank-and-records-0.1.0` |
 
 ## 2. セクション定義
 
@@ -59,7 +61,21 @@ Sprint3Config
 
 ### 2.3 masterQualification
 
-S03-001 では `evaluationPolicyVersion` のみ。閾値オブジェクトは後続 S03-002 以降で追加するまで存在しない。
+| evaluationPolicyVersion | 意味 |
+|---|---|
+| `master-qualification-deferred-0.1.0` | S03-001 互換。`sprint3-balance-0.1.0` のみ。閾値オブジェクトなし。評価関数は fail-closed。 |
+| `master-qualification-rank-and-records-0.1.0` | S03-002。`eligibilityThresholds` 必須。 |
+
+`eligibilityThresholds`（`master-qualification-rank-and-records-0.1.0` のみ）:
+
+| キー | 意味 |
+|---|---|
+| minimumRetirementRank | 引退時ランクの下限（含む）。`docs/SPEC.md` の最高到達ランク要素。 |
+| minimumOfficialWins | 公式戦勝利数下限（総合・通常大会等の集計）。 |
+| minimumLimitedOfficialWins | 限定戦勝利数下限（`winsByTournamentKind.limited` 相当）。 |
+| minimumTournamentTitles | 優勝・王座相当タイトル数下限。 |
+
+数値はすべて config 保持。評価 pure 関数 `evaluateMasterQualificationEligibility` は引退後（`careerStatus=retired`）かつ存命のみ合格し得る。
 
 ### 2.4 mentorshipFeatures
 

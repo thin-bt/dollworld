@@ -3,8 +3,10 @@
  */
 import {
   MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
+  MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
+  SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./constants.js";
 import type { Sprint3ConfigInput } from "./types.js";
 
@@ -30,6 +32,43 @@ export function createDefaultSprint3ConfigInput(): Sprint3ConfigInput {
     },
     masterQualification: {
       evaluationPolicyVersion: MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
+    },
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: false,
+      enrollmentAssignmentAiEnabled: false,
+    },
+  };
+}
+
+/** S03-002 canonical balance pack with config-held qualification thresholds (not code literals). */
+export function createSprint3Balance020ConfigInput(): Sprint3ConfigInput {
+  return {
+    schemaVersion: SPRINT3_CONFIG_SCHEMA_VERSION,
+    configVersion: SPRINT3_CONFIG_VERSION_QUALIFICATION,
+    enrollment: {
+      childhoodInfluenceMaxAge: 7,
+      formalEnrollmentMinAge: 8,
+      parentTemporaryGuidanceAllowed: true,
+    },
+    teachingEfficiency: {
+      parentTemporaryGuidanceFactorTenThousandths: 7500,
+      discipleCountFactorBrackets: [
+        { minDisciplesInclusive: 1, maxDisciplesInclusive: 3, factorTenThousandths: 10000 },
+        { minDisciplesInclusive: 4, maxDisciplesInclusive: 6, factorTenThousandths: 9200 },
+        { minDisciplesInclusive: 7, maxDisciplesInclusive: 10, factorTenThousandths: 8200 },
+        { minDisciplesInclusive: 11, maxDisciplesInclusive: 20, factorTenThousandths: 7000 },
+        { minDisciplesInclusive: 21, maxDisciplesInclusive: 40, factorTenThousandths: 5500 },
+        { minDisciplesInclusive: 41, maxDisciplesInclusive: 999_999, factorTenThousandths: 4000 },
+      ],
+    },
+    masterQualification: {
+      evaluationPolicyVersion: MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
+      eligibilityThresholds: {
+        minimumRetirementRank: "C",
+        minimumOfficialWins: 0,
+        minimumLimitedOfficialWins: 0,
+        minimumTournamentTitles: 0,
+      },
     },
     mentorshipFeatures: {
       explicitWeeklyTeachActionEnabled: false,

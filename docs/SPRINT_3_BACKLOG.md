@@ -4,8 +4,9 @@
 - 対象ゲーム仕様: `SPEC-0.1.3`（師匠・門下テーマ）
 - 対象 Sprint 3 ミニ仕様: `S3-SPEC-0.3.0-draft`（`docs/specs/15-sprint3-config-schema.md`）
 - 実装状態:
-  - **S03-001 implemented**（本タスク: `SPRINT3-FIRST-SLICE-AUTHORITY-AND-IMPLEMENTATION-A-20260920-R1`）
-  - S03-002〜S03-008 **planned**
+  - **S03-001 implemented**（`SPRINT3-FIRST-SLICE-AUTHORITY-AND-IMPLEMENTATION-A-20260920-R1`）
+  - **S03-002 implemented**（本タスク: `SPRINT3-S03-002-MASTER-QUALIFICATION-A-20260920-R1`）
+  - S03-003〜S03-008 **planned**
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -85,6 +86,7 @@
 
 - 閾値変更は新 `configVersion` のみ
 - 閾値未設定 config を受理しない（S03-001 deferred policy からの移行）
+- `sprint3-balance-0.2.0` + `evaluateMasterQualificationEligibility` テスト（MQ-001〜010）
 
 ---
 

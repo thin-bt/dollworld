@@ -1202,7 +1202,11 @@ export {
   validateNormalizedSprint2Config,
   validateSprint2Config,
 } from "./sprint2/validate-sprint2-config.js";
-export { createDefaultSprint3ConfigInput } from "./sprint3/sprint3-config-defaults.js";
+export {
+  createDefaultSprint3ConfigInput,
+  createSprint3Balance020ConfigInput,
+} from "./sprint3/sprint3-config-defaults.js";
+export { evaluateMasterQualificationEligibility } from "./sprint3/evaluate-master-qualification.js";
 export {
   computeSprint3ConfigHash,
   createDefaultSprint3Config,
@@ -1211,8 +1215,10 @@ export {
 } from "./sprint3/validate-sprint3-config.js";
 export {
   MASTER_QUALIFICATION_EVALUATION_POLICY_DEFERRED,
+  MASTER_QUALIFICATION_EVALUATION_POLICY_RANK_AND_RECORDS,
   SPRINT3_CONFIG_SCHEMA_VERSION,
   SPRINT3_CONFIG_VERSION_DEFAULT,
+  SPRINT3_CONFIG_VERSION_QUALIFICATION,
 } from "./sprint3/constants.js";
 export type {
   DiscipleCountFactorBracket,
@@ -1221,7 +1227,12 @@ export type {
   Sprint3Config,
   Sprint3ConfigInput,
   Sprint3EnrollmentConfig,
+  MasterQualificationEligibilityThresholds,
+  MasterQualificationEvaluationOutcome,
+  MasterQualificationEvaluationRecord,
   Sprint3MasterQualificationConfig,
+  Sprint3MasterQualificationConfigDeferred,
+  Sprint3MasterQualificationConfigWithThresholds,
   Sprint3MentorshipFeatureFlags,
   Sprint3TeachingEfficiencyConfig,
 } from "./sprint3/types.js";
