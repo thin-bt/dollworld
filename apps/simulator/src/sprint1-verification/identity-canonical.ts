@@ -3,6 +3,7 @@ import {
   computeConfigHash,
   createSprint1RunSession,
   toCanonicalJson,
+  withDefaultSprint2BindingsForRunSessionInput,
   validateSprint1CliInput,
   type PersonId,
   type Sha256Provider,
@@ -72,12 +73,12 @@ export function verifyIdentityAndCanonical(repoRoot: string): IdentityVerificati
       void validatedInput;
       return expectOk(
         createSprint1RunSession(
-          {
+          withDefaultSprint2BindingsForRunSessionInput({
             seed: SPRINT1_BASE_SEED,
             config: fixtures.config,
             nameData,
             sprint1CliInput: inputRaw,
-          },
+          }),
           sha256Provider,
         ),
         "createSprint1RunSession",
@@ -127,12 +128,12 @@ export function verifyIdentityAndCanonical(repoRoot: string): IdentityVerificati
     };
     const mutatedSession = expectOk(
       createSprint1RunSession(
-        {
+        withDefaultSprint2BindingsForRunSessionInput({
           seed: SPRINT1_BASE_SEED,
           config: fixtures.config,
           nameData,
           sprint1CliInput: mutatedInput,
-        },
+        }),
         sha256Provider,
       ),
       "createSprint1RunSession(mutated)",
@@ -164,12 +165,12 @@ export function verifyIdentityAndCanonical(repoRoot: string): IdentityVerificati
     writeFileSync(join(tempRoot, "reordered.json"), `${JSON.stringify(reordered)}\n`, "utf8");
     const reorderedSession = expectOk(
       createSprint1RunSession(
-        {
+        withDefaultSprint2BindingsForRunSessionInput({
           seed: SPRINT1_BASE_SEED,
           config: fixtures.config,
           nameData,
           sprint1CliInput: reordered,
-        },
+        }),
         sha256Provider,
       ),
       "createSprint1RunSession(reordered)",

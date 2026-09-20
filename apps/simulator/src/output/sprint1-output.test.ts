@@ -19,6 +19,7 @@ import {
   createSeededRng,
   createSprint1RunSession,
   createWorldDate,
+  withDefaultSprint2BindingsForRunSessionInput,
   generateInitialWorld,
   runBattleToCompletion,
   runSprint1WeeklyStep,
@@ -383,12 +384,12 @@ function buildFreshSession(seed = 5150): {
   const personIds = generated.snapshot.persons.map((person) => person.personId);
   const created = expectOk(
     createSprint1RunSession(
-      {
+      withDefaultSprint2BindingsForRunSessionInput({
         seed,
         config,
         nameData,
         sprint1CliInput: buildSprint1CliInput(buildSidecarForPersonIds(personIds)),
-      },
+      }),
       sha256Provider,
     ),
   );
@@ -643,7 +644,7 @@ describe("S01-008 Sprint1 fixed seven-file output", () => {
     expect(result.runMetadata.eventEnvelopeSchemaVersion).toBe(
       SPRINT1_EVENT_ENVELOPE_SCHEMA_VERSION,
     );
-    expect(result.runMetadata.simulationIdentity.schemaVersion).toBe("0.5.0");
+    expect(result.runMetadata.simulationIdentity.schemaVersion).toBe("0.6.0");
     expect(result.runMetadata.simulationIdentityHash).toMatch(/^[0-9a-f]{64}$/);
     expect(result.finalWorld.schemaVersion).toBe("0.3.0");
     expect(result.finalWorld.weeklyTrainingSidecars.entries.length).toBe(

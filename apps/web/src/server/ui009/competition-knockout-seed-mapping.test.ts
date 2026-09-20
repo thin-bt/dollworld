@@ -6,7 +6,6 @@ import {
 } from "@shared-world/simulation-core";
 import {
   buildTournamentBattleParticipantFixture,
-  tournamentBattleBasePolicy,
   tournamentBattleFixtureProvider,
 } from "@shared-world/simulation-core";
 import { buildUi009SingleEliminationKnockoutMapping } from "./competition-knockout-seed-mapping.js";
@@ -92,6 +91,5 @@ describe("UI009 knockout seed mapping", () => {
       return;
     }
     expect(built.value.definition.formatKind).toBe("round_robin");
-    expect(tournamentBattleBasePolicy).toBeDefined();
   });
 });

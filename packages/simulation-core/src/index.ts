@@ -901,6 +901,20 @@ export type {
   TournamentBattleAtomicPublicationGate,
 } from "./sprint2/tournament-battle-atomic-adapter.js";
 export {
+  buildRoundRobinBracketForPersons,
+  buildTournamentBattleParticipantFixture,
+  defaultCompetitionRuleHash,
+  defaultTournamentBattleActionIdentity,
+  prepareTournamentBattleSession,
+  tournamentBattleFixtureProvider,
+} from "./sprint2/tournament-battle-atomic.fixture.js";
+export {
+  buildTestSimulationIdentity,
+  createTestSprint2IdentityBindings,
+  withDefaultSprint2BindingsForRunSessionInput,
+  withTestSprint2IdentityFields,
+} from "./test-fixtures/sprint2-identity.fixture.js";
+export {
   buildTournamentFinalResult,
   computeTournamentFinalResultHash,
   tournamentPlacementContributionKey,

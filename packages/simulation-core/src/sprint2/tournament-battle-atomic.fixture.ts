@@ -296,7 +296,7 @@ export function buildTournamentBattleSession(seed = 6002): Sprint1RunSession {
         neutralGivenNameProbability: 0,
         familyNameSelection: "without_replacement",
         avoidDuplicateLivingFullNameWithinFamily: true,
-        displayFormat: "{givenName}??{familyName}",
+        displayFormat: "{givenName}・{familyName}",
       },
     }),
   );

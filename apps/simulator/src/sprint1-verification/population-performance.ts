@@ -5,6 +5,7 @@ import {
   createSeededRng,
   createSprint1RunSession,
   generateInitialWorld,
+  withDefaultSprint2BindingsForRunSessionInput,
   validateSprint1RunSession,
   type InitialWorldConfig,
   type PersonId,
@@ -131,12 +132,12 @@ export function runSprint1PopulationPerformanceProfile(
 
   const wallStart = Date.now();
   const createResult = createSprint1RunSession(
-    {
+    withDefaultSprint2BindingsForRunSessionInput({
       seed: input.seed,
       config: input.config,
       nameData,
       sprint1CliInput: measuredInput,
-    },
+    }),
     sha256Provider,
   );
   if (!createResult.ok) {

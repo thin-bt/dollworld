@@ -27,7 +27,12 @@ import { buildPerformanceSidecarFromTinyTemplate } from "./performance-sidecar.j
 import { runSprint1CliVerification } from "./run-sprint1-cli.js";
 import { scanMathRandomCallExpressions } from "./math-random-scan.js";
 import { readAndValidateSprint0CompletionReport } from "./sprint0-regression.js";
-import { asPersonId, createSprint1RunSession, type PersonId } from "@shared-world/simulation-core";
+import {
+  asPersonId,
+  createSprint1RunSession,
+  withDefaultSprint2BindingsForRunSessionInput,
+  type PersonId,
+} from "@shared-world/simulation-core";
 import { loadValidatedNameData } from "../file-loader.js";
 import { createNodeSha256Provider } from "../node-sha256-provider.js";
 import { loadTinySprint1Fixtures } from "./fixtures.js";
@@ -329,12 +334,12 @@ describe("S01-009 Sprint1 verification harness", () => {
       sha256Provider: sha256,
     });
     const created = createSprint1RunSession(
-      {
+      withDefaultSprint2BindingsForRunSessionInput({
         seed: SPRINT1_BASE_SEED,
         config: fixtures.config,
         nameData,
         sprint1CliInput: fixtures.sprint1CliInputRaw,
-      },
+      }),
       sha256,
     );
     expect(created.ok).toBe(true);

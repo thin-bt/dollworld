@@ -7,6 +7,7 @@ import {
   createDefaultStrategyActionSourceIdentity,
   createSprint1RunSession,
   createWorldDate,
+  withDefaultSprint2BindingsForRunSessionInput,
   isEligibleForBattleKind,
   runBattleToCompletion,
   runSprint1WeeklyStep,
@@ -416,12 +417,12 @@ function runIntegratedOnce(input: {
 
   const createResult = expectOk(
     createSprint1RunSession(
-      {
+      withDefaultSprint2BindingsForRunSessionInput({
         seed: SPRINT1_BASE_SEED,
         config: fixtures.config,
         nameData,
         sprint1CliInput: fixtures.sprint1CliInputRaw,
-      },
+      }),
       input.sha256Provider,
     ),
     "createSprint1RunSession",

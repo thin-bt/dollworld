@@ -3,6 +3,7 @@ import {
   computeConfigHash,
   computeNameDataHash,
   createSeededRng,
+  createDefaultSprint2IdentityBindings,
   createSprint1RunSession,
   createWorldEngineState,
   generateInitialWorld,
@@ -498,12 +499,22 @@ function runSprint1Simulation(
 
   const nameDataHash = computeNameDataHash(nameData.manifest, sha256Provider);
 
+  const sprint2IdentityBindingsResult = createDefaultSprint2IdentityBindings(sha256Provider);
+  if (!sprint2IdentityBindingsResult.ok) {
+    return {
+      exitCode: EXIT_RUNTIME_ERROR,
+      stdout: "",
+      stderr: `sprint2 identity bindings failed: ${JSON.stringify(sprint2IdentityBindingsResult.issues)}\n`,
+    };
+  }
+
   const sessionResult = createSprint1RunSession(
     {
       seed: args.seed,
       config,
       nameData,
       sprint1CliInput: sprint1InputJson,
+      sprint2IdentityBindings: sprint2IdentityBindingsResult.value,
     },
     sha256Provider,
   );

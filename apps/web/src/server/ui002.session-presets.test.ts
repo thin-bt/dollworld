@@ -154,7 +154,7 @@ describe("UI-002 session/presets/cursor/FI", () => {
     expect(presetsBody.data.nextCursor).toBeNull();
     expect(presetsBody.data.totalCount).toBe(presetsBody.data.items.length);
     expect(presetsBody.data.totalCount).toBeGreaterThanOrEqual(1);
-    expect(presetsBody.data.items[0]?.simulationIdentitySchemaVersion).toBe("0.5.0");
+    expect(presetsBody.data.items[0]?.simulationIdentitySchemaVersion).toBe("0.6.0");
     const ids = presetsBody.data.items.map((item) => item.presetId);
     expect([...ids].sort()).toEqual(ids);
   });

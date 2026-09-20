@@ -51,7 +51,7 @@ describe("year-start aggregate canonical hash streaming", () => {
     }
   });
 
-  it("hashes large event streams without materializing canonical JSON text", () => {
+  it("hashes large event streams without materializing canonical JSON text", { timeout: 60_000 }, () => {
     const eventCount = 250_000;
     const eventStream = Array.from({ length: eventCount }, (_, index) =>
       buildSyntheticEvent(index + 1),

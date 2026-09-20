@@ -23,7 +23,7 @@ describe("UI-001 React static shell", () => {
 describe("production `/` session lifecycle parity with /dev-viewer", () => {
   it("gates people route until session is ready (no premature SESSION_REQUIRED)", () => {
     const loading = renderToStaticMarkup(<Shell sessionState="empty" route={{ kind: "people" }} />);
-    expect(loading).toContain("読み込み中…");
+    expect(loading).toContain("シミュレーションを準備中…");
     expect(loading).not.toContain('data-testid="dev-viewer-people"');
     const ready = renderToStaticMarkup(<Shell sessionState="ready" route={{ kind: "people" }} />);
     expect(ready).toContain('data-testid="dev-viewer-people"');
