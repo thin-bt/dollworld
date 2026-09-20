@@ -1,17 +1,19 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-20T11:01:27+09:00
-last-consumed-task-key: SPRINT3-S03-004-INTAKE-A-20260920-R1
-last-terminal: READY / SPRINT3_S03_004_INTAKE_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-004-INTAKE-A-20260920-R1/result.md
+task-key: SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1
+mode: S03_005_TEACHING_EFFICIENCY_PIPELINE_INTEGRATION
+updatedAt: 2026-09-20T11:04:19+09:00
+sprint: Sprint3
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
+predecessor: SPRINT3-S03-004-INTAKE-A-20260920-R1
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- implement/test/publish S03-005 to canonical master
 - publish terminal result to GitHub canonical result path
+- do not start Sprint4
