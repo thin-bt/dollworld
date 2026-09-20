@@ -15,7 +15,9 @@ import {
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
   ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
 } from "./constants.js";
@@ -276,6 +278,59 @@ export function createSprint3Balance090ConfigInput(): Sprint3ConfigInput {
       evaluationPolicyVersion: ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
       researchThresholds: { ...SPEC_ORIGINAL_TECHNIQUE_RESEARCH_THRESHOLDS },
       generation: { ...SPEC_ORIGINAL_TECHNIQUE_GENERATION },
+    },
+  };
+}
+
+const CONFIG_HELD_GENERATED_TECHNIQUE_TIER_POLICY = {
+  power: { averageWeightPercent: 100, tradeoffDelta: -2 },
+  accuracy: { averageWeightPercent: 100, tradeoffDelta: 3 },
+  mentalCost: { averageWeightPercent: 100, tradeoffDelta: 2 },
+  activationDifficulty: { averageWeightPercent: 100, tradeoffDelta: 1 },
+  difficulty: { averageWeightPercent: 100, tradeoffDelta: 5 },
+  learningTier: "standard" as const,
+  consumptionClass: "medium" as const,
+  generatedTag: "generated",
+};
+
+/** S03-010 balance pack: lifecycle + config-held generated technique materialization. */
+export function createSprint3Balance100ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance090ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: true,
+      enrollmentAssignmentAiEnabled: true,
+      weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
+      weeklyTrainingParentTemporaryGuidanceEnabled: true,
+      techniqueTeachingSelectionEnabled: true,
+      originalTechniqueLifecycleEnabled: true,
+      generatedTechniqueRegistrationEnabled: true,
+    },
+    generatedTechniqueMaterialization: {
+      evaluationPolicyVersion: GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
+      generatedDefinitionDataVersion: "techniques-generated-0.1.0",
+      byResearchTier: {
+        derived_technique: {
+          ...CONFIG_HELD_GENERATED_TECHNIQUE_TIER_POLICY,
+          learningTier: "basic",
+          consumptionClass: "small",
+          generatedTag: "derived",
+        },
+        composite_technique: {
+          ...CONFIG_HELD_GENERATED_TECHNIQUE_TIER_POLICY,
+          learningTier: "advanced",
+          consumptionClass: "medium",
+          generatedTag: "composite",
+        },
+        full_original_technique: {
+          ...CONFIG_HELD_GENERATED_TECHNIQUE_TIER_POLICY,
+          power: { averageWeightPercent: 100, tradeoffDelta: -4 },
+          learningTier: "secret",
+          consumptionClass: "ultimate",
+          generatedTag: "original",
+        },
+      },
     },
   };
 }

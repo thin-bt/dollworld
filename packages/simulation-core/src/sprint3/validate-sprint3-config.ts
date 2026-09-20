@@ -18,13 +18,19 @@ import {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
   ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
 } from "./constants.js";
+import {
+  isLearningTier,
+  isTechniqueConsumptionClass,
+} from "../sprint1/technique-enums.js";
 import {
   createDefaultSprint3ConfigInput,
   createSprint3Balance020ConfigInput,
@@ -35,6 +41,7 @@ import {
   createSprint3Balance070ConfigInput,
   createSprint3Balance080ConfigInput,
   createSprint3Balance090ConfigInput,
+  createSprint3Balance100ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   getExpectedCanonicalJsonForSprint3ConfigVersion,
@@ -48,6 +55,8 @@ import type {
   Sprint3Config,
   Sprint3ConfigInput,
   Sprint3MasterIntakeConfig,
+  GeneratedTechniqueTierMaterializationPolicy,
+  Sprint3GeneratedTechniqueMaterializationConfig,
   Sprint3OriginalTechniqueLifecycleConfig,
   Sprint3TeachingSelectionConfig,
   Sprint3WeeklyTeachActionConfig,
@@ -61,6 +70,7 @@ import {
   requireBoolean,
   requireIntegerInRange,
   requireLiteralString,
+  requireNonEmptyString,
   snapshotDenseArrayOrFail,
   snapshotPlainObjectOrFail,
 } from "../sprint1/plain-data.js";
@@ -77,6 +87,7 @@ const ROOT_KEYS = [
   "weeklyTeachAction",
   "teachingSelection",
   "originalTechniqueLifecycle",
+  "generatedTechniqueMaterialization",
 ] as const;
 
 const LEARNING_TIER_KEYS = ["basic", "standard", "advanced", "secret"] as const;
@@ -85,11 +96,18 @@ const CONFIG_VERSIONS_WITH_WEEKLY_TEACH_ACTION = new Set<string>([
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
 ]);
 
 const CONFIG_VERSIONS_WITH_TECHNIQUE_TEACHING_SELECTION = new Set<string>([
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
+]);
+
+const CONFIG_VERSIONS_WITH_ORIGINAL_TECHNIQUE_LIFECYCLE = new Set<string>([
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
 ]);
 
 function configVersionRequiresWeeklyTeachAction(configVersion: string): boolean {
@@ -718,9 +736,7 @@ function parseWeeklyTeachTierThresholds(
   return {
     minimumCompositeScore,
     ...(minimumTrustScore === undefined ? {} : { minimumTrustScore }),
-    ...(minimumMasterMasteryHundredths === undefined
-      ? {}
-      : { minimumMasterMasteryHundredths }),
+    ...(minimumMasterMasteryHundredths === undefined ? {} : { minimumMasterMasteryHundredths }),
   };
 }
 
@@ -744,9 +760,10 @@ function parseWeeklyTeachAction(
   if (!configVersionRequiresWeeklyTeachAction(configVersion)) {
     issues.push({
       path: "/weeklyTeachAction",
-      message: "weeklyTeachAction is only allowed on sprint3-balance-0.7.0 through sprint3-balance-0.9.0",
+      message:
+        "weeklyTeachAction is only allowed on sprint3-balance-0.7.0 through sprint3-balance-0.9.0",
       actual: configVersion,
-      expected: `${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}`,
+      expected: `${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}|${SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION}`,
     });
     return undefined;
   }
@@ -860,10 +877,16 @@ function parseWeeklyTeachAction(
     "/weeklyTeachAction/tierThresholds",
     issues,
   );
-  const tierThresholds: Partial<Record<(typeof LEARNING_TIER_KEYS)[number], WeeklyTeachTierThresholds>> =
-    {};
+  const tierThresholds: Partial<
+    Record<(typeof LEARNING_TIER_KEYS)[number], WeeklyTeachTierThresholds>
+  > = {};
   if (tierObject !== undefined) {
-    rejectUnknownKeys(tierObject, [...LEARNING_TIER_KEYS], "/weeklyTeachAction/tierThresholds", issues);
+    rejectUnknownKeys(
+      tierObject,
+      [...LEARNING_TIER_KEYS],
+      "/weeklyTeachAction/tierThresholds",
+      issues,
+    );
     for (const tier of LEARNING_TIER_KEYS) {
       const parsed = parseWeeklyTeachTierThresholds(
         tierObject[tier],
@@ -983,9 +1006,10 @@ function parseTeachingSelection(
   if (!CONFIG_VERSIONS_WITH_TECHNIQUE_TEACHING_SELECTION.has(configVersion)) {
     issues.push({
       path: "/teachingSelection",
-      message: "teachingSelection is only allowed on sprint3-balance-0.8.0 and sprint3-balance-0.9.0",
+      message:
+        "teachingSelection is only allowed on sprint3-balance-0.8.0 and sprint3-balance-0.9.0",
       actual: configVersion,
-      expected: `${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}`,
+      expected: `${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}|${SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION}`,
     });
     return undefined;
   }
@@ -1099,10 +1123,16 @@ function parseTeachingSelection(
     "/teachingSelection/tierThresholds",
     issues,
   );
-  const tierThresholds: Partial<Record<(typeof LEARNING_TIER_KEYS)[number], WeeklyTeachTierThresholds>> =
-    {};
+  const tierThresholds: Partial<
+    Record<(typeof LEARNING_TIER_KEYS)[number], WeeklyTeachTierThresholds>
+  > = {};
   if (tierObject !== undefined) {
-    rejectUnknownKeys(tierObject, [...LEARNING_TIER_KEYS], "/teachingSelection/tierThresholds", issues);
+    rejectUnknownKeys(
+      tierObject,
+      [...LEARNING_TIER_KEYS],
+      "/teachingSelection/tierThresholds",
+      issues,
+    );
     for (const tier of LEARNING_TIER_KEYS) {
       const parsed = parseWeeklyTeachTierThresholds(
         tierObject[tier],
@@ -1187,22 +1217,22 @@ function parseOriginalTechniqueLifecycle(
   issues: ValidationIssue[],
 ): Sprint3OriginalTechniqueLifecycleConfig | undefined {
   if (value === undefined) {
-    if (configVersion === SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE) {
+    if (CONFIG_VERSIONS_WITH_ORIGINAL_TECHNIQUE_LIFECYCLE.has(configVersion)) {
       issues.push({
         path: "/originalTechniqueLifecycle",
-        message: "originalTechniqueLifecycle is required on sprint3-balance-0.9.0",
+        message: "originalTechniqueLifecycle is required on sprint3-balance-0.9.0+ lifecycle config versions",
         actual: undefined,
         expected: "object",
       });
     }
     return undefined;
   }
-  if (configVersion !== SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE) {
+  if (!CONFIG_VERSIONS_WITH_ORIGINAL_TECHNIQUE_LIFECYCLE.has(configVersion)) {
     issues.push({
       path: "/originalTechniqueLifecycle",
-      message: "originalTechniqueLifecycle is only allowed on sprint3-balance-0.9.0",
+      message: "originalTechniqueLifecycle is only allowed on sprint3-balance-0.9.0+ lifecycle config versions",
       actual: configVersion,
-      expected: SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+      expected: `${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}|${SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION}`,
     });
     return undefined;
   }
@@ -1430,6 +1460,233 @@ function parseOriginalTechniqueLifecycle(
   };
 }
 
+function parseGeneratedTechniqueStatSynthesisStep(
+  value: unknown,
+  path: string,
+  issues: ValidationIssue[],
+): GeneratedTechniqueTierMaterializationPolicy["power"] | undefined {
+  const object = snapshotPlainObjectOrFail(value, path, issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(object, ["averageWeightPercent", "tradeoffDelta"], path, issues);
+  const averageWeightPercent = requireIntegerInRange(
+    object,
+    "averageWeightPercent",
+    path,
+    0,
+    200,
+    issues,
+  );
+  const tradeoffDelta = requireIntegerInRange(object, "tradeoffDelta", path, -500, 500, issues);
+  if (averageWeightPercent === undefined || tradeoffDelta === undefined) {
+    return undefined;
+  }
+  return { averageWeightPercent, tradeoffDelta };
+}
+
+function parseGeneratedTechniqueTierPolicy(
+  value: unknown,
+  path: string,
+  issues: ValidationIssue[],
+): GeneratedTechniqueTierMaterializationPolicy | undefined {
+  const object = snapshotPlainObjectOrFail(value, path, issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(
+    object,
+    [
+      "power",
+      "accuracy",
+      "mentalCost",
+      "activationDifficulty",
+      "difficulty",
+      "learningTier",
+      "consumptionClass",
+      "generatedTag",
+    ],
+    path,
+    issues,
+  );
+  const power = parseGeneratedTechniqueStatSynthesisStep(object["power"], `${path}/power`, issues);
+  const accuracy = parseGeneratedTechniqueStatSynthesisStep(
+    object["accuracy"],
+    `${path}/accuracy`,
+    issues,
+  );
+  const mentalCost = parseGeneratedTechniqueStatSynthesisStep(
+    object["mentalCost"],
+    `${path}/mentalCost`,
+    issues,
+  );
+  const activationDifficulty = parseGeneratedTechniqueStatSynthesisStep(
+    object["activationDifficulty"],
+    `${path}/activationDifficulty`,
+    issues,
+  );
+  const difficulty = parseGeneratedTechniqueStatSynthesisStep(
+    object["difficulty"],
+    `${path}/difficulty`,
+    issues,
+  );
+  const learningTierRaw = object["learningTier"];
+  if (typeof learningTierRaw !== "string" || !isLearningTier(learningTierRaw)) {
+    issues.push({
+      path: `${path}/learningTier`,
+      message: "learningTier must be a known LearningTier",
+      actual: learningTierRaw,
+      expected: "basic|standard|advanced|secret",
+    });
+  }
+  const consumptionClassRaw = object["consumptionClass"];
+  if (
+    typeof consumptionClassRaw !== "string" ||
+    !isTechniqueConsumptionClass(consumptionClassRaw)
+  ) {
+    issues.push({
+      path: `${path}/consumptionClass`,
+      message: "consumptionClass must be a known TechniqueConsumptionClass",
+      actual: consumptionClassRaw,
+      expected: "small|medium|large|ultimate",
+    });
+  }
+  const generatedTagRaw = object["generatedTag"];
+  if (typeof generatedTagRaw !== "string" || generatedTagRaw.trim().length === 0) {
+    issues.push({
+      path: `${path}/generatedTag`,
+      message: "generatedTag must be a non-empty string",
+      actual: generatedTagRaw,
+      expected: "non-empty string",
+    });
+  }
+  if (
+    power === undefined ||
+    accuracy === undefined ||
+    mentalCost === undefined ||
+    activationDifficulty === undefined ||
+    difficulty === undefined ||
+    typeof learningTierRaw !== "string" ||
+    !isLearningTier(learningTierRaw) ||
+    typeof consumptionClassRaw !== "string" ||
+    !isTechniqueConsumptionClass(consumptionClassRaw) ||
+    typeof generatedTagRaw !== "string" ||
+    generatedTagRaw.trim().length === 0
+  ) {
+    return undefined;
+  }
+  return {
+    power,
+    accuracy,
+    mentalCost,
+    activationDifficulty,
+    difficulty,
+    learningTier: learningTierRaw,
+    consumptionClass: consumptionClassRaw,
+    generatedTag: generatedTagRaw.trim(),
+  };
+}
+
+function parseGeneratedTechniqueMaterialization(
+  value: unknown,
+  configVersion: string,
+  issues: ValidationIssue[],
+): Sprint3GeneratedTechniqueMaterializationConfig | undefined {
+  if (value === undefined) {
+    if (configVersion === SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION) {
+      issues.push({
+        path: "/generatedTechniqueMaterialization",
+        message: "generatedTechniqueMaterialization is required on sprint3-balance-0.10.0",
+        actual: undefined,
+        expected: "object",
+      });
+    }
+    return undefined;
+  }
+  if (configVersion !== SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION) {
+    issues.push({
+      path: "/generatedTechniqueMaterialization",
+      message: "generatedTechniqueMaterialization is only allowed on sprint3-balance-0.10.0",
+      actual: configVersion,
+      expected: SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
+    });
+    return undefined;
+  }
+  const object = snapshotPlainObjectOrFail(value, "/generatedTechniqueMaterialization", issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  rejectUnknownKeys(
+    object,
+    ["evaluationPolicyVersion", "generatedDefinitionDataVersion", "byResearchTier"],
+    "/generatedTechniqueMaterialization",
+    issues,
+  );
+  const evaluationPolicyVersion = requireLiteralString(
+    object,
+    "evaluationPolicyVersion",
+    "/generatedTechniqueMaterialization",
+    GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
+    issues,
+  );
+  const generatedDefinitionDataVersion = requireNonEmptyString(
+    object,
+    "generatedDefinitionDataVersion",
+    "/generatedTechniqueMaterialization",
+    issues,
+  );
+  const tiersObject = snapshotPlainObjectOrFail(
+    object["byResearchTier"],
+    "/generatedTechniqueMaterialization/byResearchTier",
+    issues,
+  );
+  let byResearchTier:
+    | Sprint3GeneratedTechniqueMaterializationConfig["byResearchTier"]
+    | undefined;
+  if (tiersObject !== undefined) {
+    rejectUnknownKeys(
+      tiersObject,
+      ["derived_technique", "composite_technique", "full_original_technique"],
+      "/generatedTechniqueMaterialization/byResearchTier",
+      issues,
+    );
+    const derived = parseGeneratedTechniqueTierPolicy(
+      tiersObject["derived_technique"],
+      "/generatedTechniqueMaterialization/byResearchTier/derived_technique",
+      issues,
+    );
+    const composite = parseGeneratedTechniqueTierPolicy(
+      tiersObject["composite_technique"],
+      "/generatedTechniqueMaterialization/byResearchTier/composite_technique",
+      issues,
+    );
+    const fullOriginal = parseGeneratedTechniqueTierPolicy(
+      tiersObject["full_original_technique"],
+      "/generatedTechniqueMaterialization/byResearchTier/full_original_technique",
+      issues,
+    );
+    if (derived !== undefined && composite !== undefined && fullOriginal !== undefined) {
+      byResearchTier = {
+        derived_technique: derived,
+        composite_technique: composite,
+        full_original_technique: fullOriginal,
+      };
+    }
+  }
+  if (
+    evaluationPolicyVersion === undefined ||
+    generatedDefinitionDataVersion === undefined ||
+    byResearchTier === undefined
+  ) {
+    return undefined;
+  }
+  return {
+    evaluationPolicyVersion,
+    generatedDefinitionDataVersion,
+    byResearchTier,
+  };
+}
+
 function parseMentorshipFeatures(
   value: unknown,
   issues: ValidationIssue[],
@@ -1447,6 +1704,7 @@ function parseMentorshipFeatures(
       "weeklyTrainingParentTemporaryGuidanceEnabled",
       "techniqueTeachingSelectionEnabled",
       "originalTechniqueLifecycleEnabled",
+      "generatedTechniqueRegistrationEnabled",
     ],
     "/mentorshipFeatures",
     issues,
@@ -1499,7 +1757,17 @@ function parseMentorshipFeatures(
       issues,
     );
   }
-  if (explicitWeeklyTeachActionEnabled === undefined ||
+  let generatedTechniqueRegistrationEnabled: boolean | undefined;
+  if ("generatedTechniqueRegistrationEnabled" in object) {
+    generatedTechniqueRegistrationEnabled = requireBoolean(
+      object,
+      "generatedTechniqueRegistrationEnabled",
+      "/mentorshipFeatures",
+      issues,
+    );
+  }
+  if (
+    explicitWeeklyTeachActionEnabled === undefined ||
     enrollmentAssignmentAiEnabled === undefined
   ) {
     return undefined;
@@ -1519,6 +1787,9 @@ function parseMentorshipFeatures(
     ...(originalTechniqueLifecycleEnabled === undefined
       ? {}
       : { originalTechniqueLifecycleEnabled }),
+    ...(generatedTechniqueRegistrationEnabled === undefined
+      ? {}
+      : { generatedTechniqueRegistrationEnabled }),
   };
 }
 
@@ -1554,10 +1825,23 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
   const masterQualification = parseMasterQualification(object["masterQualification"], issues);
   const mentorshipFeatures = parseMentorshipFeatures(object["mentorshipFeatures"], issues);
   const masterIntake = parseMasterIntake(object["masterIntake"], configVersion, issues);
-  const weeklyTeachAction = parseWeeklyTeachAction(object["weeklyTeachAction"], configVersion, issues);
-  const teachingSelection = parseTeachingSelection(object["teachingSelection"], configVersion, issues);
+  const weeklyTeachAction = parseWeeklyTeachAction(
+    object["weeklyTeachAction"],
+    configVersion,
+    issues,
+  );
+  const teachingSelection = parseTeachingSelection(
+    object["teachingSelection"],
+    configVersion,
+    issues,
+  );
   const originalTechniqueLifecycle = parseOriginalTechniqueLifecycle(
     object["originalTechniqueLifecycle"],
+    configVersion,
+    issues,
+  );
+  const generatedTechniqueMaterialization = parseGeneratedTechniqueMaterialization(
+    object["generatedTechniqueMaterialization"],
     configVersion,
     issues,
   );
@@ -1586,6 +1870,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
     SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
     SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+    SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   ] as const;
   if (
     weeklyTeachingEfficiencyEnabled &&
@@ -1619,6 +1904,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
     SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
     SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+    SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   ] as const;
   if (
     parentGuidanceWeeklyEnabled &&
@@ -1683,6 +1969,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
     SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
     SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+    SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   ] as const;
   if (
     weeklyTeachRetentionVersions.includes(
@@ -1756,14 +2043,14 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
       path: "/mentorshipFeatures/techniqueTeachingSelectionEnabled",
       message: "technique teaching selection remains disabled until sprint3-balance-0.8.0",
       actual: configVersion,
-      expected: `${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}`,
+      expected: `${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}|${SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION}`,
     });
   }
-  if (configVersion === SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE) {
+  if (CONFIG_VERSIONS_WITH_ORIGINAL_TECHNIQUE_LIFECYCLE.has(configVersion)) {
     if (mentorshipFeatures.originalTechniqueLifecycleEnabled !== true) {
       issues.push({
         path: "/mentorshipFeatures/originalTechniqueLifecycleEnabled",
-        message: "sprint3-balance-0.9.0 requires original technique lifecycle gate",
+        message: `${configVersion} requires original technique lifecycle gate`,
         actual: mentorshipFeatures.originalTechniqueLifecycleEnabled,
         expected: "true",
       });
@@ -1771,7 +2058,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     if (originalTechniqueLifecycle === undefined) {
       issues.push({
         path: "/originalTechniqueLifecycle",
-        message: "sprint3-balance-0.9.0 requires originalTechniqueLifecycle policy body",
+        message: `${configVersion} requires originalTechniqueLifecycle policy body`,
         actual: undefined,
         expected: "object",
       });
@@ -1779,13 +2066,42 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
   }
   if (
     mentorshipFeatures.originalTechniqueLifecycleEnabled === true &&
-    configVersion !== SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE
+    !CONFIG_VERSIONS_WITH_ORIGINAL_TECHNIQUE_LIFECYCLE.has(configVersion)
   ) {
     issues.push({
       path: "/mentorshipFeatures/originalTechniqueLifecycleEnabled",
       message: "original technique lifecycle remains disabled until sprint3-balance-0.9.0",
       actual: configVersion,
-      expected: SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+      expected: `${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}|${SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION}`,
+    });
+  }
+  if (configVersion === SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION) {
+    if (mentorshipFeatures.generatedTechniqueRegistrationEnabled !== true) {
+      issues.push({
+        path: "/mentorshipFeatures/generatedTechniqueRegistrationEnabled",
+        message: "sprint3-balance-0.10.0 requires generated technique registration gate",
+        actual: mentorshipFeatures.generatedTechniqueRegistrationEnabled,
+        expected: "true",
+      });
+    }
+    if (generatedTechniqueMaterialization === undefined) {
+      issues.push({
+        path: "/generatedTechniqueMaterialization",
+        message: "sprint3-balance-0.10.0 requires generatedTechniqueMaterialization policy body",
+        actual: undefined,
+        expected: "object",
+      });
+    }
+  }
+  if (
+    mentorshipFeatures.generatedTechniqueRegistrationEnabled === true &&
+    configVersion !== SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION
+  ) {
+    issues.push({
+      path: "/mentorshipFeatures/generatedTechniqueRegistrationEnabled",
+      message: "generated technique registration remains disabled until sprint3-balance-0.10.0",
+      actual: configVersion,
+      expected: SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
     });
   }
   if (
@@ -1796,7 +2112,7 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
       path: "/mentorshipFeatures/explicitWeeklyTeachActionEnabled",
       message: "explicit weekly teach action remains disabled until sprint3-balance-0.7.0",
       actual: configVersion,
-      expected: `${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}`,
+      expected: `${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}|${SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION}`,
     });
   }
   if (issues.length > 0) {
@@ -1814,6 +2130,9 @@ export function validateNormalizedSprint3Config(input: unknown): ValidationResul
     ...(weeklyTeachAction !== undefined ? { weeklyTeachAction } : {}),
     ...(teachingSelection !== undefined ? { teachingSelection } : {}),
     ...(originalTechniqueLifecycle !== undefined ? { originalTechniqueLifecycle } : {}),
+    ...(generatedTechniqueMaterialization !== undefined
+      ? { generatedTechniqueMaterialization }
+      : {}),
   };
 
   if (isKnownSprint3ConfigVersion(configVersion)) {
@@ -1883,9 +2202,7 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
     createSprint3Balance050ConfigInput(),
   );
   if (!teachingEfficiencyValidated.ok) {
-    throw new Error(
-      "Sprint3 balance 0.5.0 config failed validation during registry bootstrap",
-    );
+    throw new Error("Sprint3 balance 0.5.0 config failed validation during registry bootstrap");
   }
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
@@ -1895,15 +2212,15 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
     createSprint3Balance060ConfigInput(),
   );
   if (!parentGuidanceValidated.ok) {
-    throw new Error(
-      "Sprint3 balance 0.6.0 config failed validation during registry bootstrap",
-    );
+    throw new Error("Sprint3 balance 0.6.0 config failed validation during registry bootstrap");
   }
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
     toCanonicalJson(parentGuidanceValidated.value),
   );
-  const weeklyTeachValidated = validateNormalizedSprint3Config(createSprint3Balance070ConfigInput());
+  const weeklyTeachValidated = validateNormalizedSprint3Config(
+    createSprint3Balance070ConfigInput(),
+  );
   if (!weeklyTeachValidated.ok) {
     throw new Error("Sprint3 balance 0.7.0 config failed validation during registry bootstrap");
   }
@@ -1915,9 +2232,7 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
     createSprint3Balance080ConfigInput(),
   );
   if (!teachingSelectionValidated.ok) {
-    throw new Error(
-      "Sprint3 balance 0.8.0 config failed validation during registry bootstrap",
-    );
+    throw new Error("Sprint3 balance 0.8.0 config failed validation during registry bootstrap");
   }
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
@@ -1927,13 +2242,21 @@ function ensureDefaultSprint3ConfigRegistry(provider: Sha256Provider): void {
     createSprint3Balance090ConfigInput(),
   );
   if (!originalLifecycleValidated.ok) {
-    throw new Error(
-      "Sprint3 balance 0.9.0 config failed validation during registry bootstrap",
-    );
+    throw new Error("Sprint3 balance 0.9.0 config failed validation during registry bootstrap");
   }
   registerKnownSprint3ConfigVersion(
     SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
     toCanonicalJson(originalLifecycleValidated.value),
+  );
+  const generatedRegistrationValidated = validateNormalizedSprint3Config(
+    createSprint3Balance100ConfigInput(),
+  );
+  if (!generatedRegistrationValidated.ok) {
+    throw new Error("Sprint3 balance 0.10.0 config failed validation during registry bootstrap");
+  }
+  registerKnownSprint3ConfigVersion(
+    SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
+    toCanonicalJson(generatedRegistrationValidated.value),
   );
   defaultRegistryInitialized = true;
   void provider;

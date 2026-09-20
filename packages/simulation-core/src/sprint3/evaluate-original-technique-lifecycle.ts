@@ -5,6 +5,7 @@ import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import {
   ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
 } from "./constants.js";
 import type {
@@ -35,7 +36,8 @@ function clampInteger(value: number, minInclusive: number, maxInclusive: number)
 
 export function isOriginalTechniqueLifecycleEnabled(config: Sprint3Config): boolean {
   return (
-    config.configVersion === SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE &&
+    (config.configVersion === SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE ||
+      config.configVersion === SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION) &&
     config.mentorshipFeatures.originalTechniqueLifecycleEnabled === true &&
     config.originalTechniqueLifecycle !== undefined
   );
@@ -200,10 +202,11 @@ export function evaluateOriginalTechniqueGenerationAttempt(
     });
   }
 
-  const successPercentTenThousandths = computeOriginalTechniqueGenerationSuccessPercentTenThousandths(
-    policy.generation,
-    record.modifiers.successPercentAdjustmentPoints,
-  );
+  const successPercentTenThousandths =
+    computeOriginalTechniqueGenerationSuccessPercentTenThousandths(
+      policy.generation,
+      record.modifiers.successPercentAdjustmentPoints,
+    );
   const generationSucceeded = rollOriginalTechniqueGenerationSuccess(
     successPercentTenThousandths,
     rng,
@@ -234,9 +237,7 @@ export function evaluateOriginalTechniqueGenerationAttempt(
     developmentReason: record.developmentReason,
     researchTier,
     worldWeekIndex: record.worldWeekIndex,
-    ...(record.firstUseMatchId === undefined
-      ? {}
-      : { firstUseMatchId: record.firstUseMatchId }),
+    ...(record.firstUseMatchId === undefined ? {} : { firstUseMatchId: record.firstUseMatchId }),
   });
 
   return success({

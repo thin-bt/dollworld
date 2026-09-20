@@ -30,12 +30,14 @@ export const SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE = "sprint3-balance
 export const SPRINT3_CONFIG_VERSION_WEEKLY_TEACH = "sprint3-balance-0.7.0" as const;
 
 /** S03-008 deterministic technique teaching-selection / re-evaluation contract enabled. */
-export const SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION =
-  "sprint3-balance-0.8.0" as const;
+export const SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION = "sprint3-balance-0.8.0" as const;
 
 /** S03-008 original-technique research/generation/loss lifecycle contract enabled. */
-export const SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE =
-  "sprint3-balance-0.9.0" as const;
+export const SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE = "sprint3-balance-0.9.0" as const;
+
+/** S03-010 generated-technique materialization and runtime catalog overlay registration. */
+export const SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION =
+  "sprint3-balance-0.10.0" as const;
 
 /** Pure explicit weekly teach processor contract id (weekly adapter wiring in later slices). */
 export const EXPLICIT_WEEKLY_TEACH_ACTION_PROCESSOR_ID =
@@ -53,13 +55,27 @@ export const TECHNIQUE_TEACHING_SELECTION_PROCESSOR_ID =
 export const TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY =
   "technique-teaching-selection-0.1.0" as const;
 
-/** Pure original-technique lifecycle processor contract id (world wiring in later slices). */
+/** Pure original-technique lifecycle processor contract id (S03-009 world weekly wiring). */
 export const ORIGINAL_TECHNIQUE_LIFECYCLE_PROCESSOR_ID =
   "sprint3-original-technique-lifecycle-0.1.0" as const;
+
+/** Fresh original-technique lifecycle weekly RNG deriveSeed label (S03-009). */
+export const ORIGINAL_TECHNIQUE_LIFECYCLE_RNG_SEED_LABEL =
+  "processor/sprint3-original-technique-lifecycle" as const;
 
 /** Config-held research/generation/loss policy for S03-008 original-technique lifecycle. */
 export const ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY =
   "original-technique-lifecycle-0.1.0" as const;
+
+/** Config-held stat synthesis / registration policy for S03-010 (explicit numeric tradeoffs). */
+export const GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY =
+  "generated-technique-materialization-0.1.0" as const;
+
+export const GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION = "0.1.0" as const;
+
+/** Narrow adapter id for S03-009 generation success → S03-010 registration boundary. */
+export const GENERATED_TECHNIQUE_REGISTRATION_ADAPTER_ID =
+  "sprint3-generated-technique-registration-0.1.0" as const;
 
 /** Sprint3 → Sprint1 weekly training disciple-count factor binding (S03-005). */
 export const WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID =

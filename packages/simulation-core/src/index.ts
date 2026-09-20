@@ -1250,6 +1250,22 @@ export {
   rollOriginalTechniqueGenerationSuccess,
 } from "./sprint3/evaluate-original-technique-lifecycle.js";
 export {
+  buildMaterializationRequestFromGenerationSuccess,
+  registerGeneratedTechniqueFromGenerationSuccess,
+} from "./sprint3/adapt-original-technique-generation-registration.js";
+export type { GeneratedTechniqueRegistrationAdapterResult } from "./sprint3/adapt-original-technique-generation-registration.js";
+export {
+  assertBaseCatalogIdentityUnchanged,
+  createEmptyGeneratedTechniqueCatalogOverlay,
+  lookupTechniqueDefinitionWithOverlay,
+  registerGeneratedTechniqueInOverlay,
+} from "./sprint3/generated-technique-catalog-overlay.js";
+export type { GeneratedTechniqueCatalogOverlay } from "./sprint3/generated-technique-catalog-overlay.js";
+export {
+  isGeneratedTechniqueRegistrationEnabled,
+  materializeGeneratedTechniqueDefinition,
+} from "./sprint3/materialize-generated-technique-definition.js";
+export {
   computeAutonomousMaxDisciples,
   evaluateMasterIntakeDecision,
 } from "./sprint3/evaluate-master-intake.js";
@@ -1275,9 +1291,13 @@ export {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION,
+  GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
+  GENERATED_TECHNIQUE_REGISTRATION_ADAPTER_ID,
   ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
   ORIGINAL_TECHNIQUE_LIFECYCLE_PROCESSOR_ID,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,

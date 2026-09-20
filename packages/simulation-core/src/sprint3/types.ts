@@ -1,8 +1,9 @@
 import type { TechniqueLearnerContext } from "../sprint1/technique-acquisition.js";
 import type { TeacherCanTeachContext } from "../sprint1/technique-teacher.js";
-import type { LearningTier } from "../sprint1/technique-enums.js";
+import type { LearningTier, TechniqueConsumptionClass } from "../sprint1/technique-enums.js";
 import type { CareerStatus, LifeStatus, Rank } from "../enums.js";
 import type {
+  GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
   ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
   ORIGINAL_TECHNIQUE_LIFECYCLE_PROCESSOR_ID,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
@@ -149,6 +150,8 @@ export type Sprint3MentorshipFeatureFlags = {
   techniqueTeachingSelectionEnabled?: boolean;
   /** S03-008: original-technique research/generation/loss lifecycle (sprint3-balance-0.9.0). */
   originalTechniqueLifecycleEnabled?: boolean;
+  /** S03-010: generated TechniqueDefinition materialization + catalog overlay (sprint3-balance-0.10.0). */
+  generatedTechniqueRegistrationEnabled?: boolean;
 };
 
 export type Sprint3ConfigInput = {
@@ -166,6 +169,8 @@ export type Sprint3ConfigInput = {
   teachingSelection?: Sprint3TeachingSelectionConfig;
   /** Present from sprint3-balance-0.9.0 (S03-008); omitted on earlier configVersion bodies. */
   originalTechniqueLifecycle?: Sprint3OriginalTechniqueLifecycleConfig;
+  /** Present from sprint3-balance-0.10.0 (S03-010); omitted on earlier configVersion bodies. */
+  generatedTechniqueMaterialization?: Sprint3GeneratedTechniqueMaterializationConfig;
 };
 
 export type Sprint3Config = Sprint3ConfigInput;
@@ -203,11 +208,7 @@ export type WeeklyTeachDiscipleRequest = {
 };
 
 export type ExplicitWeeklyTeachMasterWeeklyAction =
-  | "teach"
-  | "train_stat"
-  | "learn_technique"
-  | "practice_technique"
-  | "rest";
+  "teach" | "train_stat" | "learn_technique" | "practice_technique" | "rest";
 
 export type ExplicitWeeklyTeachActionRecord = {
   masterPersonId: string;
@@ -296,9 +297,7 @@ export type TeachingSelectionReEvaluationDueResult = {
 
 /** docs/SPEC.md §独自技の発生 — research threshold tier. */
 export type OriginalTechniqueResearchTier =
-  | "derived_technique"
-  | "composite_technique"
-  | "full_original_technique";
+  "derived_technique" | "composite_technique" | "full_original_technique";
 
 export type OriginalTechniqueResearchThresholds = {
   derivedTechnique: number;
@@ -322,6 +321,39 @@ export type Sprint3OriginalTechniqueLifecycleConfig = {
   evaluationPolicyVersion: typeof ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY;
   researchThresholds: OriginalTechniqueResearchThresholds;
   generation: OriginalTechniqueGenerationPolicy;
+};
+
+/** Config-held deterministic stat synthesis step (docs/SPEC.md tradeoff; numeric values in config). */
+export type GeneratedTechniqueStatSynthesisStep = {
+  averageWeightPercent: number;
+  tradeoffDelta: number;
+};
+
+export type GeneratedTechniqueTierMaterializationPolicy = {
+  power: GeneratedTechniqueStatSynthesisStep;
+  accuracy: GeneratedTechniqueStatSynthesisStep;
+  mentalCost: GeneratedTechniqueStatSynthesisStep;
+  activationDifficulty: GeneratedTechniqueStatSynthesisStep;
+  difficulty: GeneratedTechniqueStatSynthesisStep;
+  learningTier: LearningTier;
+  consumptionClass: TechniqueConsumptionClass;
+  generatedTag: string;
+};
+
+export type Sprint3GeneratedTechniqueMaterializationConfig = {
+  evaluationPolicyVersion: typeof GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY;
+  /** TechniqueDefinition.dataVersion for runtime-generated entries (distinct from initial catalog). */
+  generatedDefinitionDataVersion: string;
+  byResearchTier: Record<
+    OriginalTechniqueResearchTier,
+    GeneratedTechniqueTierMaterializationPolicy
+  >;
+};
+
+/** Explicit display name supplied at registration boundary (not inferred from SPEC prose). */
+export type GeneratedTechniqueMaterializationRequest = {
+  displayName: string;
+  foundingHistory: OriginalTechniqueFoundingHistoryRecord;
 };
 
 /**
