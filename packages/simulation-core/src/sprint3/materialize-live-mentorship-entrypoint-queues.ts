@@ -1,0 +1,386 @@
+/**
+ * S03-013 live-world materialization for mentorship entrypoint pending queues.
+ * Preserves queue-fed replay: prepopulated pending* arrays are kept; live boundaries append only when absent.
+ */
+import { compareUnicodeCodePoints } from "../canonical-json.js";
+import { APTITUDE_KEYS } from "../abilities.js";
+import type { Person } from "../domain.js";
+import type { PersonId } from "../ids.js";
+import { failure, success } from "../validation.js";
+import type { ValidationResult } from "../validation.js";
+import { buildWeeklyTrainingPersonRecords } from "../sprint1/sprint1-person-sidecar-records.js";
+import type { WeeklyTrainingSidecarState } from "../sprint1/weekly-training-sidecar-state.js";
+import type { WeeklyTrainingPersonRecord } from "../sprint1/weekly-training-types.js";
+import { isWeeklyActionPipelineEligible } from "../sprint1/weekly-update-eligibility.js";
+import type { WorldEngineState } from "../world-engine/types.js";
+import { cloneValidatedPlainJson, deepFreezePlainJson } from "../sprint1/plain-data.js";
+import { isEnrollmentAssignmentAiEnabled } from "./evaluate-enrollment-assignment.js";
+import { isExplicitWeeklyTeachActionEnabled } from "./evaluate-explicit-weekly-teach.js";
+import {
+  createInitialSprint3MentorshipEntrypointRuntimeState,
+  validateSprint3MentorshipEntrypointRuntimeState,
+  type Sprint3MentorshipEntrypointRuntimeState,
+} from "./sprint3-mentorship-entrypoint-runtime-state.js";
+import type {
+  EnrollmentAssignmentRecord,
+  EnrollmentMasterCandidate,
+  ExplicitWeeklyTeachActionRecord,
+  MasterIntakeAcceptance,
+  MasterQualificationEvaluationRecord,
+  Sprint3Config,
+} from "./types.js";
+
+export type MaterializeLiveEnrollmentQueueInput = {
+  absoluteWeek: number;
+  worldState: WorldEngineState;
+  weeklyTrainingSidecars: WeeklyTrainingSidecarState;
+  sprint3Config?: Sprint3Config;
+  runtimeState: Sprint3MentorshipEntrypointRuntimeState | undefined;
+};
+
+export type MaterializeLiveExplicitTeachQueueInput = {
+  absoluteWeek: number;
+  worldState: WorldEngineState;
+  weeklyTrainingSidecars: WeeklyTrainingSidecarState;
+  sprint3Config?: Sprint3Config;
+  runtimeState: Sprint3MentorshipEntrypointRuntimeState | undefined;
+};
+
+function meanSurfaceAptitude(person: Person): number {
+  let sum = 0;
+  for (const key of APTITUDE_KEYS) {
+    sum += person.aptitudes[key].surfaceValue;
+  }
+  return Math.floor(sum / APTITUDE_KEYS.length);
+}
+
+function meanGrowthPotential(record: WeeklyTrainingPersonRecord): number {
+  const values = Object.values(record.growthPotential);
+  let sum = 0;
+  for (const entry of values) {
+    sum += entry;
+  }
+  return Math.floor(sum / values.length);
+}
+
+function qualificationRecordFromPerson(person: Person): MasterQualificationEvaluationRecord {
+  if (person.lifeStatus !== "living") {
+    return {
+      careerStatus: person.careerStatus,
+      lifeStatus: person.lifeStatus,
+      highestRank: "F",
+      officialWins: 0,
+      limitedOfficialWins: 0,
+      tournamentTitles: 0,
+    };
+  }
+  if (person.careerStatus === "retired") {
+    return {
+      careerStatus: person.careerStatus,
+      lifeStatus: person.lifeStatus,
+      retirementRank: person.retirementRank,
+      highestRank: person.highestRank,
+      officialWins: 0,
+      limitedOfficialWins: 0,
+      tournamentTitles: 0,
+    };
+  }
+  if (person.careerStatus === "active_competitor") {
+    return {
+      careerStatus: person.careerStatus,
+      lifeStatus: person.lifeStatus,
+      highestRank: person.highestRank,
+      officialWins: 0,
+      limitedOfficialWins: 0,
+      tournamentTitles: 0,
+    };
+  }
+  return {
+    careerStatus: person.careerStatus,
+    lifeStatus: person.lifeStatus,
+    highestRank: "F",
+    officialWins: 0,
+    limitedOfficialWins: 0,
+    tournamentTitles: 0,
+  };
+}
+
+function buildMasterCandidate(
+  masterPerson: Person,
+  childPerson: Person,
+  isBiologicalParent: boolean,
+  masterRecord: WeeklyTrainingPersonRecord | undefined,
+): EnrollmentMasterCandidate {
+  const childAptitude = meanSurfaceAptitude(childPerson);
+  const masterAptitude = meanSurfaceAptitude(masterPerson);
+  const compatibility = Math.max(0, Math.min(100, 100 - Math.abs(childAptitude - masterAptitude)));
+  const lineageAptitude =
+    masterPerson.lineageId !== undefined &&
+    childPerson.lineageId !== undefined &&
+    masterPerson.lineageId === childPerson.lineageId
+      ? childAptitude
+      : Math.max(0, childAptitude - 10);
+  const teachingEfficiencyScore =
+    masterRecord === undefined ? masterAptitude : meanGrowthPotential(masterRecord);
+  const intakeAcceptance: MasterIntakeAcceptance = "accept";
+  return {
+    masterPersonId: masterPerson.personId,
+    isBiologicalParent,
+    qualificationRecord: qualificationRecordFromPerson(masterPerson),
+    parentChildCompatibilityScore: compatibility,
+    lineageAptitudeScore: lineageAptitude,
+    schoolFitScore: lineageAptitude,
+    teachingEfficiencyScore,
+    intakeAcceptance,
+  };
+}
+
+function livingParentsForChild(worldState: WorldEngineState, childPersonId: PersonId): Person[] {
+  const parents: Person[] = [];
+  for (const relationship of worldState.relationships) {
+    if (relationship.kind !== "parent_child" || relationship.childId !== childPersonId) {
+      continue;
+    }
+    const parent = worldState.persons.find((person) => person.personId === relationship.parentId);
+    if (parent === undefined || parent.lifeStatus !== "living") {
+      continue;
+    }
+    if (parent.participationStatus === "waiting" || parent.participationStatus === "stopped") {
+      continue;
+    }
+    parents.push(parent);
+  }
+  parents.sort((left, right) => compareUnicodeCodePoints(left.personId, right.personId));
+  return parents;
+}
+
+function isEnrollmentBoundaryChild(person: Person, formalEnrollmentMinAge: number): boolean {
+  if (person.lifeStatus !== "living") {
+    return false;
+  }
+  if (person.participationStatus === "waiting" || person.participationStatus === "stopped") {
+    return false;
+  }
+  if (typeof person.currentAge !== "number" || person.currentAge !== formalEnrollmentMinAge) {
+    return false;
+  }
+  return person.careerStatus === "child" || person.careerStatus === "trainee";
+}
+
+function childAlreadyEnrolled(
+  runtime: Sprint3MentorshipEntrypointRuntimeState,
+  childPersonId: PersonId,
+): boolean {
+  return runtime.completedEnrollmentOutcomes.some((entry) => entry.childPersonId === childPersonId);
+}
+
+function childPendingEnrollment(
+  pending: readonly EnrollmentAssignmentRecord[],
+  childPersonId: PersonId,
+): boolean {
+  return pending.some((record) => record.childPersonId === childPersonId);
+}
+
+function masterPendingExplicitTeach(
+  pending: readonly ExplicitWeeklyTeachActionRecord[],
+  masterPersonId: string,
+): boolean {
+  return pending.some((record) => record.masterPersonId === masterPersonId);
+}
+
+function masterCompletedExplicitTeachThisWeek(
+  runtime: Sprint3MentorshipEntrypointRuntimeState,
+  masterPersonId: string,
+  absoluteWeek: number,
+): boolean {
+  return runtime.completedExplicitWeeklyTeachOutcomes.some(
+    (entry) => entry.masterPersonId === masterPersonId && entry.absoluteWeek === absoluteWeek,
+  );
+}
+
+function masterHasAssignedDisciple(
+  runtime: Sprint3MentorshipEntrypointRuntimeState,
+  masterPersonId: PersonId,
+): boolean {
+  return runtime.mentorshipByChildPersonId.some(
+    (entry) => entry.selectedMasterPersonId === masterPersonId,
+  );
+}
+
+function resolveExplicitWeeklyTeachActionSelected(
+  record: WeeklyTrainingPersonRecord,
+  runtime: Sprint3MentorshipEntrypointRuntimeState,
+): ExplicitWeeklyTeachActionRecord | undefined {
+  const person = record.person;
+  if (person.lifeStatus !== "living") {
+    return undefined;
+  }
+  if (record.discipleCount < 1) {
+    return undefined;
+  }
+  if (!masterHasAssignedDisciple(runtime, person.personId)) {
+    return undefined;
+  }
+  const pipelineEligible = isWeeklyActionPipelineEligible({
+    lifeStatus: person.lifeStatus,
+    careerStatus: person.careerStatus,
+    participationStatus: person.participationStatus,
+    currentAge: person.currentAge,
+  });
+  if (!pipelineEligible) {
+    return undefined;
+  }
+  return {
+    masterPersonId: person.personId,
+    masterWeeklyPipelineEligible: true,
+    masterFormalDiscipleCount: record.discipleCount,
+    teachingAbilityScore: meanGrowthPotential(record),
+    selectedWeeklyAction: "teach",
+    discipleRequests: [],
+  };
+}
+
+/**
+ * Append live enrollment boundaries for children at formalEnrollmentMinAge when not already pending/completed.
+ */
+export function materializeLiveEnrollmentQueueBoundaries(
+  input: MaterializeLiveEnrollmentQueueInput,
+): ValidationResult<Sprint3MentorshipEntrypointRuntimeState> {
+  if (input.sprint3Config === undefined || !isEnrollmentAssignmentAiEnabled(input.sprint3Config)) {
+    return success(input.runtimeState ?? createInitialSprint3MentorshipEntrypointRuntimeState());
+  }
+
+  const recordsResult = buildWeeklyTrainingPersonRecords(
+    input.worldState,
+    input.weeklyTrainingSidecars,
+    input.runtimeState,
+  );
+  if (!recordsResult.ok) {
+    return failure(recordsResult.issues);
+  }
+  const recordByPersonId = new Map(
+    recordsResult.value.map((record) => [record.person.personId, record]),
+  );
+
+  let runtime = cloneValidatedPlainJson(
+    input.runtimeState ?? createInitialSprint3MentorshipEntrypointRuntimeState(),
+  );
+  const validatedBase = validateSprint3MentorshipEntrypointRuntimeState(runtime);
+  if (!validatedBase.ok) {
+    return failure(validatedBase.issues);
+  }
+  runtime = validatedBase.value;
+
+  const formalEnrollmentMinAge = input.sprint3Config.enrollment.formalEnrollmentMinAge;
+  const pending = [...runtime.pendingEnrollmentBoundaries];
+  const materialized: EnrollmentAssignmentRecord[] = [];
+
+  const children = input.worldState.persons
+    .filter((person) => isEnrollmentBoundaryChild(person, formalEnrollmentMinAge))
+    .sort((left, right) => compareUnicodeCodePoints(left.personId, right.personId));
+
+  for (const child of children) {
+    if (childAlreadyEnrolled(runtime, child.personId)) {
+      continue;
+    }
+    if (childPendingEnrollment(pending, child.personId)) {
+      continue;
+    }
+    const parents = livingParentsForChild(input.worldState, child.personId);
+    const masterCandidates: EnrollmentMasterCandidate[] = parents.map((parent) =>
+      buildMasterCandidate(parent, child, true, recordByPersonId.get(parent.personId)),
+    );
+    const temporaryGuidanceParentPersonId = parents[0]?.personId;
+    const childAge = child.currentAge;
+    if (typeof childAge !== "number") {
+      continue;
+    }
+    materialized.push({
+      childPersonId: child.personId,
+      childAge,
+      activeSpecialReasons: [],
+      masterCandidates,
+      ...(temporaryGuidanceParentPersonId === undefined ? {} : { temporaryGuidanceParentPersonId }),
+    });
+  }
+
+  if (materialized.length === 0) {
+    return success(runtime);
+  }
+
+  const nextRuntime = deepFreezePlainJson({
+    ...runtime,
+    pendingEnrollmentBoundaries: [...pending, ...materialized],
+  });
+  const validatedNext = validateSprint3MentorshipEntrypointRuntimeState(nextRuntime);
+  if (!validatedNext.ok) {
+    return failure(validatedNext.issues);
+  }
+  return success(validatedNext.value);
+}
+
+/**
+ * Append live explicit-teach records after weekly adapter when master boundary selects teach.
+ */
+export function materializeLiveExplicitWeeklyTeachQueueRecords(
+  input: MaterializeLiveExplicitTeachQueueInput,
+): ValidationResult<Sprint3MentorshipEntrypointRuntimeState> {
+  if (
+    input.sprint3Config === undefined ||
+    !isExplicitWeeklyTeachActionEnabled(input.sprint3Config)
+  ) {
+    return success(input.runtimeState ?? createInitialSprint3MentorshipEntrypointRuntimeState());
+  }
+
+  const recordsResult = buildWeeklyTrainingPersonRecords(
+    input.worldState,
+    input.weeklyTrainingSidecars,
+    input.runtimeState,
+  );
+  if (!recordsResult.ok) {
+    return failure(recordsResult.issues);
+  }
+
+  let runtime = cloneValidatedPlainJson(
+    input.runtimeState ?? createInitialSprint3MentorshipEntrypointRuntimeState(),
+  );
+  const validatedBase = validateSprint3MentorshipEntrypointRuntimeState(runtime);
+  if (!validatedBase.ok) {
+    return failure(validatedBase.issues);
+  }
+  runtime = validatedBase.value;
+
+  const pending = [...runtime.pendingExplicitWeeklyTeachRecords];
+  const materialized: ExplicitWeeklyTeachActionRecord[] = [];
+
+  for (const record of recordsResult.value) {
+    if (
+      masterPendingExplicitTeach(pending, record.person.personId) ||
+      masterPendingExplicitTeach(materialized, record.person.personId)
+    ) {
+      continue;
+    }
+    if (masterCompletedExplicitTeachThisWeek(runtime, record.person.personId, input.absoluteWeek)) {
+      continue;
+    }
+    const boundary = resolveExplicitWeeklyTeachActionSelected(record, runtime);
+    if (boundary === undefined) {
+      continue;
+    }
+    materialized.push(boundary);
+  }
+
+  if (materialized.length === 0) {
+    return success(runtime);
+  }
+
+  const nextRuntime = deepFreezePlainJson({
+    ...runtime,
+    pendingExplicitWeeklyTeachRecords: [...pending, ...materialized],
+  });
+  const validatedNext = validateSprint3MentorshipEntrypointRuntimeState(nextRuntime);
+  if (!validatedNext.ok) {
+    return failure(validatedNext.issues);
+  }
+  return success(validatedNext.value);
+}

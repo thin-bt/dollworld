@@ -235,6 +235,7 @@ export function runSprint1WeeklyTrainingAdapter(
   const personRecordsResult = buildWeeklyTrainingPersonRecords(
     input.worldState,
     input.weeklyTrainingSidecars,
+    input.mentorshipEntrypointRuntime,
   );
   if (!personRecordsResult.ok) {
     return failure(personRecordsResult.issues);

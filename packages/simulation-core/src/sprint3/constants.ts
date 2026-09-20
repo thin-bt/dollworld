@@ -97,3 +97,11 @@ export const ENROLLMENT_ASSIGNMENT_PROCESSOR_ID = "sprint3-enrollment-assignment
 
 /** Pure master intake decision processor contract id (world step 4 / enrollment boundary). */
 export const MASTER_INTAKE_EVALUATION_PROCESSOR_ID = "sprint3-master-intake-0.1.0" as const;
+
+/** S03-012 persisted enrollment / intake / explicit-teach entrypoint outcomes (Sprint1RunRuntimeState). */
+export const SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_PROCESSOR_ID =
+  "sprint3-mentorship-entrypoint-0.1.0" as const;
+
+/** S03-013 live-world pending queue materialization before entrypoint processors. */
+export const SPRINT3_LIVE_MENTORSHIP_QUEUE_MATERIALIZATION_PROCESSOR_ID =
+  "sprint3-live-mentorship-queue-materialization-0.1.0" as const;

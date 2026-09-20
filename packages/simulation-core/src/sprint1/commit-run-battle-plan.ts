@@ -128,6 +128,13 @@ function cloneSprint1RuntimeDraft(
       eventAllocationState: cloneValidatedPlainJson(runtimeState.eventAllocationState),
       battleResults: runtimeState.battleResults.map((result) => cloneValidatedPlainJson(result)),
       battleResultWeekState: cloneValidatedPlainJson(runtimeState.battleResultWeekState),
+      ...(runtimeState.mentorshipEntrypointRuntime === undefined
+        ? {}
+        : {
+            mentorshipEntrypointRuntime: cloneValidatedPlainJson(
+              runtimeState.mentorshipEntrypointRuntime,
+            ),
+          }),
     });
   } catch (error) {
     const detail =

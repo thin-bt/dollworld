@@ -49,6 +49,12 @@ import {
 } from "./year-start-phase.js";
 import { validateWorldYearStartRuntimeState } from "./world-year-start-runtime-state.js";
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
+import { processExplicitWeeklyTeachWeek } from "../sprint3/process-explicit-weekly-teach-week.js";
+import { processSprint3EnrollmentIntakeBoundary } from "../sprint3/process-sprint3-enrollment-intake-boundary.js";
+import {
+  materializeLiveEnrollmentQueueBoundaries,
+  materializeLiveExplicitWeeklyTeachQueueRecords,
+} from "../sprint3/materialize-live-mentorship-entrypoint-queues.js";
 
 /** Matches world-engine WEEKS_PER_YEAR (48). */
 const WEEKS_PER_YEAR = 48;
@@ -221,6 +227,13 @@ function cloneSprint1RuntimeDraft(runtimeState: Sprint1RunRuntimeState): Sprint1
     eventAllocationState: cloneValidatedPlainJson(runtimeState.eventAllocationState),
     battleResults: runtimeState.battleResults.map((result) => cloneValidatedPlainJson(result)),
     battleResultWeekState: cloneValidatedPlainJson(runtimeState.battleResultWeekState),
+    ...(runtimeState.mentorshipEntrypointRuntime === undefined
+      ? {}
+      : {
+          mentorshipEntrypointRuntime: cloneValidatedPlainJson(
+            runtimeState.mentorshipEntrypointRuntime,
+          ),
+        }),
   };
 }
 
@@ -234,6 +247,7 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
   processorRuntimeStates: Sprint1RunRuntimeState["processorRuntimeStates"];
   eventAllocationState: Sprint1RunRuntimeState["eventAllocationState"];
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
+  mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
 } {
   return {
     worldState: cloneWorldEngineState(runtimeState.worldState),
@@ -241,6 +255,13 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
     processorRuntimeStates: cloneRuntimeState(runtimeState.processorRuntimeStates),
     eventAllocationState: cloneValidatedPlainJson(runtimeState.eventAllocationState),
     battleResultWeekState: cloneValidatedPlainJson(runtimeState.battleResultWeekState),
+    ...(runtimeState.mentorshipEntrypointRuntime === undefined
+      ? {}
+      : {
+          mentorshipEntrypointRuntime: cloneValidatedPlainJson(
+            runtimeState.mentorshipEntrypointRuntime,
+          ),
+        }),
   };
 }
 
@@ -505,6 +526,36 @@ function executeSprint1WeeklyTransitionDraft(
   let worldEngineStartSequence = eventStartSequence;
 
   if (!skipWeeklyAdapter) {
+    const enrollmentMaterialized = materializeLiveEnrollmentQueueBoundaries({
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      worldState: working.worldState,
+      weeklyTrainingSidecars: working.weeklyTrainingSidecars,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      runtimeState: working.mentorshipEntrypointRuntime,
+    });
+    if (!enrollmentMaterialized.ok) {
+      return failure(
+        prefixIssues(enrollmentMaterialized.issues, "/liveEnrollmentQueueMaterialization"),
+      );
+    }
+    working.mentorshipEntrypointRuntime = enrollmentMaterialized.value;
+
+    const enrollmentBoundary = processSprint3EnrollmentIntakeBoundary({
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      weeklyTrainingSidecars: working.weeklyTrainingSidecars,
+      runtimeState: working.mentorshipEntrypointRuntime,
+    });
+    if (!enrollmentBoundary.ok) {
+      return failure(prefixIssues(enrollmentBoundary.issues, "/enrollmentIntakeBoundary"));
+    }
+    working.weeklyTrainingSidecars = enrollmentBoundary.value.weeklyTrainingSidecars;
+    working.mentorshipEntrypointRuntime = enrollmentBoundary.value.runtimeState;
+
     const adapterInput: Sprint1WeeklyTrainingAdapterInput = {
       absoluteWeek: working.worldState.worldDate.absoluteWeek,
       worldState: working.worldState,
@@ -512,6 +563,12 @@ function executeSprint1WeeklyTransitionDraft(
       sprint1Config: session.context.sprint1Config,
       techniqueCatalog: session.context.techniqueCatalog,
       processorRuntimeStates: working.processorRuntimeStates,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      ...(working.mentorshipEntrypointRuntime === undefined
+        ? {}
+        : { mentorshipEntrypointRuntime: working.mentorshipEntrypointRuntime }),
     };
 
     const adapterResult = runSprint1WeeklyTrainingAdapter(adapterInput, provider);
@@ -522,6 +579,35 @@ function executeSprint1WeeklyTransitionDraft(
     working.worldState = adapterResult.value.worldState;
     working.weeklyTrainingSidecars = adapterResult.value.weeklyTrainingSidecars;
     working.processorRuntimeStates = adapterResult.value.processorRuntimeStates;
+
+    const explicitTeachMaterialized = materializeLiveExplicitWeeklyTeachQueueRecords({
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      worldState: working.worldState,
+      weeklyTrainingSidecars: working.weeklyTrainingSidecars,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      runtimeState: working.mentorshipEntrypointRuntime,
+    });
+    if (!explicitTeachMaterialized.ok) {
+      return failure(
+        prefixIssues(explicitTeachMaterialized.issues, "/liveExplicitTeachQueueMaterialization"),
+      );
+    }
+    working.mentorshipEntrypointRuntime = explicitTeachMaterialized.value;
+
+    const explicitTeachWeek = processExplicitWeeklyTeachWeek({
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      techniqueCatalog: session.context.techniqueCatalog,
+      runtimeState: working.mentorshipEntrypointRuntime,
+    });
+    if (!explicitTeachWeek.ok) {
+      return failure(prefixIssues(explicitTeachWeek.issues, "/explicitWeeklyTeachWeek"));
+    }
+    working.mentorshipEntrypointRuntime = explicitTeachWeek.value.runtimeState;
 
     const weeklyAllocation = allocateWeeklyTrainingEventCandidates({
       candidates: adapterResult.value.eventCandidates,
@@ -632,6 +718,9 @@ function executeSprint1WeeklyTransitionDraft(
     appendedEvents,
     eventAllocationState: working.eventAllocationState,
     battleResultWeekState: working.battleResultWeekState,
+    ...(working.mentorshipEntrypointRuntime === undefined
+      ? {}
+      : { mentorshipEntrypointRuntime: working.mentorshipEntrypointRuntime }),
   };
 
   if (mode === "trusted") {

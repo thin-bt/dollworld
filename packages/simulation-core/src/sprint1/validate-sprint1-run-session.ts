@@ -36,6 +36,7 @@ import {
 import { validateSeededRngState } from "./validate-seeded-rng-state.js";
 import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
+import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 
 const SESSION_KEYS = ["context", "runtimeState"] as const;
 const RUNTIME_STATE_KEYS = [
@@ -48,6 +49,7 @@ const RUNTIME_STATE_KEYS = [
   "eventAllocationState",
   "battleResults",
   "battleResultWeekState",
+  "mentorshipEntrypointRuntime",
 ] as const;
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
@@ -167,8 +169,27 @@ export function validateSprint1RunSession(
     }
   }
 
+  let mentorshipEntrypointRuntime:
+    Sprint1RunSession["runtimeState"]["mentorshipEntrypointRuntime"] | undefined;
+  if (runtime["mentorshipEntrypointRuntime"] !== undefined) {
+    const mentorshipRuntime = validateSprint3MentorshipEntrypointRuntimeState(
+      runtime["mentorshipEntrypointRuntime"],
+    );
+    if (!mentorshipRuntime.ok) {
+      issues.push(
+        ...prefixIssues(mentorshipRuntime.issues, "/runtimeState/mentorshipEntrypointRuntime"),
+      );
+    } else {
+      mentorshipEntrypointRuntime = mentorshipRuntime.value;
+    }
+  }
+
   if (worldState !== undefined && sidecarsResult.ok) {
-    const records = buildWeeklyTrainingPersonRecords(worldState, sidecarsResult.value);
+    const records = buildWeeklyTrainingPersonRecords(
+      worldState,
+      sidecarsResult.value,
+      mentorshipEntrypointRuntime,
+    );
     if (!records.ok) {
       issues.push(...prefixIssues(records.issues, "/runtimeState"));
     }
@@ -376,6 +397,7 @@ export function validateSprint1RunSession(
         eventAllocationState: allocationResult.value,
         battleResults: [...battleResultsResult.value],
         battleResultWeekState: weekStateResult.value,
+        ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
       },
     }),
   );

@@ -1224,7 +1224,10 @@ export {
   shouldApplyParentTemporaryGuidanceTeacherFactor,
   validateWeeklyTrainingSprint3ConfigBinding,
 } from "./sprint3/resolve-weekly-parent-temporary-guidance.js";
-export { evaluateEnrollmentAssignment } from "./sprint3/evaluate-enrollment-assignment.js";
+export {
+  evaluateEnrollmentAssignment,
+  isEnrollmentAssignmentAiEnabled,
+} from "./sprint3/evaluate-enrollment-assignment.js";
 export {
   computeWeeklyTeachCompositeScore,
   computeWeeklyTeachingAllocationSlots,
@@ -1265,6 +1268,24 @@ export {
   isGeneratedTechniqueRegistrationEnabled,
   materializeGeneratedTechniqueDefinition,
 } from "./sprint3/materialize-generated-technique-definition.js";
+export { processExplicitWeeklyTeachWeek } from "./sprint3/process-explicit-weekly-teach-week.js";
+export { processSprint3EnrollmentIntakeBoundary } from "./sprint3/process-sprint3-enrollment-intake-boundary.js";
+export {
+  materializeLiveEnrollmentQueueBoundaries,
+  materializeLiveExplicitWeeklyTeachQueueRecords,
+} from "./sprint3/materialize-live-mentorship-entrypoint-queues.js";
+export {
+  createInitialSprint3MentorshipEntrypointRuntimeState,
+  lookupMentorshipRelationKindForChild,
+  validateSprint3MentorshipEntrypointRuntimeState,
+} from "./sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
+export type {
+  Sprint3CompletedEnrollmentOutcomeEntry,
+  Sprint3CompletedExplicitWeeklyTeachOutcomeEntry,
+  Sprint3CompletedMasterIntakeOutcomeEntry,
+  Sprint3MentorshipAssignmentEntry,
+  Sprint3MentorshipEntrypointRuntimeState,
+} from "./sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 export {
   computeAutonomousMaxDisciples,
   evaluateMasterIntakeDecision,
@@ -1295,6 +1316,8 @@ export {
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  SPRINT3_LIVE_MENTORSHIP_QUEUE_MATERIALIZATION_PROCESSOR_ID,
+  SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_PROCESSOR_ID,
   GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION,
   GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
   GENERATED_TECHNIQUE_REGISTRATION_ADAPTER_ID,

@@ -4,6 +4,16 @@
  */
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
+import {
+  SPRINT3_CONFIG_VERSION_ENROLLMENT,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
+  SPRINT3_CONFIG_VERSION_INTAKE,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+  SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+  SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
+  SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+} from "./constants.js";
 import { evaluateMasterQualificationEligibility } from "./evaluate-master-qualification.js";
 import type {
   EnrollmentAssignmentKind,
@@ -16,6 +26,24 @@ import type {
 } from "./types.js";
 
 const INTAKE_ACCEPTANCE_VALUES = ["accept", "reject", "defer"] as const;
+
+const ENROLLMENT_ASSIGNMENT_CONFIG_VERSIONS = new Set<string>([
+  SPRINT3_CONFIG_VERSION_ENROLLMENT,
+  SPRINT3_CONFIG_VERSION_INTAKE,
+  SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
+  SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
+]);
+
+export function isEnrollmentAssignmentAiEnabled(config: Sprint3Config): boolean {
+  return (
+    ENROLLMENT_ASSIGNMENT_CONFIG_VERSIONS.has(config.configVersion) &&
+    config.mentorshipFeatures.enrollmentAssignmentAiEnabled === true
+  );
+}
 
 function pushReason(reasons: string[], code: string): void {
   reasons.push(code);
@@ -220,7 +248,10 @@ export function evaluateEnrollmentAssignment(
   }
 
   const qualifiedParents = qualifiedAcceptable.filter((c) => c.isBiologicalParent);
-  const useAlternatePool = allowsAlternateFormalMaster(record.activeSpecialReasons, qualifiedParents);
+  const useAlternatePool = allowsAlternateFormalMaster(
+    record.activeSpecialReasons,
+    qualifiedParents,
+  );
   const selectionPool = useAlternatePool ? qualifiedAcceptable : qualifiedParents;
 
   if (selectionPool.length > 0) {

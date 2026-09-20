@@ -44,8 +44,22 @@ import {
 } from "./technique-catalog.js";
 import type { SimulationIdentity, Sprint1Config } from "./types.js";
 import { validateNormalizedSprint1Config } from "./validate-sprint1-config.js";
+import { validateNormalizedSprint3Config } from "../sprint3/validate-sprint3-config.js";
+import type { Sprint3Config } from "../sprint3/types.js";
 
 export const SPRINT1_RUN_CONTEXT_KEYS = [
+  "sprint1Config",
+  "techniqueCatalog",
+  "initialWeeklyTrainingSidecarSnapshot",
+  "simulationIdentity",
+  "simulationIdentityHash",
+  "simulationId",
+  "runRuleSnapshot",
+  "runRuleSnapshotHash",
+  "sprint3Config",
+] as const;
+
+export const SPRINT1_RUN_CONTEXT_REQUIRED_KEYS = [
   "sprint1Config",
   "techniqueCatalog",
   "initialWeeklyTrainingSidecarSnapshot",
@@ -65,6 +79,7 @@ export type Sprint1RunContext = {
   readonly simulationId: SimulationId;
   readonly runRuleSnapshot: RunRuleSnapshot;
   readonly runRuleSnapshotHash: string;
+  readonly sprint3Config?: Sprint3Config;
 };
 
 export type ValidateSprint1RunContextInput = {
@@ -76,6 +91,7 @@ export type ValidateSprint1RunContextInput = {
   simulationId: unknown;
   runRuleSnapshot: unknown;
   runRuleSnapshotHash: unknown;
+  sprint3Config?: unknown;
 };
 
 function mismatch(
@@ -113,7 +129,7 @@ export function validateSprint1RunContext(
     );
   }
   rejectUnknownKeys(object, SPRINT1_RUN_CONTEXT_KEYS, "", issues);
-  for (const key of SPRINT1_RUN_CONTEXT_KEYS) {
+  for (const key of SPRINT1_RUN_CONTEXT_REQUIRED_KEYS) {
     if (!hasOwn(object, key)) {
       issues.push({
         path: `/${key}`,
@@ -136,6 +152,7 @@ export function validateSprint1RunContext(
       simulationId: object["simulationId"],
       runRuleSnapshot: object["runRuleSnapshot"],
       runRuleSnapshotHash: object["runRuleSnapshotHash"],
+      ...(hasOwn(object, "sprint3Config") ? { sprint3Config: object["sprint3Config"] } : {}),
     },
     provider,
   );
@@ -449,6 +466,20 @@ export function createSprint1RunContext(
     ]);
   }
 
+  let sprint3Config: Sprint3Config | undefined;
+  if (input.sprint3Config !== undefined) {
+    const sprint3Result = validateNormalizedSprint3Config(input.sprint3Config);
+    if (!sprint3Result.ok) {
+      return failure(
+        sprint3Result.issues.map((issue) => ({
+          ...issue,
+          path: `/sprint3Config${issue.path}`,
+        })),
+      );
+    }
+    sprint3Config = sprint3Result.value;
+  }
+
   return success(
     deepFreezePlainJson({
       sprint1Config: configResult.value,
@@ -459,6 +490,7 @@ export function createSprint1RunContext(
       simulationId: computedSimulationId.value,
       runRuleSnapshot: against.value,
       runRuleSnapshotHash: input.runRuleSnapshotHash,
+      ...(sprint3Config === undefined ? {} : { sprint3Config }),
     }),
   );
 }

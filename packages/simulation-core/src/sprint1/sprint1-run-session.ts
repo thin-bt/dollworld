@@ -18,6 +18,7 @@ import type { EventAllocationState } from "./event-allocation-state.js";
 import type { MatchIdGeneratorState } from "./match-id-generator.js";
 import type { Sprint1RunContext } from "./sprint1-run-context.js";
 import type { TechniqueCatalog } from "./technique-catalog.js";
+import type { Sprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 import type { Sprint3Config } from "../sprint3/types.js";
 import type { Sprint1Config } from "./types.js";
 import type { WeeklyTrainingEventCandidate } from "./weekly-training-types.js";
@@ -42,6 +43,8 @@ export type Sprint1RunRuntimeState = {
   eventAllocationState: EventAllocationState;
   battleResults: BattleResult[];
   battleResultWeekState: BattleResultWeekState;
+  /** S03-012: enrollment / intake / explicit-teach entrypoint persistence when Sprint3 is bound. */
+  mentorshipEntrypointRuntime?: Sprint3MentorshipEntrypointRuntimeState;
 };
 
 /**
@@ -66,6 +69,8 @@ export type Sprint1WeeklyTrainingAdapterInput = {
   processorRuntimeStates: ProcessorRuntimeState;
   /** Optional S03-005 binding: teachingEfficiency disciple brackets for weekly outcomes. */
   sprint3Config?: Sprint3Config;
+  /** Optional S03-012: mentorship relation kind merge at weekly record build. */
+  mentorshipEntrypointRuntime?: Sprint3MentorshipEntrypointRuntimeState;
 };
 
 /**

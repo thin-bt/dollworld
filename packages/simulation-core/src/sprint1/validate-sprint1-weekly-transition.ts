@@ -30,6 +30,7 @@ import { validateMatchIdGeneratorState } from "./match-id-generator.js";
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 import { validateSeededRngState } from "./validate-seeded-rng-state.js";
 import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
+import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
   return issues.map((issue) => ({
@@ -53,6 +54,7 @@ export type TrustedWeeklyTransitionDraft = {
   appendedEvents: readonly Sprint1EventEnvelope[];
   eventAllocationState: Sprint1RunRuntimeState["eventAllocationState"];
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
+  mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
 };
 
 export type ValidateTrustedWeeklyTransitionOptions = {
@@ -163,8 +165,27 @@ export function validateTrustedWeeklyTransition(
     }
   }
 
+  let mentorshipEntrypointRuntime:
+    Sprint1RunRuntimeState["mentorshipEntrypointRuntime"] | undefined;
+  if (draft.mentorshipEntrypointRuntime !== undefined) {
+    const mentorshipRuntime = validateSprint3MentorshipEntrypointRuntimeState(
+      draft.mentorshipEntrypointRuntime,
+    );
+    if (!mentorshipRuntime.ok) {
+      issues.push(
+        ...prefixIssues(mentorshipRuntime.issues, "/runtimeState/mentorshipEntrypointRuntime"),
+      );
+    } else {
+      mentorshipEntrypointRuntime = mentorshipRuntime.value;
+    }
+  }
+
   if (sidecarsResult.ok) {
-    const records = buildWeeklyTrainingPersonRecords(worldState, sidecarsResult.value);
+    const records = buildWeeklyTrainingPersonRecords(
+      worldState,
+      sidecarsResult.value,
+      mentorshipEntrypointRuntime,
+    );
     if (!records.ok) {
       issues.push(...prefixIssues(records.issues, "/runtimeState"));
     }
@@ -340,6 +361,16 @@ export function validateTrustedWeeklyTransition(
   }
 
   if (
+    draft.mentorshipEntrypointRuntime !== undefined &&
+    mentorshipEntrypointRuntime === undefined
+  ) {
+    issues.push({
+      path: "/runtimeState/mentorshipEntrypointRuntime",
+      message: "mentorship entrypoint runtime failed validation",
+    });
+  }
+
+  if (
     issues.length > 0 ||
     !sidecarsResult.ok ||
     processorRuntimeStates === undefined ||
@@ -369,6 +400,7 @@ export function validateTrustedWeeklyTransition(
       eventAllocationState: allocationResult.value,
       battleResults,
       battleResultWeekState: weekStateResult.value,
+      ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
     },
   });
 }

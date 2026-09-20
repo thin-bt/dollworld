@@ -13,6 +13,10 @@ import {
   validateWeeklyTrainingPersonRecord,
   type WeeklyTrainingPersonRecord,
 } from "./weekly-training-types.js";
+import {
+  lookupMentorshipRelationKindForChild,
+  type Sprint3MentorshipEntrypointRuntimeState,
+} from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 
 function mismatch(
   path: string,
@@ -34,6 +38,7 @@ function sortedPersonIds(personIds: readonly PersonId[]): PersonId[] {
 export function buildWeeklyTrainingPersonRecords(
   worldState: WorldEngineState,
   sidecars: unknown,
+  mentorshipEntrypointRuntime?: Sprint3MentorshipEntrypointRuntimeState,
 ): ValidationResult<readonly WeeklyTrainingPersonRecord[]> {
   const sidecarResult = validateWeeklyTrainingSidecarState(sidecars);
   if (!sidecarResult.ok) {
@@ -111,6 +116,10 @@ export function buildWeeklyTrainingPersonRecords(
   const records: WeeklyTrainingPersonRecord[] = [];
   for (const person of worldState.persons) {
     const entry = sidecarByPersonId.get(person.personId)!;
+    const mentorshipRelationKind = lookupMentorshipRelationKindForChild(
+      mentorshipEntrypointRuntime,
+      person.personId,
+    );
     const record: WeeklyTrainingPersonRecord = {
       person,
       growthProfile: entry.growthProfile,
@@ -123,6 +132,7 @@ export function buildWeeklyTrainingPersonRecords(
       techniqueTargetContexts: entry.techniqueTargetContexts,
       teacherFactorKey: entry.teacherFactorKey,
       discipleCount: entry.discipleCount,
+      ...(mentorshipRelationKind === undefined ? {} : { mentorshipRelationKind }),
     };
     const validated = validateWeeklyTrainingPersonRecord(record);
     if (!validated.ok) {
