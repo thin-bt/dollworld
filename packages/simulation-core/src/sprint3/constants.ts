@@ -77,6 +77,10 @@ export const GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION = "0.1.0" as con
 export const GENERATED_TECHNIQUE_REGISTRATION_ADAPTER_ID =
   "sprint3-generated-technique-registration-0.1.0" as const;
 
+/** S03-011 battle-commit hook: first qualifying use → founding history MatchId (once). */
+export const ORIGINAL_TECHNIQUE_FIRST_USE_MATCH_ID_PROCESSOR_ID =
+  "sprint3-original-technique-first-use-match-id-0.1.0" as const;
+
 /** Sprint3 → Sprint1 weekly training disciple-count factor binding (S03-005). */
 export const WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID =
   "sprint3-weekly-training-disciple-count-0.1.0" as const;

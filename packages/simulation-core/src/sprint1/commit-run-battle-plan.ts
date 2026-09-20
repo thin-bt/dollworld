@@ -55,6 +55,7 @@ import { validateStartBattleRuntimeTransitionAgainst } from "./start-battle-runt
 import { validateBattleResult } from "./validate-battle-result.js";
 import type { WeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
 import { validateWeeklyTrainingPersonRecord } from "./weekly-training-types.js";
+import { applyOriginalTechniqueFirstUseMatchIdAfterBattleCommit } from "../sprint3/persist-original-technique-first-use-match-id.js";
 
 export type CommitRunBattlePlanInput = {
   session: Sprint1RunSession;
@@ -128,6 +129,13 @@ function cloneSprint1RuntimeDraft(
       eventAllocationState: cloneValidatedPlainJson(runtimeState.eventAllocationState),
       battleResults: runtimeState.battleResults.map((result) => cloneValidatedPlainJson(result)),
       battleResultWeekState: cloneValidatedPlainJson(runtimeState.battleResultWeekState),
+      ...(runtimeState.originalTechniqueLifecycleRuntime === undefined
+        ? {}
+        : {
+            originalTechniqueLifecycleRuntime: cloneValidatedPlainJson(
+              runtimeState.originalTechniqueLifecycleRuntime,
+            ),
+          }),
       ...(runtimeState.mentorshipEntrypointRuntime === undefined
         ? {}
         : {
@@ -818,6 +826,16 @@ export function commitRunBattlePlan(
     battleResults: [...stores.value.battleResults],
     battleResultWeekState: stores.value.battleResultWeekState,
   };
+
+  const firstUseMatchId = applyOriginalTechniqueFirstUseMatchIdAfterBattleCommit({
+    sprint3Config: input.session.context.sprint3Config,
+    runtimeState: draft,
+    battleResult: plan.battleResult,
+  });
+  if (!firstUseMatchId.ok) {
+    return failure(prefixIssues(firstUseMatchId.issues, "/runtimeState"));
+  }
+  draft = firstUseMatchId.value;
 
   const weekMatch = assertBattleResultWeekMatchesWorldDate({
     battleResultWeekState: draft.battleResultWeekState,

@@ -1274,6 +1274,11 @@ export {
   researchValueToTenths,
   validateOriginalTechniqueLifecycleRuntimeState,
 } from "./sprint3/original-technique-lifecycle-runtime-state.js";
+export {
+  applyFirstUseMatchIdToOriginalTechniqueFoundingHistories,
+  applyOriginalTechniqueFirstUseMatchIdAfterBattleCommit,
+  collectSuccessfulBattleTechniqueUseIds,
+} from "./sprint3/persist-original-technique-first-use-match-id.js";
 export { processOriginalTechniqueLifecycleWeek } from "./sprint3/process-original-technique-lifecycle-week.js";
 export {
   AUTONOMOUS_ORIGINAL_TECHNIQUE_WEEKLY_RESEARCH_INCREMENT_TENTHS,
