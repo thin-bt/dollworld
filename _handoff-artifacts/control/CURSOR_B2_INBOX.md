@@ -1,17 +1,19 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-20T10:22:35+09:00
-last-consumed-task-key: SPRINT3-BASELINE-EVIDENCE-B2-20260920-R1
-last-terminal: READY / SPRINT3_BASELINE_EVIDENCE_B2_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-BASELINE-EVIDENCE-B2-20260920-R1/result.md
+task-key: SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1
+mode: S03_004_INDEPENDENT_ACCEPTANCE
+updatedAt: 2026-09-20T11:22:28+09:00
+sprint: Sprint3
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
+required-product-sha: f01d1823c9e40f08c1129001082c9f06f25c515c
 pickup-requirements:
 - fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- claim ACTIVE before verification
+- independently verify S03-004 without conflicting with A S03-005
 - publish terminal result to GitHub canonical result path
+- do not start Sprint4
