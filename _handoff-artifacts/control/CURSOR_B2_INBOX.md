@@ -1,17 +1,18 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-20T22:10:03+09:00
-last-consumed-task-key: SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1
-last-terminal: READY / SPRINT3_S03_004_INDEPENDENT_ACCEPTANCE_B2_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1/result.md
+task-key: SPRINT3-RUNTIME-WIRING-GAP-AUDIT-B2-20260920-R1
+mode: PRODUCT_GAP_AUDIT
+updatedAt: 2026-09-20T22:37:48+09:00
+instruction-path: _handoff-artifacts/tasks/SPRINT3-RUNTIME-WIRING-GAP-AUDIT-B2-20260920-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
+priority: DEADLINE_CRITICAL
 pickup-requirements:
 - fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- claim ACTIVE before artifact changes
+- audit recorded S03-008 runtime wiring gaps against canonical SPEC and source
+- do not duplicate lane A formal root-check recovery
 - publish terminal result to GitHub canonical result path
