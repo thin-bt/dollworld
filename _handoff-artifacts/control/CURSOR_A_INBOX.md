@@ -1,23 +1,21 @@
 # Cursor A Inbox
 state: PREPARED
 lane: A
-task-key: SPRINT3-PRE-S03-015-CANONICAL-EVIDENCE-MANIFEST-A-20260921-R1
-mode: RELEASE_EVIDENCE
+task-key: SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1
+mode: IMPLEMENTATION_VERIFICATION
 priority: DEADLINE_CRITICAL
-updatedAt: 2026-09-21T07:00:58+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-PRE-S03-015-CANONICAL-EVIDENCE-MANIFEST-A-20260921-R1/instruction.md
+updatedAt: 2026-09-21T07:55:49+09:00
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
 recovery-request: REDISPATCH
-recovery-reason: canonical PREPARED since 06:55 has no ACTIVE lock/result evidence at 07:00; executor pickup recovery required
 pickup-requirements:
-- fresh-read GitHub canonical instruction
-- claim ACTIVE before work
-- produce canonical S03-001..014 release-evidence manifest; do not status-only
-- verify current root release gate and focused Sprint3 evidence as instructed
-- do not take over B2 S03-015 generated-technique battle consumption work
-- publish terminal result to GitHub canonical result path
-- verify canonical master readback before READY
-- if executor cannot claim this REDISPATCH, expose pickup failure rather than silently leaving PREPARED
+- fresh-read GitHub canonical instruction and current master
+- claim ACTIVE before changes
+- trace live master qualification derivation/persistence; prove LIVE_CONNECTED or implement bounded PRODUCT_GAP
+- add focused regression evidence and run root npm run check when feasible
+- do not touch B2 S03-015 generated-technique battle consumption work
+- do not resume/duplicate the superseded pre-S03-015 evidence-manifest assignment
+- publish terminal result to canonical result path and verify GitHub master readback before READY
