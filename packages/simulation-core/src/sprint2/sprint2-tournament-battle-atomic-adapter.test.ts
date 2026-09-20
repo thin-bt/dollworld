@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { toCanonicalJson } from "../index.js";
 import { failure } from "../validation.js";
 import { asPersonId } from "../ids.js";
-import { createEmptyDetailedLogPayloadStore, computeDetailedLogPayloadHash } from "./detailed-log-payload-store.js";
+import {
+  createEmptyDetailedLogPayloadStore,
+  computeDetailedLogPayloadHash,
+} from "./detailed-log-payload-store.js";
 import { formatTournamentSlotId } from "./stored-battle-result-ref.js";
 import { buildTournamentMatchPlan } from "./tournament-match-plan.js";
 import {
@@ -14,6 +17,7 @@ import {
   buildRoundRobinBracketForPersons,
   defaultCompetitionRuleHash,
   defaultTournamentBattleActionIdentity,
+  defaultTournamentBattleActionsSource,
   prepareTournamentBattleSession,
   tournamentBattleFixtureProvider,
 } from "./tournament-battle-atomic.fixture.js";
@@ -69,8 +73,8 @@ describe("S02-006 tournament battle atomic adapter", () => {
           session: input.session,
           participantAActionSourceIdentity: input.actionIdentity,
           participantBActionSourceIdentity: input.actionIdentity,
-          participantAActionsSource: { identity: input.actionIdentity },
-          participantBActionsSource: { identity: input.actionIdentity },
+          participantAActionsSource: defaultTournamentBattleActionsSource(input.session),
+          participantBActionsSource: defaultTournamentBattleActionsSource(input.session),
           slotBindings: [],
         },
         matchPlan: input.plan,
@@ -118,8 +122,8 @@ describe("S02-006 tournament battle atomic adapter", () => {
           session: input.session,
           participantAActionSourceIdentity: input.actionIdentity,
           participantBActionSourceIdentity: input.actionIdentity,
-          participantAActionsSource: { identity: input.actionIdentity },
-          participantBActionsSource: { identity: input.actionIdentity },
+          participantAActionsSource: defaultTournamentBattleActionsSource(input.session),
+          participantBActionsSource: defaultTournamentBattleActionsSource(input.session),
           slotBindings: [],
         },
         matchPlan: tamperedPlan,
@@ -130,9 +134,9 @@ describe("S02-006 tournament battle atomic adapter", () => {
       },
       provider,
     );
-    expect(
-      result.kind === "pre_start_failure" || result.kind === "plan_validation_failure",
-    ).toBe(true);
+    expect(result.kind === "pre_start_failure" || result.kind === "plan_validation_failure").toBe(
+      true,
+    );
     expect(
       snapshotTournamentBattleAtomicBaseline({
         session: input.session,
@@ -230,8 +234,8 @@ describe("S02-006 tournament battle atomic adapter", () => {
           session: input.session,
           participantAActionSourceIdentity: input.actionIdentity,
           participantBActionSourceIdentity: input.actionIdentity,
-          participantAActionsSource: { identity: input.actionIdentity },
-          participantBActionsSource: { identity: input.actionIdentity },
+          participantAActionsSource: defaultTournamentBattleActionsSource(input.session),
+          participantBActionsSource: defaultTournamentBattleActionsSource(input.session),
           slotBindings: [],
         },
         matchPlan: input.plan,
@@ -276,8 +280,8 @@ describe("S02-006 tournament battle atomic adapter", () => {
           session: input.session,
           participantAActionSourceIdentity: input.actionIdentity,
           participantBActionSourceIdentity: input.actionIdentity,
-          participantAActionsSource: { identity: input.actionIdentity },
-          participantBActionsSource: { identity: input.actionIdentity },
+          participantAActionsSource: defaultTournamentBattleActionsSource(input.session),
+          participantBActionsSource: defaultTournamentBattleActionsSource(input.session),
           slotBindings: [],
         },
         matchPlan: input.plan,
@@ -369,14 +373,16 @@ describe("S02-006 tournament battle atomic adapter", () => {
     if (first.kind !== "completed" || second.kind !== "completed") {
       return;
     }
-    expect(first.applicationFact.applicationFactHash).toBe(second.applicationFact.applicationFactHash);
+    expect(first.applicationFact.applicationFactHash).toBe(
+      second.applicationFact.applicationFactHash,
+    );
     expect(first.storedBattleResultRef.refHash).toBe(second.storedBattleResultRef.refHash);
   });
 });
 
 describe("S02-006 import boundary", () => {
   it("S02-009 retention modules do not import S02-006 tournament atomic adapter", async () => {
-    const { readdir, readFile } = await import("node:fs/promises");
+    const { readFile } = await import("node:fs/promises");
     const { join } = await import("node:path");
     const sprint2Dir = join(process.cwd(), "packages/simulation-core/src/sprint2");
     const forbidden = ["tournament-battle-atomic-adapter", "stored-battle-result-ref"];

@@ -1,6 +1,8 @@
 /**
  * Shared test fixture for S02-005/S02-006 tournament battle handoff and atomic adapter tests.
  */
+import type { BattleActionSourceIdentity } from "../sprint1/battle-action-source-identity.js";
+import type { DefaultBattleStrategySource } from "../sprint1/battle-actions-source.js";
 import {
   ABILITY_KEYS,
   computeConfigHash,
@@ -31,9 +33,7 @@ import {
 import { withDefaultSprint2BindingsForRunSessionInput } from "../test-fixtures/sprint2-identity.fixture.js";
 import { asPersonId } from "../ids.js";
 import { createDefaultSprint2ConfigInput } from "./sprint2-config-defaults.js";
-import {
-  commitSchedulePlan,
-} from "./tournament-schedule-state.js";
+import { commitSchedulePlan } from "./tournament-schedule-state.js";
 import { buildTournamentScheduleReadModel } from "./tournament-schedule-read-model.js";
 import { createInitialTournamentIdGeneratorState } from "./tournament-id-registry.js";
 import type { EntrantCandidateFacts, Sprint2Config } from "./types.js";
@@ -44,9 +44,7 @@ import {
   createNeutralEntryChoicePolicy,
 } from "./tournament-entry-selection.js";
 import type { InjectedStructuralPolicyInput } from "./tournament-bracket-policy.js";
-import {
-  buildStructuralBracketDefinition,
-} from "./tournament-bracket-definition.js";
+import { buildStructuralBracketDefinition } from "./tournament-bracket-definition.js";
 
 export const tournamentBattleFixtureProvider = createNodeSha256Provider();
 const provider = tournamentBattleFixtureProvider;
@@ -131,7 +129,10 @@ export function buildTournamentBattleParticipantFixture(
   const tournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F")!;
   const policy = createNeutralEntryChoicePolicy(config);
   const facts = new Map(
-    personIds.map((id) => [asPersonId(id), activeCompetitor({ personId: asPersonId(id), currentRank: "F" })]),
+    personIds.map((id) => [
+      asPersonId(id),
+      activeCompetitor({ personId: asPersonId(id), currentRank: "F" }),
+    ]),
   );
   const list = buildPlannedParticipantList({
     tournamentId: tournament.tournamentId,
@@ -295,7 +296,7 @@ export function buildTournamentBattleSession(seed = 6002): Sprint1RunSession {
         neutralGivenNameProbability: 0,
         familyNameSelection: "without_replacement",
         avoidDuplicateLivingFullNameWithinFamily: true,
-        displayFormat: "{givenName}・{familyName}",
+        displayFormat: "{givenName}??{familyName}",
       },
     }),
   );
@@ -310,7 +311,9 @@ export function buildTournamentBattleSession(seed = 6002): Sprint1RunSession {
     sha256Provider: provider,
   });
   const personIds = generated.snapshot.persons.map((person) => person.personId);
-  const def = tournamentBattleExpectOk(validateTechniqueDefinition(techniqueDefinition("technique_alpha")));
+  const def = tournamentBattleExpectOk(
+    validateTechniqueDefinition(techniqueDefinition("technique_alpha")),
+  );
   const catalogHash = tournamentBattleExpectOk(computeTechniqueCatalogHash([def], provider));
   const created = tournamentBattleExpectOk(
     createSprint1RunSession(
@@ -412,7 +415,9 @@ function normalizeCareerStatusForAge(person: Person, currentAge: number): Person
     qualifiedMaster: careerStatus === "retired" ? person.qualifiedMaster : false,
   };
   if (careerStatus === "active_competitor") {
-    const { retirementRank: _, ...withoutRetirement } = base as Person & { retirementRank?: string };
+    const { retirementRank: _, ...withoutRetirement } = base as Person & {
+      retirementRank?: string;
+    };
     void _;
     return {
       ...withoutRetirement,
@@ -557,7 +562,13 @@ export function defaultTournamentBattleActionIdentity(session: Sprint1RunSession
       strategyVersion: session.context.runRuleSnapshot.defaultBattleStrategyVersion,
       strategyConfigHash: session.context.runRuleSnapshot.sprint1ConfigHash,
     }),
-  );
+  ) as Extract<BattleActionSourceIdentity, { kind: "default_strategy" }>;
+}
+
+export function defaultTournamentBattleActionsSource(
+  session: Sprint1RunSession,
+): DefaultBattleStrategySource {
+  return { identity: defaultTournamentBattleActionIdentity(session) };
 }
 
 export function defaultCompetitionRuleHash(session: Sprint1RunSession): string {

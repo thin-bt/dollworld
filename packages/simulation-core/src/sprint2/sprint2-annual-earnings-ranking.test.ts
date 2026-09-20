@@ -22,6 +22,7 @@ import { buildPreviousWorldYearEarningsSnapshot } from "./previous-world-year-sn
 import {
   buildTournamentFinalResult,
   type TournamentFinalPlacement,
+  type TournamentFinalResult,
 } from "./tournament-final-result.js";
 import {
   buildTournamentPayoutConfigForTest,
@@ -39,6 +40,7 @@ const personA = asPersonId("person_a");
 const personB = asPersonId("person_b");
 const personC = asPersonId("person_c");
 const personD = asPersonId("person_d");
+void personD;
 
 const structuralHash = "structural_source_identity_hash_v1";
 const completionHash = "completion_application_identity_hash_v1";
@@ -101,9 +103,7 @@ function buildCompetitiveRecordMap(
 
 function applyCompetitiveRecordsFromFinalResult(
   records: Map<ReturnType<typeof asPersonId>, CompetitiveRecord>,
-  finalResult: ReturnType<typeof buildTournamentFinalResult> extends { ok: true; value: infer T }
-    ? T
-    : never,
+  finalResult: TournamentFinalResult,
 ) {
   for (const personId of finalResult.placements.map((p) => p.personId)) {
     const record = records.get(personId)!;
@@ -235,10 +235,7 @@ describe("S02-008 annual earnings accrual", () => {
     if (first.kind !== "applied") {
       return;
     }
-    const second = applyTournamentFinalResultEarnings(
-      { ...input, ledger: first.ledger },
-      provider,
-    );
+    const second = applyTournamentFinalResultEarnings({ ...input, ledger: first.ledger }, provider);
     expect(second.kind).toBe("idempotent_skip");
     if (second.kind !== "idempotent_skip") {
       return;
