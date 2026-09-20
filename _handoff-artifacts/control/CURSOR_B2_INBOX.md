@@ -1,17 +1,16 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T06:00:13+09:00
-last-consumed-task-key: SPRINT3-CANONICAL-BACKLOG-TRUTH-RECONCILIATION-B2-20260921-R1
-last-terminal: SPRINT3_CANONICAL_BACKLOG_TRUTH_RECONCILIATION_B2_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-CANONICAL-BACKLOG-TRUTH-RECONCILIATION-B2-20260921-R1/result.md
+task-key: SPRINT3-FINAL-INDEPENDENT-ACCEPTANCE-B2-20260921-R1
+mode: FINAL_INDEPENDENT_ACCEPTANCE
+updatedAt: 2026-09-21T06:04:00+09:00
+sprint: Sprint3
+priority: DEADLINE_CRITICAL
+instruction-path: _handoff-artifacts/tasks/SPRINT3-FINAL-INDEPENDENT-ACCEPTANCE-B2-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
 pickup-requirements:
 - fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- claim ACTIVE before verification
 - publish terminal result to GitHub canonical result path
