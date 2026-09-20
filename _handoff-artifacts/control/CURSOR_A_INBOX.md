@@ -1,17 +1,19 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T05:12:08+09:00
-last-consumed-task-key: SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1
-last-terminal: READY / SPRINT3_S03_009_ORIGINAL_TECHNIQUE_RUNTIME_WIRING_B2_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1/result.md
+task-key: SPRINT3-ROOT-TEST-RECOVERY-A-20260921-R1
+mode: IMPLEMENTATION_VERIFICATION
+updatedAt: 2026-09-21T05:25:29+09:00
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: (none)
+sprint: Sprint3
+instruction-path: _handoff-artifacts/tasks/SPRINT3-ROOT-TEST-RECOVERY-A-20260921-R1/instruction.md
+priority: DEADLINE_CRITICAL
 pickup-requirements:
-- fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- fresh-read GitHub canonical instruction and current origin/master
+- claim ACTIVE for exact task before changes
+- run fresh root npm test; stale 41-failure count is not current evidence
+- repair only safe bounded deterministic failures; no test weakening or repo-wide prettier
 - publish terminal result to GitHub canonical result path
+- publish/readback any safe repair commit before READY
