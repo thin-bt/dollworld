@@ -26,7 +26,8 @@ export async function loadCompetitionState(options?: {
       params.set("rankingYear", String(options.rankingYear));
     }
     const query = params.toString();
-    const url = query.length > 0 ? `${API_PREFIX}/competition?${query}` : `${API_PREFIX}/competition`;
+    const url =
+      query.length > 0 ? `${API_PREFIX}/competition?${query}` : `${API_PREFIX}/competition`;
     response = await fetchImpl(url, { credentials: "include" });
   } catch {
     return { kind: "failure", code: null, message: "transport_error" };
@@ -118,10 +119,9 @@ export async function loadCompetitionMatch(
   const fetchImpl = options?.fetchImpl ?? fetch;
   let response: { status: number; text: () => Promise<string> };
   try {
-    response = await fetchImpl(
-      `${API_PREFIX}/competition/matches/${encodeURIComponent(matchId)}`,
-      { credentials: "include" },
-    );
+    response = await fetchImpl(`${API_PREFIX}/competition/matches/${encodeURIComponent(matchId)}`, {
+      credentials: "include",
+    });
   } catch {
     return { kind: "failure", code: null, message: "transport_error" };
   }

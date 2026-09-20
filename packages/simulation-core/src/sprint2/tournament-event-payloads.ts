@@ -61,7 +61,12 @@ const PAYLOAD_KEY_RULES: Record<
     optional: [],
   },
   "person.s_rank_promoted": {
-    required: ["personId", "tournamentId", "sourceQualificationReferenceHash", "promotionResultHash"],
+    required: [
+      "personId",
+      "tournamentId",
+      "sourceQualificationReferenceHash",
+      "promotionResultHash",
+    ],
     optional: [],
   },
 };

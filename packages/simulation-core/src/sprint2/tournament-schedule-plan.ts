@@ -2,11 +2,7 @@
  * Deterministic annual tournament schedule plan from governed Sprint2Config inputs.
  */
 import type { WorldCalendarConfig } from "../config/types.js";
-import {
-  calendarMonthFromOffset,
-  createWorldDate,
-  type WeekOfMonth,
-} from "../world-date.js";
+import { calendarMonthFromOffset, createWorldDate, type WeekOfMonth } from "../world-date.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import {
@@ -53,7 +49,11 @@ export function classifyChampionshipCycleYear(
   return "non_championship_year";
 }
 
-function assertWeekOfMonth(value: number, path: string, issues: ValidationIssue[]): WeekOfMonth | undefined {
+function assertWeekOfMonth(
+  value: number,
+  path: string,
+  issues: ValidationIssue[],
+): WeekOfMonth | undefined {
   if (!Number.isSafeInteger(value) || value < 1 || value > 4) {
     issues.push({
       path,
@@ -170,10 +170,7 @@ export function validateSchedulePlanInputs(
     }
     try {
       const month = calendarMonthFromOffset(slot.monthOffset, calendarConfig);
-      createWorldDate(
-        { year: worldYear, month, weekOfMonth: slot.weekOfMonth },
-        calendarConfig,
-      );
+      createWorldDate({ year: worldYear, month, weekOfMonth: slot.weekOfMonth }, calendarConfig);
     } catch (error) {
       issues.push({
         path: `/slots/${String(index)}`,

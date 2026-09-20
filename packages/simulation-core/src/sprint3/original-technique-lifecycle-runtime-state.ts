@@ -289,11 +289,7 @@ export function validateOriginalTechniqueLifecycleRuntimeState(
   const lastWeekRaw = object["lastProcessedAbsoluteWeek"];
   let lastProcessedAbsoluteWeek: number | null = null;
   if (lastWeekRaw !== null && lastWeekRaw !== undefined) {
-    if (
-      typeof lastWeekRaw !== "number" ||
-      !Number.isSafeInteger(lastWeekRaw) ||
-      lastWeekRaw < 0
-    ) {
+    if (typeof lastWeekRaw !== "number" || !Number.isSafeInteger(lastWeekRaw) || lastWeekRaw < 0) {
       issues.push({
         path: "/lastProcessedAbsoluteWeek",
         message: "lastProcessedAbsoluteWeek must be null or a non-negative safe integer",

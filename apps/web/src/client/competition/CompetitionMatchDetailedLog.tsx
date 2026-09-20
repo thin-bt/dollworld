@@ -1,14 +1,8 @@
 import { BattleLogViewPanel } from "../battle-log/BattleLogView.js";
 import type { BattleLogItemView } from "../battle-log/ui007-views.js";
-import type {
-  CompetitionMatchDetailView,
-  CompetitionTurnOrderLogView,
-} from "./ui009-views.js";
+import type { CompetitionMatchDetailView, CompetitionTurnOrderLogView } from "./ui009-views.js";
 
-function sideLabel(
-  side: unknown,
-  detail: CompetitionMatchDetailView,
-): string {
+function sideLabel(side: unknown, detail: CompetitionMatchDetailView): string {
   if (side === "sideA") {
     return detail.participantADisplayName;
   }
@@ -18,7 +12,9 @@ function sideLabel(
   return typeof side === "string" ? side : "—";
 }
 
-function unavailableMessage(reason: CompetitionMatchDetailView["detailedLogUnavailableReason"]): string {
+function unavailableMessage(
+  reason: CompetitionMatchDetailView["detailedLogUnavailableReason"],
+): string {
   if (reason === "pruned") {
     return "詳細ログは保持期間を過ぎたため削除されています。";
   }

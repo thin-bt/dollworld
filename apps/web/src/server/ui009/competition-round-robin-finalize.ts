@@ -65,9 +65,17 @@ function awardMetaForPlacementOrdinal(ordinal: number): {
     return { awardTier: "runner_up", placementBandKind: "runner_up", placementBandOrdinal: 1 };
   }
   if (ordinal <= 4) {
-    return { awardTier: "top_four", placementBandKind: "semifinal", placementBandOrdinal: ordinal - 2 };
+    return {
+      awardTier: "top_four",
+      placementBandKind: "semifinal",
+      placementBandOrdinal: ordinal - 2,
+    };
   }
-  return { awardTier: "completed", placementBandKind: "completed", placementBandOrdinal: ordinal - 4 };
+  return {
+    awardTier: "completed",
+    placementBandKind: "completed",
+    placementBandOrdinal: ordinal - 4,
+  };
 }
 
 function buildRoundRobinPlacements(
@@ -306,7 +314,9 @@ export function finalizeRoundRobinCompetitionStore(
   });
   const priorSummaries = state.tournamentHistorySummaries ?? [];
   const rankingHistoryStore = upsertAnnualRankingHistoryForFinalize(
-    (state.annualRankingHistoryStore ?? { entries: [] }) as import("@shared-world/simulation-core").AnnualRankingHistoryStore,
+    (state.annualRankingHistoryStore ?? {
+      entries: [],
+    }) as import("@shared-world/simulation-core").AnnualRankingHistoryStore,
     {
       worldYear: state.worldYear,
       ledger,
@@ -345,5 +355,7 @@ export function rankingDisplayFactsFromStore(
   if (store.state === null || store.state.rankingDisplayFacts.length === 0) {
     return [];
   }
-  return store.state.rankingDisplayFacts as unknown as ReturnType<typeof toAnnualRankingDisplayFacts>;
+  return store.state.rankingDisplayFacts as unknown as ReturnType<
+    typeof toAnnualRankingDisplayFacts
+  >;
 }

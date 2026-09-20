@@ -78,11 +78,7 @@ function parseBinding(
   }
   const techniqueCategory = techniqueCategoryRaw as CompetitionDomainKey;
   const basicAttackProfile = basicAttackProfileRaw as CompetitionDomainKey;
-  if (
-    techniqueCategory === undefined ||
-    basicAttackProfile === undefined ||
-    issues.length > 0
-  ) {
+  if (techniqueCategory === undefined || basicAttackProfile === undefined || issues.length > 0) {
     return undefined;
   }
   if (techniqueCategory !== basicAttackProfile) {

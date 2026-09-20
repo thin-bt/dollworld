@@ -18,17 +18,17 @@ function asRank(value: unknown, fallback: Rank): Rank {
 }
 
 function stripDisallowedRankFields(person: Person): Person {
-  const {
-    currentRank: _currentRank,
-    highestRank: _highestRank,
-    retirementRank: _retirementRank,
-    ...withoutRankFields
-  } = person as Person & {
-    currentRank?: unknown;
-    highestRank?: unknown;
-    retirementRank?: unknown;
+  const copy = {
+    ...(person as Person & {
+      currentRank?: unknown;
+      highestRank?: unknown;
+      retirementRank?: unknown;
+    }),
   };
-  return withoutRankFields as Person;
+  delete copy.currentRank;
+  delete copy.highestRank;
+  delete copy.retirementRank;
+  return copy as Person;
 }
 
 function normalizeCareerStatusForAge(person: Person, currentAge: number): Person {
@@ -50,9 +50,7 @@ function normalizeCareerStatusForAge(person: Person, currentAge: number): Person
   }
   if (careerStatus === "active_competitor") {
     const currentRank =
-      person.careerStatus === "active_competitor"
-        ? asRank(person.currentRank, "F")
-        : "F";
+      person.careerStatus === "active_competitor" ? asRank(person.currentRank, "F") : "F";
     const highestRank =
       person.careerStatus === "active_competitor"
         ? asRank(person.highestRank, currentRank)

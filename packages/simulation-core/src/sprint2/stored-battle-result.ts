@@ -292,7 +292,11 @@ export function validateStoredBattleResultRecord(
       expected: STORED_BATTLE_RESULT_RECORD_SCHEMA_VERSION,
     });
   }
-  if (!(DETAILED_LOG_RETENTION_STATUSES as readonly string[]).includes(record.detailedLogRetentionStatus)) {
+  if (
+    !(DETAILED_LOG_RETENTION_STATUSES as readonly string[]).includes(
+      record.detailedLogRetentionStatus,
+    )
+  ) {
     issues.push({
       path: "/detailedLogRetentionStatus",
       message: "invalid detailed log retention status",
@@ -382,11 +386,7 @@ export function publishStoredBattleResult(
       issues: putResult.value.outcome.issues,
     };
   }
-  const battleResultHash = computeBattleResultHash(
-    battleResult,
-    detailedLogHash.value,
-    provider,
-  );
+  const battleResultHash = computeBattleResultHash(battleResult, detailedLogHash.value, provider);
   if (!battleResultHash.ok) {
     return { kind: "validation_failure", issues: battleResultHash.issues };
   }
@@ -444,7 +444,9 @@ export function withStoredBattleResultRetentionStatus(
       },
     ]);
   }
-  const { storedRecordHash: _previous, ...withoutHash } = record;
+  const withoutHash = Object.fromEntries(
+    Object.entries(record).filter(([key]) => key !== "storedRecordHash"),
+  ) as Omit<StoredBattleResultRecord, "storedRecordHash">;
   const nextWithoutHash: Omit<StoredBattleResultRecord, "storedRecordHash"> = {
     ...withoutHash,
     detailedLogRetentionStatus: status,

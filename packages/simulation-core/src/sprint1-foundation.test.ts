@@ -427,24 +427,27 @@ describe("SimulationIdentity", () => {
       throw new Error("expected default Sprint1Config hash to succeed");
     }
     const hex = "a".repeat(64);
-    return withTestSprint2IdentityFields({
-      seed: 12345,
-      initialWorldConfigHash: hex,
-      worldCalendarConfigHash: "a".repeat(64),
-      yearStartProcessorManifestHash: "a".repeat(64),
-      sprint1ConfigHash: sprint1ConfigHashResult.value,
-      techniqueCatalogHash: hex,
-      initialWeeklyTrainingSidecarHash: "c".repeat(64),
-      battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
-      matchIdGeneratorVersion: "match-id-generator-0.1.0",
-      initialMatchIdGeneratorStateHash: hex,
-      defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
-      specVersions: createExpectedSpecVersions(),
-      rngAlgorithmVersion: "xoshiro128ss-v1",
-      canonicalJsonVersion: "canonical-json-v1",
-      hashAlgorithm: "SHA-256",
-      ...overrides,
-    }, sha256Provider);
+    return withTestSprint2IdentityFields(
+      {
+        seed: 12345,
+        initialWorldConfigHash: hex,
+        worldCalendarConfigHash: "a".repeat(64),
+        yearStartProcessorManifestHash: "a".repeat(64),
+        sprint1ConfigHash: sprint1ConfigHashResult.value,
+        techniqueCatalogHash: hex,
+        initialWeeklyTrainingSidecarHash: "c".repeat(64),
+        battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
+        matchIdGeneratorVersion: "match-id-generator-0.1.0",
+        initialMatchIdGeneratorStateHash: hex,
+        defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
+        specVersions: createExpectedSpecVersions(),
+        rngAlgorithmVersion: "xoshiro128ss-v1",
+        canonicalJsonVersion: "canonical-json-v1",
+        hashAlgorithm: "SHA-256",
+        ...overrides,
+      },
+      sha256Provider,
+    );
   }
 
   it("accepts complete version info and produces a stable simulationId", () => {
@@ -534,24 +537,27 @@ describe("S01-001 acceptance negative probes", () => {
       throw new Error("expected default Sprint1Config hash to succeed");
     }
     const hex = "a".repeat(64);
-    return withTestSprint2IdentityFields({
-      seed: 12345,
-      initialWorldConfigHash: hex,
-      worldCalendarConfigHash: "a".repeat(64),
-      yearStartProcessorManifestHash: "a".repeat(64),
-      sprint1ConfigHash: sprint1ConfigHashResult.value,
-      techniqueCatalogHash: hex,
-      initialWeeklyTrainingSidecarHash: "c".repeat(64),
-      battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
-      matchIdGeneratorVersion: "match-id-generator-0.1.0",
-      initialMatchIdGeneratorStateHash: hex,
-      defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
-      specVersions: createExpectedSpecVersions(),
-      rngAlgorithmVersion: "xoshiro128ss-v1",
-      canonicalJsonVersion: "canonical-json-v1",
-      hashAlgorithm: "SHA-256",
-      ...overrides,
-    }, sha256Provider);
+    return withTestSprint2IdentityFields(
+      {
+        seed: 12345,
+        initialWorldConfigHash: hex,
+        worldCalendarConfigHash: "a".repeat(64),
+        yearStartProcessorManifestHash: "a".repeat(64),
+        sprint1ConfigHash: sprint1ConfigHashResult.value,
+        techniqueCatalogHash: hex,
+        initialWeeklyTrainingSidecarHash: "c".repeat(64),
+        battleProfileAdapterVersion: "battle-profile-adapter-0.1.0",
+        matchIdGeneratorVersion: "match-id-generator-0.1.0",
+        initialMatchIdGeneratorStateHash: hex,
+        defaultBattleStrategyVersion: "default-battle-strategy-0.1.0",
+        specVersions: createExpectedSpecVersions(),
+        rngAlgorithmVersion: "xoshiro128ss-v1",
+        canonicalJsonVersion: "canonical-json-v1",
+        hashAlgorithm: "SHA-256",
+        ...overrides,
+      },
+      sha256Provider,
+    );
   }
 
   it("rejects arbitrary unknown configVersion", () => {

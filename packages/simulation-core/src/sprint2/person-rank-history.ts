@@ -45,7 +45,9 @@ export type BuildPersonRankHistoryEntryInput = {
   sourcePromotionResultHash: string;
 };
 
-function buildEntryIdentityMaterial(input: BuildPersonRankHistoryEntryInput): Record<string, unknown> {
+function buildEntryIdentityMaterial(
+  input: BuildPersonRankHistoryEntryInput,
+): Record<string, unknown> {
   return {
     personId: input.personId,
     worldDate: input.worldDate,
@@ -249,9 +251,9 @@ export function appendPersonRankHistoryEntry(
     };
   }
 
-  const lastEntry = history.entries.length > 0 ? history.entries[history.entries.length - 1] : undefined;
-  const expectedPrevious =
-    lastEntry !== undefined ? lastEntry.newRank : expectedCurrentRank;
+  const lastEntry =
+    history.entries.length > 0 ? history.entries[history.entries.length - 1] : undefined;
+  const expectedPrevious = lastEntry !== undefined ? lastEntry.newRank : expectedCurrentRank;
   if (entry.previousRank !== expectedPrevious) {
     return {
       kind: "validation_failure",

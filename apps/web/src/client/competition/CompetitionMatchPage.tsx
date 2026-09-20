@@ -77,15 +77,15 @@ export function CompetitionMatchPage(props: CompetitionMatchPageProps) {
           <tr>
             <th>勝者</th>
             <td>
-              {detail.winnerDisplayName === null
-                ? "—"
-                : detail.winnerPersonId === null
-                  ? detail.winnerDisplayName
-                  : (
-                      <a href={`/people/${encodeURIComponent(detail.winnerPersonId)}`}>
-                        {detail.winnerDisplayName}
-                      </a>
-                    )}
+              {detail.winnerDisplayName === null ? (
+                "—"
+              ) : detail.winnerPersonId === null ? (
+                detail.winnerDisplayName
+              ) : (
+                <a href={`/people/${encodeURIComponent(detail.winnerPersonId)}`}>
+                  {detail.winnerDisplayName}
+                </a>
+              )}
             </td>
           </tr>
         </tbody>

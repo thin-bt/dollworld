@@ -109,10 +109,7 @@ export type Sprint2FixedSevenProjectionInput = {
   worldYear: number;
 };
 
-export type FixedSevenRunOutput = Record<
-  (typeof FIXED_SEVEN_OUTPUT_FILE_NAMES)[number],
-  string
->;
+export type FixedSevenRunOutput = Record<(typeof FIXED_SEVEN_OUTPUT_FILE_NAMES)[number], string>;
 
 export function projectSprint2InitialWorldDocument(
   input: Pick<
@@ -146,7 +143,10 @@ export function materializeFinalWorldBattleResults(
       return failure(
         view.issues.map((issue) => ({
           ...issue,
-          path: issue.path === "" ? `/materializedBattleResults/${String(index)}` : `/materializedBattleResults/${String(index)}${issue.path}`,
+          path:
+            issue.path === ""
+              ? `/materializedBattleResults/${String(index)}`
+              : `/materializedBattleResults/${String(index)}${issue.path}`,
         })),
       );
     }
@@ -201,7 +201,9 @@ function buildYearlyStatisticsCsv(input: Sprint2FixedSevenProjectionInput): stri
   const ranking = projectAnnualRanking({
     worldYear: input.worldYear,
     ledger: input.earningsLedger,
-    competitiveRecords: new Map(input.competitiveRecords.map((record) => [record.personId, record])),
+    competitiveRecords: new Map(
+      input.competitiveRecords.map((record) => [record.personId, record]),
+    ),
   });
   if (!ranking.ok) {
     throw new Error(`annual ranking projection failed: ${JSON.stringify(ranking.issues)}`);

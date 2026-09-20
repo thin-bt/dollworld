@@ -137,8 +137,7 @@ export function Shell({
 
   const peopleActive = route.kind === "people" || route.kind === "person-detail";
   const mockActive = route.kind === "mock-battle" || route.kind === "mock-battle-result";
-  const competitionActive =
-    route.kind === "competition" || route.kind === "competition-match";
+  const competitionActive = route.kind === "competition" || route.kind === "competition-match";
   const rankingActive = route.kind === "ranking";
   const eventsActive = route.kind === "events";
   const homeActive = route.kind === "home";
@@ -246,9 +245,7 @@ export function Shell({
         {sessionAllowsReadRoutes(sessionState) && route.kind === "competition-match" ? (
           <CompetitionMatchPage matchId={route.matchId} />
         ) : null}
-        {sessionAllowsReadRoutes(sessionState) && route.kind === "ranking" ? (
-          <RankingPage />
-        ) : null}
+        {sessionAllowsReadRoutes(sessionState) && route.kind === "ranking" ? <RankingPage /> : null}
         {sessionAllowsReadRoutes(sessionState) && route.kind === "mock-battle-result" ? (
           <BattleLogPage />
         ) : null}

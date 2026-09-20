@@ -5,12 +5,7 @@ import type { CommittedValidationViewStore } from "./validation-store.js";
 export type CommittedLifecycle = "empty" | "ready";
 
 export type OperationKind =
-  | "start"
-  | "step"
-  | "reset"
-  | "mock_battle"
-  | "mock_battle_replay"
-  | "competition_step";
+  "start" | "step" | "reset" | "mock_battle" | "mock_battle_replay" | "competition_step";
 
 export const MOCK_BATTLE_STORE_SCHEMA_VERSION = "0.2.0" as const;
 export const MOCK_BATTLE_REPLAY_SNAPSHOT_SCHEMA_VERSION = "0.2.0" as const;

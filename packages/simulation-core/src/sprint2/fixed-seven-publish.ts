@@ -23,7 +23,10 @@ export type PublishFixedSevenRunInput = {
   runId: string;
   context: Sprint2CheckpointRunContext;
   output: FixedSevenRunOutput;
-  afterStagingFileWrite?: (stagingRunId: string, filesWritten: readonly FixedSevenOutputFileName[]) => void;
+  afterStagingFileWrite?: (
+    stagingRunId: string,
+    filesWritten: readonly FixedSevenOutputFileName[],
+  ) => void;
 };
 
 export type PublishFixedSevenRunOutcome =
@@ -217,10 +220,14 @@ export function publishSprint2FixedSevenRun(
   return store.publish(input);
 }
 
-export function listCompletedFixedSevenRuns(store: Sprint2FixedSevenPublicationStore): readonly string[] {
+export function listCompletedFixedSevenRuns(
+  store: Sprint2FixedSevenPublicationStore,
+): readonly string[] {
   return store.listCompletedRunIds();
 }
 
-export function listStagingFixedSevenRuns(store: Sprint2FixedSevenPublicationStore): readonly string[] {
+export function listStagingFixedSevenRuns(
+  store: Sprint2FixedSevenPublicationStore,
+): readonly string[] {
   return store.listStagingRunIds();
 }

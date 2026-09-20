@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { selectUi009TournamentFormat, type Ui009TournamentFormatConfig } from "./competition-format-selection.js";
+import {
+  selectUi009TournamentFormat,
+  type Ui009TournamentFormatConfig,
+} from "./competition-format-selection.js";
 
 const canonicalFormat: Ui009TournamentFormatConfig = {
   roundRobinMinimum: 2,

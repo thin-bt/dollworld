@@ -37,7 +37,10 @@ export class Sprint2CheckpointPublicationStore {
 
   publish(input: PublishCheckpointInput, provider: Sha256Provider): PublishCheckpointOutcome {
     if (input.context.transactionOpen) {
-      return { kind: "refused_transaction_open", completedCheckpointIds: this.listCompletedCheckpointIds() };
+      return {
+        kind: "refused_transaction_open",
+        completedCheckpointIds: this.listCompletedCheckpointIds(),
+      };
     }
     let publishContext = input.context;
     if (input.form === "completed") {

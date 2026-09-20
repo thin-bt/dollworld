@@ -1,8 +1,5 @@
 export type CompetitionLifecyclePhase =
-  | "idle"
-  | "awaiting_match"
-  | "round_robin_complete"
-  | "finished";
+  "idle" | "awaiting_match" | "round_robin_complete" | "finished";
 
 export type CompetitionPreStartPreview = {
   tournamentKindLabel: string;
@@ -203,10 +200,7 @@ export type CompetitionProgressView = {
 };
 
 export type CompetitionMatchDetailUnavailableReason =
-  | "not_retained"
-  | "pruned"
-  | "missing_payload"
-  | null;
+  "not_retained" | "pruned" | "missing_payload" | null;
 
 export type CompetitionTurnOrderLogView = Record<string, unknown>;
 

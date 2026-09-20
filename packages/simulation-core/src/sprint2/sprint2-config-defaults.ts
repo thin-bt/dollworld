@@ -3,10 +3,7 @@
  * Values are fixed balance literals for `sprint2-balance-0.1.14`; changing content
  * requires a new configVersion registration.
  */
-import {
-  SPRINT2_CONFIG_SCHEMA_VERSION,
-  SPRINT2_CONFIG_VERSION_DEFAULT,
-} from "./constants.js";
+import { SPRINT2_CONFIG_SCHEMA_VERSION, SPRINT2_CONFIG_VERSION_DEFAULT } from "./constants.js";
 import type { Sprint2ConfigInput } from "./types.js";
 
 export function createDefaultSprint2ConfigInput(): Sprint2ConfigInput {

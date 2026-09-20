@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
-import { createSprint3Balance080ConfigInput, createSprint3Balance090ConfigInput } from "./sprint3-config-defaults.js";
+import {
+  createSprint3Balance080ConfigInput,
+  createSprint3Balance090ConfigInput,
+} from "./sprint3-config-defaults.js";
 import { validateSprint3Config } from "./validate-sprint3-config.js";
 import {
   classifyOriginalTechniqueResearchTier,
@@ -23,7 +26,9 @@ function expectOk<T>(result: { ok: true; value: T } | { ok: false }): T {
   return result.value;
 }
 
-function baseGenerationRecord(overrides: Partial<Parameters<typeof evaluateOriginalTechniqueGenerationAttempt>[1]> = {}) {
+function baseGenerationRecord(
+  overrides: Partial<Parameters<typeof evaluateOriginalTechniqueGenerationAttempt>[1]> = {},
+) {
   return {
     founderPersonId: "person_001",
     researchValue: 180,
@@ -56,24 +61,20 @@ describe("S03-008 original technique lifecycle", () => {
   });
 
   it("OTL-003 success probability clamps to 20..80 percent", () => {
-    expect(
-      computeOriginalTechniqueGenerationSuccessPercentTenThousandths(generation, -100),
-    ).toBe(2000);
-    expect(
-      computeOriginalTechniqueGenerationSuccessPercentTenThousandths(generation, 100),
-    ).toBe(8000);
-    expect(
-      computeOriginalTechniqueGenerationSuccessPercentTenThousandths(generation, 0),
-    ).toBe(5000);
+    expect(computeOriginalTechniqueGenerationSuccessPercentTenThousandths(generation, -100)).toBe(
+      2000,
+    );
+    expect(computeOriginalTechniqueGenerationSuccessPercentTenThousandths(generation, 100)).toBe(
+      8000,
+    );
+    expect(computeOriginalTechniqueGenerationSuccessPercentTenThousandths(generation, 0)).toBe(
+      5000,
+    );
   });
 
   it("OTL-004 deterministic RNG roll respects success percent", () => {
-    expect(
-      rollOriginalTechniqueGenerationSuccess(5000, { nextInt: () => 4999 }),
-    ).toBe(true);
-    expect(
-      rollOriginalTechniqueGenerationSuccess(5000, { nextInt: () => 5000 }),
-    ).toBe(false);
+    expect(rollOriginalTechniqueGenerationSuccess(5000, { nextInt: () => 4999 })).toBe(true);
+    expect(rollOriginalTechniqueGenerationSuccess(5000, { nextInt: () => 5000 })).toBe(false);
   });
 
   it("OTL-005 failed generation retains 80% research and applies 24-week cooldown", () => {
@@ -148,7 +149,9 @@ describe("S03-008 original technique lifecycle", () => {
   });
 
   it("OTL-009 teaching selection remains enabled on sprint3-balance-0.9.0 (regression)", () => {
-    const config080 = expectOk(validateSprint3Config(createSprint3Balance080ConfigInput(), provider));
+    const config080 = expectOk(
+      validateSprint3Config(createSprint3Balance080ConfigInput(), provider),
+    );
     expect(isTechniqueTeachingSelectionEnabled(config080)).toBe(true);
     expect(isTechniqueTeachingSelectionEnabled(config)).toBe(true);
     expect(isOriginalTechniqueLifecycleEnabled(config080)).toBe(false);

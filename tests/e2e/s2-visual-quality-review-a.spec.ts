@@ -88,7 +88,9 @@ async function advanceRoundRobinToFinish(page: Page): Promise<void> {
   const step = page.getByTestId("competition-step-cta");
   await expect(step).toBeEnabled({ timeout: 60_000 });
   await step.click();
-  await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({
+    timeout: 60_000,
+  });
 
   const historyRows = page.getByTestId("competition-round-robin-history").locator("tbody tr");
   const matchesTotal = await historyRows.count();
@@ -131,9 +133,13 @@ test.describe("Sprint2 visual quality review (A)", () => {
       await expect(personLink).toBeVisible();
       await personLink.click();
       await expect(page.getByTestId("person-detail-page")).toBeVisible();
-      await expect(page.getByTestId("person-detail-status")).toHaveAttribute("data-status", "success", {
-        timeout: 60_000,
-      });
+      await expect(page.getByTestId("person-detail-status")).toHaveAttribute(
+        "data-status",
+        "success",
+        {
+          timeout: 60_000,
+        },
+      );
       await assertNoDocumentHorizontalOverflow(page);
       await shot(page, viewport.id, "12-person-detail");
 
@@ -153,7 +159,9 @@ test.describe("Sprint2 visual quality review (A)", () => {
       await shot(page, viewport.id, "05-knockout-bracket");
 
       await expect(page.getByTestId("competition-champion")).toBeVisible();
-      await expect(page.getByTestId("competition-finished")).toContainText("この大会は終了しました。");
+      await expect(page.getByTestId("competition-finished")).toContainText(
+        "この大会は終了しました。",
+      );
       await shot(page, viewport.id, "06-tournament-result");
 
       const series = page.getByTestId("competition-series-history");

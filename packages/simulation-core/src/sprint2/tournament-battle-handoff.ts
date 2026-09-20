@@ -77,7 +77,10 @@ export type TournamentBattleHandoffOutput =
       validation: { ok: false; issues: readonly ValidationIssue[] };
     };
 
-function findWorldPerson(worldState: Sprint1RunSession["runtimeState"]["worldState"], personId: PersonId): Person | undefined {
+function findWorldPerson(
+  worldState: Sprint1RunSession["runtimeState"]["worldState"],
+  personId: PersonId,
+): Person | undefined {
   return worldState.persons.find((person) => person.personId === personId);
 }
 
@@ -128,7 +131,9 @@ function participantSource(
       worldDate: session.runtimeState.worldState.worldDate,
       config: session.context.runRuleSnapshot.sprint1Config,
       knownTechniqueIds: new Set(
-        session.context.runRuleSnapshot.techniqueDefinitions.map((definition) => definition.techniqueId),
+        session.context.runRuleSnapshot.techniqueDefinitions.map(
+          (definition) => definition.techniqueId,
+        ),
       ),
     },
     provider,
@@ -371,6 +376,8 @@ export function snapshotTournamentHandoffMaterial(
   };
 }
 
-export function snapshotTournamentHandoffMaterialJson(result: TournamentBattleHandoffResult): string {
+export function snapshotTournamentHandoffMaterialJson(
+  result: TournamentBattleHandoffResult,
+): string {
   return toCanonicalJson(snapshotTournamentHandoffMaterial(result));
 }

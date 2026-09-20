@@ -2,21 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   validateTechniqueCatalog,
   validateTechniqueDefinition,
-  type PersonTechniqueState,
-  type TeacherCanTeachContext,
   type TechniqueDefinition,
 } from "../index.js";
-import { asPersonId, asTechniqueId, type PersonId } from "../ids.js";
+import { asPersonId } from "../ids.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import { ABILITY_KEYS } from "../abilities.js";
 import { computeTechniqueCatalogHash } from "../sprint1/technique-catalog.js";
 import { INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION } from "../sprint1/constants.js";
 import { WEEKLY_SCORED_ACTIONS } from "../sprint1/weekly-actions.js";
 import { validateWeeklyTrainingSidecarState } from "../sprint1/weekly-training-sidecar-state.js";
-import { buildWeeklyTrainingPersonRecords } from "../sprint1/sprint1-person-sidecar-records.js";
-import { createInitialSprint1PersonState } from "../sprint1/sprint1-person-state.js";
-import { createWorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
-import type { WorldEngineState } from "../world-engine/types.js";
 import { runSprint1WeeklyStep } from "../sprint1/sprint1-weekly-step.js";
 import { processExplicitWeeklyTeachWeek } from "./process-explicit-weekly-teach-week.js";
 import { processSprint3EnrollmentIntakeBoundary } from "./process-sprint3-enrollment-intake-boundary.js";
@@ -99,50 +93,6 @@ function validatedSidecar() {
   );
 }
 
-function minimalWorld(): WorldEngineState {
-  const sprint1State = expectOk(createInitialSprint1PersonState(50));
-  const abilityBlock = {
-    strength: { surfaceValue: 50, potentialValue: 60 },
-    agility: { surfaceValue: 50, potentialValue: 60 },
-    spirit: { surfaceValue: 50, potentialValue: 60 },
-  };
-  return {
-    simulationId: "sim_mentorship_entry",
-    seed: 9001,
-    configHash: "0".repeat(64),
-    worldDate: createWorldDate(
-      { year: 1, month: 1, weekOfMonth: 1 },
-      DEFAULT_WORLD_CALENDAR_CONFIG,
-    ),
-    persons: [
-      {
-        personId: CHILD_ID,
-        displayName: "Child",
-        sex: "male",
-        lifeStatus: "living",
-        participationStatus: "active",
-        careerStatus: "child",
-        birthYear: 1,
-        currentAge: 8,
-        abilities: abilityBlock,
-        sprint1State,
-      },
-      {
-        personId: PARENT_ID,
-        displayName: "Parent",
-        sex: "male",
-        lifeStatus: "living",
-        participationStatus: "active",
-        careerStatus: "retired",
-        birthYear: 1,
-        currentAge: 35,
-        abilities: abilityBlock,
-        sprint1State,
-      },
-    ],
-  } as unknown as WorldEngineState;
-}
-
 function qualifiedMasterRecord(): MasterQualificationEvaluationRecord {
   return {
     careerStatus: "retired",
@@ -167,28 +117,6 @@ function masterCandidate(
     teachingEfficiencyScore: 50,
     intakeAcceptance: "accept",
     ...overrides,
-  };
-}
-
-function techniqueState(techniqueId: string): PersonTechniqueState {
-  return {
-    techniqueId: asTechniqueId(techniqueId),
-    acquiredAbsoluteWeek: 1,
-    masteryHundredths: 8000,
-    learningProgressTenths: 0,
-    successfulUseCount: 0,
-    attemptedUseCount: 0,
-    lastPracticedAbsoluteWeek: null,
-  };
-}
-
-function teacherContext(): TeacherCanTeachContext {
-  return {
-    activeMentorshipExists: true,
-    masterLifeStatus: "living",
-    masterParticipationStatus: "active",
-    masterCareerStatus: "active_competitor",
-    masterTechniqueState: techniqueState("technique_alpha"),
   };
 }
 

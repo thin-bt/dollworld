@@ -21,9 +21,7 @@ import type {
 import { validateNormalizedSprint3Config } from "./validate-sprint3-config.js";
 import { isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled } from "./resolve-weekly-disciple-count-teaching-efficiency.js";
 
-export function isWeeklyTrainingParentTemporaryGuidanceEnabled(
-  config: Sprint3Config,
-): boolean {
+export function isWeeklyTrainingParentTemporaryGuidanceEnabled(config: Sprint3Config): boolean {
   return config.mentorshipFeatures.weeklyTrainingParentTemporaryGuidanceEnabled === true;
 }
 
@@ -43,16 +41,12 @@ export function selectParentTemporaryGuidanceTeacherFactor(
   teachingEfficiency: Sprint3TeachingEfficiencyConfig,
 ): ValidationResult<number> {
   const factor = teachingEfficiency.parentTemporaryGuidanceFactorTenThousandths;
-  if (
-    typeof factor !== "number" ||
-    !Number.isInteger(factor) ||
-    factor < 1 ||
-    factor > 20_000
-  ) {
+  if (typeof factor !== "number" || !Number.isInteger(factor) || factor < 1 || factor > 20_000) {
     return failure([
       {
         path: "/teachingEfficiency/parentTemporaryGuidanceFactorTenThousandths",
-        message: "parentTemporaryGuidanceFactorTenThousandths must be a validated integer in 1..20000",
+        message:
+          "parentTemporaryGuidanceFactorTenThousandths must be a validated integer in 1..20000",
         actual: factor,
         expected: "1..20000",
       },
@@ -80,7 +74,8 @@ export function selectWeeklyTrainingTeacherFactorBasisPoints(
       return failure([
         {
           path: "/sprint3Config/enrollment/parentTemporaryGuidanceAllowed",
-          message: "parent temporary guidance teacher factor requires enrollment.parentTemporaryGuidanceAllowed",
+          message:
+            "parent temporary guidance teacher factor requires enrollment.parentTemporaryGuidanceAllowed",
           actual: sprint3Config.enrollment.parentTemporaryGuidanceAllowed,
           expected: "true",
         },

@@ -41,9 +41,7 @@ export function registerGeneratedTechniqueInOverlay(input: {
   const issues: ValidationIssue[] = [];
   const techniqueId = input.definition.techniqueId;
 
-  if (
-    input.baseCatalog.definitions.some((definition) => definition.techniqueId === techniqueId)
-  ) {
+  if (input.baseCatalog.definitions.some((definition) => definition.techniqueId === techniqueId)) {
     issues.push({
       path: "/definition/techniqueId",
       message: "generated techniqueId collides with immutable base catalog entry",

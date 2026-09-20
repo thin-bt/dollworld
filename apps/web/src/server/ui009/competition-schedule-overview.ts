@@ -26,7 +26,18 @@ import type {
   CompetitionScheduleOverviewView,
 } from "./types.js";
 
-const MATRIX_ROW_ORDER = ["F", "E", "D", "C", "B", "OPEN", "unarmed", "sword", "magic", "PROMO"] as const;
+const MATRIX_ROW_ORDER = [
+  "F",
+  "E",
+  "D",
+  "C",
+  "B",
+  "OPEN",
+  "unarmed",
+  "sword",
+  "magic",
+  "PROMO",
+] as const;
 
 function scheduleRowKey(entry: TournamentScheduleReadModelEntry): string {
   if (entry.kind === "normal" && entry.targetRank !== undefined) {
@@ -116,7 +127,10 @@ export function buildCompetitionScheduleOverview(
   const rosterSession = options?.rosterSession ?? session;
   const worldDate = session.runtimeState.worldState.worldDate;
   const currentWorldYear = worldDate.year;
-  const viewingWorldYear = clampViewYear(options?.viewWorldYear ?? currentWorldYear, currentWorldYear);
+  const viewingWorldYear = clampViewYear(
+    options?.viewWorldYear ?? currentWorldYear,
+    currentWorldYear,
+  );
   const schedule = buildAnnualSchedule(viewingWorldYear);
   const playableSlot =
     persisted === null && viewingWorldYear === currentWorldYear
@@ -178,8 +192,7 @@ export function buildCompetitionScheduleOverview(
       isPlayable,
       isActiveCompetition,
       participantLinks,
-      participantCountLabel:
-        participantLinks.length > 0 ? `${participantLinks.length}名` : null,
+      participantCountLabel: participantLinks.length > 0 ? `${participantLinks.length}名` : null,
     };
   });
 
@@ -187,7 +200,8 @@ export function buildCompetitionScheduleOverview(
     worldYear: viewingWorldYear,
     currentWorldYear,
     isViewingCurrentWorldYear: viewingWorldYear === currentWorldYear,
-    prevViewYear: viewingWorldYear > Math.max(0, currentWorldYear - 1) ? viewingWorldYear - 1 : null,
+    prevViewYear:
+      viewingWorldYear > Math.max(0, currentWorldYear - 1) ? viewingWorldYear - 1 : null,
     nextViewYear: viewingWorldYear < currentWorldYear + 1 ? viewingWorldYear + 1 : null,
     worldTimeLabel: worldTimePlayerLabel(worldDate.year, worldDate.month, worldDate.weekOfMonth),
     currentAbsoluteWeek: worldDate.absoluteWeek,

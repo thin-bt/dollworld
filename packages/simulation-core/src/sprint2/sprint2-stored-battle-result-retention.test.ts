@@ -125,16 +125,12 @@ describe("S02-009 retention planning", () => {
 
   it("LOG-004 normal retention=4 keeps resultYear=2 when currentYear=6", () => {
     const record = buildTestRecord({ resultWorldDate: worldDate(2) });
-    expect(
-      expectOk(shouldPruneDetailedLogRecord(record, 6, config, "official")),
-    ).toBe(false);
+    expect(expectOk(shouldPruneDetailedLogRecord(record, 6, config, "official"))).toBe(false);
   });
 
   it("LOG-005 normal retention=4 prunes resultYear=1 when currentYear=6", () => {
     const record = buildTestRecord({ resultWorldDate: worldDate(1) });
-    expect(
-      expectOk(shouldPruneDetailedLogRecord(record, 6, config, "official")),
-    ).toBe(true);
+    expect(expectOk(shouldPruneDetailedLogRecord(record, 6, config, "official"))).toBe(true);
   });
 
   it("LOG-006 important retention uses 100y boundary", () => {
@@ -149,19 +145,13 @@ describe("S02-009 retention planning", () => {
       resultWorldDate: worldDate(10),
       importantBattleMarker: marker,
     });
-    expect(
-      expectOk(shouldPruneDetailedLogRecord(record, 109, config, "official")),
-    ).toBe(false);
-    expect(
-      expectOk(shouldPruneDetailedLogRecord(record, 111, config, "official")),
-    ).toBe(true);
+    expect(expectOk(shouldPruneDetailedLogRecord(record, 109, config, "official"))).toBe(false);
+    expect(expectOk(shouldPruneDetailedLogRecord(record, 111, config, "official"))).toBe(true);
   });
 
   it("LOG-007 mock battles remain retention exempt", () => {
     const record = buildTestRecord({ resultWorldDate: worldDate(1) });
-    expect(
-      expectOk(shouldPruneDetailedLogRecord(record, 999, config, "mock")),
-    ).toBe(false);
+    expect(expectOk(shouldPruneDetailedLogRecord(record, 999, config, "mock"))).toBe(false);
     expect(expectOk(classifyRetentionPolicy("mock", undefined))).toBe("mock_exempt");
   });
 
@@ -177,9 +167,7 @@ describe("S02-009 retention planning", () => {
       }),
     );
     const record = buildTestRecord({ resultWorldDate: worldDate(4) });
-    expect(
-      expectOk(shouldPruneDetailedLogRecord(record, 6, custom, "official")),
-    ).toBe(true);
+    expect(expectOk(shouldPruneDetailedLogRecord(record, 6, custom, "official"))).toBe(true);
     expect(expectOk(resolveDetailedLogRetentionYears(custom, "normal"))).toBe(1);
   });
 });
@@ -189,19 +177,11 @@ describe("S02-009 stored record prune and GC", () => {
 
   it("LOG-010 prune changes storedRecordHash but not battleResultHash", () => {
     const detailedLog = createEmptyBattleDetailedLog();
-    let store = createEmptyDetailedLogPayloadStore();
-    store = expectOk(putDetailedLogPayloadIfAbsent(store, detailedLog, provider)).store;
     const detailedLogHash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
 
     const retained = buildTestRecord({ detailedLogHash, resultWorldDate: worldDate(1) });
     const prunedRecords = expectOk(
-      applyRetentionPrunePlan(
-        [retained],
-        6,
-        config,
-        { [retained.matchId]: "official" },
-        provider,
-      ),
+      applyRetentionPrunePlan([retained], 6, config, { [retained.matchId]: "official" }, provider),
     );
     const pruned = prunedRecords[0]!;
     expect(pruned.detailedLogRetentionStatus).toBe("pruned");
@@ -211,8 +191,9 @@ describe("S02-009 stored record prune and GC", () => {
 
   it("LOG-011 shared payload survives single-owner prune", () => {
     const detailedLog = createEmptyBattleDetailedLog();
-    let store = createEmptyDetailedLogPayloadStore();
-    store = expectOk(putDetailedLogPayloadIfAbsent(store, detailedLog, provider)).store;
+    const store = expectOk(
+      putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider),
+    ).store;
     const detailedLogHash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
     const recordA = buildTestRecord({
       matchId: asMatchId("match_000000000001"),
@@ -238,9 +219,7 @@ describe("S02-009 stored record prune and GC", () => {
     );
     expect(getDetailedLogPayloadBytes(store, detailedLogHash)).toBeDefined();
     expect(retainedOwnerCountForPayload(detailedLogHash, prunedA)).toBe(1);
-    expect(planDetailedLogPayloadGc(prunedA, store).eligibleHashes).not.toContain(
-      detailedLogHash,
-    );
+    expect(planDetailedLogPayloadGc(prunedA, store).eligibleHashes).not.toContain(detailedLogHash);
   });
 
   it("LOG-012 last retained owner prune makes payload GC eligible", () => {
@@ -250,13 +229,7 @@ describe("S02-009 stored record prune and GC", () => {
     const detailedLogHash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
     const record = buildTestRecord({ detailedLogHash, resultWorldDate: worldDate(1) });
     const pruned = expectOk(
-      applyRetentionPrunePlan(
-        [record],
-        6,
-        config,
-        { [record.matchId]: "official" },
-        provider,
-      ),
+      applyRetentionPrunePlan([record], 6, config, { [record.matchId]: "official" }, provider),
     );
     const plan = planDetailedLogPayloadGc(pruned, store);
     expect(plan.eligibleHashes).toContain(detailedLogHash);
@@ -274,13 +247,7 @@ describe("S02-009 stored record prune and GC", () => {
     const detailedLogHash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
     const record = buildTestRecord({ detailedLogHash, resultWorldDate: worldDate(1) });
     const pruned = expectOk(
-      applyRetentionPrunePlan(
-        [record],
-        6,
-        config,
-        { [record.matchId]: "official" },
-        provider,
-      ),
+      applyRetentionPrunePlan([record], 6, config, { [record.matchId]: "official" }, provider),
     );
     const prunedBeforeGc = pruned[0]!;
     const plan = planDetailedLogPayloadGc(pruned, store);
@@ -312,7 +279,11 @@ describe("S02-009 materialization and integrity", () => {
 
   it("LOG-017 retained missing payload fails closed", () => {
     const record = buildTestRecord({ detailedLogRetentionStatus: "retained" });
-    const view = materializeStoredBattleResultView(record, createEmptyDetailedLogPayloadStore(), provider);
+    const view = materializeStoredBattleResultView(
+      record,
+      createEmptyDetailedLogPayloadStore(),
+      provider,
+    );
     expect(view.ok).toBe(false);
   });
 
@@ -361,9 +332,9 @@ describe("S02-009 importance marker", () => {
       reasonProofHashesByReason: {},
       markerHash: "f".repeat(64),
     };
-    expect(buildImportantBattleMarker(marker.reasons, marker.reasonProofHashesByReason, provider).ok).toBe(
-      false,
-    );
+    expect(
+      buildImportantBattleMarker(marker.reasons, marker.reasonProofHashesByReason, provider).ok,
+    ).toBe(false);
   });
 
   it("publishStoredBattleResult rejects invalid battle result closed", () => {

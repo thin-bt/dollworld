@@ -399,11 +399,7 @@ export function applyTrainStat(
   if (!currentValueFactor.ok) {
     return failure(currentValueFactor.issues);
   }
-  const teacherFactor = selectWeeklyTrainingTeacherFactorBasisPoints(
-    record,
-    config,
-    sprint3Config,
-  );
+  const teacherFactor = selectWeeklyTrainingTeacherFactorBasisPoints(record, config, sprint3Config);
   if (!teacherFactor.ok) {
     return failure(teacherFactor.issues);
   }

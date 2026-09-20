@@ -44,7 +44,9 @@ export type AnnualRankingHistoryStore = {
   entries: readonly AnnualRankingHistoryEntry[];
 };
 
-function buildRowHashMaterial(row: Omit<AnnualRankingHistoryRow, "rowHash">): Record<string, unknown> {
+function buildRowHashMaterial(
+  row: Omit<AnnualRankingHistoryRow, "rowHash">,
+): Record<string, unknown> {
   return {
     schemaVersion: row.schemaVersion,
     displayOrder: row.displayOrder,

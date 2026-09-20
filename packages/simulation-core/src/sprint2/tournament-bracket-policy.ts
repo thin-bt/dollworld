@@ -6,7 +6,11 @@ import type { PersonId } from "../ids.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 
-export const STRUCTURAL_FORMAT_KINDS = ["round_robin", "knockout", "group_round_robin_knockout"] as const;
+export const STRUCTURAL_FORMAT_KINDS = [
+  "round_robin",
+  "knockout",
+  "group_round_robin_knockout",
+] as const;
 export type StructuralFormatKind = (typeof STRUCTURAL_FORMAT_KINDS)[number];
 
 export type FormatSelectionPolicyIdentity = {
@@ -58,7 +62,9 @@ export type InjectedStructuralPolicyInput = {
 };
 
 function isStructuralFormatKind(value: unknown): value is StructuralFormatKind {
-  return typeof value === "string" && (STRUCTURAL_FORMAT_KINDS as readonly string[]).includes(value);
+  return (
+    typeof value === "string" && (STRUCTURAL_FORMAT_KINDS as readonly string[]).includes(value)
+  );
 }
 
 export function validateFormatSelectionResult(

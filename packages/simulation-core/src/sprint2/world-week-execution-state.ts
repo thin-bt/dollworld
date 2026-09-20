@@ -30,9 +30,7 @@ export function deriveProcessedWorldWeeks(state: WorldWeekExecutionState): numbe
   return state.elapsedWeeks + (state.phase === "completed" ? 1 : 0);
 }
 
-function validateWorldDateResult(
-  date: WorldDate,
-): ValidationResult<WorldDate> {
+function validateWorldDateResult(date: WorldDate): ValidationResult<WorldDate> {
   try {
     validateWorldDate(date, DEFAULT_WORLD_CALENDAR_CONFIG);
     return success(deepFreezePlainJson(date));
@@ -100,11 +98,18 @@ export function validateWorldWeekExecutionState(
     issues.push(
       ...dateResult.issues.map((issue) => ({
         ...issue,
-        path: issue.path === "" ? "/expectedCurrentWorldDate" : `/expectedCurrentWorldDate${issue.path}`,
+        path:
+          issue.path === ""
+            ? "/expectedCurrentWorldDate"
+            : `/expectedCurrentWorldDate${issue.path}`,
       })),
     );
   }
-  if (typeof object.elapsedWeeks !== "number" || !Number.isSafeInteger(object.elapsedWeeks) || object.elapsedWeeks < 0) {
+  if (
+    typeof object.elapsedWeeks !== "number" ||
+    !Number.isSafeInteger(object.elapsedWeeks) ||
+    object.elapsedWeeks < 0
+  ) {
     issues.push({
       path: "/elapsedWeeks",
       message: "elapsedWeeks must be a non-negative safe integer",
@@ -112,9 +117,16 @@ export function validateWorldWeekExecutionState(
     });
   }
   if (typeof object.simulationId !== "string" || object.simulationId.length === 0) {
-    issues.push({ path: "/simulationId", message: "simulationId must be a non-empty string", actual: object.simulationId });
+    issues.push({
+      path: "/simulationId",
+      message: "simulationId must be a non-empty string",
+      actual: object.simulationId,
+    });
   }
-  if (typeof object.sprint2ConfigHash !== "string" || !/^[0-9a-f]{64}$/.test(object.sprint2ConfigHash)) {
+  if (
+    typeof object.sprint2ConfigHash !== "string" ||
+    !/^[0-9a-f]{64}$/.test(object.sprint2ConfigHash)
+  ) {
     issues.push({
       path: "/sprint2ConfigHash",
       message: "sprint2ConfigHash must be a 64-char lowercase hex digest",

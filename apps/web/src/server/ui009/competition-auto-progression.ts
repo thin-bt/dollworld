@@ -1,5 +1,8 @@
 import type { Sha256Provider, Sprint1RunSession } from "@shared-world/simulation-core";
-import { runCompetitionProgressionStep, type CompetitionEngineOutcome } from "./competition-engine.js";
+import {
+  runCompetitionProgressionStep,
+  type CompetitionEngineOutcome,
+} from "./competition-engine.js";
 import { finalizeRoundRobinCompetitionStore } from "./competition-round-robin-finalize.js";
 import {
   findUi009PlayableScheduleSlot,

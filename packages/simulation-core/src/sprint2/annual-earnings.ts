@@ -4,7 +4,6 @@
 import { toCanonicalJson } from "../canonical-json.js";
 import type { PersonId, TournamentId } from "../ids.js";
 import type { Sha256Provider } from "../sha256-provider.js";
-import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import { deepFreezePlainJson } from "../sprint1/plain-data.js";
 import { safeHashUtf8 } from "../sprint1/safe-sha256.js";
@@ -50,7 +49,11 @@ export type ApplyTournamentFinalResultEarningsInput = {
 
 export type ApplyTournamentFinalResultEarningsOutput =
   | { kind: "applied"; ledger: AnnualEarningsLedger; application: AnnualEarningsApplication }
-  | { kind: "idempotent_skip"; ledger: AnnualEarningsLedger; application: AnnualEarningsApplication }
+  | {
+      kind: "idempotent_skip";
+      ledger: AnnualEarningsLedger;
+      application: AnnualEarningsApplication;
+    }
   | { kind: "validation_failure"; issues: readonly ValidationIssue[] };
 
 function buildApplicationHashMaterial(
@@ -79,7 +82,10 @@ export function computeAnnualEarningsApplicationIdentityHash(
   );
 }
 
-export function annualEarningsApplicationKey(tournamentId: TournamentId, personId: PersonId): string {
+export function annualEarningsApplicationKey(
+  tournamentId: TournamentId,
+  personId: PersonId,
+): string {
   return `${tournamentId}:earnings:${personId}`;
 }
 
@@ -126,7 +132,11 @@ export function applyTournamentFinalResultEarnings(
   let appliedAny = false;
 
   for (const placement of input.finalResult.placements) {
-    const existing = findApplicationByKey(ledger, input.finalResult.tournamentId, placement.personId);
+    const existing = findApplicationByKey(
+      ledger,
+      input.finalResult.tournamentId,
+      placement.personId,
+    );
     if (existing !== undefined) {
       if (existing.sourceFinalResultHash !== input.finalResult.resultHash) {
         return {

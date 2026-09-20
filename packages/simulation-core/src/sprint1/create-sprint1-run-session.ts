@@ -340,7 +340,11 @@ function parseSprint2IdentityBindings(
   ] as const;
   const hashes: Partial<Record<(typeof hashKeys)[number], string>> = {};
   for (const key of hashKeys) {
-    if (!hasOwn(object, key) || typeof object[key] !== "string" || !SHA256_HEX_PATTERN.test(object[key])) {
+    if (
+      !hasOwn(object, key) ||
+      typeof object[key] !== "string" ||
+      !SHA256_HEX_PATTERN.test(object[key])
+    ) {
       issues.push({
         path: `/sprint2IdentityBindings/${key}`,
         message: "value must be a 64 lowercase hex character SHA-256 digest",

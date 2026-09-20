@@ -1,4 +1,8 @@
-import type { KnockoutSeedByeMapping, KnockoutStructuralSlot, PersonId } from "@shared-world/simulation-core";
+import type {
+  KnockoutSeedByeMapping,
+  KnockoutStructuralSlot,
+  PersonId,
+} from "@shared-world/simulation-core";
 
 export const UI009_KNOCKOUT_SEED_BYE_POLICY = {
   policyVersion: "ui009-knockout-seed-bye-0.1.0",
@@ -25,7 +29,10 @@ function nextPowerOfTwo(n: number): number {
   return size;
 }
 
-function appendUpperRounds(slots: KnockoutStructuralSlot[], firstRoundSlotIds: readonly string[]): string {
+function appendUpperRounds(
+  slots: KnockoutStructuralSlot[],
+  firstRoundSlotIds: readonly string[],
+): string {
   let previous = [...firstRoundSlotIds];
   let roundIndex = 1;
   while (previous.length > 1) {

@@ -158,7 +158,9 @@ type AtomicWorkingState = {
 
 function snapshotAtomicWorkingState(state: AtomicWorkingState): AtomicWorkingState {
   return {
-    committedPromotions: deepClonePlainJson(state.committedPromotions) as CommittedPromotionRegistry,
+    committedPromotions: deepClonePlainJson(
+      state.committedPromotions,
+    ) as CommittedPromotionRegistry,
     rankHistory: deepClonePlainJson(state.rankHistory) as PersonRankHistory,
   };
 }

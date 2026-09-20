@@ -40,7 +40,11 @@ async function bootstrapSession(
   uiRevision: number;
   sessionId: string;
 }> {
-  const sessionRes = await app.inject({ method: "GET", url: `${API_PREFIX}/session`, headers: { host: HOST } });
+  const sessionRes = await app.inject({
+    method: "GET",
+    url: `${API_PREFIX}/session`,
+    headers: { host: HOST },
+  });
   const sessionId = parseSetCookieSessionId(sessionRes.headers["set-cookie"]);
   const sessionBody = JSON.parse(sessionRes.body) as Envelope;
   const csrf = (sessionBody.data as { csrfToken: string }).csrfToken;
@@ -86,7 +90,11 @@ type CompetitionSnapshot = {
 
 function expectNotFalseFinishedCompetition(competition: CompetitionSnapshot): void {
   const progress = competition.roundRobinProgress;
-  if (progress !== null && progress.matchesTotal > 0 && progress.matchesCompleted < progress.matchesTotal) {
+  if (
+    progress !== null &&
+    progress.matchesTotal > 0 &&
+    progress.matchesCompleted < progress.matchesTotal
+  ) {
     expect(competition.lifecyclePhase).not.toBe("finished");
     expect(competition.championDisplayName).toBeNull();
   }
@@ -180,61 +188,57 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
     }
   });
 
-  it(
-    "manual browser progression then next simulation week keeps terminal competition and records step",
-    async () => {
-      app = await createUiApp({
-        publicOrigin: ORIGIN,
-        enableTestProbe: false,
-        repoRoot: REPO_ROOT,
-        processKeys: createTestProcessSecurityContext(911),
-      });
-      const { cookie, csrf } = await bootstrapSession(app);
-      await competitionStepUntilFinished(app, cookie, csrf);
+  it("manual browser progression then next simulation week keeps terminal competition and records step", async () => {
+    app = await createUiApp({
+      publicOrigin: ORIGIN,
+      enableTestProbe: false,
+      repoRoot: REPO_ROOT,
+      processKeys: createTestProcessSecurityContext(911),
+    });
+    const { cookie, csrf } = await bootstrapSession(app);
+    await competitionStepUntilFinished(app, cookie, csrf);
 
-      const competitionAtWeek = await app.inject({
-        method: "GET",
-        url: `${API_PREFIX}/competition`,
-        headers: { host: HOST, cookie },
-      });
-      const competitionBody = JSON.parse(competitionAtWeek.body) as Envelope;
-      expect(competitionBody.ok).toBe(true);
-      const competition = competitionBody.data as CompetitionSnapshot;
-      expectCoherentFinishedCompetition(competition);
-      const matchesCompleted = competition.roundRobinProgress!.matchesCompleted;
+    const competitionAtWeek = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/competition`,
+      headers: { host: HOST, cookie },
+    });
+    const competitionBody = JSON.parse(competitionAtWeek.body) as Envelope;
+    expect(competitionBody.ok).toBe(true);
+    const competition = competitionBody.data as CompetitionSnapshot;
+    expectCoherentFinishedCompetition(competition);
+    const matchesCompleted = competition.roundRobinProgress!.matchesCompleted;
 
-      const simulationGetBeforeStep = await app.inject({
-        method: "GET",
-        url: `${API_PREFIX}/simulation`,
-        headers: { host: HOST, cookie },
-      });
-      const simulationRevision = (JSON.parse(simulationGetBeforeStep.body) as Envelope).uiRevision;
-      const nextWeek = await simulationStep(app, cookie, csrf, simulationRevision, 1);
-      expect(nextWeek.ok).toBe(true);
+    const simulationGetBeforeStep = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/simulation`,
+      headers: { host: HOST, cookie },
+    });
+    const simulationRevision = (JSON.parse(simulationGetBeforeStep.body) as Envelope).uiRevision;
+    const nextWeek = await simulationStep(app, cookie, csrf, simulationRevision, 1);
+    expect(nextWeek.ok).toBe(true);
 
-      const competitionAfter = await app.inject({
-        method: "GET",
-        url: `${API_PREFIX}/competition`,
-        headers: { host: HOST, cookie },
-      });
-      const afterBody = JSON.parse(competitionAfter.body) as Envelope;
-      const after = afterBody.data as typeof competition;
-      expect(after.lifecyclePhase).toBe("finished");
-      expect(after.roundRobinProgress?.matchesCompleted).toBe(matchesCompleted);
+    const competitionAfter = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/competition`,
+      headers: { host: HOST, cookie },
+    });
+    const afterBody = JSON.parse(competitionAfter.body) as Envelope;
+    const after = afterBody.data as typeof competition;
+    expect(after.lifecyclePhase).toBe("finished");
+    expect(after.roundRobinProgress?.matchesCompleted).toBe(matchesCompleted);
 
-      const simulationGet = await app.inject({
-        method: "GET",
-        url: `${API_PREFIX}/simulation`,
-        headers: { host: HOST, cookie },
-      });
-      expect(simulationGet.statusCode).toBe(200);
-      const simulationBody = JSON.parse(simulationGet.body) as Envelope;
-      expect((simulationBody.data as { lastOperation: { operation: string } }).lastOperation.operation).toBe(
-        "step",
-      );
-    },
-    120_000,
-  );
+    const simulationGet = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/simulation`,
+      headers: { host: HOST, cookie },
+    });
+    expect(simulationGet.statusCode).toBe(200);
+    const simulationBody = JSON.parse(simulationGet.body) as Envelope;
+    expect(
+      (simulationBody.data as { lastOperation: { operation: string } }).lastOperation.operation,
+    ).toBe("step");
+  }, 120_000);
 
   it("GET competition immediately after simulation start never exposes false-finished round-robin", async () => {
     app = await createUiApp({
@@ -255,7 +259,8 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
       headers: { host: HOST, cookie },
     });
     expect(competitionAtStart.statusCode).toBe(200);
-    const competition = (JSON.parse(competitionAtStart.body) as Envelope).data as CompetitionSnapshot;
+    const competition = (JSON.parse(competitionAtStart.body) as Envelope)
+      .data as CompetitionSnapshot;
 
     expectNotFalseFinishedCompetition(competition);
     if (weeksUntilTournament === 0) {
@@ -305,7 +310,8 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
     const row = app.uiSessionStore.get(sessionId)!;
     const startYear = row.worldEngineRuntime!.runtimeState.worldState.worldDate.year;
     const slot = findUi009PlayableScheduleSlot(startYear)!;
-    const weeksUntil = slot.absoluteWeek - row.worldEngineRuntime!.runtimeState.worldState.worldDate.absoluteWeek;
+    const weeksUntil =
+      slot.absoluteWeek - row.worldEngineRuntime!.runtimeState.worldState.worldDate.absoluteWeek;
     if (weeksUntil > 0) {
       await simulationStep(app, cookie, csrf, 1, weeksUntil);
     } else {
@@ -338,7 +344,10 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
     });
     expect(manual.statusCode).toBe(200);
     const manualData = JSON.parse(manual.body).data as {
-      competition: { lifecyclePhase: string; roundRobinProgress: { matchesCompleted: number } | null };
+      competition: {
+        lifecyclePhase: string;
+        roundRobinProgress: { matchesCompleted: number } | null;
+      };
     };
     expect(manualData.competition.lifecyclePhase).toBe("finished");
     expect(manualData.competition.roundRobinProgress?.matchesCompleted).toBe(

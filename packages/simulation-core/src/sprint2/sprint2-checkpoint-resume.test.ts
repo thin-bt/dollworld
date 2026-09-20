@@ -38,10 +38,7 @@ import {
   buildDetailedLogLogicalPath,
   validateDetailedLogLogicalPath,
 } from "./checkpoint-manifest.js";
-import {
-  computeStoredRecordHash,
-  type StoredBattleResultRecord,
-} from "./stored-battle-result.js";
+import { computeStoredRecordHash, type StoredBattleResultRecord } from "./stored-battle-result.js";
 import { STORED_BATTLE_RESULT_RECORD_SCHEMA_VERSION } from "./constants.js";
 
 const provider = createNodeSha256Provider();
@@ -54,7 +51,10 @@ function buildRetainedRecord(
     schemaVersion: STORED_BATTLE_RESULT_RECORD_SCHEMA_VERSION,
     simulationId,
     matchId: asMatchId("match_000000000001"),
-    resultWorldDate: createWorldDate({ year: 1, month: 1, weekOfMonth: 1 }, DEFAULT_WORLD_CALENDAR_CONFIG),
+    resultWorldDate: createWorldDate(
+      { year: 1, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    ),
     participantAId: asPersonId("person_000000000001"),
     participantBId: asPersonId("person_000000000002"),
     winnerPersonId: asPersonId("person_000000000001"),
@@ -77,11 +77,7 @@ function publishContext(
   form: "pending" | "completed",
   checkpointId: string,
 ) {
-  const outcome = publishSprint2Checkpoint(
-    store,
-    { context, checkpointId, form },
-    provider,
-  );
+  const outcome = publishSprint2Checkpoint(store, { context, checkpointId, form }, provider);
   expect(outcome.kind).toBe("published");
   if (outcome.kind !== "published") {
     throw new Error("expected published checkpoint");
@@ -95,7 +91,9 @@ describe("S02-010 checkpoint publish/resume", () => {
     const initial = buildFreshCheckpointRunContext(93001, provider);
     publishContext(store, initial, "pending", "pending-001");
     const fresh = expectOk(runWeeks(initial, 2, provider));
-    const restored = expectOk(resumeSprint2CheckpointFromStore(store, { checkpointId: "pending-001" }, provider));
+    const restored = expectOk(
+      resumeSprint2CheckpointFromStore(store, { checkpointId: "pending-001" }, provider),
+    );
     const resumed = expectOk(runWeeks(restored, 2, provider));
     expect(canonicalizeSprint2CheckpointRunContext(resumed)).toBe(
       canonicalizeSprint2CheckpointRunContext(fresh),
@@ -121,7 +119,9 @@ describe("S02-010 checkpoint publish/resume", () => {
     const initial = buildFreshCheckpointRunContext(93003, provider);
     const detailedLog = createEmptyBattleDetailedLog();
     const hash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
-    const put = expectOk(putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider));
+    const put = expectOk(
+      putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider),
+    );
     const withRetention = {
       ...initial,
       payloadStore: put.store,
@@ -140,7 +140,9 @@ describe("S02-010 checkpoint publish/resume", () => {
     const initial = buildFreshCheckpointRunContext(93004, provider);
     const detailedLog = createEmptyBattleDetailedLog();
     const hash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
-    const put = expectOk(putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider));
+    const put = expectOk(
+      putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider),
+    );
     const withRetention = {
       ...initial,
       payloadStore: put.store,
@@ -162,7 +164,9 @@ describe("S02-010 checkpoint publish/resume", () => {
     const initial = buildFreshCheckpointRunContext(93005, provider);
     const detailedLog = createEmptyBattleDetailedLog();
     const hash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
-    const put = expectOk(putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider));
+    const put = expectOk(
+      putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider),
+    );
     const withRetention = {
       ...initial,
       payloadStore: put.store,
@@ -244,7 +248,9 @@ describe("S02-010 checkpoint publish/resume", () => {
     publishContext(store, initial, "pending", "pending-011");
     publishContext(store, afterOne, "completed", "completed-011");
     for (const id of ["pending-011", "completed-011"]) {
-      const restored = expectOk(resumeSprint2CheckpointFromStore(store, { checkpointId: id }, provider));
+      const restored = expectOk(
+        resumeSprint2CheckpointFromStore(store, { checkpointId: id }, provider),
+      );
       const before = canonicalizeSprint2CheckpointRunContext(restored);
       const after = expectOk(runWeeks(restored, 0, provider));
       expect(canonicalizeSprint2CheckpointRunContext(after)).toBe(before);

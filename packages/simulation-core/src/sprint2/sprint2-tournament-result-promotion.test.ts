@@ -43,7 +43,10 @@ const structuralHash = "structural_source_identity_hash_v1";
 const completionHash = "completion_application_identity_hash_v1";
 const qualificationRefHash = "qualification_reference_hash_v1";
 
-const worldDate = createWorldDate({ year: 1, month: 6, weekOfMonth: 2 }, DEFAULT_WORLD_CALENDAR_CONFIG);
+const worldDate = createWorldDate(
+  { year: 1, month: 6, weekOfMonth: 2 },
+  DEFAULT_WORLD_CALENDAR_CONFIG,
+);
 
 function winnerDeterminedPlacements(): readonly TournamentFinalPlacement[] {
   return [
@@ -84,8 +87,14 @@ function buildFinalResultInput(placements: readonly TournamentFinalPlacement[]) 
 
 describe("S02-007 tournament final result", () => {
   it("builds deterministic result identity with winner equal to placement #1", () => {
-    const first = buildTournamentFinalResult(buildFinalResultInput(winnerDeterminedPlacements()), provider);
-    const second = buildTournamentFinalResult(buildFinalResultInput(winnerDeterminedPlacements()), provider);
+    const first = buildTournamentFinalResult(
+      buildFinalResultInput(winnerDeterminedPlacements()),
+      provider,
+    );
+    const second = buildTournamentFinalResult(
+      buildFinalResultInput(winnerDeterminedPlacements()),
+      provider,
+    );
     expect(first.ok).toBe(true);
     expect(second.ok).toBe(true);
     if (!first.ok || !second.ok) {
@@ -114,7 +123,10 @@ describe("S02-007 tournament final result", () => {
   });
 
   it("rejects stale tournament source identity", () => {
-    const built = buildTournamentFinalResult(buildFinalResultInput(winnerDeterminedPlacements()), provider);
+    const built = buildTournamentFinalResult(
+      buildFinalResultInput(winnerDeterminedPlacements()),
+      provider,
+    );
     expect(built.ok).toBe(true);
     if (!built.ok) {
       return;
@@ -128,7 +140,10 @@ describe("S02-007 tournament final result", () => {
   });
 
   it("validates stored result hash integrity", () => {
-    const built = buildTournamentFinalResult(buildFinalResultInput(winnerDeterminedPlacements()), provider);
+    const built = buildTournamentFinalResult(
+      buildFinalResultInput(winnerDeterminedPlacements()),
+      provider,
+    );
     expect(built.ok).toBe(true);
     if (!built.ok) {
       return;
@@ -294,7 +309,9 @@ describe("S02-007 promotion result and rank history atomicity", () => {
     if (second.kind !== "idempotent_replay") {
       return;
     }
-    expect(second.promotionResult.promotionResultHash).toBe(first.promotionResult.promotionResultHash);
+    expect(second.promotionResult.promotionResultHash).toBe(
+      first.promotionResult.promotionResultHash,
+    );
 
     expect(
       snapshotPromotionAtomicBaseline({
@@ -307,7 +324,10 @@ describe("S02-007 promotion result and rank history atomicity", () => {
   it("atomic gate failure leaves promotion registry and rank history unchanged", () => {
     const registry: CommittedPromotionRegistry = { results: [] };
     const history = createEmptyPersonRankHistory(personA);
-    const baseline = snapshotPromotionAtomicBaseline({ committedPromotions: registry, rankHistory: history });
+    const baseline = snapshotPromotionAtomicBaseline({
+      committedPromotions: registry,
+      rankHistory: history,
+    });
 
     const result = commitPromotionWithRankHistory(
       {
@@ -328,9 +348,9 @@ describe("S02-007 promotion result and rank history atomicity", () => {
       provider,
     );
     expect(result.kind).toBe("atomic_failure");
-    expect(snapshotPromotionAtomicBaseline({ committedPromotions: registry, rankHistory: history })).toBe(
-      baseline,
-    );
+    expect(
+      snapshotPromotionAtomicBaseline({ committedPromotions: registry, rankHistory: history }),
+    ).toBe(baseline);
     expect(registry.results).toHaveLength(0);
     expect(history.entries).toHaveLength(0);
   });

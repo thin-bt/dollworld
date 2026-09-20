@@ -43,7 +43,9 @@ async function openCompetitionReady(
 }
 
 async function selectFirstPlayableTournament(page: import("@playwright/test").Page): Promise<void> {
-  const playable = page.locator(".competition-schedule-cell--playable [data-testid='competition-schedule-cell']").first();
+  const playable = page
+    .locator(".competition-schedule-cell--playable [data-testid='competition-schedule-cell']")
+    .first();
   await expect(playable).toBeVisible({ timeout: 60_000 });
   await playable.click();
   await expect(page.getByTestId("competition-detail")).toBeVisible();
@@ -53,7 +55,9 @@ async function advanceRoundRobinToFinish(page: import("@playwright/test").Page):
   const step = page.getByTestId("competition-step-cta");
   await expect(step).toBeEnabled({ timeout: 60_000 });
   await step.click();
-  await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({
+    timeout: 60_000,
+  });
 
   const historyRows = page.getByTestId("competition-round-robin-history").locator("tbody tr");
   const matchesTotal = await historyRows.count();
@@ -137,7 +141,9 @@ test.describe("Sprint2 wireframe browser acceptance (B2 completion gate)", () =>
     await selectFirstPlayableTournament(page);
     await advanceRoundRobinToFinish(page);
     await expect(page.getByTestId("competition-champion")).toBeVisible();
-    await expect(page.getByTestId("competition-finished")).toContainText("この大会は終了しました。");
+    await expect(page.getByTestId("competition-finished")).toContainText(
+      "この大会は終了しました。",
+    );
   });
 
   test("guard-07 tournament series history and historical winners", async ({ page, context }) => {
@@ -181,7 +187,9 @@ test.describe("Sprint2 wireframe browser acceptance (B2 completion gate)", () =>
     await selectFirstPlayableTournament(page);
     await advanceRoundRobinToFinish(page);
     await expect(page.getByTestId("competition-person-rank-history")).toBeVisible();
-    await expect(page.getByTestId("competition-person-rank-history")).toContainText("人物ランク履歴");
+    await expect(page.getByTestId("competition-person-rank-history")).toContainText(
+      "人物ランク履歴",
+    );
   });
 
   test("guard-11 tournament history match link opens battle detail with detailed log", async ({
@@ -205,14 +213,21 @@ test.describe("Sprint2 wireframe browser acceptance (B2 completion gate)", () =>
     await openCompetitionReady(page, context);
     await selectFirstPlayableTournament(page);
     await page.getByTestId("competition-detail-tab-participants").click();
-    const personLink = page.getByTestId("competition-participants").locator('a[href^="/people/"]').first();
+    const personLink = page
+      .getByTestId("competition-participants")
+      .locator('a[href^="/people/"]')
+      .first();
     await expect(personLink).toBeVisible();
     const personHref = await personLink.getAttribute("href");
     expect(personHref).toMatch(/^\/people\/person_/);
     await personLink.click();
     await expect(page.getByTestId("person-detail-page")).toBeVisible();
-    await expect(page.getByTestId("person-detail-status")).toHaveAttribute("data-status", "success", {
-      timeout: 60_000,
-    });
+    await expect(page.getByTestId("person-detail-status")).toHaveAttribute(
+      "data-status",
+      "success",
+      {
+        timeout: 60_000,
+      },
+    );
   });
 });

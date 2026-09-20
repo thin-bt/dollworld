@@ -165,9 +165,7 @@ export function buildTournamentFinalResult(
     placements: input.placements,
   };
   const withoutHash: Omit<TournamentFinalResult, "resultHash"> =
-    winnerPersonId !== undefined
-      ? { ...withoutHashBase, winnerPersonId }
-      : withoutHashBase;
+    winnerPersonId !== undefined ? { ...withoutHashBase, winnerPersonId } : withoutHashBase;
 
   const hash = computeTournamentFinalResultHash(withoutHash, provider);
   if (!hash.ok) {

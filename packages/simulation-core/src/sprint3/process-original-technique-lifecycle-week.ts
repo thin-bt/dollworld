@@ -89,7 +89,10 @@ function replacePersonEntry(
 export function processOriginalTechniqueLifecycleWeek(
   input: ProcessOriginalTechniqueLifecycleWeekInput,
 ): ValidationResult<ProcessOriginalTechniqueLifecycleWeekResult> {
-  if (input.sprint3Config === undefined || !isOriginalTechniqueLifecycleEnabled(input.sprint3Config)) {
+  if (
+    input.sprint3Config === undefined ||
+    !isOriginalTechniqueLifecycleEnabled(input.sprint3Config)
+  ) {
     return success({ runtimeState: input.runtimeState });
   }
 

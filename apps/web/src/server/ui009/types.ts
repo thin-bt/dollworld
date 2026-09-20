@@ -67,10 +67,7 @@ export type CompetitionScheduleOverviewView = {
 };
 
 export type CompetitionLifecyclePhase =
-  | "idle"
-  | "awaiting_match"
-  | "round_robin_complete"
-  | "finished";
+  "idle" | "awaiting_match" | "round_robin_complete" | "finished";
 
 export type CompetitionMatchSummaryView = {
   matchId: string;

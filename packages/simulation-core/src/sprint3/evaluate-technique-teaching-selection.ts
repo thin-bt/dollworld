@@ -104,10 +104,7 @@ function discipleAlreadyAcquired(
   record: TechniqueTeachingSelectionRecord,
 ): boolean {
   for (const state of record.discipleLearnerContext.techniqueStates) {
-    if (
-      state.techniqueId === candidate.techniqueId &&
-      state.acquiredAbsoluteWeek !== null
-    ) {
+    if (state.techniqueId === candidate.techniqueId && state.acquiredAbsoluteWeek !== null) {
       return true;
     }
   }
@@ -119,7 +116,9 @@ function gateCandidate(
   record: TechniqueTeachingSelectionRecord,
   definition: TechniqueDefinition,
   candidate: TechniqueTeachingSelectionCandidate,
-): ValidationResult<TechniqueTeachingSelectionExcludedCandidate | { accepted: true; compositeScore: number }> {
+): ValidationResult<
+  TechniqueTeachingSelectionExcludedCandidate | { accepted: true; compositeScore: number }
+> {
   const reasons: string[] = [];
   if (definition.techniqueId !== candidate.techniqueId) {
     return failure([

@@ -5,7 +5,14 @@ export const DEFAULT_LISTEN_PORT = 8787 as const;
 export const RAW_BODY_LIMIT_BYTES = 65536 as const;
 export const REQUEST_TARGET_LIMIT_BYTES = 8192 as const;
 
-export const MENU_ITEMS = ["シミュレーション", "人物", "模擬戦", "大会", "ランキング", "イベント"] as const;
+export const MENU_ITEMS = [
+  "シミュレーション",
+  "人物",
+  "模擬戦",
+  "大会",
+  "ランキング",
+  "イベント",
+] as const;
 export type MenuItem = (typeof MENU_ITEMS)[number];
 
 export const SESSION_DISPLAY_STATES = ["empty", "ready", "updating"] as const;

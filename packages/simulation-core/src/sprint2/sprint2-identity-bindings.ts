@@ -18,10 +18,7 @@ import {
   computeTournamentIdGeneratorStateHash,
   createInitialTournamentIdGeneratorState,
 } from "./tournament-id-registry.js";
-import {
-  computeSprint2ConfigHash,
-  createDefaultSprint2Config,
-} from "./validate-sprint2-config.js";
+import { computeSprint2ConfigHash, createDefaultSprint2Config } from "./validate-sprint2-config.js";
 
 export function createDefaultSprint2IdentityBindings(
   provider: Sha256Provider,
@@ -104,10 +101,13 @@ export function validateSprint2IdentityBindings(
   return success({
     sprint2ConfigVersion: object.sprint2ConfigVersion as string,
     sprint2ConfigHash: object.sprint2ConfigHash as string,
-    competitionDomainRegistryVersion: object.competitionDomainRegistryVersion as Sprint2IdentityBindings["competitionDomainRegistryVersion"],
+    competitionDomainRegistryVersion:
+      object.competitionDomainRegistryVersion as Sprint2IdentityBindings["competitionDomainRegistryVersion"],
     competitionDomainRegistryHash: object.competitionDomainRegistryHash as string,
-    derivedTieKeyPolicyVersion: object.derivedTieKeyPolicyVersion as Sprint2IdentityBindings["derivedTieKeyPolicyVersion"],
-    tournamentIdGeneratorVersion: object.tournamentIdGeneratorVersion as Sprint2IdentityBindings["tournamentIdGeneratorVersion"],
+    derivedTieKeyPolicyVersion:
+      object.derivedTieKeyPolicyVersion as Sprint2IdentityBindings["derivedTieKeyPolicyVersion"],
+    tournamentIdGeneratorVersion:
+      object.tournamentIdGeneratorVersion as Sprint2IdentityBindings["tournamentIdGeneratorVersion"],
     initialTournamentIdGeneratorStateHash: object.initialTournamentIdGeneratorStateHash as string,
   });
 }

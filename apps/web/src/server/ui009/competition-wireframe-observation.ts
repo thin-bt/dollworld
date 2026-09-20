@@ -49,8 +49,7 @@ export function enrichParticipantLinks(
       (row) => row.personId === link.personId,
     );
     const record = competitiveRecordByPersonId?.[link.personId] as CompetitiveRecord | undefined;
-    const age =
-      person !== undefined ? computeCurrentAge(worldYear, person.birthYear) : null;
+    const age = person !== undefined ? computeCurrentAge(worldYear, person.birthYear) : null;
     const officialWins = record?.officialWins ?? 0;
     const officialLosses = record?.officialLosses ?? 0;
     const rank = person?.currentRank ?? record?.currentRank ?? null;
@@ -79,7 +78,11 @@ export function annualRankingHistoryStoreFromState(
     return { entries: [] };
   }
   const raw = state.annualRankingHistoryStore;
-  if (typeof raw !== "object" || raw === null || !Array.isArray((raw as AnnualRankingHistoryStore).entries)) {
+  if (
+    typeof raw !== "object" ||
+    raw === null ||
+    !Array.isArray((raw as AnnualRankingHistoryStore).entries)
+  ) {
     return { entries: [] };
   }
   return raw as unknown as AnnualRankingHistoryStore;

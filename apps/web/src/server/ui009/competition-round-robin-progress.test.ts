@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { StoredBattleResultRecord, TournamentBracketDefinition } from "@shared-world/simulation-core";
+import type {
+  StoredBattleResultRecord,
+  TournamentBracketDefinition,
+} from "@shared-world/simulation-core";
 import { projectRoundRobinProgress } from "./competition-round-robin-progress.js";
 
 function bracket(): TournamentBracketDefinition {

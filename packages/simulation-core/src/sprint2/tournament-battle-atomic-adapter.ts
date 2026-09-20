@@ -4,7 +4,7 @@
  */
 import { toCanonicalJson } from "../canonical-json.js";
 import type { Sha256Provider } from "../sha256-provider.js";
-import { failure, success } from "../validation.js";
+import { success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import type { BattleActionsSource } from "../sprint1/battle-actions-source.js";
 import type { BattleActionSourceIdentity } from "../sprint1/battle-action-source-identity.js";
@@ -27,10 +27,7 @@ import {
   type TournamentBattleHandoffInput,
   type TournamentBattleHandoffResult,
 } from "./tournament-battle-handoff.js";
-import type {
-  TournamentMatchPlan,
-  TournamentSlotMatchBinding,
-} from "./tournament-match-plan.js";
+import type { TournamentMatchPlan, TournamentSlotMatchBinding } from "./tournament-match-plan.js";
 import { safeHashUtf8 } from "../sprint1/safe-sha256.js";
 import { deepFreezePlainJson } from "../sprint1/plain-data.js";
 
@@ -220,7 +217,8 @@ export function executeTournamentBattleAtomic(
     return {
       kind: "publication_failure",
       issues:
-        publication.kind === "validation_failure" || publication.kind === "payload_integrity_failure"
+        publication.kind === "validation_failure" ||
+        publication.kind === "payload_integrity_failure"
           ? publication.issues
           : [],
     };

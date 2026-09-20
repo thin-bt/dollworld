@@ -84,7 +84,8 @@ export const BATTLE_PROFILE_ADAPTER_VERSION = "battle-profile-adapter-0.1.0" as 
 export const MATCH_ID_GENERATOR_VERSION = "match-id-generator-0.1.0" as const;
 export const MATCH_ID_GENERATOR_STATE_SCHEMA_VERSION = "0.1.0" as const;
 export const MATCH_ID_NAMESPACE = "match" as const;
-export const TOURNAMENT_ID_GENERATOR_VERSION_FOR_IDENTITY = "tournament-id-generator-0.1.0" as const;
+export const TOURNAMENT_ID_GENERATOR_VERSION_FOR_IDENTITY =
+  "tournament-id-generator-0.1.0" as const;
 export const SPRINT2_CONFIG_VERSION_FOR_IDENTITY = "sprint2-balance-0.1.14" as const;
 export const COMPETITION_DOMAIN_REGISTRY_VERSION_FOR_IDENTITY =
   "competition-domain-registry-0.2.0" as const;

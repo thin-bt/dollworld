@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { toCanonicalJson } from "../canonical-json.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import { withTestSprint2IdentityFields } from "../test-fixtures/sprint2-identity.fixture.js";
-import { createExpectedSpecVersions, validateSimulationIdentity } from "../sprint1/simulation-identity.js";
+import {
+  createExpectedSpecVersions,
+  validateSimulationIdentity,
+} from "../sprint1/simulation-identity.js";
 import { computeSprint1ConfigHash } from "../sprint1/sprint1-config.js";
 import { createDefaultSprint1ConfigInput } from "../sprint1/sprint1-config-defaults.js";
 import {

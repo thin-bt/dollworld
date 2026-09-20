@@ -114,9 +114,9 @@ export function projectAnnualRanking(
     }
 
     const sharedRank = index + 1;
-    const group = candidates.slice(index, groupEnd).sort((a, b) =>
-      compareUnicodeCodePoints(a.personId, b.personId),
-    );
+    const group = candidates
+      .slice(index, groupEnd)
+      .sort((a, b) => compareUnicodeCodePoints(a.personId, b.personId));
 
     for (let order = 0; order < group.length; order += 1) {
       const candidate = group[order]!;

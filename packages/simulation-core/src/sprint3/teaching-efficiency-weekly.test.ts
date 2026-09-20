@@ -56,27 +56,27 @@ describe("S03-005 teachingEfficiency weekly training binding", () => {
   it("TE-004 bracket boundaries 1/3/4/7/11/21/41 are deterministic", () => {
     const config = expectOk(validateSprint3Config(createSprint3Balance050ConfigInput(), provider));
     const brackets = config.teachingEfficiency.discipleCountFactorBrackets;
-    expect(expectOk(selectDiscipleCountTeachingEfficiencyFactor(1, config.teachingEfficiency))).toBe(
-      brackets[0]!.factorTenThousandths,
-    );
-    expect(expectOk(selectDiscipleCountTeachingEfficiencyFactor(3, config.teachingEfficiency))).toBe(
-      brackets[0]!.factorTenThousandths,
-    );
-    expect(expectOk(selectDiscipleCountTeachingEfficiencyFactor(4, config.teachingEfficiency))).toBe(
-      brackets[1]!.factorTenThousandths,
-    );
-    expect(expectOk(selectDiscipleCountTeachingEfficiencyFactor(7, config.teachingEfficiency))).toBe(
-      brackets[2]!.factorTenThousandths,
-    );
-    expect(expectOk(selectDiscipleCountTeachingEfficiencyFactor(11, config.teachingEfficiency))).toBe(
-      brackets[3]!.factorTenThousandths,
-    );
-    expect(expectOk(selectDiscipleCountTeachingEfficiencyFactor(21, config.teachingEfficiency))).toBe(
-      brackets[4]!.factorTenThousandths,
-    );
-    expect(expectOk(selectDiscipleCountTeachingEfficiencyFactor(41, config.teachingEfficiency))).toBe(
-      brackets[5]!.factorTenThousandths,
-    );
+    expect(
+      expectOk(selectDiscipleCountTeachingEfficiencyFactor(1, config.teachingEfficiency)),
+    ).toBe(brackets[0]!.factorTenThousandths);
+    expect(
+      expectOk(selectDiscipleCountTeachingEfficiencyFactor(3, config.teachingEfficiency)),
+    ).toBe(brackets[0]!.factorTenThousandths);
+    expect(
+      expectOk(selectDiscipleCountTeachingEfficiencyFactor(4, config.teachingEfficiency)),
+    ).toBe(brackets[1]!.factorTenThousandths);
+    expect(
+      expectOk(selectDiscipleCountTeachingEfficiencyFactor(7, config.teachingEfficiency)),
+    ).toBe(brackets[2]!.factorTenThousandths);
+    expect(
+      expectOk(selectDiscipleCountTeachingEfficiencyFactor(11, config.teachingEfficiency)),
+    ).toBe(brackets[3]!.factorTenThousandths);
+    expect(
+      expectOk(selectDiscipleCountTeachingEfficiencyFactor(21, config.teachingEfficiency)),
+    ).toBe(brackets[4]!.factorTenThousandths);
+    expect(
+      expectOk(selectDiscipleCountTeachingEfficiencyFactor(41, config.teachingEfficiency)),
+    ).toBe(brackets[5]!.factorTenThousandths);
   });
 
   it("TE-005 sprint3 bracket factor can differ from Sprint1 growth discipleCountFactors at same count", () => {
@@ -87,9 +87,7 @@ describe("S03-005 teachingEfficiency weekly training binding", () => {
         { minDisciplesInclusive: 1, maxDisciplesInclusive: 999_999, factorTenThousandths: 5000 },
       ],
     };
-    const sprint3Factor = expectOk(
-      selectDiscipleCountTeachingEfficiencyFactor(2, customTeaching),
-    );
+    const sprint3Factor = expectOk(selectDiscipleCountTeachingEfficiencyFactor(2, customTeaching));
     const sprint1Factor = expectOk(selectDiscipleCountGrowthFactor(2, sprint1Config));
     expect(sprint3Factor).toBe(5000);
     expect(sprint1Factor).not.toBe(sprint3Factor);
@@ -144,7 +142,9 @@ describe("S03-005 teachingEfficiency weekly training binding", () => {
 
   it("TE-010 multiple disciples use highest matching bracket only once per apply", () => {
     const config = expectOk(validateSprint3Config(createSprint3Balance050ConfigInput(), provider));
-    const many = expectOk(selectDiscipleCountTeachingEfficiencyFactor(15, config.teachingEfficiency));
+    const many = expectOk(
+      selectDiscipleCountTeachingEfficiencyFactor(15, config.teachingEfficiency),
+    );
     const one = expectOk(selectDiscipleCountTeachingEfficiencyFactor(1, config.teachingEfficiency));
     expect(many).toBeLessThan(one);
   });

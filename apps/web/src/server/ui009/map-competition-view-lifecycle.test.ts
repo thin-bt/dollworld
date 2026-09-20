@@ -24,9 +24,7 @@ function falseFinishedRoundRobinStore(): CompetitionSessionStore {
       formatKind: "round_robin",
       tournamentId: "t-false-finished",
       orderedPersonIds: ["person-a", "person-b"],
-      roundRobinPairs: [
-        { pairIndex: 0, personIdA: "person-a", personIdB: "person-b" },
-      ],
+      roundRobinPairs: [{ pairIndex: 0, personIdA: "person-a", personIdB: "person-b" }],
     },
     bracketRuntimeState: {},
     isolatedSession: { runtimeState: { worldState: { persons: [] } } },
@@ -98,7 +96,11 @@ describe("mapCompetitionProgressView lifecycle coherence", () => {
       worldYear: 1,
       rankingDisplayFacts: [{ personId: "person-a", displayOrder: 1 }],
     } as unknown as CompetitionPersistedState;
-    const view = mapCompetitionProgressView({ schemaVersion: COMPETITION_STORE_SCHEMA_VERSION, state }, [], null);
+    const view = mapCompetitionProgressView(
+      { schemaVersion: COMPETITION_STORE_SCHEMA_VERSION, state },
+      [],
+      null,
+    );
     expect(view.lifecyclePhase).toBe("awaiting_match");
     expect(view.championDisplayName).toBeNull();
     expect(view.roundRobinProgress!.matchesTotal).toBe(0);

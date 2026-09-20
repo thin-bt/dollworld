@@ -8,7 +8,7 @@ import { RANK_ORDER, type Rank } from "../enums.js";
 import type { PersonId, TournamentId } from "../ids.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import { failure, success } from "../validation.js";
-import type { ValidationIssue, ValidationResult } from "../validation.js";
+import type { ValidationResult } from "../validation.js";
 import {
   DERIVED_TIE_KEY_POLICY_VERSION,
   ENTRY_CHOICE_POLICY_VERSION,
@@ -55,8 +55,7 @@ function requiresChampionshipEntrantQualification(
   tournament: TournamentScheduleReadModelEntry,
 ): boolean {
   return (
-    tournament.championshipCycleClassification === "championship_year" &&
-    tournament.kind === "open"
+    tournament.championshipCycleClassification === "championship_year" && tournament.kind === "open"
   );
 }
 
@@ -166,14 +165,25 @@ function absoluteWorldMonth(entry: TournamentScheduleReadModelEntry): number {
   return (entry.worldYear - 1) * 12 + (entry.month - 1);
 }
 
-function kindPriorityIndex(config: Sprint2Config, kind: TournamentScheduleReadModelEntry["kind"]): number {
+function kindPriorityIndex(
+  config: Sprint2Config,
+  kind: TournamentScheduleReadModelEntry["kind"],
+): number {
   const index = config.execution.tournamentKindPriority.indexOf(kind);
   return index >= 0 ? index : Number.MAX_SAFE_INTEGER;
 }
 
 function compareTournamentChoiceCandidates(
-  left: { tournamentId: TournamentId; score: number; kind: TournamentScheduleReadModelEntry["kind"] },
-  right: { tournamentId: TournamentId; score: number; kind: TournamentScheduleReadModelEntry["kind"] },
+  left: {
+    tournamentId: TournamentId;
+    score: number;
+    kind: TournamentScheduleReadModelEntry["kind"];
+  },
+  right: {
+    tournamentId: TournamentId;
+    score: number;
+    kind: TournamentScheduleReadModelEntry["kind"];
+  },
   config: Sprint2Config,
 ): number {
   if (left.score !== right.score) {
@@ -456,7 +466,10 @@ export function computeParticipantListHash(
   );
 }
 
-function tournamentCapacityMaximum(config: Sprint2Config, kind: TournamentScheduleReadModelEntry["kind"]): number {
+function tournamentCapacityMaximum(
+  config: Sprint2Config,
+  kind: TournamentScheduleReadModelEntry["kind"],
+): number {
   return config.tournamentCapacity[kind].maximum;
 }
 
@@ -607,8 +620,7 @@ export function buildPlannedParticipantList(input: {
     candidatesByEffectiveWeek.set(week, bucket);
   }
 
-  const effectiveEntry =
-    resolveEffectiveEntry(sourceEntry, entriesById) ?? sourceEntry;
+  const effectiveEntry = resolveEffectiveEntry(sourceEntry, entriesById) ?? sourceEntry;
   const relevantWeek = effectiveEntry.absoluteWeek;
   const weekCandidates = candidatesByEffectiveWeek.get(relevantWeek) ?? [];
 

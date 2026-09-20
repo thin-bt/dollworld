@@ -3,10 +3,7 @@ import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixt
 import { asPersonId, asTournamentId } from "../ids.js";
 import { DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
 import { createDefaultSprint2ConfigInput } from "./sprint2-config-defaults.js";
-import {
-  applyFailureToStart,
-  commitSchedulePlan,
-} from "./tournament-schedule-state.js";
+import { applyFailureToStart, commitSchedulePlan } from "./tournament-schedule-state.js";
 import { buildTournamentScheduleReadModel } from "./tournament-schedule-read-model.js";
 import { createInitialTournamentIdGeneratorState } from "./tournament-id-registry.js";
 import type { EntrantCandidateFacts, Sprint2Config } from "./types.js";
@@ -60,7 +57,9 @@ function tinyScheduleConfig(overrides?: Partial<Sprint2Config["schedule"]>): Spr
   };
 }
 
-function activeCompetitor(overrides: Partial<EntrantCandidateFacts> & Pick<EntrantCandidateFacts, "personId">): EntrantCandidateFacts {
+function activeCompetitor(
+  overrides: Partial<EntrantCandidateFacts> & Pick<EntrantCandidateFacts, "personId">,
+): EntrantCandidateFacts {
   return {
     currentAge: 20,
     lifeStatus: "living",
@@ -77,12 +76,7 @@ function commitTinySchedule(config = tinyScheduleConfig()) {
   if (!initial.ok) {
     throw new Error("generator init failed");
   }
-  const committed = commitSchedulePlan(
-    config,
-    DEFAULT_WORLD_CALENDAR_CONFIG,
-    1,
-    initial.value,
-  );
+  const committed = commitSchedulePlan(config, DEFAULT_WORLD_CALENDAR_CONFIG, 1, initial.value);
   expect(committed.kind).toBe("success");
   if (committed.kind !== "success") {
     throw new Error("schedule commit failed");
@@ -98,13 +92,33 @@ describe("S02-003 entrant eligibility", () => {
   const promotion = schedule.find((entry) => entry.kind === "promotion")!;
 
   it("accepts age 16 and 41; rejects 15 and 42", () => {
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("p16"), currentAge: 16 }), fNormal).eligible).toBe(true);
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("p41"), currentAge: 41 }), fNormal).eligible).toBe(true);
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("p15"), currentAge: 15 }), fNormal)).toEqual({
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("p16"), currentAge: 16 }),
+        fNormal,
+      ).eligible,
+    ).toBe(true);
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("p41"), currentAge: 41 }),
+        fNormal,
+      ).eligible,
+    ).toBe(true);
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("p15"), currentAge: 15 }),
+        fNormal,
+      ),
+    ).toEqual({
       eligible: false,
       reason: "age_below_minimum",
     });
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("p42"), currentAge: 42 }), fNormal)).toEqual({
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("p42"), currentAge: 42 }),
+        fNormal,
+      ),
+    ).toEqual({
       eligible: false,
       reason: "age_above_maximum",
     });
@@ -147,8 +161,18 @@ describe("S02-003 entrant eligibility", () => {
   });
 
   it("enforces F..B normal exact-rank match with no down-entry", () => {
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }), fNormal).eligible).toBe(true);
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("b"), currentRank: "B" }), fNormal)).toEqual({
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }),
+        fNormal,
+      ).eligible,
+    ).toBe(true);
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("b"), currentRank: "B" }),
+        fNormal,
+      ),
+    ).toEqual({
       eligible: false,
       reason: "normal_rank_mismatch",
     });
@@ -160,30 +184,59 @@ describe("S02-003 entrant eligibility", () => {
       championshipCycleClassification: "non_championship_year" as const,
     };
     expect(
-      evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("a"), currentRank: "A" }), openNonChampionship)
-        .eligible,
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("a"), currentRank: "A" }),
+        openNonChampionship,
+      ).eligible,
     ).toBe(true);
     expect(
-      evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("s"), currentRank: "S" }), openNonChampionship)
-        .eligible,
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("s"), currentRank: "S" }),
+        openNonChampionship,
+      ).eligible,
     ).toBe(true);
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }), openNonChampionship)).toEqual({
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }),
+        openNonChampionship,
+      ),
+    ).toEqual({
       eligible: false,
       reason: "open_rank_ineligible",
     });
   });
 
   it("allows C+ limited eligibility without numeric aptitude invention", () => {
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("c"), currentRank: "C" }), limited).eligible).toBe(true);
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("s"), currentRank: "S" }), limited).eligible).toBe(true);
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }), limited)).toEqual({
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("c"), currentRank: "C" }),
+        limited,
+      ).eligible,
+    ).toBe(true);
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("s"), currentRank: "S" }),
+        limited,
+      ).eligible,
+    ).toBe(true);
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }),
+        limited,
+      ),
+    ).toEqual({
       eligible: false,
       reason: "limited_rank_below_minimum",
     });
   });
 
   it("fail-closes promotion/championship without accepted upstream facts", () => {
-    expect(evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }), promotion)).toEqual({
+    expect(
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("f"), currentRank: "F" }),
+        promotion,
+      ),
+    ).toEqual({
       eligible: false,
       reason: "promotion_qualification_missing",
     });
@@ -203,7 +256,10 @@ describe("S02-003 entrant eligibility", () => {
       championshipCycleClassification: "championship_year" as const,
     };
     expect(
-      evaluateEntrantEligibility(activeCompetitor({ personId: asPersonId("s"), currentRank: "S" }), championshipOpen),
+      evaluateEntrantEligibility(
+        activeCompetitor({ personId: asPersonId("s"), currentRank: "S" }),
+        championshipOpen,
+      ),
     ).toEqual({
       eligible: false,
       reason: "championship_qualification_missing",
@@ -244,7 +300,8 @@ describe("S02-003 simultaneous choice and determinism", () => {
     const schedule = commitTinySchedule(config);
     const candidates = buildTournamentChoiceCandidates(schedule);
     const sameWeek = candidates.filter(
-      (candidate) => candidate.effectiveEntry.absoluteWeek === candidates[0]!.effectiveEntry.absoluteWeek,
+      (candidate) =>
+        candidate.effectiveEntry.absoluteWeek === candidates[0]!.effectiveEntry.absoluteWeek,
     );
     expect(sameWeek.length).toBeGreaterThan(1);
 
@@ -280,12 +337,23 @@ describe("S02-003 simultaneous choice and determinism", () => {
       promotionMonthOffsets: [],
     });
     const schedule = commitTinySchedule(config);
-    const fTournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F")!;
+    const fTournament = schedule.find(
+      (entry) => entry.kind === "normal" && entry.targetRank === "F",
+    )!;
     const policy = createNeutralEntryChoicePolicy(config);
     const candidates = new Map([
-      [asPersonId("person_b"), activeCompetitor({ personId: asPersonId("person_b"), currentRank: "F" })],
-      [asPersonId("person_a"), activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" })],
-      [asPersonId("person_c"), activeCompetitor({ personId: asPersonId("person_c"), currentRank: "F" })],
+      [
+        asPersonId("person_b"),
+        activeCompetitor({ personId: asPersonId("person_b"), currentRank: "F" }),
+      ],
+      [
+        asPersonId("person_a"),
+        activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" }),
+      ],
+      [
+        asPersonId("person_c"),
+        activeCompetitor({ personId: asPersonId("person_c"), currentRank: "F" }),
+      ],
     ]);
 
     const build = () =>
@@ -327,7 +395,8 @@ describe("S02-003 simultaneous choice and determinism", () => {
     const schedule = commitTinySchedule(config);
     const candidates = buildTournamentChoiceCandidates(schedule);
     const sameWeek = candidates.filter(
-      (candidate) => candidate.effectiveEntry.absoluteWeek === candidates[0]!.effectiveEntry.absoluteWeek,
+      (candidate) =>
+        candidate.effectiveEntry.absoluteWeek === candidates[0]!.effectiveEntry.absoluteWeek,
     );
     const policy = createNeutralEntryChoicePolicy(config);
     const selected = selectSimultaneousTournamentForPerson({
@@ -385,7 +454,10 @@ describe("S02-003 lifecycle-aware participant lists", () => {
       tournamentId: source.tournamentId,
       scheduleEntries: readModel,
       candidateFactsByPersonId: new Map([
-        [asPersonId("person_a"), activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" })],
+        [
+          asPersonId("person_a"),
+          activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" }),
+        ],
       ]),
       policy,
       config,
@@ -434,7 +506,10 @@ describe("S02-003 lifecycle-aware participant lists", () => {
       tournamentId: fSlot.tournamentId,
       scheduleEntries: readModel,
       candidateFactsByPersonId: new Map([
-        [asPersonId("person_a"), activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" })],
+        [
+          asPersonId("person_a"),
+          activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" }),
+        ],
       ]),
       policy,
       config,
@@ -451,7 +526,9 @@ describe("S02-003 lifecycle-aware participant lists", () => {
 
   it("rejects stale schedule/lifecycle identity", () => {
     const schedule = commitTinySchedule();
-    const fTournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F")!;
+    const fTournament = schedule.find(
+      (entry) => entry.kind === "normal" && entry.targetRank === "F",
+    )!;
     const identity = computeScheduleLifecycleIdentity(fTournament, provider);
     expect(identity.ok).toBe(true);
     if (!identity.ok) {
@@ -469,14 +546,19 @@ describe("S02-003 lifecycle-aware participant lists", () => {
 describe("S02-003 S02-004 handoff", () => {
   it("exposes minimal downstream handoff fields only", () => {
     const schedule = commitTinySchedule();
-    const fTournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F")!;
+    const fTournament = schedule.find(
+      (entry) => entry.kind === "normal" && entry.targetRank === "F",
+    )!;
     const config = tinyScheduleConfig();
     const policy = createNeutralEntryChoicePolicy(config);
     const list = buildPlannedParticipantList({
       tournamentId: fTournament.tournamentId,
       scheduleEntries: schedule,
       candidateFactsByPersonId: new Map([
-        [asPersonId("person_a"), activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" })],
+        [
+          asPersonId("person_a"),
+          activeCompetitor({ personId: asPersonId("person_a"), currentRank: "F" }),
+        ],
       ]),
       policy,
       config,

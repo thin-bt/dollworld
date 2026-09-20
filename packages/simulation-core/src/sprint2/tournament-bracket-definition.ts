@@ -16,10 +16,7 @@ import {
   assertScheduleLifecycleIdentityFresh,
   computeParticipantListHash,
 } from "./tournament-entry-selection.js";
-import type {
-  EntryChoicePolicyIdentity,
-  ScheduleLifecycleIdentity,
-} from "./types.js";
+import type { EntryChoicePolicyIdentity, ScheduleLifecycleIdentity } from "./types.js";
 import type {
   InjectedStructuralPolicyInput,
   KnockoutSeedByeMapping,
@@ -465,7 +462,9 @@ function buildBracketDefinitionHashInput(definition: {
         : {}),
       ...(slot.seedRank !== undefined ? { seedRank: slot.seedRank } : {}),
       ...(slot.isByeAdvancement === true ? { isByeAdvancement: true } : {}),
-      ...(slot.feedsFromSlotIds !== undefined ? { feedsFromSlotIds: [...slot.feedsFromSlotIds] } : {}),
+      ...(slot.feedsFromSlotIds !== undefined
+        ? { feedsFromSlotIds: [...slot.feedsFromSlotIds] }
+        : {}),
     })),
     policyIdentities: definition.policyIdentities,
   };
@@ -483,7 +482,10 @@ export function computeBracketDefinitionHash(
 }
 
 export function createInitialBracketRuntimeSlotState(
-  definition: Pick<TournamentBracketDefinition, "tournamentId" | "bracketDefinitionHash" | "knockoutSlots">,
+  definition: Pick<
+    TournamentBracketDefinition,
+    "tournamentId" | "bracketDefinitionHash" | "knockoutSlots"
+  >,
 ): BracketRuntimeSlotState {
   return {
     schemaVersion: BRACKET_RUNTIME_SLOT_STATE_SCHEMA_VERSION,
@@ -572,7 +574,10 @@ export function buildStructuralBracketDefinition(
       }
       return comparePersonIds(left.personIdB, right.personIdB);
     });
-    groupRoundRobinPairs = groupRoundRobinPairs.map((pair, index) => ({ ...pair, pairIndex: index }));
+    groupRoundRobinPairs = groupRoundRobinPairs.map((pair, index) => ({
+      ...pair,
+      pairIndex: index,
+    }));
   }
 
   if (formatKind === "knockout" || formatKind === "group_round_robin_knockout") {

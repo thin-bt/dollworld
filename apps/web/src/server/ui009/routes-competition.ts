@@ -22,13 +22,12 @@ import { createNodeSha256Provider } from "../presets.js";
 import { allocateServerErrorReference, type ProcessSecurityContext } from "../process-keys.js";
 import { parseSessionCookieHeader } from "../session-cookie.js";
 import type { SessionStore } from "../session-store.js";
-import {
-  assertUiSessionIntegrity,
-  deriveEnvelopeRevision,
-  type UiSession,
-} from "../ui-session.js";
+import { assertUiSessionIntegrity, deriveEnvelopeRevision, type UiSession } from "../ui-session.js";
 import { fixReadSnapshot } from "../ui004/list-get-common.js";
-import { assertWorldUnchanged, projectIsolationSnapshot } from "../ui006/compare-world-isolation.js";
+import {
+  assertWorldUnchanged,
+  projectIsolationSnapshot,
+} from "../ui006/compare-world-isolation.js";
 import { finalizeRoundRobinCompetitionStore } from "./competition-round-robin-finalize.js";
 import { rankingFactsForStore, runCompetitionProgressionStep } from "./competition-engine.js";
 import { getCompetitionStore, setCompetitionStore } from "./competition-session-registry.js";
@@ -277,9 +276,9 @@ export async function handleGetCompetition(
   );
 }
 
-function parseStepBody(body: unknown):
-  | { ok: true; requestId: string; expectedUiRevision: number }
-  | { ok: false; message: string } {
+function parseStepBody(
+  body: unknown,
+): { ok: true; requestId: string; expectedUiRevision: number } | { ok: false; message: string } {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return { ok: false, message: "JSON body must be an object" };
   }
@@ -310,7 +309,9 @@ export async function handlePostCompetitionStep(
     return;
   }
 
-  const parsed = parseStepBody(request.ui001Json?.ok === true ? request.ui001Json.value : undefined);
+  const parsed = parseStepBody(
+    request.ui001Json?.ok === true ? request.ui001Json.value : undefined,
+  );
   if (!parsed.ok) {
     const rev = deriveEnvelopeRevision(session);
     sendApiJson(

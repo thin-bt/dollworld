@@ -3,9 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { CompetitionMatchDetailedLog } from "./CompetitionMatchDetailedLog.js";
 import type { CompetitionMatchDetailView } from "./ui009-views.js";
 
-function baseDetail(
-  overrides: Partial<CompetitionMatchDetailView>,
-): CompetitionMatchDetailView {
+function baseDetail(overrides: Partial<CompetitionMatchDetailView>): CompetitionMatchDetailView {
   return {
     matchId: "m1",
     participantAId: "a",
@@ -29,9 +27,7 @@ function baseDetail(
 
 describe("CompetitionMatchDetailedLog", () => {
   it("renders unavailable state for pruned logs", () => {
-    const html = renderToStaticMarkup(
-      <CompetitionMatchDetailedLog detail={baseDetail({})} />,
-    );
+    const html = renderToStaticMarkup(<CompetitionMatchDetailedLog detail={baseDetail({})} />);
     expect(html).toContain('data-testid="competition-match-log-unavailable"');
     expect(html).toContain("保持期間を過ぎ");
   });

@@ -40,7 +40,10 @@ describe("year-start aggregate canonical hash streaming", () => {
   it("matches legacy hashUtf8(toCanonicalJson) on bounded fixtures", () => {
     const fixtures: unknown[] = [
       { b: 1, a: { d: 2, c: 3 }, list: [1, 2] },
-      [{ sequence: 2, label: "b" }, { sequence: 1, label: "a" }],
+      [
+        { sequence: 2, label: "b" },
+        { sequence: 1, label: "a" },
+      ],
       { eventEnvelopeSchemaVersion: "0.2.0", nextSequence: 42 },
     ];
 
@@ -51,31 +54,35 @@ describe("year-start aggregate canonical hash streaming", () => {
     }
   });
 
-  it("hashes large event streams without materializing canonical JSON text", { timeout: 60_000 }, () => {
-    const eventCount = 250_000;
-    const eventStream = Array.from({ length: eventCount }, (_, index) =>
-      buildSyntheticEvent(index + 1),
-    );
+  it(
+    "hashes large event streams without materializing canonical JSON text",
+    { timeout: 60_000 },
+    () => {
+      const eventCount = 250_000;
+      const eventStream = Array.from({ length: eventCount }, (_, index) =>
+        buildSyntheticEvent(index + 1),
+      );
 
-    const hashed = computeEventStreamHash(eventStream, provider);
-    expect(hashed.ok).toBe(true);
-    if (!hashed.ok) {
-      throw new Error(JSON.stringify(hashed.issues));
-    }
+      const hashed = computeEventStreamHash(eventStream, provider);
+      expect(hashed.ok).toBe(true);
+      if (!hashed.ok) {
+        throw new Error(JSON.stringify(hashed.issues));
+      }
 
-    expect(hashed.value).toMatch(/^[0-9a-f]{64}$/);
+      expect(hashed.value).toMatch(/^[0-9a-f]{64}$/);
 
-    const prefix = eventStream.slice(0, 128);
-    const prefixLegacy = provider.hashUtf8(toCanonicalJson(prefix));
-    const prefixStreamed = hashCanonicalValueUtf8(provider, prefix);
-    expect(prefixStreamed).toBe(prefixLegacy);
+      const prefix = eventStream.slice(0, 128);
+      const prefixLegacy = provider.hashUtf8(toCanonicalJson(prefix));
+      const prefixStreamed = hashCanonicalValueUtf8(provider, prefix);
+      expect(prefixStreamed).toBe(prefixLegacy);
 
-    const repeat = computeEventStreamHash(eventStream, provider);
-    expect(repeat.ok).toBe(true);
-    if (repeat.ok) {
-      expect(repeat.value).toBe(hashed.value);
-    }
-  });
+      const repeat = computeEventStreamHash(eventStream, provider);
+      expect(repeat.ok).toBe(true);
+      if (repeat.ok) {
+        expect(repeat.value).toBe(hashed.value);
+      }
+    },
+  );
 
   it("runYears year-start sealing survives real checkpoint progression", () => {
     const initial = buildFreshCheckpointRunContext(12345, provider);

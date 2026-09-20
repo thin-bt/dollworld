@@ -34,8 +34,13 @@ export function projectKnockoutBracketProgressView(input: {
   slotBindings: readonly TournamentSlotMatchBinding[];
   displayNameForPersonId: (personId: string) => string;
 }): KnockoutBracketProgressView | null {
-  const { bracketDefinition, bracketRuntimeState, storedRecords, slotBindings, displayNameForPersonId } =
-    input;
+  const {
+    bracketDefinition,
+    bracketRuntimeState,
+    storedRecords,
+    slotBindings,
+    displayNameForPersonId,
+  } = input;
   if (bracketDefinition.knockoutSlots.length === 0) {
     return null;
   }

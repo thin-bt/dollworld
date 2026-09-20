@@ -1,6 +1,9 @@
 import type { PersonId } from "@shared-world/simulation-core";
 import { compareUnicodeCodePoints } from "@shared-world/simulation-core";
-import type { StoredBattleResultRecord, TournamentBracketDefinition } from "@shared-world/simulation-core";
+import type {
+  StoredBattleResultRecord,
+  TournamentBracketDefinition,
+} from "@shared-world/simulation-core";
 import { projectRoundRobinProgress } from "./competition-round-robin-progress.js";
 
 /** Group-stage advancers for UI009 integration (wins, then person_id). */

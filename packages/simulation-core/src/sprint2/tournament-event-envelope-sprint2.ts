@@ -9,16 +9,7 @@ import {
   type EventImportance,
   type EventOrigin,
 } from "../events/types.js";
-import type {
-  EventId,
-  FamilyId,
-  LineageId,
-  MatchId,
-  PersonId,
-  RelationshipId,
-  SimulationId,
-  TournamentId,
-} from "../ids.js";
+import type { EventId, SimulationId, TournamentId } from "../ids.js";
 import {
   asEventId,
   asFamilyId,
@@ -45,7 +36,6 @@ import {
   assertNoAccessors,
   childPath,
   deepFreezePlainJson,
-  hasOwn,
   rejectUnknownKeys,
   requireNonEmptyString,
   requireSafeIntegerAtLeast,
@@ -65,7 +55,10 @@ import {
   validateSprint2TournamentEventPayload,
 } from "./tournament-event-payloads.js";
 
-export const SPRINT2_EVENT_ENTITIES_KEYS = [...SPRINT1_EVENT_ENTITIES_KEYS, "tournamentIds"] as const;
+export const SPRINT2_EVENT_ENTITIES_KEYS = [
+  ...SPRINT1_EVENT_ENTITIES_KEYS,
+  "tournamentIds",
+] as const;
 
 export type Sprint2EventEntities = Sprint1EventEntities & {
   tournamentIds: TournamentId[];
@@ -187,9 +180,27 @@ function parseSprint2EventEntities(
   assertNoAccessors(object, path, issues);
   rejectUnknownKeys(object, SPRINT2_EVENT_ENTITIES_KEYS, path, issues);
 
-  const personIds = parseIdArray(object["personIds"], childPath(path, "personIds"), issues, asPersonId, "PersonId");
-  const familyIds = parseIdArray(object["familyIds"], childPath(path, "familyIds"), issues, asFamilyId, "FamilyId");
-  const lineageIds = parseIdArray(object["lineageIds"], childPath(path, "lineageIds"), issues, asLineageId, "LineageId");
+  const personIds = parseIdArray(
+    object["personIds"],
+    childPath(path, "personIds"),
+    issues,
+    asPersonId,
+    "PersonId",
+  );
+  const familyIds = parseIdArray(
+    object["familyIds"],
+    childPath(path, "familyIds"),
+    issues,
+    asFamilyId,
+    "FamilyId",
+  );
+  const lineageIds = parseIdArray(
+    object["lineageIds"],
+    childPath(path, "lineageIds"),
+    issues,
+    asLineageId,
+    "LineageId",
+  );
   const relationshipIds = parseIdArray(
     object["relationshipIds"],
     childPath(path, "relationshipIds"),
@@ -197,7 +208,13 @@ function parseSprint2EventEntities(
     asRelationshipId,
     "RelationshipId",
   );
-  const matchIds = parseIdArray(object["matchIds"], childPath(path, "matchIds"), issues, asMatchId, "MatchId");
+  const matchIds = parseIdArray(
+    object["matchIds"],
+    childPath(path, "matchIds"),
+    issues,
+    asMatchId,
+    "MatchId",
+  );
   const tournamentIds = parseIdArray(
     object["tournamentIds"],
     childPath(path, "tournamentIds"),
@@ -246,7 +263,11 @@ function parseSprint2EventEntities(
   return { personIds, familyIds, lineageIds, relationshipIds, matchIds, tournamentIds };
 }
 
-function parseWorldDate(value: unknown, path: string, issues: ValidationIssue[]): WorldDate | undefined {
+function parseWorldDate(
+  value: unknown,
+  path: string,
+  issues: ValidationIssue[],
+): WorldDate | undefined {
   const object = snapshotPlainObjectOrFail(value, path, issues);
   if (object === undefined) {
     return undefined;
@@ -255,7 +276,12 @@ function parseWorldDate(value: unknown, path: string, issues: ValidationIssue[])
   const month = requireSafeIntegerAtLeast(object, "month", path, 1, issues);
   const weekOfMonth = requireSafeIntegerAtLeast(object, "weekOfMonth", path, 1, issues);
   const absoluteWeek = requireSafeIntegerAtLeast(object, "absoluteWeek", path, 0, issues);
-  if (year === undefined || month === undefined || weekOfMonth === undefined || absoluteWeek === undefined) {
+  if (
+    year === undefined ||
+    month === undefined ||
+    weekOfMonth === undefined ||
+    absoluteWeek === undefined
+  ) {
     return undefined;
   }
   const worldDate = { year, month, weekOfMonth, absoluteWeek } as WorldDate;
@@ -268,7 +294,9 @@ function parseWorldDate(value: unknown, path: string, issues: ValidationIssue[])
   return worldDate;
 }
 
-export function validateSprint2EventEnvelope(event: unknown): ValidationResult<Sprint2EventEnvelope> {
+export function validateSprint2EventEnvelope(
+  event: unknown,
+): ValidationResult<Sprint2EventEnvelope> {
   const issues: ValidationIssue[] = [];
   const object = snapshotPlainObjectOrFail(event, "", issues);
   if (object === undefined) {
@@ -292,11 +320,19 @@ export function validateSprint2EventEnvelope(event: unknown): ValidationResult<S
   const eventType = requireNonEmptyString(object, "eventType", "", issues);
   const importanceRaw = object["importance"];
   if (typeof importanceRaw !== "string" || !isEventImportance(importanceRaw)) {
-    issues.push({ path: "/importance", message: "importance must be a defined EventImportance", actual: importanceRaw });
+    issues.push({
+      path: "/importance",
+      message: "importance must be a defined EventImportance",
+      actual: importanceRaw,
+    });
   }
   const originRaw = object["origin"];
   if (typeof originRaw !== "string" || !isEventOrigin(originRaw)) {
-    issues.push({ path: "/origin", message: "origin must be a defined EventOrigin", actual: originRaw });
+    issues.push({
+      path: "/origin",
+      message: "origin must be a defined EventOrigin",
+      actual: originRaw,
+    });
   }
   const sourceProcessor = requireNonEmptyString(object, "sourceProcessor", "", issues);
   const worldDate = parseWorldDate(object["worldDate"], "/worldDate", issues);
@@ -434,7 +470,11 @@ export function rejectDuplicateSprint2EventCandidate(
   return validated;
 }
 
-function findNextIndex(events: readonly Sprint2EventEnvelope[], start: number, predicate: (e: Sprint2EventEnvelope) => boolean): number {
+function findNextIndex(
+  events: readonly Sprint2EventEnvelope[],
+  start: number,
+  predicate: (e: Sprint2EventEnvelope) => boolean,
+): number {
   for (let index = start; index < events.length; index += 1) {
     if (predicate(events[index]!)) {
       return index;
@@ -455,9 +495,18 @@ export function validateSprint2TournamentEventOrdering(
     const event = events[index]!;
 
     if (event.eventType === BATTLE_STARTED_EVENT_TYPE) {
-      const finishedIndex = findNextIndex(events, index + 1, (e) => e.eventType === BATTLE_FINISHED_EVENT_TYPE);
+      const finishedIndex = findNextIndex(
+        events,
+        index + 1,
+        (e) => e.eventType === BATTLE_FINISHED_EVENT_TYPE,
+      );
       if (finishedIndex === -1) {
-        return failure([{ path: `/${String(index)}`, message: "battle.started must be followed by battle.finished" }]);
+        return failure([
+          {
+            path: `/${String(index)}`,
+            message: "battle.started must be followed by battle.finished",
+          },
+        ]);
       }
       const recordedIndex = findNextIndex(
         events,
@@ -468,7 +517,8 @@ export function validateSprint2TournamentEventOrdering(
         return failure([
           {
             path: `/${String(finishedIndex)}`,
-            message: "battle.finished must be followed by tournament.match_recorded for completed battle",
+            message:
+              "battle.finished must be followed by tournament.match_recorded for completed battle",
           },
         ]);
       }
@@ -476,7 +526,8 @@ export function validateSprint2TournamentEventOrdering(
         return failure([
           {
             path: `/${String(index + 1)}`,
-            message: "EVT-001 requires battle.started -> battle.finished -> tournament.match_recorded order",
+            message:
+              "EVT-001 requires battle.started -> battle.finished -> tournament.match_recorded order",
             actual: events[index + 1]?.eventType,
             expected: BATTLE_FINISHED_EVENT_TYPE,
           },
@@ -486,7 +537,8 @@ export function validateSprint2TournamentEventOrdering(
         return failure([
           {
             path: `/${String(finishedIndex + 1)}`,
-            message: "EVT-001 requires battle.started -> battle.finished -> tournament.match_recorded order",
+            message:
+              "EVT-001 requires battle.started -> battle.finished -> tournament.match_recorded order",
             actual: events[finishedIndex + 1]?.eventType,
             expected: TOURNAMENT_MATCH_RECORDED_EVENT_TYPE,
           },
@@ -495,14 +547,23 @@ export function validateSprint2TournamentEventOrdering(
     }
 
     if (event.eventType === TOURNAMENT_MATCH_RECORDED_EVENT_TYPE) {
-      const roundIndex = findNextIndex(events, index + 1, (e) => e.eventType === TOURNAMENT_ROUND_COMPLETED_EVENT_TYPE);
-      const finishedIndex = findNextIndex(events, index + 1, (e) => e.eventType === TOURNAMENT_FINISHED_EVENT_TYPE);
+      const roundIndex = findNextIndex(
+        events,
+        index + 1,
+        (e) => e.eventType === TOURNAMENT_ROUND_COMPLETED_EVENT_TYPE,
+      );
+      const finishedIndex = findNextIndex(
+        events,
+        index + 1,
+        (e) => e.eventType === TOURNAMENT_FINISHED_EVENT_TYPE,
+      );
       if (roundIndex !== -1 && finishedIndex !== -1 && roundIndex < finishedIndex) {
         if (roundIndex !== index + 1 || finishedIndex !== roundIndex + 1) {
           return failure([
             {
               path: `/${String(index + 1)}`,
-              message: "EVT-002 requires tournament.match_recorded -> round_completed -> tournament.finished order",
+              message:
+                "EVT-002 requires tournament.match_recorded -> round_completed -> tournament.finished order",
             },
           ]);
         }
@@ -539,7 +600,10 @@ export function validateSprint2TournamentEventOrdering(
     if (event.eventType === TOURNAMENT_MATCH_BYE_EVENT_TYPE) {
       const priorBattle = events
         .slice(Math.max(0, index - 2), index)
-        .some((e) => e.eventType === BATTLE_STARTED_EVENT_TYPE || e.eventType === BATTLE_FINISHED_EVENT_TYPE);
+        .some(
+          (e) =>
+            e.eventType === BATTLE_STARTED_EVENT_TYPE || e.eventType === BATTLE_FINISHED_EVENT_TYPE,
+        );
       if (priorBattle) {
         return failure([
           {
@@ -554,7 +618,11 @@ export function validateSprint2TournamentEventOrdering(
   return success(true);
 }
 
-export function toSprint1CompatibleEnvelope(event: Sprint2EventEnvelope): ValidationResult<ReturnType<typeof validateSprint1EventEnvelope> extends ValidationResult<infer T> ? T : never> {
+export function toSprint1CompatibleEnvelope(
+  event: Sprint2EventEnvelope,
+): ValidationResult<
+  ReturnType<typeof validateSprint1EventEnvelope> extends ValidationResult<infer T> ? T : never
+> {
   if (event.entities.tournamentIds.length > 0) {
     return failure([
       {

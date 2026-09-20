@@ -282,8 +282,7 @@ export type EntrantCandidateFacts = {
 };
 
 export type EntrantEligibilityResult =
-  | { eligible: true }
-  | { eligible: false; reason: EntrantEligibilityRejectionReason };
+  { eligible: true } | { eligible: false; reason: EntrantEligibilityRejectionReason };
 
 export type EntryChoicePolicyIdentity = {
   policyVersion: typeof ENTRY_CHOICE_POLICY_VERSION;
@@ -303,7 +302,9 @@ export type EntryChoicePolicyResult = {
 
 export type EntryChoicePolicy = {
   identity: EntryChoicePolicyIdentity;
-  evaluatePreference: (input: EntryChoiceDecisionInput) => ValidationResult<EntryChoicePolicyResult>;
+  evaluatePreference: (
+    input: EntryChoiceDecisionInput,
+  ) => ValidationResult<EntryChoicePolicyResult>;
 };
 
 export type ScheduleLifecycleIdentity = {
@@ -331,7 +332,14 @@ export type EntrySelectionHandoff = {
   participantListHash: string;
   scheduleLifecycleIdentity: ScheduleLifecycleIdentity;
   policyIdentity: EntryChoicePolicyIdentity;
-  rejectionFacts?: Readonly<Partial<Record<EntrantEligibilityRejectionReason, readonly PersonId[]>>>;
+  rejectionFacts?: Readonly<
+    Partial<Record<EntrantEligibilityRejectionReason, readonly PersonId[]>>
+  >;
 };
 
-export type { ChampionshipCycleClassification, NormalRankKey, TournamentKind, TournamentLifecycleState };
+export type {
+  ChampionshipCycleClassification,
+  NormalRankKey,
+  TournamentKind,
+  TournamentLifecycleState,
+};

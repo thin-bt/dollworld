@@ -15,7 +15,10 @@ import {
   type RoundRobinMatchHistoryRow,
   type RoundRobinParticipantMatrixRow,
 } from "./competition-round-robin-progress.js";
-import { buildAnnualSchedule, buildCompetitionScheduleOverview } from "./competition-schedule-overview.js";
+import {
+  buildAnnualSchedule,
+  buildCompetitionScheduleOverview,
+} from "./competition-schedule-overview.js";
 import {
   annualRankingHistoryStoreFromState,
   buildAnnualRankingYearOptions,
@@ -194,18 +197,14 @@ function scheduleOverviewForSession(
   }
   const persisted = store.state;
   const rosterSession =
-    persisted !== null
-      ? (persisted.isolatedSession as unknown as Sprint1RunSession)
-      : worldSession;
+    persisted !== null ? (persisted.isolatedSession as unknown as Sprint1RunSession) : worldSession;
   const playableIds = persisted === null ? plannedPreviewParticipantIds(worldSession) : [];
   const playableLinks = playableIds.map((personId) => ({
     personId,
     displayName: displayNameForPersonIdInSession(worldSession, personId),
   }));
   const activeLinks =
-    persisted === null
-      ? []
-      : participantLinksFromIds(persisted, activeParticipantIds(persisted));
+    persisted === null ? [] : participantLinksFromIds(persisted, activeParticipantIds(persisted));
   const scheduleOptions: { viewWorldYear?: number; rosterSession: Sprint1RunSession } = {
     rosterSession,
   };
@@ -227,9 +226,11 @@ function knockoutBracketFromState(
   try {
     return projectKnockoutBracketProgressView({
       bracketDefinition: state.bracketDefinition as unknown as TournamentBracketDefinition,
-      bracketRuntimeState: state.bracketRuntimeState as unknown as import("@shared-world/simulation-core").BracketRuntimeSlotState,
+      bracketRuntimeState:
+        state.bracketRuntimeState as unknown as import("@shared-world/simulation-core").BracketRuntimeSlotState,
       storedRecords: state.storedRecords as unknown as readonly StoredBattleResultRecord[],
-      slotBindings: (state.slotBindings ?? []) as unknown as import("@shared-world/simulation-core").TournamentSlotMatchBinding[],
+      slotBindings: (state.slotBindings ??
+        []) as unknown as import("@shared-world/simulation-core").TournamentSlotMatchBinding[],
       displayNameForPersonId: (personId) => displayNameInIsolatedState(state, personId),
     });
   } catch {
@@ -382,9 +383,7 @@ export function mapCompetitionProgressView(
       rankingRows: [],
       ...EMPTY_PLAYER_FIELDS,
       preStartPreview:
-        preStartPreview === null
-          ? null
-          : { ...preStartPreview, participantDisplayNames },
+        preStartPreview === null ? null : { ...preStartPreview, participantDisplayNames },
       participantDisplayNames,
       tournamentKindLabel: preStartPreview?.tournamentKindLabel ?? null,
       targetRankLabel: preStartPreview?.targetRankLabel ?? null,
@@ -394,7 +393,9 @@ export function mapCompetitionProgressView(
       scheduleOverview: scheduleOverviewForSession(
         worldSession,
         store,
-        options?.scheduleViewYear !== undefined ? { viewWorldYear: options.scheduleViewYear } : undefined,
+        options?.scheduleViewYear !== undefined
+          ? { viewWorldYear: options.scheduleViewYear }
+          : undefined,
       ),
       wireframeObservation: buildWireframeObservation({
         store,
@@ -411,10 +412,11 @@ export function mapCompetitionProgressView(
   const knockoutBracket = knockoutBracketFromState(state);
   const lifecyclePhase = effectiveLifecyclePhase(state, roundRobinProgress);
   const presentAsFinished = lifecyclePhase === "finished";
-  const participantIds = roundRobinProgress?.participantIds ?? [state.participantAId, state.participantBId];
-  const participantDisplayNames = participantIds.map((id) =>
-    displayNameInIsolatedState(state, id),
-  );
+  const participantIds = roundRobinProgress?.participantIds ?? [
+    state.participantAId,
+    state.participantBId,
+  ];
+  const participantDisplayNames = participantIds.map((id) => displayNameInIsolatedState(state, id));
   const kindLabel = tournamentKindPlayerLabel(state.tournamentKind);
   const rankLabel = rankBandPlayerLabel(state.targetRank);
 
@@ -473,7 +475,9 @@ export function mapCompetitionProgressView(
     scheduleOverview: scheduleOverviewForSession(
       worldSession,
       store,
-      options?.scheduleViewYear !== undefined ? { viewWorldYear: options.scheduleViewYear } : undefined,
+      options?.scheduleViewYear !== undefined
+        ? { viewWorldYear: options.scheduleViewYear }
+        : undefined,
     ),
     wireframeObservation: buildWireframeObservation({
       store,
@@ -500,7 +504,9 @@ export function buildStepDataView(
 
 export { buildAnnualSchedule };
 
-export function rankingFactsFromState(state: CompetitionPersistedState | null): readonly AnnualRankingDisplayFacts[] {
+export function rankingFactsFromState(
+  state: CompetitionPersistedState | null,
+): readonly AnnualRankingDisplayFacts[] {
   if (state === null) {
     return [];
   }

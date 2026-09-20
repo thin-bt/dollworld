@@ -13,7 +13,7 @@ export const UI009_INTEGRATION_PARTICIPANT_CAP = 16;
 /** @deprecated use UI009_INTEGRATION_PARTICIPANT_CAP */
 export const UI009_INTEGRATION_ROUND_ROBIN_MAX = UI009_INTEGRATION_PARTICIPANT_CAP;
 
-function isOfficialBattleEligiblePerson(person: Person, worldYear: number): boolean {
+function isOfficialBattleEligiblePerson(person: Person): boolean {
   if (person.lifeStatus !== "living" || person.participationStatus !== "active") {
     return false;
   }
@@ -29,7 +29,6 @@ function isOfficialBattleEligiblePerson(person: Person, worldYear: number): bool
 export function selectUi009IntegrationFallbackParticipantIds(
   session: Sprint1RunSession,
 ): readonly PersonId[] {
-  const worldYear = session.runtimeState.worldState.worldDate.year;
   const source = buildMockCandidateSourceRows(session);
   if (!source.ok) {
     return [];
@@ -42,7 +41,7 @@ export function selectUi009IntegrationFallbackParticipantIds(
     .filter((row) => mockCandidateEligible(row.eligibleInput!))
     .filter((row) => {
       const person = personsById.get(row.personId as PersonId);
-      return person !== undefined && isOfficialBattleEligiblePerson(person, worldYear);
+      return person !== undefined && isOfficialBattleEligiblePerson(person);
     })
     .map((row) => row.personId as PersonId)
     .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
@@ -52,7 +51,7 @@ export function selectUi009IntegrationFallbackParticipantIds(
   }
 
   const fallback = session.runtimeState.worldState.persons
-    .filter((person) => isOfficialBattleEligiblePerson(person as Person, worldYear))
+    .filter((person) => isOfficialBattleEligiblePerson(person as Person))
     .map((person) => person.personId as PersonId)
     .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   return fallback.slice(0, UI009_INTEGRATION_PARTICIPANT_CAP);

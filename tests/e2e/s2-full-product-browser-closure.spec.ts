@@ -79,27 +79,40 @@ test.describe("Sprint2 full product browser closure", () => {
 
     const step = page.getByTestId("competition-step-cta");
     await step.click();
-    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({
+      timeout: 60_000,
+    });
     await expect(page.getByTestId("competition-round-robin-history")).toBeVisible();
     await expect(page.getByTestId("competition-match-result")).toBeVisible();
 
     await page.getByTestId("competition-detail-tab-participants").click();
     const participantRows = page.getByTestId("competition-participants").locator("tbody tr");
     expect(await participantRows.count()).toBeGreaterThan(2);
-    const personLink = page.getByTestId("competition-participants").locator('a[href^="/people/"]').first();
+    const personLink = page
+      .getByTestId("competition-participants")
+      .locator('a[href^="/people/"]')
+      .first();
     await expect(personLink).toBeVisible();
     const personHref = await personLink.getAttribute("href");
     expect(personHref).toMatch(/^\/people\/person_/);
     await personLink.click();
-    await expect(page).toHaveURL(new RegExp(`${personHref!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
+    await expect(page).toHaveURL(
+      new RegExp(`${personHref!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`),
+    );
     await expect(page.getByTestId("person-detail-page")).toBeVisible();
-    await expect(page.getByTestId("person-detail-status")).toHaveAttribute("data-status", "success", {
-      timeout: 60_000,
-    });
+    await expect(page.getByTestId("person-detail-status")).toHaveAttribute(
+      "data-status",
+      "success",
+      {
+        timeout: 60_000,
+      },
+    );
     await shot(page, project, "04-person-detail-from-competition");
 
     await page.locator('[data-menu-item="大会"]').click();
-    await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({
+      timeout: 60_000,
+    });
     await page.getByTestId("competition-detail-tab-overview").click();
     await expect(page.getByTestId("competition-match-result")).toBeVisible();
 

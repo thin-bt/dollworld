@@ -12,7 +12,7 @@ import {
 import type { TechniqueDefinition } from "../sprint1/technique-definition.js";
 import { ABILITY_KEYS } from "../abilities.js";
 import type { AbilityKey } from "../abilities.js";
-import { failure, success } from "../validation.js";
+import { failure } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import {
   GENERATED_TECHNIQUE_MATERIALIZATION_EVALUATION_POLICY,
@@ -30,9 +30,7 @@ import type {
 const PRIMARY_STAT_ORDER: readonly AbilityKey[] = ABILITY_KEYS;
 
 function sortTechniqueIds(ids: readonly string[]): TechniqueId[] {
-  return [...ids]
-    .map((id) => asTechniqueId(id))
-    .sort((a, b) => compareUnicodeCodePoints(a, b));
+  return [...ids].map((id) => asTechniqueId(id)).sort((a, b) => compareUnicodeCodePoints(a, b));
 }
 
 function synthesizeIntegerStat(
@@ -59,10 +57,7 @@ function mergePrimaryStats(sources: readonly TechniqueDefinition[]): AbilityKey[
   return PRIMARY_STAT_ORDER.filter((key) => seen.has(key));
 }
 
-function mergeTags(
-  sources: readonly TechniqueDefinition[],
-  generatedTag: string,
-): string[] {
+function mergeTags(sources: readonly TechniqueDefinition[], generatedTag: string): string[] {
   const seen = new Set<string>();
   for (const definition of sources) {
     for (const tag of definition.tags) {
@@ -132,8 +127,7 @@ export function materializeGeneratedTechniqueDefinition(input: {
   const { foundingHistory, displayName } = input.request;
   const canonicalSourceIds = sortTechniqueIds(foundingHistory.sourceTechniqueIds);
 
-  const tierPolicy =
-    materializationPolicy.byResearchTier[foundingHistory.researchTier];
+  const tierPolicy = materializationPolicy.byResearchTier[foundingHistory.researchTier];
   if (tierPolicy === undefined) {
     issues.push({
       path: "/generatedTechniqueMaterialization/byResearchTier",
@@ -220,11 +214,7 @@ export function materializeGeneratedTechniqueDefinition(input: {
     teachingProficiencyRequired: primarySource.teachingProficiencyRequired,
     secrecy: primarySource.secrecy,
     power: Math.max(1, boundedPower),
-    accuracy: synthesizeIntegerStat(
-      sourceDefinitions,
-      (def) => def.accuracy,
-      tierPolicy.accuracy,
-    ),
+    accuracy: synthesizeIntegerStat(sourceDefinitions, (def) => def.accuracy, tierPolicy.accuracy),
     activationDifficulty: synthesizeIntegerStat(
       sourceDefinitions,
       (def) => def.activationDifficulty,

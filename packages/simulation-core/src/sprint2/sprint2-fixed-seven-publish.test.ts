@@ -8,7 +8,10 @@ import {
   generateInitialWorld,
   validateInitialWorldConfig,
 } from "../index.js";
-import { createNodeSha256Provider, createTinyNameData } from "../test-fixtures/name-data-loader.fixture.js";
+import {
+  createNodeSha256Provider,
+  createTinyNameData,
+} from "../test-fixtures/name-data-loader.fixture.js";
 import {
   buildFreshCheckpointRunContext,
   createSmallCheckpointTestConfig,
@@ -123,7 +126,9 @@ function buildProjectionInput(
 describe("S02-011 fixed-seven publish OUT-001..008", () => {
   it("OUT-001 successful completed run contains only the fixed seven", () => {
     const detailedLog = createEmptyBattleDetailedLog();
-    const put = expectOk(putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider));
+    const put = expectOk(
+      putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider),
+    );
     const detailedLogHash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
     const retained = buildTestRecord({ detailedLogHash, detailedLogRetentionStatus: "retained" });
     const input = buildProjectionInput([retained], put.store);
@@ -164,10 +169,10 @@ describe("S02-011 fixed-seven publish OUT-001..008", () => {
 
   it("OUT-003 extra staging entry rejects publish", () => {
     const membership = validateFixedSevenStagingMembership({
-      ...Object.fromEntries(FIXED_SEVEN_OUTPUT_FILE_NAMES.map((name) => [name, "{}"])) as Record<
+      ...(Object.fromEntries(FIXED_SEVEN_OUTPUT_FILE_NAMES.map((name) => [name, "{}"])) as Record<
         (typeof FIXED_SEVEN_OUTPUT_FILE_NAMES)[number],
         string
-      >,
+      >),
       "sidecar.json": "{}",
     });
     expect(membership.ok).toBe(false);
@@ -175,7 +180,6 @@ describe("S02-011 fixed-seven publish OUT-001..008", () => {
 
   it("OUT-004 staging directory is not listed as completed run", () => {
     const store = new Sprint2FixedSevenPublicationStore();
-    store["#staging" as never]; // not accessible; use publish mid-failure
     const input = buildProjectionInput([], createEmptyDetailedLogPayloadStore());
     const output = expectOk(buildSprint2FixedSevenRunOutput(input, provider));
     publishSprint2FixedSevenRun(store, {
@@ -192,7 +196,9 @@ describe("S02-011 fixed-seven publish OUT-001..008", () => {
 
   it("OUT-005 retained StoredBattleResult projects detailed body in final-world", () => {
     const detailedLog = createEmptyBattleDetailedLog();
-    const put = expectOk(putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider));
+    const put = expectOk(
+      putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider),
+    );
     const detailedLogHash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));
     const retained = buildTestRecord({ detailedLogHash, detailedLogRetentionStatus: "retained" });
     const materialized = expectOk(
@@ -204,7 +210,7 @@ describe("S02-011 fixed-seven publish OUT-001..008", () => {
 
   it("OUT-006 pruned result projects null detailed body and preserves hashes", () => {
     const detailedLog = createEmptyBattleDetailedLog();
-    let store = expectOk(
+    const store = expectOk(
       putDetailedLogPayloadIfAbsent(createEmptyDetailedLogPayloadStore(), detailedLog, provider),
     ).store;
     const detailedLogHash = expectOk(computeDetailedLogPayloadHash(detailedLog, provider));

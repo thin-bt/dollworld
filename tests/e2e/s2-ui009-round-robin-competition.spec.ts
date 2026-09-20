@@ -51,7 +51,9 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
 
     // First real match: this must transition from the annual schedule to the active tournament detail.
     await step.click();
-    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({
+      timeout: 60_000,
+    });
     await expect(page.getByTestId("competition-round-robin-history")).toBeVisible();
 
     // Regression for the original two-person placeholder: the accepted participant plan must expose >2.
@@ -76,15 +78,15 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
 
     for (let expectedCompleted = 2; expectedCompleted <= matchesTotal; expectedCompleted += 1) {
       await step.click();
-      await expect
-        .poll(completedMatches, { timeout: 60_000 })
-        .toBe(expectedCompleted);
+      await expect.poll(completedMatches, { timeout: 60_000 }).toBe(expectedCompleted);
       if (expectedCompleted < matchesTotal) {
         await expect(step).toBeEnabled();
       }
     }
 
-    await expect(page.getByTestId("competition-finished")).toContainText("この大会は終了しました。");
+    await expect(page.getByTestId("competition-finished")).toContainText(
+      "この大会は終了しました。",
+    );
     await expect(page.getByTestId("competition-champion")).toBeVisible();
     await expect(page.getByRole("heading", { name: "年間順位" })).toBeVisible();
     expect(await historyRows.count()).toBe(matchesTotal);

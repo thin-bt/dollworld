@@ -108,8 +108,7 @@ export function projectBracketProgress(input: {
         })
       : null;
 
-  const groupPhaseComplete =
-    groupProgress === null ? true : groupProgress.nextPairIndex === null;
+  const groupPhaseComplete = groupProgress === null ? true : groupProgress.nextPairIndex === null;
   const groupMatchesCompleted = groupProgress?.matchesCompleted ?? 0;
   const groupMatchesTotal = groupProgress?.matchesTotal ?? 0;
 

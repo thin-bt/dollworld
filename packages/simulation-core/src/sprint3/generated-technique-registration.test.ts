@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { computeTechniqueCatalogHash, validateTechniqueCatalog } from "../sprint1/technique-catalog.js";
-import { validateTechniqueDefinition, type TechniqueDefinition } from "../sprint1/technique-definition.js";
+import {
+  computeTechniqueCatalogHash,
+  validateTechniqueCatalog,
+} from "../sprint1/technique-catalog.js";
+import {
+  validateTechniqueDefinition,
+  type TechniqueDefinition,
+} from "../sprint1/technique-definition.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import {
   buildMaterializationRequestFromGenerationSuccess,
@@ -17,7 +23,10 @@ import {
   materializeGeneratedTechniqueDefinition,
 } from "./materialize-generated-technique-definition.js";
 import { evaluateOriginalTechniqueGenerationAttempt } from "./evaluate-original-technique-lifecycle.js";
-import { createSprint3Balance090ConfigInput, createSprint3Balance100ConfigInput } from "./sprint3-config-defaults.js";
+import {
+  createSprint3Balance090ConfigInput,
+  createSprint3Balance100ConfigInput,
+} from "./sprint3-config-defaults.js";
 import { validateSprint3Config } from "./validate-sprint3-config.js";
 import type { OriginalTechniqueFoundingHistoryRecord } from "./types.js";
 
@@ -272,11 +281,8 @@ describe("S03-010 generated technique registration", () => {
     );
     expect(registered.overlay.definitions).toHaveLength(1);
     expect(
-      lookupTechniqueDefinitionWithOverlay(
-        baseCatalog,
-        registered.overlay,
-        "tech_full_adapter",
-      )?.name,
+      lookupTechniqueDefinitionWithOverlay(baseCatalog, registered.overlay, "tech_full_adapter")
+        ?.name,
     ).toBe("Full Adapter Technique");
   });
 

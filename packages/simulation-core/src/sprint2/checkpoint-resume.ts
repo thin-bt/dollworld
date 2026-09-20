@@ -29,9 +29,7 @@ export type ResumeCheckpointInput = {
   expectedSimulationId?: Sprint2CheckpointRunContext["executionState"]["simulationId"];
 };
 
-function rebuildPayloadStore(
-  bundle: Sprint2CheckpointBundle,
-): DetailedLogPayloadStore {
+function rebuildPayloadStore(bundle: Sprint2CheckpointBundle): DetailedLogPayloadStore {
   const entries = new Map<string, { detailedLogHash: string; canonicalUtf8Bytes: string }>();
   for (const entry of bundle.payloadStore.entries) {
     entries.set(entry.detailedLogHash, {
@@ -143,9 +141,9 @@ export function resumeSprint2CheckpointFromStore(
   return restored;
 }
 
-export function rejectUnsupportedDraftCheckpointBundle(
-  bundle: { schemaVersion?: string },
-): ValidationResult<true> {
+export function rejectUnsupportedDraftCheckpointBundle(bundle: {
+  schemaVersion?: string;
+}): ValidationResult<true> {
   if (bundle.schemaVersion === "0.0.1-draft") {
     return failure([
       {

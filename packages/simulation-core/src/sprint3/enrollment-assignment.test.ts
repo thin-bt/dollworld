@@ -68,10 +68,7 @@ describe("S03-003 enrollment assignment", () => {
     if (!config.ok) {
       return;
     }
-    const outcome = evaluateEnrollmentAssignment(
-      config.value,
-      enrollmentRecord({ childAge: 7 }),
-    );
+    const outcome = evaluateEnrollmentAssignment(config.value, enrollmentRecord({ childAge: 7 }));
     expect(outcome.ok).toBe(true);
     if (!outcome.ok) {
       return;

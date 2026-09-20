@@ -13,9 +13,7 @@ export interface Ui009TournamentFormatConfig {
 }
 
 export type Ui009AcceptedTournamentFormat =
-  | "round_robin"
-  | "single_elimination"
-  | "group_plus_knockout";
+  "round_robin" | "single_elimination" | "group_plus_knockout";
 
 export interface Ui009TournamentFormatSelection {
   readonly acceptedFormat: Ui009AcceptedTournamentFormat;

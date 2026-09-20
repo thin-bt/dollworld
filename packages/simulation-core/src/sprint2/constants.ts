@@ -53,8 +53,7 @@ export const CHAMPIONSHIP_CYCLE_CLASSIFICATIONS = [
   "championship_year",
   "non_championship_year",
 ] as const;
-export type ChampionshipCycleClassification =
-  (typeof CHAMPIONSHIP_CYCLE_CLASSIFICATIONS)[number];
+export type ChampionshipCycleClassification = (typeof CHAMPIONSHIP_CYCLE_CLASSIFICATIONS)[number];
 
 export const NORMAL_RANK_KEYS = ["F", "E", "D", "C", "B"] as const;
 export type NormalRankKey = (typeof NORMAL_RANK_KEYS)[number];
@@ -147,7 +146,8 @@ export const SPRINT2_TOURNAMENT_EVENT_TYPES = [
 export type Sprint2TournamentEventType = (typeof SPRINT2_TOURNAMENT_EVENT_TYPES)[number];
 
 export const TOURNAMENT_FINISHED_COMPLETION_KINDS = ["winner_determined", "no_winner"] as const;
-export type TournamentFinishedCompletionKind = (typeof TOURNAMENT_FINISHED_COMPLETION_KINDS)[number];
+export type TournamentFinishedCompletionKind =
+  (typeof TOURNAMENT_FINISHED_COMPLETION_KINDS)[number];
 
 /** Fixed-seven output file names (immutable Sprint1 contract). */
 export const FIXED_SEVEN_OUTPUT_FILE_NAMES = [

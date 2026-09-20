@@ -31,7 +31,11 @@ export function computePreviousWorldYearEarningsSnapshotHash(
   snapshot: Omit<PreviousWorldYearEarningsSnapshot, "snapshotHash">,
   provider: Sha256Provider,
 ): ValidationResult<string> {
-  return safeHashUtf8(provider, toCanonicalJson(buildSnapshotHashMaterial(snapshot)), "/snapshotHash");
+  return safeHashUtf8(
+    provider,
+    toCanonicalJson(buildSnapshotHashMaterial(snapshot)),
+    "/snapshotHash",
+  );
 }
 
 export function buildPreviousWorldYearEarningsSnapshot(

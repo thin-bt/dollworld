@@ -135,13 +135,7 @@ export function validateTournamentIdGeneratorState(
     TOURNAMENT_ID_GENERATOR_VERSION,
     issues,
   );
-  const namespace = requireLiteralString(
-    object,
-    "namespace",
-    "",
-    TOURNAMENT_ID_NAMESPACE,
-    issues,
-  );
+  const namespace = requireLiteralString(object, "namespace", "", TOURNAMENT_ID_NAMESPACE, issues);
   const nextSequence = requireIntegerInRange(
     object,
     "nextSequence",

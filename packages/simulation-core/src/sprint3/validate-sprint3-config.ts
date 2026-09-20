@@ -27,10 +27,7 @@ import {
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
 } from "./constants.js";
-import {
-  isLearningTier,
-  isTechniqueConsumptionClass,
-} from "../sprint1/technique-enums.js";
+import { isLearningTier, isTechniqueConsumptionClass } from "../sprint1/technique-enums.js";
 import {
   createDefaultSprint3ConfigInput,
   createSprint3Balance020ConfigInput,
@@ -1220,7 +1217,8 @@ function parseOriginalTechniqueLifecycle(
     if (CONFIG_VERSIONS_WITH_ORIGINAL_TECHNIQUE_LIFECYCLE.has(configVersion)) {
       issues.push({
         path: "/originalTechniqueLifecycle",
-        message: "originalTechniqueLifecycle is required on sprint3-balance-0.9.0+ lifecycle config versions",
+        message:
+          "originalTechniqueLifecycle is required on sprint3-balance-0.9.0+ lifecycle config versions",
         actual: undefined,
         expected: "object",
       });
@@ -1230,7 +1228,8 @@ function parseOriginalTechniqueLifecycle(
   if (!CONFIG_VERSIONS_WITH_ORIGINAL_TECHNIQUE_LIFECYCLE.has(configVersion)) {
     issues.push({
       path: "/originalTechniqueLifecycle",
-      message: "originalTechniqueLifecycle is only allowed on sprint3-balance-0.9.0+ lifecycle config versions",
+      message:
+        "originalTechniqueLifecycle is only allowed on sprint3-balance-0.9.0+ lifecycle config versions",
       actual: configVersion,
       expected: `${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}|${SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION}`,
     });
@@ -1640,9 +1639,7 @@ function parseGeneratedTechniqueMaterialization(
     "/generatedTechniqueMaterialization/byResearchTier",
     issues,
   );
-  let byResearchTier:
-    | Sprint3GeneratedTechniqueMaterializationConfig["byResearchTier"]
-    | undefined;
+  let byResearchTier: Sprint3GeneratedTechniqueMaterializationConfig["byResearchTier"] | undefined;
   if (tiersObject !== undefined) {
     rejectUnknownKeys(
       tiersObject,

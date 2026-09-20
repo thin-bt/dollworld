@@ -4,7 +4,10 @@
 import { createWorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../../world-date.js";
 import { asMatchId, asPersonId, asSimulationId, asTournamentId } from "../../ids.js";
 import { BATTLE_FINISHED_EVENT_TYPE } from "../../sprint1/battle-finished-event.js";
-import { BATTLE_SIMULATION_SOURCE_PROCESSOR, BATTLE_STARTED_EVENT_TYPE } from "../../sprint1/battle-started-event.js";
+import {
+  BATTLE_SIMULATION_SOURCE_PROCESSOR,
+  BATTLE_STARTED_EVENT_TYPE,
+} from "../../sprint1/battle-started-event.js";
 import { SPRINT2_TOURNAMENT_EVENT_PROCESSOR } from "../constants.js";
 import {
   PERSON_RANK_PROMOTED_EVENT_TYPE,
@@ -44,7 +47,9 @@ function baseEntities(overrides: Partial<Sprint2EventEntities> = {}): Sprint2Eve
   };
 }
 
-function expectEnvelope(envelope: ReturnType<typeof allocateSprint2EventEnvelope>): Sprint2EventEnvelope {
+function expectEnvelope(
+  envelope: ReturnType<typeof allocateSprint2EventEnvelope>,
+): Sprint2EventEnvelope {
   if (!envelope.ok) {
     throw new Error(`fixture envelope failed: ${JSON.stringify(envelope.issues)}`);
   }
@@ -89,7 +94,7 @@ export function buildEvt001BattleCompletedSequence(): Sprint2EventEnvelope[] {
   );
   const recorded = expectEnvelope(
     allocateSprint2EventEnvelope({
-      sequence: sequence++,
+      sequence: sequence,
       simulationId: fixtureSimulationId,
       importance: "normal",
       worldDate: fixtureWorldDate,
@@ -131,7 +136,7 @@ export function buildEvt002RoundTournamentCompleteSequence(): Sprint2EventEnvelo
   );
   const finished = expectEnvelope(
     allocateSprint2EventEnvelope({
-      sequence: sequence++,
+      sequence: sequence,
       simulationId: fixtureSimulationId,
       importance: "major",
       worldDate: fixtureWorldDate,
@@ -155,10 +160,10 @@ export function buildEvt002RoundTournamentCompleteSequence(): Sprint2EventEnvelo
 
 export function buildEvt003PromotionSequence(): Sprint2EventEnvelope[] {
   const base = buildEvt002RoundTournamentCompleteSequence();
-  let sequence = base.length;
+  const sequence = base.length;
   const promoted = expectEnvelope(
     allocateSprint2EventEnvelope({
-      sequence: sequence++,
+      sequence: sequence,
       simulationId: fixtureSimulationId,
       importance: "major",
       worldDate: fixtureWorldDate,
@@ -207,7 +212,7 @@ export function buildEvt006SQualificationSequence(): Sprint2EventEnvelope[] {
   );
   const promoted = expectEnvelope(
     allocateSprint2EventEnvelope({
-      sequence: sequence++,
+      sequence: sequence,
       simulationId: fixtureSimulationId,
       importance: "historic",
       worldDate: fixtureWorldDate,

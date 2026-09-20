@@ -11,7 +11,10 @@ import {
   type TournamentBracketDefinition,
   type TournamentId,
 } from "@shared-world/simulation-core";
-import { defaultCompetitionRuleHash, defaultTournamentBattleActionIdentity } from "./competition-engine-helpers.js";
+import {
+  defaultCompetitionRuleHash,
+  defaultTournamentBattleActionIdentity,
+} from "./competition-engine-helpers.js";
 import { restoreDetailedLogPayloadStore } from "./competition-payload-store.js";
 import { projectRoundRobinProgress } from "./competition-round-robin-progress.js";
 
@@ -31,7 +34,10 @@ export type ExecuteNextRoundRobinMatchOutcome =
       readonly pairIndex: number;
       readonly atomic: ReturnType<typeof executeTournamentBattleAtomic>;
     }
-  | { readonly kind: "domain_failure"; readonly issues: readonly { path: string; message: string }[] };
+  | {
+      readonly kind: "domain_failure";
+      readonly issues: readonly { path: string; message: string }[];
+    };
 
 /**
  * Execute the next accepted round-robin structural pair from persisted UI009 state.
@@ -52,7 +58,9 @@ export function executeNextRoundRobinMatch(input: {
   if (payloadStore === null) {
     return {
       kind: "domain_failure",
-      issues: [{ path: "/payloadStore", message: "competition detailed-log payload store is invalid" }],
+      issues: [
+        { path: "/payloadStore", message: "competition detailed-log payload store is invalid" },
+      ],
     };
   }
   const progress = projectRoundRobinProgress({ bracketDefinition, storedRecords });

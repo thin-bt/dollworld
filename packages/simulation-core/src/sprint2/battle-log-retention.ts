@@ -3,7 +3,7 @@
  */
 import type { BattleKind } from "../sprint1/battle-enums.js";
 import { failure, success } from "../validation.js";
-import type { ValidationIssue, ValidationResult } from "../validation.js";
+import type { ValidationResult } from "../validation.js";
 import type { Sha256Provider } from "../sha256-provider.js";
 import type { Sprint2Config } from "./types.js";
 import {
@@ -101,7 +101,9 @@ export function planRetentionPruneUpdates(
   currentWorldYear: number,
   config: Sprint2Config,
   battleKindByMatchId: Readonly<Partial<Record<string, BattleKind>>>,
-): ValidationResult<readonly { matchId: StoredBattleResultRecord["matchId"]; shouldPrune: boolean }[]> {
+): ValidationResult<
+  readonly { matchId: StoredBattleResultRecord["matchId"]; shouldPrune: boolean }[]
+> {
   const plan: { matchId: StoredBattleResultRecord["matchId"]; shouldPrune: boolean }[] = [];
   for (const record of records) {
     const battleKind = battleKindByMatchId[record.matchId];
@@ -115,12 +117,7 @@ export function planRetentionPruneUpdates(
         },
       ]);
     }
-    const shouldPrune = shouldPruneDetailedLogRecord(
-      record,
-      currentWorldYear,
-      config,
-      battleKind,
-    );
+    const shouldPrune = shouldPruneDetailedLogRecord(record, currentWorldYear, config, battleKind);
     if (!shouldPrune.ok) {
       return shouldPrune;
     }
@@ -136,12 +133,7 @@ export function applyRetentionPrunePlan(
   battleKindByMatchId: Readonly<Partial<Record<string, BattleKind>>>,
   provider: Sha256Provider,
 ): ValidationResult<readonly StoredBattleResultRecord[]> {
-  const plan = planRetentionPruneUpdates(
-    records,
-    currentWorldYear,
-    config,
-    battleKindByMatchId,
-  );
+  const plan = planRetentionPruneUpdates(records, currentWorldYear, config, battleKindByMatchId);
   if (!plan.ok) {
     return plan;
   }
@@ -161,7 +153,7 @@ export function applyRetentionPrunePlan(
   return success(Object.freeze(next));
 }
 
-export function isSummaryOrResultPermanent(_record: StoredBattleResultRecord): true {
+export function isSummaryOrResultPermanent(): true {
   // Official result/summary identity (battleResultHash) is never age-pruned; only detailedLog status changes.
   return true;
 }

@@ -9,7 +9,10 @@ import {
   AUTONOMOUS_ORIGINAL_TECHNIQUE_WEEKLY_RESEARCH_INCREMENT_TENTHS,
   resolveAutonomousOriginalTechniqueWeeklyResearchIncrementTenths,
 } from "./resolve-autonomous-original-technique-weekly-research-increment.js";
-import { createSprint3Balance080ConfigInput, createSprint3Balance090ConfigInput } from "./sprint3-config-defaults.js";
+import {
+  createSprint3Balance080ConfigInput,
+  createSprint3Balance090ConfigInput,
+} from "./sprint3-config-defaults.js";
 import { validateSprint3Config } from "./validate-sprint3-config.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import type { PersonId } from "../ids.js";
@@ -32,9 +35,7 @@ function expectOk<T>(result: { ok: true; value: T } | { ok: false }): T {
 
 const PERSON_ID = "person_otl_runtime_001" as PersonId;
 
-function minimalEligibleWorldState(overrides: {
-  researchSeedTenths?: number;
-} = {}): WorldEngineState {
+function minimalEligibleWorldState(): WorldEngineState {
   const sprint1State = expectOk(createInitialSprint1PersonState(50));
   const withTechnique = {
     ...sprint1State,
@@ -54,7 +55,10 @@ function minimalEligibleWorldState(overrides: {
     simulationId: "sim_otl_test",
     seed: 4242,
     configHash: "0".repeat(64),
-    worldDate: createWorldDate({ year: 1, month: 1, weekOfMonth: 1 }, DEFAULT_WORLD_CALENDAR_CONFIG),
+    worldDate: createWorldDate(
+      { year: 1, month: 1, weekOfMonth: 1 },
+      DEFAULT_WORLD_CALENDAR_CONFIG,
+    ),
     persons: [
       {
         personId: PERSON_ID,

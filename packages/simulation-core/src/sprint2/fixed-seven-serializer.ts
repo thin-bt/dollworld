@@ -18,8 +18,7 @@ export function measureUtf8Bytes(text: string): number {
     let codePoint = text.charCodeAt(index);
     if (codePoint >= 0xd800 && codePoint <= 0xdbff) {
       index += 1;
-      codePoint =
-        ((codePoint - 0xd800) << 10) + (text.charCodeAt(index)! - 0xdc00) + 0x10000;
+      codePoint = ((codePoint - 0xd800) << 10) + (text.charCodeAt(index)! - 0xdc00) + 0x10000;
     }
     if (codePoint <= 0x7f) {
       length += 1;
@@ -34,7 +33,9 @@ export function measureUtf8Bytes(text: string): number {
   return length;
 }
 
-export function serializeFixedSevenToMemoryReference(output: FixedSevenRunOutput): FixedSevenRunOutput {
+export function serializeFixedSevenToMemoryReference(
+  output: FixedSevenRunOutput,
+): FixedSevenRunOutput {
   const reference = {} as FixedSevenRunOutput;
   for (const fileName of FIXED_SEVEN_OUTPUT_FILE_NAMES) {
     reference[fileName] = output[fileName];
@@ -42,7 +43,9 @@ export function serializeFixedSevenToMemoryReference(output: FixedSevenRunOutput
   return reference;
 }
 
-export function serializeFixedSevenStreaming(output: FixedSevenRunOutput): FixedSevenStreamingChunk[] {
+export function serializeFixedSevenStreaming(
+  output: FixedSevenRunOutput,
+): FixedSevenStreamingChunk[] {
   const chunks: FixedSevenStreamingChunk[] = [];
   for (const fileName of FIXED_SEVEN_OUTPUT_FILE_NAMES) {
     const text = output[fileName];
@@ -63,7 +66,9 @@ export function serializeFixedSevenStreaming(output: FixedSevenRunOutput): Fixed
   return chunks;
 }
 
-export function reassembleFixedSevenFromStreaming(chunks: readonly FixedSevenStreamingChunk[]): FixedSevenRunOutput {
+export function reassembleFixedSevenFromStreaming(
+  chunks: readonly FixedSevenStreamingChunk[],
+): FixedSevenRunOutput {
   const buffers = new Map<(typeof FIXED_SEVEN_OUTPUT_FILE_NAMES)[number], string[]>();
   for (const fileName of FIXED_SEVEN_OUTPUT_FILE_NAMES) {
     buffers.set(fileName, []);

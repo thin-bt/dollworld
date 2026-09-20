@@ -38,7 +38,13 @@ type RoundRobinProgress = {
   matchesCompleted: number;
   nextPairIndex: number | null;
   history: unknown[];
-  matrix: Array<{ personId: string; wins: number; losses: number; played: number; cells: unknown[] }>;
+  matrix: Array<{
+    personId: string;
+    wins: number;
+    losses: number;
+    played: number;
+    cells: unknown[];
+  }>;
 };
 
 type CompetitionView = Record<string, unknown> & {
@@ -69,17 +75,17 @@ function asRank(value: unknown, fallback: Rank): Rank {
 }
 
 function stripDisallowedRankFields(person: Person): Person {
-  const {
-    currentRank: _currentRank,
-    highestRank: _highestRank,
-    retirementRank: _retirementRank,
-    ...withoutRankFields
-  } = person as Person & {
-    currentRank?: unknown;
-    highestRank?: unknown;
-    retirementRank?: unknown;
+  const copy = {
+    ...(person as Person & {
+      currentRank?: unknown;
+      highestRank?: unknown;
+      retirementRank?: unknown;
+    }),
   };
-  return withoutRankFields as Person;
+  delete copy.currentRank;
+  delete copy.highestRank;
+  delete copy.retirementRank;
+  return copy as Person;
 }
 
 function normalizeCareerStatusForAge(person: Person, currentAge: number): Person {
@@ -101,9 +107,7 @@ function normalizeCareerStatusForAge(person: Person, currentAge: number): Person
   }
   if (careerStatus === "active_competitor") {
     const currentRank =
-      person.careerStatus === "active_competitor"
-        ? asRank(person.currentRank, "F")
-        : "F";
+      person.careerStatus === "active_competitor" ? asRank(person.currentRank, "F") : "F";
     const highestRank =
       person.careerStatus === "active_competitor"
         ? asRank(person.highestRank, currentRank)
@@ -173,7 +177,11 @@ async function bootstrapReadySession(app: UiApp): Promise<{
   csrf: string;
   uiRevision: number;
 }> {
-  const sessionRes = await app.inject({ method: "GET", url: `${API_PREFIX}/session`, headers: { host: HOST } });
+  const sessionRes = await app.inject({
+    method: "GET",
+    url: `${API_PREFIX}/session`,
+    headers: { host: HOST },
+  });
   const sessionId = parseSetCookieSessionId(sessionRes.headers["set-cookie"]);
   const sessionBody = JSON.parse(sessionRes.body) as Envelope;
   const csrf = (sessionBody.data as { csrfToken: string }).csrfToken;
@@ -241,9 +249,7 @@ describe("UI-009 competition progression", () => {
     }
   });
 
-  it(
-    "GET idle then steps every accepted round-robin pair without fabricating final standings",
-    async () => {
+  it("GET idle then steps every accepted round-robin pair without fabricating final standings", async () => {
     app = await createUiApp({
       publicOrigin: ORIGIN,
       enableTestProbe: false,
@@ -267,15 +273,18 @@ describe("UI-009 competition progression", () => {
     };
     expect(idleData.preStartPreview).not.toBeNull();
     expect(idleData.participantIds.length).toBeGreaterThanOrEqual(2);
-    expect(idleData.preStartPreview!.participantDisplayNames).toHaveLength(idleData.participantIds.length);
+    expect(idleData.preStartPreview!.participantDisplayNames).toHaveLength(
+      idleData.participantIds.length,
+    );
     expect(idleData.tournamentKindLabel).toBe("通常大会");
-    const scheduleOverview = (idleBody.data as { scheduleOverview: { entries: unknown[]; worldTimeLabel: string } })
-      .scheduleOverview;
+    const scheduleOverview = (
+      idleBody.data as { scheduleOverview: { entries: unknown[]; worldTimeLabel: string } }
+    ).scheduleOverview;
     expect(scheduleOverview.worldTimeLabel.length).toBeGreaterThan(0);
     expect(scheduleOverview.entries.length).toBeGreaterThan(10);
     expect(
-      (idleBody.data as { scheduleOverview: { playableSelectionKey: string | null } }).scheduleOverview
-        .playableSelectionKey,
+      (idleBody.data as { scheduleOverview: { playableSelectionKey: string | null } })
+        .scheduleOverview.playableSelectionKey,
     ).not.toBeNull();
 
     let revision = uiRevision;
@@ -328,64 +337,60 @@ describe("UI-009 competition progression", () => {
     expect(simulation.statusCode).toBe(200);
     const simulationBody = JSON.parse(simulation.body) as Envelope;
     expect(simulationBody.ok).toBe(true);
-    expect((simulationBody.data as { lastOperation: { operation: string } }).lastOperation.operation).toBe("start");
-  },
-  120_000,
-  );
+    expect(
+      (simulationBody.data as { lastOperation: { operation: string } }).lastOperation.operation,
+    ).toBe("start");
+  }, 120_000);
 
-  it(
-    "GET competition match detail exposes retained detailed log items after a played match",
-    async () => {
-      app = await createUiApp({
-        publicOrigin: ORIGIN,
-        enableTestProbe: false,
-        repoRoot: REPO_ROOT,
-        processKeys: createTestProcessSecurityContext(911),
-      });
-      const { cookie, csrf, uiRevision } = await bootstrapReadySession(app);
-      let revision = uiRevision;
-      let competition: CompetitionView | null = null;
-      for (let guard = 0; guard < 128; guard += 1) {
-        const stepped = await stepCompetition(app, cookie, csrf, revision);
-        revision = stepped.envelope.uiRevision;
-        competition = stepped.competition;
-        if (competition.lifecyclePhase === "finished") {
-          break;
-        }
+  it("GET competition match detail exposes retained detailed log items after a played match", async () => {
+    app = await createUiApp({
+      publicOrigin: ORIGIN,
+      enableTestProbe: false,
+      repoRoot: REPO_ROOT,
+      processKeys: createTestProcessSecurityContext(911),
+    });
+    const { cookie, csrf, uiRevision } = await bootstrapReadySession(app);
+    let revision = uiRevision;
+    let competition: CompetitionView | null = null;
+    for (let guard = 0; guard < 128; guard += 1) {
+      const stepped = await stepCompetition(app, cookie, csrf, revision);
+      revision = stepped.envelope.uiRevision;
+      competition = stepped.competition;
+      if (competition.lifecyclePhase === "finished") {
+        break;
       }
-      expect(competition).not.toBeNull();
-      expect(competition!.roundRobinProgress).not.toBeNull();
-      const played = competition!.roundRobinProgress!.history.find(
-        (row) =>
-          typeof row === "object" &&
-          row !== null &&
-          (row as { matchId?: string | null }).matchId !== null &&
-          (row as { matchId?: string | null }).matchId !== undefined,
-      ) as { matchId: string } | undefined;
-      expect(played).toBeDefined();
-      const matchId = played!.matchId;
-      const detailRes = await app!.inject({
-        method: "GET",
-        url: `${API_PREFIX}/competition/matches/${encodeURIComponent(matchId)}`,
-        headers: { host: HOST, cookie },
-      });
-      expect(detailRes.statusCode).toBe(200);
-      const detailBody = JSON.parse(detailRes.body) as Envelope;
-      expect(detailBody.ok).toBe(true);
-      const view = detailBody.data as {
-        matchId: string;
-        detailedLogAvailable: boolean;
-        logItems: unknown[];
-        detailedLogActionCount: number;
-      };
-      expect(view.matchId).toBe(matchId);
-      if (view.detailedLogAvailable) {
-        expect(view.logItems.length).toBeGreaterThan(0);
-        expect(view.detailedLogActionCount).toBeGreaterThan(0);
-      }
-    },
-    120_000,
-  );
+    }
+    expect(competition).not.toBeNull();
+    expect(competition!.roundRobinProgress).not.toBeNull();
+    const played = competition!.roundRobinProgress!.history.find(
+      (row) =>
+        typeof row === "object" &&
+        row !== null &&
+        (row as { matchId?: string | null }).matchId !== null &&
+        (row as { matchId?: string | null }).matchId !== undefined,
+    ) as { matchId: string } | undefined;
+    expect(played).toBeDefined();
+    const matchId = played!.matchId;
+    const detailRes = await app!.inject({
+      method: "GET",
+      url: `${API_PREFIX}/competition/matches/${encodeURIComponent(matchId)}`,
+      headers: { host: HOST, cookie },
+    });
+    expect(detailRes.statusCode).toBe(200);
+    const detailBody = JSON.parse(detailRes.body) as Envelope;
+    expect(detailBody.ok).toBe(true);
+    const view = detailBody.data as {
+      matchId: string;
+      detailedLogAvailable: boolean;
+      logItems: unknown[];
+      detailedLogActionCount: number;
+    };
+    expect(view.matchId).toBe(matchId);
+    if (view.detailedLogAvailable) {
+      expect(view.logItems.length).toBeGreaterThan(0);
+      expect(view.detailedLogActionCount).toBeGreaterThan(0);
+    }
+  }, 120_000);
 
   it("accepted UI009 start seed can initialize competition without runtime normalization", async () => {
     app = await createUiApp({
@@ -394,7 +399,11 @@ describe("UI-009 competition progression", () => {
       repoRoot: REPO_ROOT,
       processKeys: createTestProcessSecurityContext(910),
     });
-    const sessionRes = await app.inject({ method: "GET", url: `${API_PREFIX}/session`, headers: { host: HOST } });
+    const sessionRes = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/session`,
+      headers: { host: HOST },
+    });
     const sessionId = parseSetCookieSessionId(sessionRes.headers["set-cookie"]);
     const csrf = (JSON.parse(sessionRes.body) as Envelope).data!.csrfToken as string;
     const start = await app.inject({

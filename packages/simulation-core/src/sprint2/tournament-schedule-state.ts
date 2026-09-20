@@ -7,10 +7,7 @@ import { calendarMonthFromOffset, createWorldDate } from "../world-date.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import { TOURNAMENT_SCHEDULE_STATE_SCHEMA_VERSION } from "./constants.js";
-import {
-  classifyChampionshipCycleYear,
-  generateSchedulePlan,
-} from "./tournament-schedule-plan.js";
+import { classifyChampionshipCycleYear, generateSchedulePlan } from "./tournament-schedule-plan.js";
 import {
   reserveNextTournamentId,
   validateTournamentIdGeneratorState,

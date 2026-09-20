@@ -7,7 +7,10 @@ import type { ValidationResult } from "../validation.js";
 import type { BattleDetailedLog } from "../sprint1/battle-state.js";
 import { validateBattleDetailedLog } from "../sprint1/battle-state.js";
 import { safeHashUtf8 } from "../sprint1/safe-sha256.js";
-import { computeDetailedLogPayloadBytes, getDetailedLogPayloadBytes } from "./detailed-log-payload-store.js";
+import {
+  computeDetailedLogPayloadBytes,
+  getDetailedLogPayloadBytes,
+} from "./detailed-log-payload-store.js";
 import type { DetailedLogPayloadStore } from "./detailed-log-payload-store.js";
 import { MATERIALIZED_BATTLE_RESULT_VIEW_SCHEMA_VERSION } from "./constants.js";
 import {

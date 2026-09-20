@@ -359,10 +359,9 @@ function validateSlotBinding(input: TournamentMatchPlanBuildInput): ValidationRe
   return success(null);
 }
 
-function buildMatchPlanHashInput(plan: Omit<TournamentMatchPlan, "matchPlanIdentityHash">): Record<
-  string,
-  unknown
-> {
+function buildMatchPlanHashInput(
+  plan: Omit<TournamentMatchPlan, "matchPlanIdentityHash">,
+): Record<string, unknown> {
   return {
     schemaVersion: plan.schemaVersion,
     tournamentId: plan.tournamentId,
@@ -417,7 +416,12 @@ export function buildTournamentMatchPlan(
 
   const reservation = reserveNextMatchId(generatorClone.value);
   if (reservation.kind === "failure") {
-    return failure(reservation.issues.map((issue) => ({ ...issue, path: `/matchIdGeneratorState${issue.path}` })));
+    return failure(
+      reservation.issues.map((issue) => ({
+        ...issue,
+        path: `/matchIdGeneratorState${issue.path}`,
+      })),
+    );
   }
 
   const structuralSlotKey = canonicalStructuralSlotKey(input.structuralSlot);

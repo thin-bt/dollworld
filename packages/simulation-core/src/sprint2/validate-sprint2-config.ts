@@ -25,7 +25,6 @@ import {
   requireIntegerInRange,
   requireBoolean,
   requireLiteralString,
-  requireNonNegativeFiniteNumber,
   snapshotDenseArrayOrFail,
   snapshotPlainObjectOrFail,
 } from "../sprint1/plain-data.js";
@@ -231,7 +230,11 @@ function parseSchedule(
     }
   }
 
-  const weekObject = snapshotPlainObjectOrFail(object["weekByKind"], "/schedule/weekByKind", issues);
+  const weekObject = snapshotPlainObjectOrFail(
+    object["weekByKind"],
+    "/schedule/weekByKind",
+    issues,
+  );
   const weekByKind: Sprint2ConfigInput["schedule"]["weekByKind"] | undefined =
     weekObject === undefined
       ? undefined
@@ -268,9 +271,11 @@ function parseSchedule(
   }
 
   return {
-    normalMonthOffsetsByRank: normalMonthOffsetsByRank as Sprint2ConfigInput["schedule"]["normalMonthOffsetsByRank"],
+    normalMonthOffsetsByRank:
+      normalMonthOffsetsByRank as Sprint2ConfigInput["schedule"]["normalMonthOffsetsByRank"],
     openMonthOffsets,
-    limitedMonthOffsets: limitedMonthOffsets as Sprint2ConfigInput["schedule"]["limitedMonthOffsets"],
+    limitedMonthOffsets:
+      limitedMonthOffsets as Sprint2ConfigInput["schedule"]["limitedMonthOffsets"],
     promotionMonthOffsets,
     weekByKind,
   };
@@ -330,7 +335,12 @@ function parseChampionship(
   if (object === undefined) {
     return undefined;
   }
-  rejectUnknownKeys(object, ["championshipCycleYears", "cycleOriginWorldYear"], "/championship", issues);
+  rejectUnknownKeys(
+    object,
+    ["championshipCycleYears", "cycleOriginWorldYear"],
+    "/championship",
+    issues,
+  );
   const cycleYearsRaw = object["championshipCycleYears"];
   if (cycleYearsRaw !== 1 && cycleYearsRaw !== 4) {
     issues.push({
@@ -363,7 +373,11 @@ function parseGenericSection<T>(
   path: string,
   keys: readonly string[],
   issues: ValidationIssue[],
-  parser: (object: Record<string, unknown>, path: string, issues: ValidationIssue[]) => T | undefined,
+  parser: (
+    object: Record<string, unknown>,
+    path: string,
+    issues: ValidationIssue[],
+  ) => T | undefined,
 ): T | undefined {
   const object = snapshotPlainObjectOrFail(value, path, issues);
   if (object === undefined) {
@@ -577,7 +591,8 @@ function parseEntry(
   return {
     maximumTournamentReservationsPerWorldMonth,
     enterThresholdHundredths,
-    baseScoresHundredths: baseScoresHundredths as Sprint2ConfigInput["entry"]["baseScoresHundredths"],
+    baseScoresHundredths:
+      baseScoresHundredths as Sprint2ConfigInput["entry"]["baseScoresHundredths"],
     promotionQualificationBonusHundredths,
     rankGoalFitMaximumHundredths,
     domainFitMaximumHundredths,
@@ -633,7 +648,12 @@ function parseSeeding(
   path: string,
   issues: ValidationIssue[],
 ): Sprint2ConfigInput["seeding"] | undefined {
-  rejectUnknownKeys(object, ["rankOrder", "comparisonOrder", "useDerivedTieKeyOnlyForExactTie"], path, issues);
+  rejectUnknownKeys(
+    object,
+    ["rankOrder", "comparisonOrder", "useDerivedTieKeyOnlyForExactTie"],
+    path,
+    issues,
+  );
   const rankObject = snapshotPlainObjectOrFail(object["rankOrder"], `${path}/rankOrder`, issues);
   const rankOrder: Partial<Record<(typeof RANK_ORDER_KEYS)[number], number>> = {};
   if (rankObject !== undefined) {
@@ -740,12 +760,7 @@ function parseExecution(
     issues,
   );
   const issueMatchIdForBye = requireBoolean(object, "issueMatchIdForBye", path, issues);
-  const issueMatchIdForForfeit = requireBoolean(
-    object,
-    "issueMatchIdForForfeit",
-    path,
-    issues,
-  );
+  const issueMatchIdForForfeit = requireBoolean(object, "issueMatchIdForForfeit", path, issues);
   if (
     maximumMatchesPerPersonPerWorldWeek === undefined ||
     tournamentKindPriority === undefined ||
@@ -851,7 +866,12 @@ function parsePromotion(
         `${path}/qualificationBySourceRank/${rank}`,
         issues,
       );
-      const target = objectString(entryObject, "target", `${path}/qualificationBySourceRank/${rank}`, issues);
+      const target = objectString(
+        entryObject,
+        "target",
+        `${path}/qualificationBySourceRank/${rank}`,
+        issues,
+      );
       const points = requireSafeInteger(
         entryObject,
         "points",
@@ -877,7 +897,12 @@ function parsePromotion(
   );
   let promotionSlots: Sprint2ConfigInput["promotion"]["promotionSlots"] | undefined;
   if (slotsObject !== undefined) {
-    rejectUnknownKeys(slotsObject, ["divisor", "minimum", "maximum"], `${path}/promotionSlots`, issues);
+    rejectUnknownKeys(
+      slotsObject,
+      ["divisor", "minimum", "maximum"],
+      `${path}/promotionSlots`,
+      issues,
+    );
     const divisor = requireSafeInteger(slotsObject, "divisor", `${path}/promotionSlots`, issues);
     const minimum = requireSafeInteger(slotsObject, "minimum", `${path}/promotionSlots`, issues);
     const maximum = requireSafeInteger(slotsObject, "maximum", `${path}/promotionSlots`, issues);
@@ -911,7 +936,9 @@ function parsePromotion(
   if (
     normalPlacementPoints === undefined ||
     limitedPlacementPoints === undefined ||
-    (["F", "E", "D", "C", "B"] as const).some((rank) => qualificationBySourceRank[rank] === undefined) ||
+    (["F", "E", "D", "C", "B"] as const).some(
+      (rank) => qualificationBySourceRank[rank] === undefined,
+    ) ||
     promotionSlots === undefined ||
     resetPointsAfterPromotion === undefined ||
     preservePointsAfterFailedAttempt === undefined
@@ -922,7 +949,8 @@ function parsePromotion(
   return {
     normalPlacementPoints,
     limitedPlacementPoints,
-    qualificationBySourceRank: qualificationBySourceRank as Sprint2ConfigInput["promotion"]["qualificationBySourceRank"],
+    qualificationBySourceRank:
+      qualificationBySourceRank as Sprint2ConfigInput["promotion"]["qualificationBySourceRank"],
     promotionSlots,
     resetPointsAfterPromotion,
     preservePointsAfterFailedAttempt,
@@ -984,7 +1012,12 @@ function parseSQualification(
     rejectUnknownKeys(openPlacementObject, placementKeys, `${path}/openPlacementPoints`, issues);
     const parsed: Partial<Record<(typeof placementKeys)[number], number>> = {};
     for (const key of placementKeys) {
-      const score = requireSafeInteger(openPlacementObject, key, `${path}/openPlacementPoints`, issues);
+      const score = requireSafeInteger(
+        openPlacementObject,
+        key,
+        `${path}/openPlacementPoints`,
+        issues,
+      );
       if (score !== undefined) {
         parsed[key] = score;
       }
@@ -1022,16 +1055,16 @@ function parseAnnualRanking(
 ): Sprint2ConfigInput["annualRanking"] | undefined {
   rejectUnknownKeys(
     object,
-    ["officialMatchWinPoints", "placementBonus", "limitedPlacementFactorBasisPoints", "tieBreakOrder"],
+    [
+      "officialMatchWinPoints",
+      "placementBonus",
+      "limitedPlacementFactorBasisPoints",
+      "tieBreakOrder",
+    ],
     path,
     issues,
   );
-  const officialMatchWinPoints = requireSafeInteger(
-    object,
-    "officialMatchWinPoints",
-    path,
-    issues,
-  );
+  const officialMatchWinPoints = requireSafeInteger(object, "officialMatchWinPoints", path, issues);
   const limitedPlacementFactorBasisPoints = requireSafeInteger(
     object,
     "limitedPlacementFactorBasisPoints",
@@ -1244,7 +1277,12 @@ export function validateNormalizedSprint2Config(input: unknown): ValidationResul
   const annualRanking = parseGenericSection(
     object["annualRanking"],
     "/annualRanking",
-    ["officialMatchWinPoints", "placementBonus", "limitedPlacementFactorBasisPoints", "tieBreakOrder"],
+    [
+      "officialMatchWinPoints",
+      "placementBonus",
+      "limitedPlacementFactorBasisPoints",
+      "tieBreakOrder",
+    ],
     issues,
     parseAnnualRanking,
   );

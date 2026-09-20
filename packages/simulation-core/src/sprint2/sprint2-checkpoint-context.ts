@@ -64,7 +64,8 @@ export function createInitialSprint2CheckpointRunContext(
   const executionState = createInitialWorldWeekExecutionState({
     simulationId: validatedSession.value.context.simulationId,
     sprint2ConfigHash: validatedSession.value.context.simulationIdentity.sprint2ConfigHash,
-    worldCalendarConfigHash: validatedSession.value.context.simulationIdentity.worldCalendarConfigHash,
+    worldCalendarConfigHash:
+      validatedSession.value.context.simulationIdentity.worldCalendarConfigHash,
     initialWorldDate: validatedSession.value.runtimeState.worldState.worldDate,
   });
   if (!executionState.ok) {
@@ -134,7 +135,9 @@ export function cloneSprint2CheckpointRunContext(
   });
 }
 
-export function canonicalizeSprint2CheckpointRunContext(context: Sprint2CheckpointRunContext): string {
+export function canonicalizeSprint2CheckpointRunContext(
+  context: Sprint2CheckpointRunContext,
+): string {
   return toCanonicalJson({
     session: context.session,
     executionState: context.executionState,

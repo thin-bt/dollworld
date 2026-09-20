@@ -1,4 +1,7 @@
-import type { StoredBattleResultRecord, TournamentBracketDefinition } from "@shared-world/simulation-core";
+import type {
+  StoredBattleResultRecord,
+  TournamentBracketDefinition,
+} from "@shared-world/simulation-core";
 
 export type RoundRobinMatchHistoryRow = {
   pairIndex: number;

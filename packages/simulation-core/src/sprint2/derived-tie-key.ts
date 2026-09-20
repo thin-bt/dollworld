@@ -45,12 +45,7 @@ function validateEntryChoiceScope(
   if (object === undefined) {
     return false;
   }
-  rejectUnknownKeys(
-    object,
-    ["absoluteWorldMonth", "personId", "allocationRound"],
-    path,
-    issues,
-  );
+  rejectUnknownKeys(object, ["absoluteWorldMonth", "personId", "allocationRound"], path, issues);
   return (
     requireInteger(object, "absoluteWorldMonth", path, issues) !== undefined &&
     requireNonEmptyTrimmedString(object, "personId", path, issues) !== undefined &&

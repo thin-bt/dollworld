@@ -5,9 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_WORLD_CALENDAR_CONFIG,
   isWorldYearStartWeek,
-  toCanonicalJson,
   WORLD_YEAR_START_PROCESSOR_ID,
-  type ValidationResult,
 } from "../index.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import {
@@ -16,7 +14,10 @@ import {
 } from "../test-fixtures/sprint2-checkpoint.fixture.js";
 import { deriveProcessedWorldWeeks } from "./world-week-execution-state.js";
 import { runWeeks, runYears, SPRINT2_WEEKS_PER_WORLD_YEAR } from "./run-weeks.js";
-import { canonicalizeSprint2CheckpointRunContext, type Sprint2CheckpointRunContext } from "./sprint2-checkpoint-context.js";
+import {
+  canonicalizeSprint2CheckpointRunContext,
+  type Sprint2CheckpointRunContext,
+} from "./sprint2-checkpoint-context.js";
 import { validateWorldYearStartRuntimeState } from "../sprint1/world-year-start-runtime-state.js";
 
 const provider = createNodeSha256Provider();
@@ -123,7 +124,9 @@ describe("S02-010 runWeeks window", () => {
   });
 
   it("WIN-011: pending runWeeks(3) equals 1+2 chunking", () => {
-    const batched = expectOk(runWeeks(buildFreshCheckpointRunContext(920111, provider), 3, provider));
+    const batched = expectOk(
+      runWeeks(buildFreshCheckpointRunContext(920111, provider), 3, provider),
+    );
     let chunked = buildFreshCheckpointRunContext(920111, provider);
     chunked = expectOk(runWeeks(chunked, 1, provider));
     chunked = expectOk(runWeeks(chunked, 2, provider));
@@ -143,7 +146,9 @@ describe("S02-010 runWeeks window", () => {
       },
     };
     const batched = expectOk(runWeeks(completedBase, 3, provider));
-    const afterOneChunk = expectOk(runWeeks(buildFreshCheckpointRunContext(920121, provider), 1, provider));
+    const afterOneChunk = expectOk(
+      runWeeks(buildFreshCheckpointRunContext(920121, provider), 1, provider),
+    );
     let chunked: Sprint2CheckpointRunContext = {
       ...afterOneChunk,
       executionState: {
@@ -159,7 +164,9 @@ describe("S02-010 runWeeks window", () => {
   });
 
   it("WIN-013: completed runWeeks(0) is fully unchanged", () => {
-    const afterOne = expectOk(runWeeks(buildFreshCheckpointRunContext(92013, provider), 1, provider));
+    const afterOne = expectOk(
+      runWeeks(buildFreshCheckpointRunContext(92013, provider), 1, provider),
+    );
     const completed = {
       ...afterOne,
       executionState: { ...afterOne.executionState, phase: "completed" as const },
@@ -191,7 +198,9 @@ describe("S02-010 runWeeks window", () => {
     const after = expectOk(runWeeks(atBoundary, 1, provider));
     const runtimeAfter = yearStartRuntimeOf(after);
     expect(runtimeAfter.lastCompletedWorldYearStart).toBe(101);
-    expect(runtimeAfter.lastCompletedWorldYearStart).toBe(runtimeBefore.lastCompletedWorldYearStart);
+    expect(runtimeAfter.lastCompletedWorldYearStart).toBe(
+      runtimeBefore.lastCompletedWorldYearStart,
+    );
     expect(runtimeAfter.receipts.length).toBe(receiptCountBefore);
     expect(after.session.runtimeState.worldState.worldDate.year).toBe(101);
     expect(after.session.runtimeState.worldState.worldDate.absoluteWeek).toBe(
@@ -216,7 +225,3 @@ describe("S02-010 S02-008 regression via checkpoint seam", () => {
     expect(yearStartRuntimeOf(secondStep).receipts.length).toBe(receiptCountAfter);
   });
 });
-
-function expectFail(result: ValidationResult<unknown>): void {
-  expect(result.ok).toBe(false);
-}

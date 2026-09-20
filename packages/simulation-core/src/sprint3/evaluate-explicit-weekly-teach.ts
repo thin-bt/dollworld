@@ -87,8 +87,7 @@ export function computeWeeklyTeachingAllocationSlots(
   teachingAbilityScore: number,
 ): number {
   const formula = policy.allocationFormula;
-  const bonus =
-    Math.floor(teachingAbilityScore / 10) * formula.teachingAbilityBonusPerTenPoints;
+  const bonus = Math.floor(teachingAbilityScore / 10) * formula.teachingAbilityBonusPerTenPoints;
   const raw = formula.baseWeeklyTeachSlots + bonus;
   return clampInteger(raw, formula.minimumWeeklyTeachSlots, formula.maximumWeeklyTeachSlots);
 }
@@ -104,7 +103,10 @@ export function computeWeeklyTeachCompositeScore(
   const positive =
     weightedContribution(inputs.styleMatchScore, weights.styleMatchMaxPoints) +
     weightedContribution(inputs.requirementsMetScore, weights.requirementsMetMaxPoints) +
-    weightedContribution(inputs.trustAndCompatibilityScore, weights.trustAndCompatibilityMaxPoints) +
+    weightedContribution(
+      inputs.trustAndCompatibilityScore,
+      weights.trustAndCompatibilityMaxPoints,
+    ) +
     weightedContribution(inputs.tacticalNeedScore, weights.tacticalNeedMaxPoints) +
     weightedContribution(inputs.successionPriorityScore, weights.successionPriorityMaxPoints);
   const penalty = weightedContribution(

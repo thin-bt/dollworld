@@ -51,7 +51,6 @@ export type CompetitionEngineOutcome =
   | { kind: "domain_failure"; issues: readonly ValidationIssue[] }
   | { kind: "corrupt" };
 
-
 function groupAdvanceCount(
   participantCount: number,
   config: {
@@ -241,7 +240,10 @@ function initializeCompetitionState(
       unknown
     >,
     participantListHash: participantListHash.value,
-    bracketDefinition: JSON.parse(toCanonicalJson(built.value.definition)) as Record<string, unknown>,
+    bracketDefinition: JSON.parse(toCanonicalJson(built.value.definition)) as Record<
+      string,
+      unknown
+    >,
     bracketRuntimeState: JSON.parse(toCanonicalJson(seededRuntime)) as Record<string, unknown>,
     isolatedSession: JSON.parse(toCanonicalJson(isolatedSession)) as Record<string, unknown>,
     payloadStore: persistDetailedLogPayloadStore(createEmptyDetailedLogPayloadStore()),
@@ -277,14 +279,17 @@ function playNextMatch(
   }
 
   const bracketDefinition = state.bracketDefinition as unknown as TournamentBracketDefinition;
-  const storedRecords = state.storedRecords as unknown as import("@shared-world/simulation-core").StoredBattleResultRecord[];
-  const slotBindings = (state.slotBindings ?? []) as unknown as import("@shared-world/simulation-core").TournamentSlotMatchBinding[];
+  const storedRecords =
+    state.storedRecords as unknown as import("@shared-world/simulation-core").StoredBattleResultRecord[];
+  const slotBindings = (state.slotBindings ??
+    []) as unknown as import("@shared-world/simulation-core").TournamentSlotMatchBinding[];
 
   let knockoutSeedPersonIds: readonly PersonId[] | undefined;
   if (bracketDefinition.formatKind === "group_round_robin_knockout") {
     const groupProgress = projectBracketProgress({
       bracketDefinition,
-      bracketRuntimeState: state.bracketRuntimeState as unknown as import("@shared-world/simulation-core").BracketRuntimeSlotState,
+      bracketRuntimeState:
+        state.bracketRuntimeState as unknown as import("@shared-world/simulation-core").BracketRuntimeSlotState,
       storedRecords,
       slotBindings,
     });

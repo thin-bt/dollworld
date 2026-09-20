@@ -113,7 +113,10 @@ function buildAcceptedCompetitionParticipantPlanOnSession(
   const facts = new Map<PersonId, EntrantCandidateFacts>();
   for (const rawPerson of session.runtimeState.worldState.persons) {
     const person = rawPerson as Person;
-    facts.set(person.personId, entrantFacts(person, session.runtimeState.worldState.worldDate.year));
+    facts.set(
+      person.personId,
+      entrantFacts(person, session.runtimeState.worldState.worldDate.year),
+    );
   }
   const policy = createNeutralEntryChoicePolicy(config);
   const list = buildPlannedParticipantList({

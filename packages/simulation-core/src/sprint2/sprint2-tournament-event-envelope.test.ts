@@ -40,7 +40,9 @@ describe("S02-011 tournament event envelope EVT-001..006", () => {
     const events = buildEvt002RoundTournamentCompleteSequence();
     const ordering = validateSprint2TournamentEventOrdering(events);
     expect(ordering.ok).toBe(true);
-    const matchRecordedIndex = events.findIndex((event) => event.eventType === "tournament.match_recorded");
+    const matchRecordedIndex = events.findIndex(
+      (event) => event.eventType === "tournament.match_recorded",
+    );
     expect(events[matchRecordedIndex + 1]?.eventType).toBe("tournament.round_completed");
     expect(events[matchRecordedIndex + 2]?.eventType).toBe("tournament.finished");
     expect(events[matchRecordedIndex + 2]?.payload.completionKind).toBe("winner_determined");

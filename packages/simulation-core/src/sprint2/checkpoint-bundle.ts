@@ -25,7 +25,10 @@ import {
   getDetailedLogPayloadBytes,
   type DetailedLogPayloadStore,
 } from "./detailed-log-payload-store.js";
-import { validateStoredBattleResultRecord, validateStoredBattleResultReferences } from "./stored-battle-result.js";
+import {
+  validateStoredBattleResultRecord,
+  validateStoredBattleResultReferences,
+} from "./stored-battle-result.js";
 import type { Sprint2CheckpointRunContext } from "./sprint2-checkpoint-context.js";
 import { validateWorldWeekExecutionState } from "./world-week-execution-state.js";
 
@@ -57,7 +60,9 @@ function computeExecutionStateHash(
   return safeHashUtf8(provider, toCanonicalJson(executionState), "/executionStateHash");
 }
 
-function serializePayloadStore(context: Sprint2CheckpointRunContext): Sprint2CheckpointBundle["payloadStore"] {
+function serializePayloadStore(
+  context: Sprint2CheckpointRunContext,
+): Sprint2CheckpointBundle["payloadStore"] {
   const entries = [...context.payloadStore.entries.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([detailedLogHash, entry]) => ({
@@ -79,7 +84,10 @@ export function buildSprint2CheckpointBundle(
     if (!validatedRecord.ok) {
       return validatedRecord;
     }
-    const reference = validateStoredBattleResultReferences(validatedRecord.value, context.payloadStore);
+    const reference = validateStoredBattleResultReferences(
+      validatedRecord.value,
+      context.payloadStore,
+    );
     if (!reference.ok) {
       return reference;
     }
@@ -105,7 +113,10 @@ export function buildSprint2CheckpointBundle(
   if (!manifest.ok) {
     return manifest;
   }
-  const manifestMatch = assertManifestMatchesRetainedRecords(manifest.value, context.retainedRecords);
+  const manifestMatch = assertManifestMatchesRetainedRecords(
+    manifest.value,
+    context.retainedRecords,
+  );
   if (!manifestMatch.ok) {
     return manifestMatch;
   }

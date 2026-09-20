@@ -12,10 +12,7 @@ import {
 } from "./competition-match-log-projection.js";
 
 export type CompetitionMatchDetailUnavailableReason =
-  | "not_retained"
-  | "pruned"
-  | "missing_payload"
-  | null;
+  "not_retained" | "pruned" | "missing_payload" | null;
 
 export type CompetitionMatchDetailView = {
   matchId: string;

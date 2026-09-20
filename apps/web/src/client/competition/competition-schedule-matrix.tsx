@@ -117,7 +117,12 @@ export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps)
                 帯
               </th>
               {monthHeaders.map((header) => (
-                <th key={header.month} scope="colgroup" colSpan={4} className="competition-schedule-month">
+                <th
+                  key={header.month}
+                  scope="colgroup"
+                  colSpan={4}
+                  className="competition-schedule-month"
+                >
                   {header.label}
                 </th>
               ))}

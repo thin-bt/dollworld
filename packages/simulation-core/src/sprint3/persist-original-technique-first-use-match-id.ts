@@ -2,10 +2,7 @@
  * S03-011: persist authoritative first-use MatchId on original-technique founding history.
  */
 import { compareUnicodeCodePoints } from "../canonical-json.js";
-import type {
-  BattleDevelopmentEffects,
-  BattleResult,
-} from "../sprint1/battle-result-types.js";
+import type { BattleDevelopmentEffects, BattleResult } from "../sprint1/battle-result-types.js";
 import { cloneValidatedPlainJson, deepFreezePlainJson } from "../sprint1/plain-data.js";
 import type { Sprint1RunRuntimeState } from "../sprint1/sprint1-run-session.js";
 import { failure, success } from "../validation.js";

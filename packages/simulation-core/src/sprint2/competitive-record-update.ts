@@ -5,7 +5,7 @@ import { toCanonicalJson } from "../canonical-json.js";
 import type { Rank } from "../enums.js";
 import type { PersonId } from "../ids.js";
 import type { Sha256Provider } from "../sha256-provider.js";
-import { failure, success } from "../validation.js";
+import { success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import { deepFreezePlainJson } from "../sprint1/plain-data.js";
 import { safeHashUtf8 } from "../sprint1/safe-sha256.js";
@@ -143,7 +143,9 @@ export function createEmptyCompetitiveRecord(
   );
 }
 
-function buildRecordHashMaterial(record: Omit<CompetitiveRecord, "recordHash">): Record<string, unknown> {
+function buildRecordHashMaterial(
+  record: Omit<CompetitiveRecord, "recordHash">,
+): Record<string, unknown> {
   const material: Record<string, unknown> = {
     schemaVersion: record.schemaVersion,
     personId: record.personId,

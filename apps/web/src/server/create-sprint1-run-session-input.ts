@@ -22,9 +22,7 @@ export function buildProductionCreateSprint1RunSessionInput(
 ): ProductionCreateSprint1RunSessionInput {
   const bindings = createDefaultSprint2IdentityBindings(sha256Provider);
   if (!bindings.ok) {
-    throw new Error(
-      `default Sprint2 identity bindings failed: ${JSON.stringify(bindings.issues)}`,
-    );
+    throw new Error(`default Sprint2 identity bindings failed: ${JSON.stringify(bindings.issues)}`);
   }
   return {
     seed,

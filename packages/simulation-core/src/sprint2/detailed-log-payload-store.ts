@@ -3,7 +3,7 @@
  */
 import { toCanonicalJson } from "../canonical-json.js";
 import type { Sha256Provider } from "../sha256-provider.js";
-import { failure, success } from "../validation.js";
+import { success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import type { BattleDetailedLog } from "../sprint1/battle-state.js";
 import { validateBattleDetailedLog } from "../sprint1/battle-state.js";

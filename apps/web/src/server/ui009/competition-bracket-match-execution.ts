@@ -24,7 +24,10 @@ import {
   projectBracketProgress,
   type BracketStructuralSlot,
 } from "./competition-bracket-progress.js";
-import { defaultCompetitionRuleHash, defaultTournamentBattleActionIdentity } from "./competition-engine-helpers.js";
+import {
+  defaultCompetitionRuleHash,
+  defaultTournamentBattleActionIdentity,
+} from "./competition-engine-helpers.js";
 import { restoreDetailedLogPayloadStore } from "./competition-payload-store.js";
 
 export type BracketExecutionState = {
@@ -49,12 +52,13 @@ export type ExecuteNextBracketMatchOutcome =
       readonly bracketRuntimeState: BracketRuntimeSlotState;
       readonly slotBindings: readonly TournamentSlotMatchBinding[];
     }
-  | { readonly kind: "domain_failure"; readonly issues: readonly { path: string; message: string }[] };
+  | {
+      readonly kind: "domain_failure";
+      readonly issues: readonly { path: string; message: string }[];
+    };
 
 function toStructuralSlotIdentity(slot: BracketStructuralSlot) {
-  return slot.kind === "knockout"
-    ? ({ kind: "knockout" as const, slotId: slot.slotId })
-    : slot;
+  return slot.kind === "knockout" ? { kind: "knockout" as const, slotId: slot.slotId } : slot;
 }
 
 export function executeNextBracketMatch(input: {
@@ -64,8 +68,7 @@ export function executeNextBracketMatch(input: {
   knockoutSeedPersonIds?: readonly PersonId[];
 }): ExecuteNextBracketMatchOutcome {
   const bracketDefinition = input.state.bracketDefinition as unknown as TournamentBracketDefinition;
-  let bracketRuntimeState = input.state
-    .bracketRuntimeState as unknown as BracketRuntimeSlotState;
+  let bracketRuntimeState = input.state.bracketRuntimeState as unknown as BracketRuntimeSlotState;
   const storedRecords = input.state.storedRecords as unknown as readonly StoredBattleResultRecord[];
   const slotBindings = [...input.state.slotBindings];
 
@@ -105,7 +108,9 @@ export function executeNextBracketMatch(input: {
   if (payloadStore === null) {
     return {
       kind: "domain_failure",
-      issues: [{ path: "/payloadStore", message: "competition detailed-log payload store is invalid" }],
+      issues: [
+        { path: "/payloadStore", message: "competition detailed-log payload store is invalid" },
+      ],
     };
   }
 

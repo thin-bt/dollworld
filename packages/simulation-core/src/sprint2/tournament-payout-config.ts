@@ -25,7 +25,8 @@ export type TournamentPayoutConfig = {
   configHash: string;
 };
 
-export const TOURNAMENT_PAYOUT_CONFIG_VERSION_DEFAULT = "tournament-payout-0.1.0-provisional" as const;
+export const TOURNAMENT_PAYOUT_CONFIG_VERSION_DEFAULT =
+  "tournament-payout-0.1.0-provisional" as const;
 
 export function createDefaultTournamentPayoutTable(): TournamentPayoutTable {
   return {
