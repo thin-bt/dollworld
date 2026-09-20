@@ -3,7 +3,7 @@ state: PREPARED
 lane: A
 task-key: SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1
 mode: S03_005_TEACHING_EFFICIENCY_PIPELINE_INTEGRATION
-updatedAt: 2026-09-20T19:23:45+09:00
+updatedAt: 2026-09-20T19:51:43+09:00
 sprint: Sprint3
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1/instruction.md
@@ -17,6 +17,7 @@ pickup-requirements:
 - implement/test/publish S03-005 to canonical master
 - publish terminal result to GitHub canonical result path
 - do not start Sprint4
-- pickup-recovery: canonical PREPARED remains unclaimed and no terminal exists at 2026-09-20T19:23:45+09:00; immediate re-dispatch of the same authority; do not create a duplicate task
+- pickup-recovery: canonical PREPARED remains unclaimed and no terminal exists at 2026-09-20T19:51:43+09:00; immediate re-dispatch of the same authority; do not create a duplicate task
 - deadline-recovery: Sprint3 deadline is today; execute product work now rather than returning status-only
 - escalation: repeated PREPARED pickup failure; this lane must claim ACTIVE and perform the product implementation now, not merely rewrite control state
+- release-gate: after S03-005 READY, identify and immediately take the next unique Sprint3 release-gate/evidence gap rather than idling
