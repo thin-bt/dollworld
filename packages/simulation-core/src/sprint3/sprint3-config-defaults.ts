@@ -12,8 +12,10 @@ import {
   SPRINT3_CONFIG_VERSION_QUALIFICATION,
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
+  ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
 } from "./constants.js";
@@ -235,6 +237,45 @@ export function createSprint3Balance080ConfigInput(): Sprint3ConfigInput {
         triggerOnNewEnrollment: true,
         triggerOnCurrentTechniqueAcquisitionComplete: true,
       },
+    },
+  };
+}
+
+const SPEC_ORIGINAL_TECHNIQUE_RESEARCH_THRESHOLDS = {
+  derivedTechnique: 180,
+  compositeTechnique: 320,
+  fullOriginalTechnique: 550,
+} as const;
+
+const SPEC_ORIGINAL_TECHNIQUE_GENERATION = {
+  baseSuccessPercent: 50,
+  minimumSuccessPercent: 20,
+  maximumSuccessPercent: 80,
+  failureResearchRetentionPercent: 80,
+  regenerationCooldownWeeks: 24,
+  initialMasteryHundredthsMinimum: 1000,
+  initialMasteryHundredthsMaximum: 2500,
+  maximumPositiveSuccessAdjustmentPoints: 30,
+  maximumNegativeSuccessAdjustmentPoints: 30,
+} as const;
+
+/** S03-008 canonical balance pack with original-technique lifecycle policy. */
+export function createSprint3Balance090ConfigInput(): Sprint3ConfigInput {
+  return {
+    ...createSprint3Balance080ConfigInput(),
+    configVersion: SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+    mentorshipFeatures: {
+      explicitWeeklyTeachActionEnabled: true,
+      enrollmentAssignmentAiEnabled: true,
+      weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
+      weeklyTrainingParentTemporaryGuidanceEnabled: true,
+      techniqueTeachingSelectionEnabled: true,
+      originalTechniqueLifecycleEnabled: true,
+    },
+    originalTechniqueLifecycle: {
+      evaluationPolicyVersion: ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
+      researchThresholds: { ...SPEC_ORIGINAL_TECHNIQUE_RESEARCH_THRESHOLDS },
+      generation: { ...SPEC_ORIGINAL_TECHNIQUE_GENERATION },
     },
   };
 }

@@ -8,6 +8,7 @@ import {
   createSprint3Balance060ConfigInput,
   createSprint3Balance070ConfigInput,
   createSprint3Balance080ConfigInput,
+  createSprint3Balance090ConfigInput,
 } from "./sprint3-config-defaults.js";
 import {
   computeSprint3ConfigHash,
@@ -98,5 +99,9 @@ describe("S03-001 Sprint3Config", () => {
 
   it("CFG-013 accepts technique teaching selection on sprint3-balance-0.8.0", () => {
     expect(validateSprint3Config(createSprint3Balance080ConfigInput(), provider).ok).toBe(true);
+  });
+
+  it("CFG-014 accepts original technique lifecycle on sprint3-balance-0.9.0", () => {
+    expect(validateSprint3Config(createSprint3Balance090ConfigInput(), provider).ok).toBe(true);
   });
 });

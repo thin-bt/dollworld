@@ -9,6 +9,7 @@ import type { WeeklyTrainingPersonRecord } from "../sprint1/weekly-training-type
 import {
   SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE,
   SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
 } from "./constants.js";
@@ -112,15 +113,16 @@ export function validateWeeklyTrainingSprint3ConfigBinding(
     config.configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE &&
     config.configVersion !== SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY &&
     config.configVersion !== SPRINT3_CONFIG_VERSION_WEEKLY_TEACH &&
-    config.configVersion !== SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION
+    config.configVersion !== SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION &&
+    config.configVersion !== SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE
   ) {
     return failure([
       {
         path: "/sprint3Config/configVersion",
         message:
-          "weeklyTrainingDiscipleCountTeachingEfficiencyEnabled requires sprint3-balance-0.5.0 through sprint3-balance-0.8.0",
+          "weeklyTrainingDiscipleCountTeachingEfficiencyEnabled requires sprint3-balance-0.5.0 through sprint3-balance-0.9.0",
         actual: config.configVersion,
-        expected: `${SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY}|${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}|${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}`,
+        expected: `${SPRINT3_CONFIG_VERSION_TEACHING_EFFICIENCY}|${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}|${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}`,
       },
     ]);
   }
@@ -128,15 +130,16 @@ export function validateWeeklyTrainingSprint3ConfigBinding(
     parentGuidanceEnabled &&
     config.configVersion !== SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE &&
     config.configVersion !== SPRINT3_CONFIG_VERSION_WEEKLY_TEACH &&
-    config.configVersion !== SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION
+    config.configVersion !== SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION &&
+    config.configVersion !== SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE
   ) {
     return failure([
       {
         path: "/sprint3Config/configVersion",
         message:
-          "weeklyTrainingParentTemporaryGuidanceEnabled requires sprint3-balance-0.6.0 through sprint3-balance-0.8.0",
+          "weeklyTrainingParentTemporaryGuidanceEnabled requires sprint3-balance-0.6.0 through sprint3-balance-0.9.0",
         actual: config.configVersion,
-        expected: `${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}|${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}`,
+        expected: `${SPRINT3_CONFIG_VERSION_PARENT_TEMPORARY_GUIDANCE}|${SPRINT3_CONFIG_VERSION_WEEKLY_TEACH}|${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}|${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}`,
       },
     ]);
   }

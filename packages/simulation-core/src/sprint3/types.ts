@@ -3,6 +3,8 @@ import type { TeacherCanTeachContext } from "../sprint1/technique-teacher.js";
 import type { LearningTier } from "../sprint1/technique-enums.js";
 import type { CareerStatus, LifeStatus, Rank } from "../enums.js";
 import type {
+  ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
+  ORIGINAL_TECHNIQUE_LIFECYCLE_PROCESSOR_ID,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
   TECHNIQUE_TEACHING_SELECTION_PROCESSOR_ID,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
@@ -145,6 +147,8 @@ export type Sprint3MentorshipFeatureFlags = {
   weeklyTrainingParentTemporaryGuidanceEnabled?: boolean;
   /** S03-008: deterministic master→disciple teachable technique ranking. */
   techniqueTeachingSelectionEnabled?: boolean;
+  /** S03-008: original-technique research/generation/loss lifecycle (sprint3-balance-0.9.0). */
+  originalTechniqueLifecycleEnabled?: boolean;
 };
 
 export type Sprint3ConfigInput = {
@@ -160,6 +164,8 @@ export type Sprint3ConfigInput = {
   weeklyTeachAction?: Sprint3WeeklyTeachActionConfig;
   /** Present from sprint3-balance-0.8.0 (S03-008); omitted on earlier configVersion bodies. */
   teachingSelection?: Sprint3TeachingSelectionConfig;
+  /** Present from sprint3-balance-0.9.0 (S03-008); omitted on earlier configVersion bodies. */
+  originalTechniqueLifecycle?: Sprint3OriginalTechniqueLifecycleConfig;
 };
 
 export type Sprint3Config = Sprint3ConfigInput;
@@ -286,6 +292,101 @@ export type TeachingSelectionReEvaluationContext = {
 export type TeachingSelectionReEvaluationDueResult = {
   due: boolean;
   matchedTriggers: readonly string[];
+};
+
+/** docs/SPEC.md §独自技の発生 — research threshold tier. */
+export type OriginalTechniqueResearchTier =
+  | "derived_technique"
+  | "composite_technique"
+  | "full_original_technique";
+
+export type OriginalTechniqueResearchThresholds = {
+  derivedTechnique: number;
+  compositeTechnique: number;
+  fullOriginalTechnique: number;
+};
+
+export type OriginalTechniqueGenerationPolicy = {
+  baseSuccessPercent: number;
+  minimumSuccessPercent: number;
+  maximumSuccessPercent: number;
+  failureResearchRetentionPercent: number;
+  regenerationCooldownWeeks: number;
+  initialMasteryHundredthsMinimum: number;
+  initialMasteryHundredthsMaximum: number;
+  maximumPositiveSuccessAdjustmentPoints: number;
+  maximumNegativeSuccessAdjustmentPoints: number;
+};
+
+export type Sprint3OriginalTechniqueLifecycleConfig = {
+  evaluationPolicyVersion: typeof ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY;
+  researchThresholds: OriginalTechniqueResearchThresholds;
+  generation: OriginalTechniqueGenerationPolicy;
+};
+
+/**
+ * Boundary for original-technique research/generation/loss (docs/SPEC.md §独自技の発生).
+ */
+export type OriginalTechniqueLifecycleContract = {
+  readonly processorId: typeof ORIGINAL_TECHNIQUE_LIFECYCLE_PROCESSOR_ID;
+};
+
+export type OriginalTechniqueGenerationModifierInput = {
+  successPercentAdjustmentPoints: number;
+};
+
+export type OriginalTechniqueGenerationRecord = {
+  founderPersonId: string;
+  researchValue: number;
+  sourceTechniqueIds: readonly string[];
+  developmentReason: string;
+  worldWeekIndex: number;
+  cooldownWeeksRemaining: number;
+  modifiers: OriginalTechniqueGenerationModifierInput;
+  proposedNewTechniqueId: string;
+  firstUseMatchId?: string;
+};
+
+export type OriginalTechniqueGenerationOutcomeKind =
+  | "feature_disabled"
+  | "cooldown_active"
+  | "below_research_threshold"
+  | "generation_failed"
+  | "generation_succeeded";
+
+export type OriginalTechniqueFoundingHistoryRecord = {
+  eventKind: "original_technique_founded";
+  founderPersonId: string;
+  newTechniqueId: string;
+  sourceTechniqueIds: readonly string[];
+  researchValueAtFounding: number;
+  developmentReason: string;
+  researchTier: OriginalTechniqueResearchTier;
+  firstUseMatchId?: string;
+  worldWeekIndex: number;
+};
+
+export type OriginalTechniqueGenerationOutcome = {
+  kind: OriginalTechniqueGenerationOutcomeKind;
+  researchTier?: OriginalTechniqueResearchTier;
+  successPercentTenThousandths?: number;
+  retainedResearchValue?: number;
+  cooldownWeeksRemaining?: number;
+  initialMasteryHundredths?: number;
+  foundingHistory?: OriginalTechniqueFoundingHistoryRecord;
+  reasons: readonly string[];
+};
+
+export type OriginalTechniqueLossEvaluationRecord = {
+  techniqueId: string;
+  livingPractitionerCount: number;
+  registeredSuccessorPersonIds: readonly string[];
+  livingSuccessorPractitionerCount: number;
+};
+
+export type OriginalTechniqueLossOutcome = {
+  isLost: boolean;
+  reasons: readonly string[];
 };
 
 /** Per-master intake decision supplied by caller; S03-004 owns autonomous limit policy. */

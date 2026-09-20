@@ -8,6 +8,7 @@ import { teacherCanTeach } from "../sprint1/technique-teacher.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import {
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
@@ -34,9 +35,14 @@ function pushReason(reasons: string[], code: string): void {
   reasons.push(code);
 }
 
+const TECHNIQUE_TEACHING_SELECTION_CONFIG_VERSIONS = new Set<string>([
+  SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+]);
+
 export function isTechniqueTeachingSelectionEnabled(config: Sprint3Config): boolean {
   return (
-    config.configVersion === SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION &&
+    TECHNIQUE_TEACHING_SELECTION_CONFIG_VERSIONS.has(config.configVersion) &&
     config.mentorshipFeatures.techniqueTeachingSelectionEnabled === true &&
     config.teachingSelection !== undefined
   );
@@ -51,7 +57,7 @@ function resolveTeachingSelectionPolicy(
       path: "/mentorshipFeatures/techniqueTeachingSelectionEnabled",
       message: "technique teaching selection is not enabled for this configVersion",
       actual: config.mentorshipFeatures.techniqueTeachingSelectionEnabled,
-      expected: `true on ${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION}`,
+      expected: `true on ${SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION} or ${SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE}`,
     });
     return undefined;
   }

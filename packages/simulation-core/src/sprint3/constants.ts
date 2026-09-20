@@ -33,6 +33,10 @@ export const SPRINT3_CONFIG_VERSION_WEEKLY_TEACH = "sprint3-balance-0.7.0" as co
 export const SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION =
   "sprint3-balance-0.8.0" as const;
 
+/** S03-008 original-technique research/generation/loss lifecycle contract enabled. */
+export const SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE =
+  "sprint3-balance-0.9.0" as const;
+
 /** Pure explicit weekly teach processor contract id (weekly adapter wiring in later slices). */
 export const EXPLICIT_WEEKLY_TEACH_ACTION_PROCESSOR_ID =
   "sprint3-explicit-weekly-teach-0.1.0" as const;
@@ -48,6 +52,14 @@ export const TECHNIQUE_TEACHING_SELECTION_PROCESSOR_ID =
 /** Config-held candidate scoring / tier thresholds for S03-008. */
 export const TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY =
   "technique-teaching-selection-0.1.0" as const;
+
+/** Pure original-technique lifecycle processor contract id (world wiring in later slices). */
+export const ORIGINAL_TECHNIQUE_LIFECYCLE_PROCESSOR_ID =
+  "sprint3-original-technique-lifecycle-0.1.0" as const;
+
+/** Config-held research/generation/loss policy for S03-008 original-technique lifecycle. */
+export const ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY =
+  "original-technique-lifecycle-0.1.0" as const;
 
 /** Sprint3 → Sprint1 weekly training disciple-count factor binding (S03-005). */
 export const WEEKLY_TRAINING_DISCIPLE_COUNT_TEACHING_EFFICIENCY_BINDING_ID =

@@ -11,7 +11,7 @@
   - **S03-005 implemented**（`SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1`）
   - **S03-006 implemented**（`SPRINT3-S03-006-PARENT-TEMP-GUIDANCE-A-20260920-R1`）
   - S03-007 **implemented**（`master` product）
-  - S03-008 **教授技選択 slice published**（`master` product）— **独自技研究・生成・失伝 remaining**
+  - S03-008 **教授技選択 + 独自技ライフサイクル slice published**（`master` product）
 - 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
 
 ## 目的
@@ -37,7 +37,7 @@
 | S03-005 | 門下人数係数の週間訓練パイプライン接続 | S03-001、S01-004 既存契約 |
 | S03-006 | 親一時指導（正式師匠不在） | S03-001、S03-003 |
 | S03-007 | 明示的週間 `teach` 行動・教授拒否 | S03-001、09/10 契約 — **implemented** |
-| S03-008 | 教授技選択（published）・技継承・独自技/失伝（**remaining**） | S03-007 |
+| S03-008 | 教授技選択・独自技研究/生成/失伝（published） | S03-007 |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
 
@@ -186,6 +186,15 @@ SPEC 本文の教授方針・技段階・独自技研究値の Sprint 3 実装�
 - SPEC 評価配点・段階閾値・再評価トリガーを config 保持（コード直書きなし）
 - `technique-teaching-selection` テスト（TS-001〜010）および CFG-013
 
-### 残スコープ（未実装・Sprint 3 内 follow-up）
+### 受入チェック（独自技ライフサイクル slice — published）
 
-- 独自技研究・生成・失伝（研究 180/320/550、生成成功率 20..80%、失敗時 80% 保持、24 週 cooldown、履歴要件）
+- `sprint3-balance-0.9.0` + `originalTechniqueLifecycleEnabled: true` + config-held `originalTechniqueLifecycle` policy
+- Pure 関数 `evaluateOriginalTechniqueGenerationAttempt` / `evaluateOriginalTechniqueLoss` / `buildOriginalTechniqueFoundingHistoryRecord`（processor id `sprint3-original-technique-lifecycle-0.1.0`）
+- SPEC 研究閾値 180/320/550、生成成功率 20..80%、失敗時 80% 保持、24 週 cooldown、創始履歴・失伝判定を config 保持（コード直書きなし）
+- `original-technique-lifecycle` テスト（OTL-001〜009）および CFG-014
+- 既存 `technique-teaching-selection`（TS-001〜010）regression 維持
+
+### 残スコープ（Sprint 3 外・後続 wiring）
+
+- 週間 `WeeklyAction` への独自技研究値蓄積と world-step への processor 配線
+- 生成技ステータ合成・流派登録・初使用試合の runtime 永続化

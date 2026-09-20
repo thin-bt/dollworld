@@ -8,6 +8,7 @@ import type { TechniqueDefinition } from "../sprint1/technique-definition.js";
 import { teacherCanTeach } from "../sprint1/technique-teacher.js";
 import {
   WEEKLY_TEACH_ACTION_EVALUATION_POLICY_EXPLICIT,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
 } from "./constants.js";
@@ -35,6 +36,7 @@ function pushReason(reasons: string[], code: string): void {
 const EXPLICIT_WEEKLY_TEACH_CONFIG_VERSIONS = new Set<string>([
   SPRINT3_CONFIG_VERSION_WEEKLY_TEACH,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
 ]);
 
 export function isExplicitWeeklyTeachActionEnabled(config: Sprint3Config): boolean {
