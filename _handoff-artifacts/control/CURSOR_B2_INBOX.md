@@ -3,7 +3,7 @@ state: PREPARED
 lane: B2
 task-key: SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1
 mode: S03_004_INDEPENDENT_ACCEPTANCE
-updatedAt: 2026-09-20T12:23:27+09:00
+updatedAt: 2026-09-20T12:54:11+09:00
 sprint: Sprint3
 priority: IMMEDIATE
 instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1/instruction.md
@@ -17,4 +17,4 @@ pickup-requirements:
 - independently verify S03-004 without conflicting with A S03-005
 - publish terminal result to GitHub canonical result path
 - do not start Sprint4
-- pickup-recovery: canonical PREPARED is still unclaimed at 2026-09-20T12:23:27+09:00; treat this write as immediate re-dispatch, not a new task
+- pickup-recovery: canonical PREPARED remains unclaimed at 2026-09-20T12:54:11+09:00; immediate re-dispatch; do not create a duplicate task
