@@ -1,12 +1,12 @@
 # Cursor B2 Active Task
 
-state: IDLE
+state: ACTIVE
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-20T22:01:54+09:00
-pickup: (none)
-startedAt: (none)
+task-key: SPRINT3-CANONICAL-BACKLOG-TRUTH-RECONCILIATION-B2-20260921-R1
+mode: SPEC_TO_SOURCE_RECONCILIATION
+updatedAt: 2026-09-21T05:58:00+09:00
+pickup: ACTIVE_IDLE
+startedAt: 2026-09-21T05:58:00+09:00
 branch: master
 completedAt: (none)
 last-completed-task: (none)

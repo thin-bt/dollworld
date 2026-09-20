@@ -157,9 +157,9 @@ Pure 関数 `evaluateExplicitWeeklyTeachAction` は師匠が週間 `teach` を�
 | Backlog | configVersion（代表） | 役割 | canonical `master` |
 |---|---|---|---|
 | S03-008 OTL pure | `sprint3-balance-0.9.0` | 閾値・RNG 試行・失伝・創始履歴 **pure** | published |
-| S03-009 runtime wiring | （B2 task 正本） | 研究値/cooldown **永続**、週次蓄積、production 配線 | **未統合**（B2 専任） |
+| S03-009 runtime wiring | （B2 task 正本） | 研究値/cooldown **永続**、週次蓄積、production 配線 | published（`b81df17`） |
 | S03-010 materialization | `sprint3-balance-0.10.0` | 生成技 stat 合成・catalog **overlay** | published |
-| S03-011 first-use MatchId | （S03-011 task 正本） | battle-commit 経路の初使用試合 ID | **blocked**（S03-009 待ち） |
+| S03-011 first-use MatchId | （S03-011 task 正本） | battle-commit 経路の初使用試合 ID | published（`fbb83b1`） |
 
 S03-001〜007 の `mentorshipFeatures` ゲート契約は変更しない。S03-010 `generatedTechniqueMaterialization` は S03-008 OTL と同様 config-held 数値のみ（SPEC 本文数値の硬编码禁止）。
 

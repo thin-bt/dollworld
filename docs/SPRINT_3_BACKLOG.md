@@ -1,6 +1,6 @@
 # Sprint 3 バックログ：師匠・門下・教授
 
-- バックログバージョン: `S3-BACKLOG-0.1.1`
+- バックログバージョン: `S3-BACKLOG-0.1.2`
 - 対象ゲーム仕様: `SPEC-0.1.3`（師匠・門下テーマ）
 - 対象 Sprint 3 ミニ仕様: `S3-SPEC-0.3.0-draft`（`docs/specs/15-sprint3-config-schema.md`）
 - 実装状態:
@@ -13,8 +13,8 @@
   - S03-007 **implemented**（`master` product）
   - S03-008 **教授技選択 + 独自技ライフサイクル pure slice published**（`master` product）
   - **S03-010 implemented on canonical `master`**（生成技 materialization / catalog overlay — `SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1`）
-  - **S03-009 pending canonical publication**（B2 専任: `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1` — OTL 週次 runtime 未統合）
-  - **S03-011 blocked on canonical S03-009**（初使用 MatchId — ローカル実装済み、canonical 公開待ち）
+  - **S03-009 implemented on canonical `master`**（OTL 週次 runtime 配線 — `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1` @ `b81df17`）
+  - **S03-011 implemented on canonical `master`**（初使用 MatchId 永続化 — `SPRINT3-S03-011-CANONICAL-PUBLICATION-RECOVERY-B2-20260921-R1` @ `fbb83b1`）
 - 実装順序の正本: S03-001 → S03-002 → … → S03-008 → S03-009 → S03-010 → S03-011（下表）
 
 ## 目的
@@ -26,7 +26,7 @@
 - **権威**: `docs/SPEC_PREPARATION_PLAN.md` §Sprint 3前 は `技継承・独自技・失伝` を Sprint 3 準備対象とし、ミニ仕様完了条件（入力／出力／**状態更新**／処理順／設定／不変条件／対象外／受入テスト）を要求する。
 - **解釈**: S03-008 で公開済みの pure processor（生成試行・失伝・創始履歴レコード）に加え、週次研究値の **runtime 永続化**、production world-step からの **決定的蓄積・生成試行**、生成技の **catalog 登録**、初使用試合 **MatchId 永続化** までが Sprint 3 閉ループに含まれる（`docs/specs/15-sprint3-config-schema.md` §5 参照）。
 - **Sprint 4 外**: 引退・遺伝・家系 lineage schema の拡張は Sprint 3 非目標（従来どおり）。
-- **未完了の正本表現**: canonical `master` に実装が無い slice は **pending / blocked** と記す。`Sprint 3 外` ラベルで runtime 配線を後続 Sprint へ送る記述は、本バックログ `S3-BACKLOG-0.1.1` 以降では使用しない。
+- **未完了の正本表現**: canonical `master` に実装が無い slice は **pending / blocked** と記す。`Sprint 3 外` ラベルで runtime 配線を後続 Sprint へ送る記述は、本バックログ `S3-BACKLOG-0.1.2` 以降では使用しない。
 
 ## 固定完了条件（Sprint 3 全体・将来）
 
@@ -48,9 +48,9 @@
 | S03-006 | 親一時指導（正式師匠不在） | S03-001、S03-003 |
 | S03-007 | 明示的週間 `teach` 行動・教授拒否 | S03-001、09/10 契約 — **implemented** |
 | S03-008 | 教授技選択・OTL pure processor（published） | S03-007 |
-| S03-009 | 独自技研究 runtime 永続化・週次蓄積・生成試行 production 配線 | S03-008 OTL slice — **B2 専任・canonical 未統合** |
+| S03-009 | 独自技研究 runtime 永続化・週次蓄積・生成試行 production 配線 | S03-008 OTL slice — **implemented**（canonical `master` @ `b81df17`） |
 | S03-010 | 生成技 stat 合成・TechniqueCatalog overlay 登録 | S03-008 — **canonical `master` implemented** |
-| S03-011 | 初使用試合 MatchId の founding history 永続化 | S03-009 canonical + S03-010 — **blocked** |
+| S03-011 | 初使用試合 MatchId の founding history 永続化 | S03-009 + S03-010 — **implemented**（canonical `master` @ `fbb83b1`） |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
 
@@ -221,8 +221,7 @@ S03-008 `originalTechniqueLifecycle` policy / `evaluateOriginalTechniqueGenerati
 
 ### 実装状態
 
-- **canonical `master`**: **未統合**（`original-technique-lifecycle-runtime-state.ts` 等なし）
-- **担当**: `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1`（lane A は duplicate しない）
+- **canonical `master`**: **implemented**（`original-technique-lifecycle-runtime-state.ts`、`processOriginalTechniqueLifecycleWeek`、`runSprint1WeeklyStep` 配線 — 証跡 `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1` @ `b81df17`）
 
 ### 受入チェック（概要）
 
@@ -239,7 +238,7 @@ S03-008/009 の生成成功 outcome から **config-held stat 合成**で `Techn
 
 ### 依存
 
-S03-008 founding history / generation outcome 型。runtime 週次チェーンとの統合は **S03-009** 公開後に end-to-end で検証する。
+S03-008 founding history / generation outcome 型。**S03-009** 週次 runtime 配線は canonical `master` @ `b81df17` で公開済み。
 
 ### 実装状態
 
@@ -266,7 +265,7 @@ S03-008 founding history / generation outcome 型。runtime 週次チェーン�
 
 ### 実装状態
 
-- **canonical `master`**: **absent** — **BLOCKED** on missing S03-009（ローカル lane A 実装・検証済み、証跡 `SPRINT3-S03-011-FIRST-USE-MATCHID-PERSISTENCE-A-20260921-R1`）
+- **canonical `master`**: **implemented**（`persist-original-technique-first-use-match-id.ts`、`commitRunBattlePlan` hook — 証跡 `SPRINT3-S03-011-CANONICAL-PUBLICATION-RECOVERY-B2-20260921-R1` @ `fbb83b1`）
 
 ### 受入チェック（概要）
 
