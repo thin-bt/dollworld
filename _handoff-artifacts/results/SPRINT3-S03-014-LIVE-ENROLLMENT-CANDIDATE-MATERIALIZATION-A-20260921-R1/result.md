@@ -8,7 +8,7 @@ updatedAt: 2026-09-21T02:44:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
-published-master-sha: b4dd1f033c70107a21bd552d40362347475d0a66
+published-master-sha: 5cc06e1c67a3e245dae45d3ba63a7386e78ff683
 product-commit-sha: b4dd1f033c70107a21bd552d40362347475d0a66
 pre-publication-origin-head: 83acbc06ccb091b6f7d9a84ec489a52fbe5bfce9
 predecessor: SPRINT3-S03-013-CANONICAL-PUBLICATION-RECOVERY-A-20260921-R1
@@ -25,8 +25,9 @@ Bounded **S03-014** fix for live enrollment candidate materialization: `material
 |-------|--------|
 | Product SHA | `b4dd1f033c70107a21bd552d40362347475d0a66` |
 | Product message | Extend live enrollment candidate materialization for non-parent masters and S03-004 intake. |
-| Master tip SHA | `b4dd1f033c70107a21bd552d40362347475d0a66` |
-| Remote | `origin/master` (pushed `83acbc0..b4dd1f0`) |
+| Master tip SHA | `5cc06e1c67a3e245dae45d3ba63a7386e78ff683` |
+| Result artifact commit | `5cc06e1c67a3e245dae45d3ba63a7386e78ff683` |
+| Remote | `origin/master` (pushed `83acbc0..5cc06e1`) |
 
 ## Product files
 
