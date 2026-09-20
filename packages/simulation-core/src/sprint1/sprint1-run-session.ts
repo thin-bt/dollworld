@@ -18,6 +18,7 @@ import type { EventAllocationState } from "./event-allocation-state.js";
 import type { MatchIdGeneratorState } from "./match-id-generator.js";
 import type { Sprint1RunContext } from "./sprint1-run-context.js";
 import type { TechniqueCatalog } from "./technique-catalog.js";
+import type { OriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import type { Sprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 import type { Sprint3Config } from "../sprint3/types.js";
 import type { Sprint1Config } from "./types.js";
@@ -43,6 +44,8 @@ export type Sprint1RunRuntimeState = {
   eventAllocationState: EventAllocationState;
   battleResults: BattleResult[];
   battleResultWeekState: BattleResultWeekState;
+  /** S03-009: per-person research/cooldown when sprint3-balance-0.9.0 is bound on context. */
+  originalTechniqueLifecycleRuntime?: OriginalTechniqueLifecycleRuntimeState;
   /** S03-012: enrollment / intake / explicit-teach entrypoint persistence when Sprint3 is bound. */
   mentorshipEntrypointRuntime?: Sprint3MentorshipEntrypointRuntimeState;
 };

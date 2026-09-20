@@ -36,6 +36,7 @@ import {
 import { validateSeededRngState } from "./validate-seeded-rng-state.js";
 import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
+import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 
 const SESSION_KEYS = ["context", "runtimeState"] as const;
@@ -49,6 +50,7 @@ const RUNTIME_STATE_KEYS = [
   "eventAllocationState",
   "battleResults",
   "battleResultWeekState",
+  "originalTechniqueLifecycleRuntime",
   "mentorshipEntrypointRuntime",
 ] as const;
 
@@ -369,6 +371,20 @@ export function validateSprint1RunSession(
     }
   }
 
+  let originalTechniqueLifecycleRuntime:
+    Sprint1RunSession["runtimeState"]["originalTechniqueLifecycleRuntime"] | undefined;
+  if (runtime["originalTechniqueLifecycleRuntime"] !== undefined) {
+    const otlRuntime = validateOriginalTechniqueLifecycleRuntimeState(
+      runtime["originalTechniqueLifecycleRuntime"],
+    );
+    if (!otlRuntime.ok) {
+      issues.push(
+        ...prefixIssues(otlRuntime.issues, "/runtimeState/originalTechniqueLifecycleRuntime"),
+      );
+    } else {
+      originalTechniqueLifecycleRuntime = otlRuntime.value;
+    }
+  }
   if (
     worldState === undefined ||
     !sidecarsResult.ok ||
@@ -397,6 +413,9 @@ export function validateSprint1RunSession(
         eventAllocationState: allocationResult.value,
         battleResults: [...battleResultsResult.value],
         battleResultWeekState: weekStateResult.value,
+        ...(originalTechniqueLifecycleRuntime === undefined
+          ? {}
+          : { originalTechniqueLifecycleRuntime }),
         ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
       },
     }),

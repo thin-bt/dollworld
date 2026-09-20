@@ -30,6 +30,7 @@ import { validateMatchIdGeneratorState } from "./match-id-generator.js";
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 import { validateSeededRngState } from "./validate-seeded-rng-state.js";
 import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
+import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
@@ -54,6 +55,7 @@ export type TrustedWeeklyTransitionDraft = {
   appendedEvents: readonly Sprint1EventEnvelope[];
   eventAllocationState: Sprint1RunRuntimeState["eventAllocationState"];
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
+  originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
 };
 
@@ -360,6 +362,21 @@ export function validateTrustedWeeklyTransition(
     }
   }
 
+  let originalTechniqueLifecycleRuntime:
+    Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"] | undefined;
+  if (draft.originalTechniqueLifecycleRuntime !== undefined) {
+    const otlRuntime = validateOriginalTechniqueLifecycleRuntimeState(
+      draft.originalTechniqueLifecycleRuntime,
+    );
+    if (!otlRuntime.ok) {
+      issues.push(
+        ...prefixIssues(otlRuntime.issues, "/runtimeState/originalTechniqueLifecycleRuntime"),
+      );
+    } else {
+      originalTechniqueLifecycleRuntime = otlRuntime.value;
+    }
+  }
+
   if (
     draft.mentorshipEntrypointRuntime !== undefined &&
     mentorshipEntrypointRuntime === undefined
@@ -400,6 +417,9 @@ export function validateTrustedWeeklyTransition(
       eventAllocationState: allocationResult.value,
       battleResults,
       battleResultWeekState: weekStateResult.value,
+      ...(originalTechniqueLifecycleRuntime === undefined
+        ? {}
+        : { originalTechniqueLifecycleRuntime }),
       ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
     },
   });

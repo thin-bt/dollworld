@@ -1268,6 +1268,17 @@ export {
   isGeneratedTechniqueRegistrationEnabled,
   materializeGeneratedTechniqueDefinition,
 } from "./sprint3/materialize-generated-technique-definition.js";
+export {
+  createInitialOriginalTechniqueLifecycleRuntimeState,
+  researchValueFromTenths,
+  researchValueToTenths,
+  validateOriginalTechniqueLifecycleRuntimeState,
+} from "./sprint3/original-technique-lifecycle-runtime-state.js";
+export { processOriginalTechniqueLifecycleWeek } from "./sprint3/process-original-technique-lifecycle-week.js";
+export {
+  AUTONOMOUS_ORIGINAL_TECHNIQUE_WEEKLY_RESEARCH_INCREMENT_TENTHS,
+  resolveAutonomousOriginalTechniqueWeeklyResearchIncrementTenths,
+} from "./sprint3/resolve-autonomous-original-technique-weekly-research-increment.js";
 export { processExplicitWeeklyTeachWeek } from "./sprint3/process-explicit-weekly-teach-week.js";
 export { processSprint3EnrollmentIntakeBoundary } from "./sprint3/process-sprint3-enrollment-intake-boundary.js";
 export {

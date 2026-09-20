@@ -49,6 +49,7 @@ import {
 } from "./year-start-phase.js";
 import { validateWorldYearStartRuntimeState } from "./world-year-start-runtime-state.js";
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
+import { processOriginalTechniqueLifecycleWeek } from "../sprint3/process-original-technique-lifecycle-week.js";
 import { processExplicitWeeklyTeachWeek } from "../sprint3/process-explicit-weekly-teach-week.js";
 import { processSprint3EnrollmentIntakeBoundary } from "../sprint3/process-sprint3-enrollment-intake-boundary.js";
 import {
@@ -227,6 +228,13 @@ function cloneSprint1RuntimeDraft(runtimeState: Sprint1RunRuntimeState): Sprint1
     eventAllocationState: cloneValidatedPlainJson(runtimeState.eventAllocationState),
     battleResults: runtimeState.battleResults.map((result) => cloneValidatedPlainJson(result)),
     battleResultWeekState: cloneValidatedPlainJson(runtimeState.battleResultWeekState),
+    ...(runtimeState.originalTechniqueLifecycleRuntime === undefined
+      ? {}
+      : {
+          originalTechniqueLifecycleRuntime: cloneValidatedPlainJson(
+            runtimeState.originalTechniqueLifecycleRuntime,
+          ),
+        }),
     ...(runtimeState.mentorshipEntrypointRuntime === undefined
       ? {}
       : {
@@ -247,6 +255,7 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
   processorRuntimeStates: Sprint1RunRuntimeState["processorRuntimeStates"];
   eventAllocationState: Sprint1RunRuntimeState["eventAllocationState"];
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
+  originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
 } {
   return {
@@ -255,6 +264,13 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
     processorRuntimeStates: cloneRuntimeState(runtimeState.processorRuntimeStates),
     eventAllocationState: cloneValidatedPlainJson(runtimeState.eventAllocationState),
     battleResultWeekState: cloneValidatedPlainJson(runtimeState.battleResultWeekState),
+    ...(runtimeState.originalTechniqueLifecycleRuntime === undefined
+      ? {}
+      : {
+          originalTechniqueLifecycleRuntime: cloneValidatedPlainJson(
+            runtimeState.originalTechniqueLifecycleRuntime,
+          ),
+        }),
     ...(runtimeState.mentorshipEntrypointRuntime === undefined
       ? {}
       : {
@@ -609,6 +625,20 @@ function executeSprint1WeeklyTransitionDraft(
     }
     working.mentorshipEntrypointRuntime = explicitTeachWeek.value.runtimeState;
 
+    const otlWeek = processOriginalTechniqueLifecycleWeek({
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      runSeed: session.context.simulationIdentity.seed,
+      worldState: working.worldState,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      runtimeState: working.originalTechniqueLifecycleRuntime,
+    });
+    if (!otlWeek.ok) {
+      return failure(prefixIssues(otlWeek.issues, "/originalTechniqueLifecycleWeek"));
+    }
+    working.originalTechniqueLifecycleRuntime = otlWeek.value.runtimeState;
+
     const weeklyAllocation = allocateWeeklyTrainingEventCandidates({
       candidates: adapterResult.value.eventCandidates,
       startSequence: eventStartSequence,
@@ -718,6 +748,9 @@ function executeSprint1WeeklyTransitionDraft(
     appendedEvents,
     eventAllocationState: working.eventAllocationState,
     battleResultWeekState: working.battleResultWeekState,
+    ...(working.originalTechniqueLifecycleRuntime === undefined
+      ? {}
+      : { originalTechniqueLifecycleRuntime: working.originalTechniqueLifecycleRuntime }),
     ...(working.mentorshipEntrypointRuntime === undefined
       ? {}
       : { mentorshipEntrypointRuntime: working.mentorshipEntrypointRuntime }),
