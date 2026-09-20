@@ -1,36 +1,26 @@
 # SPRINT3-SCOPE-CLOSURE-CONTRADICTION-ROLE3-20260920-R1
 
-status: FINDING_CONFIRMED
+status: RESOLVED
+resolvedBy: SPRINT3-SCOPE-AUTHORITY-RECONCILIATION-A-20260921-R1
 owner: Role3
 date: 2026-09-20
+resolvedAt: 2026-09-21
 priority: DEADLINE_CRITICAL
 authority: GitHub `thin-bt/dollworld` / `master`
 
-## Finding
+## Original finding
 
-`docs/SPRINT_3_BACKLOG.md` currently labels the remaining original-technique runtime wiring as `Sprint 3 外・後続 wiring`, while `docs/SPEC_PREPARATION_PLAN.md` explicitly places `技継承・独自技・失伝` in `Sprint 3前` and requires input/output/state update/process order for mini-spec completion.
+`docs/SPRINT_3_BACKLOG.md` labeled remaining original-technique runtime wiring as `Sprint 3 外・後続 wiring`, while `docs/SPEC_PREPARATION_PLAN.md` places `技継承・独自技・失伝` in Sprint 3 preparation with required state-update mini-spec completion.
 
-Therefore Sprint3 formal completion must not rely on the backlog's `Sprint 3 外` label alone. The runtime gap needs either implementation in Sprint3 or an explicit authoritative scope correction that reconciles `SPEC_PREPARATION_PLAN.md` before formal READY.
+## Resolution
 
-## Current bounded recovery
+Lane A reconciled canonical docs without scope reduction:
 
-B2 already owns `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1`, covering persisted research state, deterministic weekly accumulation, generation attempt/cooldown/founding outcome, and production world-step invocation. Do not duplicate or steal that authority.
+- `docs/SPRINT_3_BACKLOG.md` `S3-BACKLOG-0.1.1` — explicit S03-009 / S03-010 / S03-011 rows, status truth (`S03-010` on master; `S03-009` B2 pending; `S03-011` blocked), removed unsupported `Sprint 3 外` runtime deferral.
+- `docs/specs/15-sprint3-config-schema.md` §4 — closure boundary table aligned with backlog.
 
-Lane A already owns `SPRINT3-ROOT-TYPECHECK-RECOVERY-A-20260920-R1`; do not collide with its release-gate work.
+Formal Sprint3 READY remains gated on **implementation** of pending slices (B2 S03-009 canonical publication, then A S03-011), not on this documentation contradiction.
 
-## Next product boundaries after S03-009
+## Formal acceptance guard (unchanged)
 
-If S03-009 reaches READY, the remaining concrete product gaps named by the backlog are:
-
-1. S03-010: generated technique stat synthesis plus TechniqueCatalog/school registration.
-2. S03-011: first-use match/runtime persistence for the generated technique.
-
-These must be checked against SPEC/Sprint3 authority before Sprint3 formal READY. They may be deferred only by an explicit canonical scope decision that reconciles the preparation plan; absence of implementation is not itself evidence of deferral.
-
-## Formal acceptance guard
-
-Until the contradiction is resolved, a Sprint3 formal acceptance result must distinguish:
-- product/test gate health (`npm run check`, focused tests, build), from
-- scope completeness for `技継承・独自技・失伝`.
-
-A green typecheck/check does not by itself close this scope finding.
+Green product/test gates alone do not close Sprint3 formal acceptance while S03-009 / S03-011 remain absent from canonical master.

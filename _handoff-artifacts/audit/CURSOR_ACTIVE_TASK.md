@@ -4,20 +4,20 @@ state: IDLE
 lane: A
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-20T22:05:00+09:00
+updatedAt: 2026-09-21T03:48:00+09:00
 pickup: (none)
 startedAt: (none)
 branch: master
-HEAD: df2501a575783984c369454b67b07b3391d0b244
-origin-master-head: df2501a575783984c369454b67b07b3391d0b244
-completedAt: 2026-09-20T22:05:00+09:00
-last-completed-task: SPRINT3-S03-008-ORIGINAL-TECHNIQUE-LIFECYCLE-A-20260920-R1
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-008-ORIGINAL-TECHNIQUE-LIFECYCLE-A-20260920-R1/result.md
-last-terminal: READY / SPRINT3_S03_008_ORIGINAL_TECHNIQUE_LIFECYCLE_PUBLISHED
-terminal: READY / SPRINT3_S03_008_ORIGINAL_TECHNIQUE_LIFECYCLE_PUBLISHED
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-008-ORIGINAL-TECHNIQUE-LIFECYCLE-A-20260920-R1/instruction.md
+HEAD: (see published-master-sha in last result)
+origin-master-head: (see published-master-sha in last result)
+completedAt: 2026-09-21T03:48:00+09:00
+last-completed-task: SPRINT3-SCOPE-AUTHORITY-RECONCILIATION-A-20260921-R1
+last-result-path: _handoff-artifacts/results/SPRINT3-SCOPE-AUTHORITY-RECONCILIATION-A-20260921-R1/result.md
+last-terminal: READY / SPRINT3_SCOPE_AUTHORITY_RECONCILIATION_PUBLISHED
+terminal: READY / SPRINT3_SCOPE_AUTHORITY_RECONCILIATION_PUBLISHED
+instruction-path: _handoff-artifacts/tasks/SPRINT3-SCOPE-AUTHORITY-RECONCILIATION-A-20260921-R1/instruction.md
 control-authority: GitHub
-predecessor: SPRINT3-S03-008-PUBLISH-RECOVERY-A-20260920-R1
+predecessor: SPRINT3-WEB-TEST-TYPECHECK-RECOVERY-A-20260921-R1
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.

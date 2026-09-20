@@ -1,6 +1,6 @@
 # Sprint 3 バックログ：師匠・門下・教授
 
-- バックログバージョン: `S3-BACKLOG-0.1.0`
+- バックログバージョン: `S3-BACKLOG-0.1.1`
 - 対象ゲーム仕様: `SPEC-0.1.3`（師匠・門下テーマ）
 - 対象 Sprint 3 ミニ仕様: `S3-SPEC-0.3.0-draft`（`docs/specs/15-sprint3-config-schema.md`）
 - 実装状態:
@@ -11,12 +11,22 @@
   - **S03-005 implemented**（`SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1`）
   - **S03-006 implemented**（`SPRINT3-S03-006-PARENT-TEMP-GUIDANCE-A-20260920-R1`）
   - S03-007 **implemented**（`master` product）
-  - S03-008 **教授技選択 + 独自技ライフサイクル slice published**（`master` product）
-- 実装順序の正本: S03-001 → S03-002 → S03-003 → …（下表）
+  - S03-008 **教授技選択 + 独自技ライフサイクル pure slice published**（`master` product）
+  - **S03-010 implemented on canonical `master`**（生成技 materialization / catalog overlay — `SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1`）
+  - **S03-009 pending canonical publication**（B2 専任: `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1` — OTL 週次 runtime 未統合）
+  - **S03-011 blocked on canonical S03-009**（初使用 MatchId — ローカル実装済み、canonical 公開待ち）
+- 実装順序の正本: S03-001 → S03-002 → … → S03-008 → S03-009 → S03-010 → S03-011（下表）
 
 ## 目的
 
 `docs/SPEC_PREPARATION_PLAN.md` §Sprint 3前（師匠資格、門下受入、指導効率、親指導、教授技選択、技継承・独自技・失伝）を、Sprint 1/2 と同様の受入可能なタスク列へ分解する。Sprint 2 視覚・大会 product baseline は維持する。
+
+## スコープ正本（`技継承・独自技・失伝`）
+
+- **権威**: `docs/SPEC_PREPARATION_PLAN.md` §Sprint 3前 は `技継承・独自技・失伝` を Sprint 3 準備対象とし、ミニ仕様完了条件（入力／出力／**状態更新**／処理順／設定／不変条件／対象外／受入テスト）を要求する。
+- **解釈**: S03-008 で公開済みの pure processor（生成試行・失伝・創始履歴レコード）に加え、週次研究値の **runtime 永続化**、production world-step からの **決定的蓄積・生成試行**、生成技の **catalog 登録**、初使用試合 **MatchId 永続化** までが Sprint 3 閉ループに含まれる（`docs/specs/15-sprint3-config-schema.md` §5 参照）。
+- **Sprint 4 外**: 引退・遺伝・家系 lineage schema の拡張は Sprint 3 非目標（従来どおり）。
+- **未完了の正本表現**: canonical `master` に実装が無い slice は **pending / blocked** と記す。`Sprint 3 外` ラベルで runtime 配線を後続 Sprint へ送る記述は、本バックログ `S3-BACKLOG-0.1.1` 以降では使用しない。
 
 ## 固定完了条件（Sprint 3 全体・将来）
 
@@ -37,7 +47,10 @@
 | S03-005 | 門下人数係数の週間訓練パイプライン接続 | S03-001、S01-004 既存契約 |
 | S03-006 | 親一時指導（正式師匠不在） | S03-001、S03-003 |
 | S03-007 | 明示的週間 `teach` 行動・教授拒否 | S03-001、09/10 契約 — **implemented** |
-| S03-008 | 教授技選択・独自技研究/生成/失伝（published） | S03-007 |
+| S03-008 | 教授技選択・OTL pure processor（published） | S03-007 |
+| S03-009 | 独自技研究 runtime 永続化・週次蓄積・生成試行 production 配線 | S03-008 OTL slice — **B2 専任・canonical 未統合** |
+| S03-010 | 生成技 stat 合成・TechniqueCatalog overlay 登録 | S03-008 — **canonical `master` implemented** |
+| S03-011 | 初使用試合 MatchId の founding history 永続化 | S03-009 canonical + S03-010 — **blocked** |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
 
@@ -176,7 +189,7 @@ S03-001 `teachingEfficiency` を Sprint 1 週間訓練成果計算へ接続（�
 
 ### 目的
 
-SPEC 本文の教授方針・技段階・独自技研究値の Sprint 3 実装残（Sprint 4 引退/遺伝は対象外）。
+SPEC 本文の教授方針・技段階・独自技研究値の **pure/config slice**（Sprint 4 引退/遺伝は対象外）。**状態を変える runtime 閉ループ**（S03-009〜S03-011）は別 ID で追跡する。
 
 ### 受入チェック（教授技選択 slice — published）
 
@@ -194,7 +207,68 @@ SPEC 本文の教授方針・技段階・独自技研究値の Sprint 3 実装�
 - `original-technique-lifecycle` テスト（OTL-001〜009）および CFG-014
 - 既存 `technique-teaching-selection`（TS-001〜010）regression 維持
 
-### 残スコープ（Sprint 3 外・後続 wiring）
+---
 
-- 週間 `WeeklyAction` への独自技研究値蓄積と world-step への processor 配線
-- 生成技ステータ合成・流派登録・初使用試合の runtime 永続化
+## S03-009 独自技研究 runtime 配線（B2 専任）
+
+### 目的
+
+S03-008 OTL pure processor を production 週次/world-step へ接続し、研究値・cooldown・生成試行 outcome を **run 永続状態**として更新する。ユーザー操作の追加はしない（自律進行維持）。
+
+### 依存
+
+S03-008 `originalTechniqueLifecycle` policy / `evaluateOriginalTechniqueGenerationAttempt` 契約。生成技 stat 合成・catalog 登録本体は **S03-010**（lane A）。本 slice では founding outcome の emit/record のみ（S03-009 task 正本どおり）。
+
+### 実装状態
+
+- **canonical `master`**: **未統合**（`original-technique-lifecycle-runtime-state.ts` 等なし）
+- **担当**: `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1`（lane A は duplicate しない）
+
+### 受入チェック（概要）
+
+- 決定的週次研究蓄積、閾値未満 no-attempt、試行成功/失敗と cooldown、founding history outcome、production world-step 呼び出しの focused テスト
+- S03-008 OTL / Sprint1/Sprint2 regression 維持
+
+---
+
+## S03-010 生成技 materialization・catalog overlay
+
+### 目的
+
+S03-008/009 の生成成功 outcome から **config-held stat 合成**で `TechniqueDefinition` を materialize し、immutable base catalog を壊さず **runtime overlay** へ登録する。
+
+### 依存
+
+S03-008 founding history / generation outcome 型。runtime 週次チェーンとの統合は **S03-009** 公開後に end-to-end で検証する。
+
+### 実装状態
+
+- **canonical `master`**: **implemented**（`sprint3-balance-0.10.0`、`materializeGeneratedTechniqueDefinition`、GTR-001..008 — 証跡 `SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1`）
+
+### 受入チェック（published 証跡）
+
+- `sprint3-balance-0.10.0` + `generatedTechniqueMaterialization` policy
+- Pure 関数 `materializeGeneratedTechniqueDefinition`、overlay register/lookup、narrow `adapt-original-technique-generation-registration`
+- `generated-technique-registration` テスト（GTR-001..008）および CFG-015
+- 専用 school/lineage テーブル拡張・初使用 MatchId は **S03-011**
+
+---
+
+## S03-011 初使用試合 MatchId 永続化
+
+### 目的
+
+`OriginalTechniqueFoundingHistoryRecord` へ **初使用試合 MatchId** を battle-commit 経路で決定的に永続化する（SPEC 創始履歴の runtime 完結）。
+
+### 依存
+
+**S03-009** が canonical `master` に存在すること（`Sprint1RunRuntimeState` / weekly processor / `sprint3Config` 配線）。**S03-010** catalog overlay は前提。
+
+### 実装状態
+
+- **canonical `master`**: **absent** — **BLOCKED** on missing S03-009（ローカル lane A 実装・検証済み、証跡 `SPRINT3-S03-011-FIRST-USE-MATCHID-PERSISTENCE-A-20260921-R1`）
+
+### 受入チェック（概要）
+
+- `persist-original-technique-first-use-match-id` + `commitRunBattlePlan` hook
+- `original-technique-first-use-match-id` テスト（FUM-001..005）
