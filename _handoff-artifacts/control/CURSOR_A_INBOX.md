@@ -1,18 +1,17 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-KICKOFF-IMPLEMENTATION-A-20260920-R1
-mode: SPRINT3_KICKOFF_IMPLEMENTATION
-updatedAt: 2026-09-20T09:23:25+09:00
-priority: IMMEDIATE
-instruction-path: _handoff-artifacts/tasks/SPRINT3-KICKOFF-IMPLEMENTATION-A-20260920-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-20T09:25:45+09:00
+last-consumed-task-key: SPRINT3-KICKOFF-IMPLEMENTATION-A-20260920-R1
+last-terminal: FIX_REQUIRED / SPRINT3_KICKOFF_AUTHORITY_GAP
+last-result-path: _handoff-artifacts/results/SPRINT3-KICKOFF-IMPLEMENTATION-A-20260920-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
-required-product-baseline: 8d52ead09e7a5a6736777ab281db21ae79f28d48
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
-- publish production implementation and terminal result to GitHub canonical master
-- do not start Sprint4
+- publish terminal result to GitHub canonical result path
