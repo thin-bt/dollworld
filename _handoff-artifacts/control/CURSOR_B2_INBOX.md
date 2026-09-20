@@ -1,22 +1,17 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1
-mode: S03_004_INDEPENDENT_ACCEPTANCE
-updatedAt: 2026-09-20T22:01:54+09:00
-sprint: Sprint3
-priority: DEADLINE_CRITICAL
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-20T22:10:03+09:00
+last-consumed-task-key: SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1
+last-terminal: READY / SPRINT3_S03_004_INDEPENDENT_ACCEPTANCE_B2_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-004-INDEPENDENT-ACCEPTANCE-B2-20260920-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-required-product-sha: f01d1823c9e40f08c1129001082c9f06f25c515c
-recovery-request: FAILOVER_REDISPATCH_AFTER_B2_ACTIVE_LOCK_BOOTSTRAP
+sprint: Sprint3
 pickup-requirements:
 - fresh-read GitHub canonical instruction
-- claim ACTIVE before verification
-- independently verify S03-004 without conflicting with A S03-008
+- claim ACTIVE before changes
 - publish terminal result to GitHub canonical result path
-- do not start Sprint4
-- B2 active-lock bootstrap is now present on canonical master; execute acceptance now
-- deadline-recovery: Sprint3 deadline is today; no status-only/control-rewrite-only run
