@@ -17,7 +17,7 @@
   - **S03-011 implemented on canonical `master`**（初使用 MatchId 永続化 — `SPRINT3-S03-011-CANONICAL-PUBLICATION-RECOVERY-B2-20260921-R1` @ `fbb83b1`）
 - 実装順序の正本: S03-001 → S03-002 → … → S03-008 → S03-009 → S03-010 → S03-011（下表）
 - **S03-026 監査（歴史的受理 @ `47bdb9b`）**: `SPRINT3-S03-026-FORMAL-CLOSE-EVIDENCE-AUDIT-B2-20260921-R1` は当時点の入門/資格、persisted 教授技選択 **consumption**、生成技 battle consumption、独自技 **loss** チェーンについて **残存 product gap なし** と判定。**ただし** 後続 **S03-028** B2 権威監査により、enrollment **`EnrollmentSpecialReason` / live `activeSpecialReasons`** スライスでは当該 no-gap 結論は **superseded**（`47bdb9b` では live boundary が常に `activeSpecialReasons: []` で、supported reason が live-unreachable だった）。**S03-028 A**（`8e9b825`）+ **S03-029/030 A**（rebellion 信号の canonical publication @ `db14129`）で当該スライス gap は **canonical `master` 上で閉じ**；S03-026 の主表 production チェーン受理は **歴史証跡として維持**。
-- **formal release gate**（A-owned `SPRINT3-S03-025-ROOT-CHECK-TIMEOUT-CLOSURE-A-20260921-R1` **READY**）: root `npm run check` 全緑（`1889/1889` 当時）；S03-024 executor-timeout 差分は **環境/load 由来**。**S03-030** 後の fresh root gate は B2 `SPRINT3-S03-030-FORMAL-CLOSE-RECONCILIATION-B2-20260921-R1` result を正本とする。
+- **formal release gate**（A-owned `SPRINT3-S03-025-ROOT-CHECK-TIMEOUT-CLOSURE-A-20260921-R1` **READY**）: root `npm run check` 全緑（`1889/1889` 当時）；S03-024 executor-timeout 差分は **環境/load 由来**。**S03-031** A final release gate（`SPRINT3-S03-031-FINAL-RELEASE-GATE-A-20260921-R1` **READY** @ master `eb39e2d`、**1896/1896**）は **歴史的 current-master ゲート証跡**。**current-master 上の fresh root gate 正本**は後続 drift 証跡（S03-043 以降 product lineage、**S03-047** `ROOT_GATE_INCOMPLETE`、**S03-048** `LOAD_CONCURRENCY_CLASSIFIED`）により **S03-031 を supersede**；root 全緑は **未達**（active B2 **S03-049** root-gate concurrency closure **pending** — 本 backlog に完了受理しない）。
 - **formal Sprint3 `CLOSED`**: A **S03-030** canonical **READY** @ `db14129` + fresh root gate 緑は **必要条件**；本ファイル単独では Sprint 3 を `CLOSED` と **しない**（PM/制御面の最終遷移待ち）。Sprint 4 着手不可は product 受理と formal ラベルを混同しない。
 
 ## 目的
@@ -57,7 +57,7 @@
 
 ## Production / integration 受理証跡（主表外・S03-012 以降）
 
-S03-001..011 の **計画順序を変更しない**。以下は canonical `master` 上で **result 証跡により accepted / READY** とされた recovery/integration・reconciliation 作業（S03-030 B2 証跡まで整合）。
+S03-001..011 の **計画順序を変更しない**。以下は canonical `master` 上で **terminal/READY result 証跡**に基づく recovery/integration・reconciliation・control 作業（**S03-048** まで整合；**S03-049** は active B2 作業のため **未掲載**）。
 
 | ID | ドメイン（要約） | 代表 result（lane） | 受理 |
 |---|---|---|---|
@@ -79,6 +79,25 @@ S03-001..011 の **計画順序を変更しない**。以下は canonical `maste
 | S03-029 | Rebellion signal prerequisite（A） | `SPRINT3-S03-029-REBELLION-SIGNAL-PREREQUISITE-A-20260921-R1` @ `894a701` | **READY** — explicit persisted signal（local product） |
 | S03-030 | Rebellion canonical publication recovery（A） | `SPRINT3-S03-030-REBELLION-SIGNAL-CANONICAL-PUBLICATION-RECOVERY-A-20260921-R1` @ `db14129` | **READY** — canonical GitHub `master` product |
 | S03-030 | Formal-close evidence reconciliation（B2） | `SPRINT3-S03-030-FORMAL-CLOSE-RECONCILIATION-B2-20260921-R1` | **READY** — backlog `S3-BACKLOG-0.1.4`；formal `CLOSED` **未付与** |
+| S03-031 | Final release gate（A） | `SPRINT3-S03-031-FINAL-RELEASE-GATE-A-20260921-R1` @ `eb39e2d` | **READY** — **1896/1896** @ 当時 master；**current-master root gate は superseded**（S03-047/048） |
+| S03-032 | Backlog publication recovery（B2） | `SPRINT3-S03-032-BACKLOG-PUBLICATION-RECOVERY-B2-20260921-R1` | **READY** — `S3-BACKLOG-0.1.4` reconciliation ソース |
+| S03-033 | Backlog canonical publish（A） | `SPRINT3-S03-033-BACKLOG-CANONICAL-PUBLISH-A-20260921-R1` @ `55ae2a2` | **READY** — binding backlog version on `master` |
+| S03-034 | Post-publication formal-close eligibility（B2） | `SPRINT3-S03-034-POST-PUBLICATION-FORMAL-CLOSE-ELIGIBILITY-B2-20260921-R1` | **READY_FOR_FORMAL_CLOSE** — eligibility 監査 |
+| S03-035 | B2 pickup health diagnosis（A） | `SPRINT3-S03-035-B2-PICKUP-HEALTH-DIAGNOSIS-A-20260921-R1` | **READY** — executor source defect 修復 |
+| S03-036 | Formal-close control artifact preparation（B2） | `SPRINT3-S03-036-FORMAL-CLOSE-CONTROL-ARTIFACT-PREPARATION-B2-20260921-R1` | **READY** — `SPRINT3_STATUS.md` 準備 |
+| S03-037 | Formal status canonical publication（A） | `SPRINT3-S03-037-FORMAL-STATUS-CANONICAL-PUBLICATION-A-20260921-R1` @ `79280d3` | **READY** — status on canonical `master` |
+| S03-038 | Post-status product immutability audit（A） | `SPRINT3-S03-038-POST-STATUS-PRODUCT-IMMUTABILITY-AUDIT-A-20260921-R1` | **READY** — audit pass |
+| S03-039 | Formal-close packet consistency（B2） | `SPRINT3-S03-039-FORMAL-CLOSE-PACKET-CONSISTENCY-B2-20260921-R1` | **READY** — packet coherent |
+| S03-039 | Sprint2 repair regression guard（B2） | `SPRINT3-S03-039-SPRINT2-REPAIR-REGRESSION-GUARD-B2-20260921-R1` | **ACCEPT** — ordinary-step integration guard |
+| S03-040 | Sprint2 repair guard canonical publication（B2） | `SPRINT3-S03-040-SPRINT2-REPAIR-GUARD-CANONICAL-PUBLICATION-B2-20260921-R1` @ `2fc1643` | **ACCEPT** — guard on `master` |
+| S03-041 | Weekly guard typecheck closure（A） | `SPRINT3-S03-041-WEEKLY-GUARD-TYPECHECK-CLOSURE-A-20260921-R1` @ `d84680b` | **READY** — regression guard typecheck 閉じ |
+| S03-042 | Ordinary session activation（B2） | `SPRINT3-S03-042-ORDINARY-SESSION-ACTIVATION-B2-20260921-R1` | **READY** — local verify；canonical は **S03-043** |
+| S03-043 | Ordinary session activation canonical publish（B2） | `SPRINT3-S03-043-ORDINARY-SESSION-ACTIVATION-CANONICAL-PUBLISH-B2-20260921-R1` @ `410889b` | **ACCEPT** — ordinary start に Sprint3 production 绑定 |
+| S03-044 | Person detail mentorship visibility（B2） | `SPRINT3-S03-044-PERSON-DETAIL-MENTORSHIP-VISIBILITY-B2-20260922-R1` @ `4884107` | **ACCEPT** — UI 師弟表示 gap 閉じ |
+| S03-045 | Person detail mentorship browser evidence（B2） | `SPRINT3-S03-045-PERSON-DETAIL-MENTORSHIP-BROWSER-EVIDENCE-B2-20260922-R1` | **READY** — Playwright release evidence |
+| S03-046 | Mentorship browser evidence canonical publish（B2） | `SPRINT3-S03-046-MENTORSHIP-BROWSER-EVIDENCE-CANONICAL-PUBLISH-B2-20260922-R1` @ `94ba2ad` | **READY** — e2e harness on `master` |
+| S03-047 | Current-master formal-close gate（B2） | `SPRINT3-S03-047-CURRENT-MASTER-FORMAL-CLOSE-GATE-B2-20260922-R1` @ `4c3453e` | **BLOCKED** — `ROOT_GATE_INCOMPLETE`（**1904/1906**；2 timeout） |
+| S03-048 | Current-master timeout classification（B2） | `SPRINT3-S03-048-CURRENT-MASTER-TIMEOUT-CLASSIFICATION-B2-20260922-R1` @ `822f3d8` | **BLOCKED** — `LOAD_CONCURRENCY_CLASSIFIED`；root gate **未緑**；remediation **S03-049 pending**（active B2；本表に完了行なし） |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
 
