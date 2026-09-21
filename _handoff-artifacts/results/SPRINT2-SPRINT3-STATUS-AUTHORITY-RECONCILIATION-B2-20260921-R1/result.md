@@ -10,7 +10,9 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: 9753f1d6a4b3319e1a01340372da980214ff04a7
-publication-commit: (filled post-push)
+publication-commit: 0e3c31c5257c5bf2eb2a22b1cc0e526cdca33bda
+publication-parent: 9753f1d6a4b3319e1a01340372da980214ff04a7
+origin-master-at-completion: 0e3c31c5257c5bf2eb2a22b1cc0e526cdca33bda
 pickup: SDK_EXECUTOR / ACTIVE_IDLE
 recovery: CURSOR-B2-001 — single bounded attempt per check family; no same-case retry after exhaust
 production-change: NO
