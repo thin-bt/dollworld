@@ -20,7 +20,10 @@ import {
   ORIGINAL_TECHNIQUE_LIFECYCLE_PROCESSOR_ID,
   ORIGINAL_TECHNIQUE_LIFECYCLE_RNG_SEED_LABEL,
 } from "./constants.js";
-import type { OriginalTechniqueFoundingHistoryRecord } from "./types.js";
+import type {
+  OriginalTechniqueFoundingHistoryRecord,
+  OriginalTechniqueLossHistoryRecord,
+} from "./types.js";
 
 export const ORIGINAL_TECHNIQUE_LIFECYCLE_RUNTIME_STATE_SCHEMA_VERSION = "0.1.0" as const;
 
@@ -31,6 +34,7 @@ export const ORIGINAL_TECHNIQUE_LIFECYCLE_RUNTIME_STATE_KEYS = [
   "lastProcessedAbsoluteWeek",
   "personEntries",
   "foundingHistories",
+  "lossHistories",
 ] as const;
 
 export const ORIGINAL_TECHNIQUE_LIFECYCLE_PERSON_ENTRY_KEYS = [
@@ -55,6 +59,7 @@ export type OriginalTechniqueLifecycleRuntimeState = {
   lastProcessedAbsoluteWeek: number | null;
   personEntries: readonly OriginalTechniqueLifecyclePersonEntry[];
   foundingHistories: readonly OriginalTechniqueFoundingHistoryRecord[];
+  lossHistories: readonly OriginalTechniqueLossHistoryRecord[];
 };
 
 export function researchValueFromTenths(researchValueTenths: number): number {
@@ -76,6 +81,7 @@ export function createInitialOriginalTechniqueLifecycleRuntimeState(
     lastProcessedAbsoluteWeek: null,
     personEntries: [],
     foundingHistories: [],
+    lossHistories: [],
   });
 }
 
@@ -186,6 +192,74 @@ function validateFoundingHistory(
     ...(typeof object["firstUseMatchId"] === "string"
       ? { firstUseMatchId: object["firstUseMatchId"] }
       : {}),
+  });
+}
+
+function validateLossHistory(
+  input: unknown,
+  path: string,
+  issues: ValidationIssue[],
+): OriginalTechniqueLossHistoryRecord | undefined {
+  const object = snapshotPlainObjectOrFail(input, path, issues);
+  if (object === undefined) {
+    return undefined;
+  }
+  if (object["eventKind"] !== "original_technique_lost") {
+    issues.push({
+      path: `${path}/eventKind`,
+      message: "loss history eventKind must be original_technique_lost",
+      actual: object["eventKind"],
+      expected: "original_technique_lost",
+    });
+    return undefined;
+  }
+  if (typeof object["techniqueId"] !== "string" || object["techniqueId"].length === 0) {
+    issues.push({
+      path: `${path}/techniqueId`,
+      message: "techniqueId must be a non-empty string",
+      actual: object["techniqueId"],
+    });
+    return undefined;
+  }
+  if (typeof object["founderPersonId"] !== "string" || object["founderPersonId"].length === 0) {
+    issues.push({
+      path: `${path}/founderPersonId`,
+      message: "founderPersonId must be a non-empty string",
+      actual: object["founderPersonId"],
+    });
+    return undefined;
+  }
+  if (
+    typeof object["worldWeekIndex"] !== "number" ||
+    !Number.isSafeInteger(object["worldWeekIndex"]) ||
+    object["worldWeekIndex"] < 0
+  ) {
+    issues.push({
+      path: `${path}/worldWeekIndex`,
+      message: "worldWeekIndex must be a non-negative safe integer",
+      actual: object["worldWeekIndex"],
+    });
+    return undefined;
+  }
+  const reasons = snapshotDenseArrayOrFail(object["reasons"], `${path}/reasons`, issues);
+  if (reasons === undefined) {
+    return undefined;
+  }
+  for (let index = 0; index < reasons.length; index += 1) {
+    if (typeof reasons[index] !== "string") {
+      issues.push({
+        path: `${path}/reasons/${String(index)}`,
+        message: "loss reason must be a string",
+        actual: reasons[index],
+      });
+    }
+  }
+  return deepFreezePlainJson({
+    eventKind: "original_technique_lost",
+    techniqueId: object["techniqueId"],
+    founderPersonId: object["founderPersonId"],
+    worldWeekIndex: object["worldWeekIndex"],
+    reasons: reasons as string[],
   });
 }
 
@@ -345,6 +419,39 @@ export function validateOriginalTechniqueLifecycleRuntimeState(
     }
   }
 
+  const rawLossHistories = object["lossHistories"];
+  const lossHistories: OriginalTechniqueLossHistoryRecord[] = [];
+  if (rawLossHistories === undefined) {
+    // Backward-compatible default for persisted sessions predating S03-020 loss wiring.
+  } else {
+    const rawLossArray = snapshotDenseArrayOrFail(rawLossHistories, "/lossHistories", issues);
+    if (rawLossArray !== undefined) {
+      for (let index = 0; index < rawLossArray.length; index += 1) {
+        const record = validateLossHistory(
+          rawLossArray[index],
+          `/lossHistories/${String(index)}`,
+          issues,
+        );
+        if (record !== undefined) {
+          lossHistories.push(record);
+        }
+      }
+      lossHistories.sort((left, right) =>
+        compareUnicodeCodePoints(left.techniqueId, right.techniqueId),
+      );
+      for (let index = 1; index < lossHistories.length; index += 1) {
+        if (lossHistories[index - 1]!.techniqueId === lossHistories[index]!.techniqueId) {
+          issues.push({
+            path: "/lossHistories",
+            message: "lossHistories must not contain duplicate techniqueId",
+            actual: lossHistories[index]!.techniqueId,
+          });
+          break;
+        }
+      }
+    }
+  }
+
   if (issues.length > 0 || !rngResult.ok) {
     return failure(issues);
   }
@@ -357,6 +464,7 @@ export function validateOriginalTechniqueLifecycleRuntimeState(
       lastProcessedAbsoluteWeek,
       personEntries,
       foundingHistories,
+      lossHistories,
     }),
   );
 }

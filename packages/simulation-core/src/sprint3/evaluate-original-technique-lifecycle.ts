@@ -10,6 +10,7 @@ import {
 } from "./constants.js";
 import type {
   OriginalTechniqueFoundingHistoryRecord,
+  OriginalTechniqueLossHistoryRecord,
   OriginalTechniqueGenerationOutcome,
   OriginalTechniqueGenerationPolicy,
   OriginalTechniqueGenerationRecord,
@@ -147,6 +148,21 @@ export function buildOriginalTechniqueFoundingHistoryRecord(input: {
     researchTier: input.researchTier,
     worldWeekIndex: input.worldWeekIndex,
     ...(input.firstUseMatchId === undefined ? {} : { firstUseMatchId: input.firstUseMatchId }),
+  };
+}
+
+export function buildOriginalTechniqueLossHistoryRecord(input: {
+  techniqueId: string;
+  founderPersonId: string;
+  worldWeekIndex: number;
+  reasons: readonly string[];
+}): OriginalTechniqueLossHistoryRecord {
+  return {
+    eventKind: "original_technique_lost",
+    techniqueId: input.techniqueId,
+    founderPersonId: input.founderPersonId,
+    worldWeekIndex: input.worldWeekIndex,
+    reasons: [...input.reasons],
   };
 }
 

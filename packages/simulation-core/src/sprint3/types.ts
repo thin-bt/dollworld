@@ -398,6 +398,14 @@ export type OriginalTechniqueFoundingHistoryRecord = {
   worldWeekIndex: number;
 };
 
+export type OriginalTechniqueLossHistoryRecord = {
+  eventKind: "original_technique_lost";
+  techniqueId: string;
+  founderPersonId: string;
+  worldWeekIndex: number;
+  reasons: readonly string[];
+};
+
 export type OriginalTechniqueGenerationOutcome = {
   kind: OriginalTechniqueGenerationOutcomeKind;
   researchTier?: OriginalTechniqueResearchTier;

@@ -1265,6 +1265,7 @@ export {
 } from "./sprint3/evaluate-technique-teaching-selection.js";
 export {
   buildOriginalTechniqueFoundingHistoryRecord,
+  buildOriginalTechniqueLossHistoryRecord,
   classifyOriginalTechniqueResearchTier,
   computeFailedGenerationRetainedResearchValue,
   computeOriginalTechniqueGenerationSuccessPercentTenThousandths,
@@ -1309,6 +1310,12 @@ export {
   collectSuccessfulBattleTechniqueUseIds,
 } from "./sprint3/persist-original-technique-first-use-match-id.js";
 export { processOriginalTechniqueLifecycleWeek } from "./sprint3/process-original-technique-lifecycle-week.js";
+export { processOriginalTechniqueLossWeek } from "./sprint3/process-original-technique-loss-week.js";
+export {
+  buildOriginalTechniqueLossEvaluationRecord,
+  countLivingPractitionersForTechnique,
+  listTrackedOriginalTechniqueIds,
+} from "./sprint3/derive-live-original-technique-loss-evaluation.js";
 export {
   AUTONOMOUS_ORIGINAL_TECHNIQUE_WEEKLY_RESEARCH_INCREMENT_TENTHS,
   resolveAutonomousOriginalTechniqueWeeklyResearchIncrementTenths,
@@ -1400,6 +1407,7 @@ export type {
   TechniqueTeachingSelectionRankedCandidate,
   TechniqueTeachingSelectionRecord,
   OriginalTechniqueFoundingHistoryRecord,
+  OriginalTechniqueLossHistoryRecord,
   OriginalTechniqueGenerationOutcome,
   OriginalTechniqueGenerationOutcomeKind,
   OriginalTechniqueGenerationRecord,

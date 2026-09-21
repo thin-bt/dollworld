@@ -50,6 +50,7 @@ import {
 import { validateWorldYearStartRuntimeState } from "./world-year-start-runtime-state.js";
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 import { processOriginalTechniqueLifecycleWeek } from "../sprint3/process-original-technique-lifecycle-week.js";
+import { processOriginalTechniqueLossWeek } from "../sprint3/process-original-technique-loss-week.js";
 import { processExplicitWeeklyTeachWeek } from "../sprint3/process-explicit-weekly-teach-week.js";
 import { processSprint3EnrollmentIntakeBoundary } from "../sprint3/process-sprint3-enrollment-intake-boundary.js";
 import {
@@ -718,6 +719,20 @@ function executeSprint1WeeklyTransitionDraft(
       return failure(prefixIssues(otlWeek.issues, "/originalTechniqueLifecycleWeek"));
     }
     working.originalTechniqueLifecycleRuntime = otlWeek.value.runtimeState;
+
+    const otlLossWeek = processOriginalTechniqueLossWeek({
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      worldState: working.worldState,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      runtimeState: working.originalTechniqueLifecycleRuntime,
+      mentorshipRuntime: working.mentorshipEntrypointRuntime,
+    });
+    if (!otlLossWeek.ok) {
+      return failure(prefixIssues(otlLossWeek.issues, "/originalTechniqueLossWeek"));
+    }
+    working.originalTechniqueLifecycleRuntime = otlLossWeek.value.runtimeState;
 
     const weeklyAllocation = allocateWeeklyTrainingEventCandidates({
       candidates: adapterResult.value.eventCandidates,
