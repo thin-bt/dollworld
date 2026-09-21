@@ -1311,6 +1311,18 @@ export {
 } from "./sprint3/persist-original-technique-first-use-match-id.js";
 export { processOriginalTechniqueLifecycleWeek } from "./sprint3/process-original-technique-lifecycle-week.js";
 export { processOriginalTechniqueLossWeek } from "./sprint3/process-original-technique-loss-week.js";
+export { processTechniqueTeachingSelectionWeek } from "./sprint3/process-technique-teaching-selection-week.js";
+export { buildTeachingSelectionRecord } from "./sprint3/derive-live-explicit-weekly-teach-disciple-requests.js";
+export {
+  createInitialTechniqueTeachingSelectionRuntimeState,
+  lookupTechniqueTeachingSelectionPairSnapshot,
+  upsertTechniqueTeachingSelectionPairSnapshot,
+  validateTechniqueTeachingSelectionRuntimeState,
+} from "./sprint3/technique-teaching-selection-runtime-state.js";
+export type {
+  TechniqueTeachingSelectionPairSnapshot,
+  TechniqueTeachingSelectionRuntimeState,
+} from "./sprint3/technique-teaching-selection-runtime-state.js";
 export {
   buildOriginalTechniqueLossEvaluationRecord,
   countLivingPractitionersForTechnique,

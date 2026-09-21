@@ -19,6 +19,7 @@ import type { MatchIdGeneratorState } from "./match-id-generator.js";
 import type { Sprint1RunContext } from "./sprint1-run-context.js";
 import type { TechniqueCatalog } from "./technique-catalog.js";
 import type { OriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
+import type { TechniqueTeachingSelectionRuntimeState } from "../sprint3/technique-teaching-selection-runtime-state.js";
 import type { Sprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 import type { Sprint3Config } from "../sprint3/types.js";
 import type { GeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
@@ -50,6 +51,8 @@ export type Sprint1RunRuntimeState = {
   originalTechniqueLifecycleRuntime?: OriginalTechniqueLifecycleRuntimeState;
   /** S03-012: enrollment / intake / explicit-teach entrypoint persistence when Sprint3 is bound. */
   mentorshipEntrypointRuntime?: Sprint3MentorshipEntrypointRuntimeState;
+  /** S03-022: persisted technique teaching-selection snapshots when Sprint3 teaching selection is enabled. */
+  techniqueTeachingSelectionRuntime?: TechniqueTeachingSelectionRuntimeState;
   /** S03-015: runtime generated-technique overlay for production battle technique lookup. */
   generatedTechniqueCatalogOverlay?: GeneratedTechniqueCatalogOverlay;
   /** S03-017: authoritative Sprint2 competitive records for live master qualification derivation. */

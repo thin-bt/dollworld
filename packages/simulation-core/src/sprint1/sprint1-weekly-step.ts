@@ -53,6 +53,7 @@ import { processOriginalTechniqueLifecycleWeek } from "../sprint3/process-origin
 import { processOriginalTechniqueLossWeek } from "../sprint3/process-original-technique-loss-week.js";
 import { applyExplicitWeeklyTeachOutcomesToWorldState } from "../sprint3/apply-explicit-weekly-teach-outcomes-to-world-state.js";
 import { processExplicitWeeklyTeachWeek } from "../sprint3/process-explicit-weekly-teach-week.js";
+import { processTechniqueTeachingSelectionWeek } from "../sprint3/process-technique-teaching-selection-week.js";
 import { processSprint3EnrollmentIntakeBoundary } from "../sprint3/process-sprint3-enrollment-intake-boundary.js";
 import {
   materializeLiveEnrollmentQueueBoundaries,
@@ -268,6 +269,13 @@ function cloneSprint1RuntimeDraft(runtimeState: Sprint1RunRuntimeState): Sprint1
             runtimeState.mentorshipEntrypointRuntime,
           ),
         }),
+    ...(runtimeState.techniqueTeachingSelectionRuntime === undefined
+      ? {}
+      : {
+          techniqueTeachingSelectionRuntime: cloneValidatedPlainJson(
+            runtimeState.techniqueTeachingSelectionRuntime,
+          ),
+        }),
     ...(runtimeState.generatedTechniqueCatalogOverlay === undefined
       ? {}
       : {
@@ -297,6 +305,7 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
   originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
+  techniqueTeachingSelectionRuntime?: Sprint1RunRuntimeState["techniqueTeachingSelectionRuntime"];
   generatedTechniqueCatalogOverlay?: Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"];
   sprint2CompetitiveRecordRuntime?: Sprint1RunRuntimeState["sprint2CompetitiveRecordRuntime"];
 } {
@@ -318,6 +327,13 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
       : {
           mentorshipEntrypointRuntime: cloneValidatedPlainJson(
             runtimeState.mentorshipEntrypointRuntime,
+          ),
+        }),
+    ...(runtimeState.techniqueTeachingSelectionRuntime === undefined
+      ? {}
+      : {
+          techniqueTeachingSelectionRuntime: cloneValidatedPlainJson(
+            runtimeState.techniqueTeachingSelectionRuntime,
           ),
         }),
     ...(runtimeState.generatedTechniqueCatalogOverlay === undefined
@@ -678,6 +694,26 @@ function executeSprint1WeeklyTransitionDraft(
       return failure(adapterQualifiedMasterRefresh.issues);
     }
 
+    const teachingSelectionWeek = processTechniqueTeachingSelectionWeek({
+      absoluteWeek: working.worldState.worldDate.absoluteWeek,
+      worldState: working.worldState,
+      weeklyTrainingSidecars: working.weeklyTrainingSidecars,
+      sprint1Config: session.context.sprint1Config,
+      techniqueCatalog: session.context.techniqueCatalog,
+      ...(session.context.sprint3Config === undefined
+        ? {}
+        : { sprint3Config: session.context.sprint3Config }),
+      mentorshipRuntime: working.mentorshipEntrypointRuntime,
+      runtimeState: working.techniqueTeachingSelectionRuntime,
+      ...(working.generatedTechniqueCatalogOverlay === undefined
+        ? {}
+        : { generatedTechniqueCatalogOverlay: working.generatedTechniqueCatalogOverlay }),
+    });
+    if (!teachingSelectionWeek.ok) {
+      return failure(prefixIssues(teachingSelectionWeek.issues, "/techniqueTeachingSelectionWeek"));
+    }
+    working.techniqueTeachingSelectionRuntime = teachingSelectionWeek.value.runtimeState;
+
     const explicitTeachCompletedBefore =
       working.mentorshipEntrypointRuntime?.completedExplicitWeeklyTeachOutcomes.length ?? 0;
     const explicitTeachMaterialized = materializeLiveExplicitWeeklyTeachQueueRecords({
@@ -886,6 +922,9 @@ function executeSprint1WeeklyTransitionDraft(
     ...(working.mentorshipEntrypointRuntime === undefined
       ? {}
       : { mentorshipEntrypointRuntime: working.mentorshipEntrypointRuntime }),
+    ...(working.techniqueTeachingSelectionRuntime === undefined
+      ? {}
+      : { techniqueTeachingSelectionRuntime: working.techniqueTeachingSelectionRuntime }),
     ...(working.generatedTechniqueCatalogOverlay === undefined
       ? {}
       : { generatedTechniqueCatalogOverlay: working.generatedTechniqueCatalogOverlay }),

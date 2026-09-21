@@ -169,7 +169,7 @@ function discipleHasIncompletePriorFocus(discipleRecord: WeeklyTrainingPersonRec
   return state === undefined || state.acquiredAbsoluteWeek === null;
 }
 
-function buildTeachingSelectionRecord(input: {
+export function buildTeachingSelectionRecord(input: {
   masterPersonId: PersonId;
   disciplePersonId: PersonId;
   mentorshipRelationKind: MentorshipRelationKind;

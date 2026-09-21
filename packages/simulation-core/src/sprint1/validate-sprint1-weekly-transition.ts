@@ -33,6 +33,7 @@ import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-st
 import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import { validateGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
+import { validateTechniqueTeachingSelectionRuntimeState } from "../sprint3/technique-teaching-selection-runtime-state.js";
 import { validateSprint2CompetitiveRecordRuntimeState } from "../sprint3/live-sprint2-competitive-record-runtime-state.js";
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
@@ -59,6 +60,7 @@ export type TrustedWeeklyTransitionDraft = {
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
   originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
+  techniqueTeachingSelectionRuntime?: Sprint1RunRuntimeState["techniqueTeachingSelectionRuntime"];
   generatedTechniqueCatalogOverlay?: Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"];
   sprint2CompetitiveRecordRuntime?: Sprint1RunRuntimeState["sprint2CompetitiveRecordRuntime"];
 };
@@ -183,6 +185,21 @@ export function validateTrustedWeeklyTransition(
       );
     } else {
       mentorshipEntrypointRuntime = mentorshipRuntime.value;
+    }
+  }
+
+  let techniqueTeachingSelectionRuntime:
+    Sprint1RunRuntimeState["techniqueTeachingSelectionRuntime"] | undefined;
+  if (draft.techniqueTeachingSelectionRuntime !== undefined) {
+    const selectionRuntime = validateTechniqueTeachingSelectionRuntimeState(
+      draft.techniqueTeachingSelectionRuntime,
+    );
+    if (!selectionRuntime.ok) {
+      issues.push(
+        ...prefixIssues(selectionRuntime.issues, "/runtimeState/techniqueTeachingSelectionRuntime"),
+      );
+    } else {
+      techniqueTeachingSelectionRuntime = selectionRuntime.value;
     }
   }
 
@@ -458,6 +475,9 @@ export function validateTrustedWeeklyTransition(
         ? {}
         : { originalTechniqueLifecycleRuntime }),
       ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
+      ...(techniqueTeachingSelectionRuntime === undefined
+        ? {}
+        : { techniqueTeachingSelectionRuntime }),
       ...(generatedTechniqueCatalogOverlay === undefined
         ? {}
         : { generatedTechniqueCatalogOverlay }),

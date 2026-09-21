@@ -14,7 +14,10 @@ import type { WorldEngineState } from "../world-engine/types.js";
 import { applyExplicitWeeklyTeachOutcomesToWorldState } from "./apply-explicit-weekly-teach-outcomes-to-world-state.js";
 import { materializeLiveExplicitWeeklyTeachQueueRecords } from "./materialize-live-mentorship-entrypoint-queues.js";
 import { processExplicitWeeklyTeachWeek } from "./process-explicit-weekly-teach-week.js";
-import { createInitialSprint3MentorshipEntrypointRuntimeState } from "./sprint3-mentorship-entrypoint-runtime-state.js";
+import {
+  createInitialSprint3MentorshipEntrypointRuntimeState,
+  type Sprint3MentorshipEntrypointRuntimeState,
+} from "./sprint3-mentorship-entrypoint-runtime-state.js";
 import {
   createSprint3Balance070ConfigInput,
   createSprint3Balance080ConfigInput,
@@ -127,7 +130,7 @@ function techniqueDefinition(id: string, learningTier: "basic" | "advanced" = "b
   );
 }
 
-function sidecarEntry(personId: string, discipleCount = 0) {
+export function sidecarEntry(personId: string, discipleCount = 0) {
   const byAction: Record<string, unknown> = {};
   for (const action of WEEKLY_SCORED_ACTIONS) {
     byAction[action] = {
@@ -169,7 +172,7 @@ function sidecarEntry(personId: string, discipleCount = 0) {
   };
 }
 
-function teachWorld(mentorshipKind: "formal_master_disciple" | "parent_temporary_guidance") {
+export function teachWorld(mentorshipKind: "formal_master_disciple" | "parent_temporary_guidance") {
   const sprint1Master = {
     ...expectOk(createInitialSprint1PersonState(50)),
     techniqueStates: [techniqueState(TECH_ID)],
@@ -250,9 +253,7 @@ function teachWorld(mentorshipKind: "formal_master_disciple" | "parent_temporary
 }
 
 describe("S03-021 live explicit weekly teach wiring", () => {
-  const sprint1Config = expectOk(
-    validateSprint1Config(createDefaultSprint1ConfigInput(), provider),
-  );
+  const sprint1Config = expectOk(validateSprint1Config(createDefaultSprint1ConfigInput()));
   const sprint3Teach = expectOk(
     validateSprint3Config(createSprint3Balance080ConfigInput(), provider),
   );
@@ -389,7 +390,7 @@ describe("S03-021 live explicit weekly teach wiring", () => {
         entries: [sidecarEntry(DISCIPLE_ID), sidecarEntry(MASTER_ID, 1)],
       }),
     );
-    let currentRuntime = runtime;
+    let currentRuntime: Sprint3MentorshipEntrypointRuntimeState = runtime;
     const materialized = expectOk(
       materializeLiveExplicitWeeklyTeachQueueRecords({
         absoluteWeek: 203,

@@ -144,6 +144,13 @@ function cloneSprint1RuntimeDraft(
               runtimeState.mentorshipEntrypointRuntime,
             ),
           }),
+      ...(runtimeState.techniqueTeachingSelectionRuntime === undefined
+        ? {}
+        : {
+            techniqueTeachingSelectionRuntime: cloneValidatedPlainJson(
+              runtimeState.techniqueTeachingSelectionRuntime,
+            ),
+          }),
       ...(runtimeState.generatedTechniqueCatalogOverlay === undefined
         ? {}
         : {

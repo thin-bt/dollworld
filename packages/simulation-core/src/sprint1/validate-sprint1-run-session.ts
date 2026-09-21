@@ -38,6 +38,7 @@ import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-st
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
+import { validateTechniqueTeachingSelectionRuntimeState } from "../sprint3/technique-teaching-selection-runtime-state.js";
 import { validateGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 import { validateSprint2CompetitiveRecordRuntimeState } from "../sprint3/live-sprint2-competitive-record-runtime-state.js";
 
@@ -54,6 +55,7 @@ const RUNTIME_STATE_KEYS = [
   "battleResultWeekState",
   "originalTechniqueLifecycleRuntime",
   "mentorshipEntrypointRuntime",
+  "techniqueTeachingSelectionRuntime",
   "generatedTechniqueCatalogOverlay",
   "sprint2CompetitiveRecordRuntime",
 ] as const;
@@ -408,6 +410,21 @@ export function validateSprint1RunSession(
     }
   }
 
+  let techniqueTeachingSelectionRuntime:
+    Sprint1RunSession["runtimeState"]["techniqueTeachingSelectionRuntime"] | undefined;
+  if (runtime["techniqueTeachingSelectionRuntime"] !== undefined) {
+    const selectionRuntime = validateTechniqueTeachingSelectionRuntimeState(
+      runtime["techniqueTeachingSelectionRuntime"],
+    );
+    if (!selectionRuntime.ok) {
+      issues.push(
+        ...prefixIssues(selectionRuntime.issues, "/runtimeState/techniqueTeachingSelectionRuntime"),
+      );
+    } else {
+      techniqueTeachingSelectionRuntime = selectionRuntime.value;
+    }
+  }
+
   let originalTechniqueLifecycleRuntime:
     Sprint1RunSession["runtimeState"]["originalTechniqueLifecycleRuntime"] | undefined;
   if (runtime["originalTechniqueLifecycleRuntime"] !== undefined) {
@@ -454,6 +471,9 @@ export function validateSprint1RunSession(
           ? {}
           : { originalTechniqueLifecycleRuntime }),
         ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
+        ...(techniqueTeachingSelectionRuntime === undefined
+          ? {}
+          : { techniqueTeachingSelectionRuntime }),
         ...(generatedTechniqueCatalogOverlay === undefined
           ? {}
           : { generatedTechniqueCatalogOverlay }),
