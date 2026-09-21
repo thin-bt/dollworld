@@ -159,6 +159,18 @@ export function isRecoveryPickup(pickup, active) {
 }
 
 /**
+ * Explicit redispatch/recovery pickup reasons must bypass the same-key cooldown.
+ * Otherwise the executor classifies a recovery as invokable and immediately
+ * suppresses it for 30 minutes, leaving PREPARED lanes unclaimed.
+ *
+ * @param {{ reason?: string }} pickup
+ */
+export function isCooldownExemptPickup(pickup) {
+  const reason = pickup?.reason ?? "";
+  return reason === "REDISPATCH_SAME_TASK" || reason.startsWith("RECOVERY_");
+}
+
+/**
  * @param {string | undefined} lastInvokedTaskKey
  * @param {string | undefined} lastInvokedAt
  * @param {string} inboxKey
