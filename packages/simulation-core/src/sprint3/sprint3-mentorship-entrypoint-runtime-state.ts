@@ -24,7 +24,12 @@ import type {
   MentorshipRelationKind,
 } from "./types.js";
 
-export const SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_SCHEMA_VERSION = "0.2.0" as const;
+
+export const SUPPORTED_SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_SCHEMA_VERSIONS = [
+  "0.1.0",
+  "0.2.0",
+] as const;
 
 export const SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_KEYS = [
   "schemaVersion",
@@ -37,6 +42,7 @@ export const SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_KEYS = [
   "completedExplicitWeeklyTeachOutcomes",
   "lastProcessedEnrollmentAbsoluteWeek",
   "lastProcessedExplicitTeachAbsoluteWeek",
+  "enrollmentParentRebellionChildPersonIds",
 ] as const;
 
 export const SPRINT3_MENTORSHIP_ASSIGNMENT_ENTRY_KEYS = [
@@ -85,7 +91,49 @@ export type Sprint3MentorshipEntrypointRuntimeState = {
   completedExplicitWeeklyTeachOutcomes: readonly Sprint3CompletedExplicitWeeklyTeachOutcomeEntry[];
   lastProcessedEnrollmentAbsoluteWeek: number | null;
   lastProcessedExplicitTeachAbsoluteWeek: number | null;
+  /** Explicit child→parent rebellion at enrollment; no autonomous derivation. */
+  enrollmentParentRebellionChildPersonIds: readonly PersonId[];
 };
+
+function parseEnrollmentParentRebellionChildPersonIds(
+  raw: unknown,
+  path: string,
+  issues: ValidationIssue[],
+): PersonId[] | undefined {
+  if (!Array.isArray(raw)) {
+    issues.push({
+      path,
+      message: "enrollmentParentRebellionChildPersonIds must be an array",
+      actual: raw,
+    });
+    return undefined;
+  }
+  const ids: PersonId[] = [];
+  const seen = new Set<string>();
+  for (let index = 0; index < raw.length; index += 1) {
+    const value = raw[index];
+    if (typeof value !== "string" || value.length === 0) {
+      issues.push({
+        path: `${path}/${String(index)}`,
+        message: "childPersonId must be a non-empty string",
+        actual: value,
+      });
+      continue;
+    }
+    if (seen.has(value)) {
+      issues.push({
+        path: `${path}/${String(index)}`,
+        message: "duplicate childPersonId in enrollmentParentRebellionChildPersonIds",
+        actual: value,
+      });
+      continue;
+    }
+    seen.add(value);
+    ids.push(asPersonId(value));
+  }
+  ids.sort(compareUnicodeCodePoints);
+  return ids;
+}
 
 export function createInitialSprint3MentorshipEntrypointRuntimeState(): Sprint3MentorshipEntrypointRuntimeState {
   return deepFreezePlainJson({
@@ -99,6 +147,7 @@ export function createInitialSprint3MentorshipEntrypointRuntimeState(): Sprint3M
     completedExplicitWeeklyTeachOutcomes: [],
     lastProcessedEnrollmentAbsoluteWeek: null,
     lastProcessedExplicitTeachAbsoluteWeek: null,
+    enrollmentParentRebellionChildPersonIds: [],
   });
 }
 
@@ -193,12 +242,17 @@ export function validateSprint3MentorshipEntrypointRuntimeState(
   rejectUnknownKeys(object, SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_KEYS, "", issues);
 
   const schemaVersion = object["schemaVersion"];
-  if (schemaVersion !== SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_SCHEMA_VERSION) {
+  if (
+    typeof schemaVersion !== "string" ||
+    !SUPPORTED_SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_SCHEMA_VERSIONS.includes(
+      schemaVersion as (typeof SUPPORTED_SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_SCHEMA_VERSIONS)[number],
+    )
+  ) {
     issues.push({
       path: "/schemaVersion",
       message: "unsupported mentorship entrypoint runtime schemaVersion",
       actual: schemaVersion,
-      expected: SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_SCHEMA_VERSION,
+      expected: SUPPORTED_SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_SCHEMA_VERSIONS.join(" | "),
     });
   }
   const processorId = object["processorId"];
@@ -266,6 +320,18 @@ export function validateSprint3MentorshipEntrypointRuntimeState(
       ? null
       : requireSafeIntegerAtLeast(object, "lastProcessedExplicitTeachAbsoluteWeek", "", 0, issues);
 
+  let enrollmentParentRebellionChildPersonIds: PersonId[] = [];
+  if (object["enrollmentParentRebellionChildPersonIds"] !== undefined) {
+    const parsed = parseEnrollmentParentRebellionChildPersonIds(
+      object["enrollmentParentRebellionChildPersonIds"],
+      "/enrollmentParentRebellionChildPersonIds",
+      issues,
+    );
+    if (parsed !== undefined) {
+      enrollmentParentRebellionChildPersonIds = parsed;
+    }
+  }
+
   if (
     issues.length > 0 ||
     pendingEnrollmentBoundaries === undefined ||
@@ -294,6 +360,7 @@ export function validateSprint3MentorshipEntrypointRuntimeState(
     ),
     lastProcessedEnrollmentAbsoluteWeek: lastEnrollmentWeek ?? null,
     lastProcessedExplicitTeachAbsoluteWeek: lastTeachWeek ?? null,
+    enrollmentParentRebellionChildPersonIds,
   }) as Sprint3MentorshipEntrypointRuntimeState;
 
   return success(frozen);

@@ -26,6 +26,7 @@ import { isExplicitWeeklyTeachActionEnabled } from "./evaluate-explicit-weekly-t
 import type { TechniqueCatalog } from "../sprint1/technique-catalog.js";
 import type { Sprint1Config } from "../sprint1/types.js";
 import { deriveLiveEnrollmentActiveSpecialReasons } from "./derive-live-enrollment-active-special-reasons.js";
+import { childHasEnrollmentParentRebellionSignal } from "./enrollment-parent-rebellion-signal.js";
 import { evaluateMasterIntakeDecision } from "./evaluate-master-intake.js";
 import {
   createInitialSprint3MentorshipEntrypointRuntimeState,
@@ -422,6 +423,7 @@ export function materializeLiveEnrollmentQueueBoundaries(
       child,
       masterCandidates,
       parentPersonById,
+      childHasEnrollmentParentRebellionSignal(input.runtimeState, child.personId),
     );
     const temporaryGuidanceParentPersonId = parents[0]?.personId;
     const childAge = child.currentAge;

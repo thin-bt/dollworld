@@ -38,6 +38,7 @@ export function deriveLiveEnrollmentActiveSpecialReasons(
   childPerson: Person,
   masterCandidates: readonly EnrollmentMasterCandidate[],
   parentPersonById: ReadonlyMap<string, Person>,
+  enrollmentParentRebellionActive: boolean,
 ): readonly EnrollmentSpecialReason[] {
   const active = new Set<EnrollmentSpecialReason>();
 
@@ -89,6 +90,10 @@ export function deriveLiveEnrollmentActiveSpecialReasons(
   const qualifiedAcceptNonParents = qualifiedAccept.filter(
     (candidate) => !candidate.isBiologicalParent,
   );
+
+  if (enrollmentParentRebellionActive && qualifiedAcceptParents.length > 0) {
+    active.add("rebellion_against_parent");
+  }
 
   if (qualifiedAcceptParents.length > 0 && qualifiedAcceptNonParents.length > 0) {
     const maxParentRank = Math.max(

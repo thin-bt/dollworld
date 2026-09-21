@@ -1336,6 +1336,10 @@ export { processExplicitWeeklyTeachWeek } from "./sprint3/process-explicit-weekl
 export { applyExplicitWeeklyTeachOutcomesToWorldState } from "./sprint3/apply-explicit-weekly-teach-outcomes-to-world-state.js";
 export { deriveLiveExplicitWeeklyTeachDiscipleRequests } from "./sprint3/derive-live-explicit-weekly-teach-disciple-requests.js";
 export { deriveLiveEnrollmentActiveSpecialReasons } from "./sprint3/derive-live-enrollment-active-special-reasons.js";
+export {
+  childHasEnrollmentParentRebellionSignal,
+  withEnrollmentParentRebellionSignalForChild,
+} from "./sprint3/enrollment-parent-rebellion-signal.js";
 export { processSprint3EnrollmentIntakeBoundary } from "./sprint3/process-sprint3-enrollment-intake-boundary.js";
 export {
   materializeLiveEnrollmentQueueBoundaries,

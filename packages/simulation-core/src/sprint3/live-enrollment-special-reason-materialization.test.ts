@@ -10,7 +10,11 @@ import { createWorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js
 import type { WorldEngineState } from "../world-engine/types.js";
 import { materializeLiveEnrollmentQueueBoundaries } from "./materialize-live-mentorship-entrypoint-queues.js";
 import { processSprint3EnrollmentIntakeBoundary } from "./process-sprint3-enrollment-intake-boundary.js";
-import { createInitialSprint3MentorshipEntrypointRuntimeState } from "./sprint3-mentorship-entrypoint-runtime-state.js";
+import {
+  createInitialSprint3MentorshipEntrypointRuntimeState,
+  validateSprint3MentorshipEntrypointRuntimeState,
+} from "./sprint3-mentorship-entrypoint-runtime-state.js";
+import { withEnrollmentParentRebellionSignalForChild } from "./enrollment-parent-rebellion-signal.js";
 import { createSprint3Balance040ConfigInput } from "./sprint3-config-defaults.js";
 import { validateSprint3Config } from "./validate-sprint3-config.js";
 
@@ -335,6 +339,90 @@ describe("S03-028 live enrollment special reason materialization", () => {
     const boundary = materialized.pendingEnrollmentBoundaries[0];
     expect(boundary?.activeSpecialReasons).toEqual(["parent_intake_limit_reached"]);
     expect(boundary?.activeSpecialReasons).not.toContain("rebellion_against_parent");
+  });
+
+  it("LESR-006 persisted parent-rebellion signal materializes rebellion_against_parent and selects non-parent master", () => {
+    const world = enrollmentWorld({});
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [
+          sidecarEntry(CHILD_ID),
+          sidecarEntry(EXTERNAL_MASTER_ID),
+          sidecarEntry(PARENT_ID),
+        ],
+      }),
+    );
+    const runtimeWithRebellion = expectOk(
+      withEnrollmentParentRebellionSignalForChild(
+        createInitialSprint3MentorshipEntrypointRuntimeState(),
+        CHILD_ID,
+      ),
+    );
+    const materialized = expectOk(
+      materializeLiveEnrollmentQueueBoundaries({
+        absoluteWeek: 384,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Enrollment,
+        runtimeState: runtimeWithRebellion,
+      }),
+    );
+    const boundary = materialized.pendingEnrollmentBoundaries[0];
+    expect(boundary?.activeSpecialReasons).toContain("rebellion_against_parent");
+    const processed = expectOk(
+      processSprint3EnrollmentIntakeBoundary({
+        absoluteWeek: 384,
+        sprint3Config: sprint3Enrollment,
+        weeklyTrainingSidecars: sidecars,
+        runtimeState: materialized,
+      }),
+    );
+    expect(processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.kind).toBe(
+      "formal_master_assigned",
+    );
+    expect(
+      processed.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.selectedMasterPersonId,
+    ).toBe(EXTERNAL_MASTER_ID);
+  });
+
+  it("LESR-007 rebellion signal survives validate/reload and negative control omits reason", () => {
+    const runtimeWithRebellion = expectOk(
+      withEnrollmentParentRebellionSignalForChild(
+        createInitialSprint3MentorshipEntrypointRuntimeState(),
+        CHILD_ID,
+      ),
+    );
+    const reloaded = expectOk(
+      validateSprint3MentorshipEntrypointRuntimeState(
+        JSON.parse(JSON.stringify(runtimeWithRebellion)),
+      ),
+    );
+    expect(reloaded.enrollmentParentRebellionChildPersonIds).toEqual([CHILD_ID]);
+
+    const world = enrollmentWorld({});
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [
+          sidecarEntry(CHILD_ID),
+          sidecarEntry(EXTERNAL_MASTER_ID),
+          sidecarEntry(PARENT_ID),
+        ],
+      }),
+    );
+    const withoutSignal = expectOk(
+      materializeLiveEnrollmentQueueBoundaries({
+        absoluteWeek: 384,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Enrollment,
+        runtimeState: createInitialSprint3MentorshipEntrypointRuntimeState(),
+      }),
+    );
+    expect(withoutSignal.pendingEnrollmentBoundaries[0]?.activeSpecialReasons).not.toContain(
+      "rebellion_against_parent",
+    );
   });
 
   it("LESR-005 materialized special reasons and candidates are replay-stable", () => {
