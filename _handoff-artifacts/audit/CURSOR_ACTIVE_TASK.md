@@ -8,8 +8,8 @@ updatedAt: 2026-09-21T13:01:00+09:00
 pickup: (none)
 startedAt: (none)
 branch: master
-HEAD: 8e9b825be269a6660cdd36a74fc55cd2ed138240
-origin-master-head: 8e9b825be269a6660cdd36a74fc55cd2ed138240
+HEAD: f8891d6a7281369a0da26a0cea88d69e772f62ae
+origin-master-head: f8891d6a7281369a0da26a0cea88d69e772f62ae
 completedAt: 2026-09-21T13:01:00+09:00
 last-completed-task: SPRINT3-S03-028-LIVE-ENROLLMENT-SPECIAL-REASON-MATERIALIZATION-A-20260921-R1
 last-result-path: _handoff-artifacts/results/SPRINT3-S03-028-LIVE-ENROLLMENT-SPECIAL-REASON-MATERIALIZATION-A-20260921-R1/result.md

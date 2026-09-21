@@ -8,7 +8,7 @@ updatedAt: 2026-09-21T13:01:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
-published-master-sha: 8e9b825be269a6660cdd36a74fc55cd2ed138240
+published-master-sha: f8891d6a7281369a0da26a0cea88d69e772f62ae
 product-commit-sha: 8e9b825be269a6660cdd36a74fc55cd2ed138240
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-S03-020-LIVE-TECHNIQUE-LOSS-WIRING-ROLE3-20260921-R1
