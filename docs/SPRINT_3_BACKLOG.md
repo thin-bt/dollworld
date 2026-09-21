@@ -1,6 +1,6 @@
 # Sprint 3 バックログ：師匠・門下・教授
 
-- バックログバージョン: `S3-BACKLOG-0.1.2`
+- バックログバージョン: `S3-BACKLOG-0.1.3`
 - 対象ゲーム仕様: `SPEC-0.1.3`（師匠・門下テーマ）
 - 対象 Sprint 3 ミニ仕様: `S3-SPEC-0.3.0-draft`（`docs/specs/15-sprint3-config-schema.md`）
 - 実装状態:
@@ -11,11 +11,13 @@
   - **S03-005 implemented**（`SPRINT3-S03-005-TEACHING-EFFICIENCY-A-20260920-R1`）
   - **S03-006 implemented**（`SPRINT3-S03-006-PARENT-TEMP-GUIDANCE-A-20260920-R1`）
   - S03-007 **implemented**（`master` product）
-  - S03-008 **教授技選択 + 独自技ライフサイクル pure slice published**（`master` product）
+  - S03-008 **implemented**（教授技選択 + OTL **pure processor** published on `master` product；週次 runtime 閉ループは S03-009〜S03-011 および下記 **証跡表** の production/integration slices で canonical 受理済み）
   - **S03-010 implemented on canonical `master`**（生成技 materialization / catalog overlay — `SPRINT3-S03-010-PUBLICATION-RECOVERY-A-20260921-R1`）
   - **S03-009 implemented on canonical `master`**（OTL 週次 runtime 配線 — `SPRINT3-S03-009-ORIGINAL-TECHNIQUE-RUNTIME-WIRING-B2-20260920-R1` @ `b81df17`）
   - **S03-011 implemented on canonical `master`**（初使用 MatchId 永続化 — `SPRINT3-S03-011-CANONICAL-PUBLICATION-RECOVERY-B2-20260921-R1` @ `fbb83b1`）
 - 実装順序の正本: S03-001 → S03-002 → … → S03-008 → S03-009 → S03-010 → S03-011（下表）
+- **canonical product 受理**（独立監査 `SPRINT3-S03-026-FORMAL-CLOSE-EVIDENCE-AUDIT-B2-20260921-R1` @ `47bdb9b`）: 入門/資格、persisted 教授技選択 **consumption**、生成技 battle consumption、独自技 **loss** の production チェーンに **残存 product gap なし**（Sprint 4 着手不可）
+- **formal release gate**（A-owned `SPRINT3-S03-025-ROOT-CHECK-TIMEOUT-CLOSURE-A-20260921-R1` **READY**）: root `npm run check` 全緑（`1889/1889`）；S03-024 の executor-timeout 差分は **環境/load 由来** と分類済み。**正式クローズラベル**は PM/制御面の次遷移待ち；本ファイル単独では Sprint 3 を `CLOSED` としない
 
 ## 目的
 
@@ -24,17 +26,17 @@
 ## スコープ正本（`技継承・独自技・失伝`）
 
 - **権威**: `docs/SPEC_PREPARATION_PLAN.md` §Sprint 3前 は `技継承・独自技・失伝` を Sprint 3 準備対象とし、ミニ仕様完了条件（入力／出力／**状態更新**／処理順／設定／不変条件／対象外／受入テスト）を要求する。
-- **解釈**: S03-008 で公開済みの pure processor（生成試行・失伝・創始履歴レコード）に加え、週次研究値の **runtime 永続化**、production world-step からの **決定的蓄積・生成試行**、生成技の **catalog 登録**、初使用試合 **MatchId 永続化** までが Sprint 3 閉ループに含まれる（`docs/specs/15-sprint3-config-schema.md` §5 参照）。
+- **解釈**: S03-008 pure processor に加え、週次研究値の **runtime 永続化**（S03-009）、生成技 **catalog 登録**（S03-010）、初使用 **MatchId**（S03-011）、および S03-012 以降の **integration/recovery 証跡**で production 閉ループが canonical `master` 上で受理されている（`docs/specs/15-sprint3-config-schema.md` §5 参照）。主表 S03-001..011 の **順序・スコープは拡張しない**。
 - **Sprint 4 外**: 引退・遺伝・家系 lineage schema の拡張は Sprint 3 非目標（従来どおり）。
-- **未完了の正本表現**: canonical `master` に実装が無い slice は **pending / blocked** と記す。`Sprint 3 外` ラベルで runtime 配線を後続 Sprint へ送る記述は、本バックログ `S3-BACKLOG-0.1.2` 以降では使用しない。
+- **未完了の正本表現**: canonical `master` に実装が無い **主表 slice** のみ **pending / blocked** と記す。S03-012 以降 ID は **受入済み証跡**として下表に列挙し、新仕様の暗黙追加としない。
 
 ## 固定完了条件（Sprint 3 全体・将来）
 
-- S03-001〜最終受入タスクが accepted
+- S03-001〜S03-011（主表）および受理済み production 証跡が canonical result と整合
 - Sprint3Config／師弟ドメイン validation／canonical hash 契約が正本どおり
 - 師匠資格閾値は config 化され、SPEC 本文にない数値をコードへ硬编码しない
 - 週間 `teach`・入門 AI・Sprint 4 引退/遺伝 scope を混在させない
-- `npm run check` が成功する
+- root `npm run check` が成功する（release gate 証跡: S03-025）
 
 ## タスク一覧
 
@@ -51,6 +53,25 @@
 | S03-009 | 独自技研究 runtime 永続化・週次蓄積・生成試行 production 配線 | S03-008 OTL slice — **implemented**（canonical `master` @ `b81df17`） |
 | S03-010 | 生成技 stat 合成・TechniqueCatalog overlay 登録 | S03-008 — **canonical `master` implemented** |
 | S03-011 | 初使用試合 MatchId の founding history 永続化 | S03-009 + S03-010 — **implemented**（canonical `master` @ `fbb83b1`） |
+
+## Production / integration 受理証跡（主表外・S03-012 以降）
+
+S03-001..011 の **計画順序を変更しない**。以下は canonical `master` 上で **result 証跡により accepted** とされた recovery/integration 作業のみ（S03-026 監査と整合）。
+
+| ID | ドメイン（要約） | 代表 result（lane） | 受理 |
+|---|---|---|---|
+| S03-012 | Runtime entrypoint 統合 | `SPRINT3-S03-012-RUNTIME-ENTRYPOINT-INTEGRATION-A-20260921-R1` | **ACCEPT** |
+| S03-013 | Live mentorship queue materialization | `SPRINT3-S03-013-LIVE-MENTORSHIP-QUEUE-MATERIALIZATION-A-20260921-R1` | **ACCEPT** |
+| S03-014 | Live enrollment candidate materialization | `SPRINT3-S03-014-LIVE-ENROLLMENT-CANDIDATE-MATERIALIZATION-A-20260921-R1` | **ACCEPT** |
+| S03-015 | 生成技 battle consumption（catalog overlay） | `SPRINT3-S03-015-GENERATED-TECHNIQUE-BATTLE-CONSUMPTION-B2-20260921-R1` | **ACCEPT** |
+| S03-016 | Live master qualification 永続化/derivation | `SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1` | **ACCEPT** |
+| S03-017 | Sprint2 competitive record production 配線 | `SPRINT3-S03-017-LIVE-COMPETITIVE-RECORD-WIRING-A-20260921-R1` | **ACCEPT** |
+| S03-020 | OTL loss production 配線（週次） | `SPRINT3-S03-020-LIVE-TECHNIQUE-LOSS-WIRING-ROLE3-20260921-R1` | **ACCEPT** |
+| S03-021..022 | 教授技選択 persistence + live wiring | `SPRINT3-S03-022-LIVE-TEACHING-SELECTION-WIRING-A-20260921-R1` 他 | **ACCEPT** |
+| S03-023 | Persisted selection **consumption**（explicit teach） | `SPRINT3-S03-023-LIVE-TEACHING-SELECTION-CONSUMPTION-A-20260921-R1` @ `47bdb9b` | **ACCEPT** |
+| S03-024 | OTL loss production 境界 regression 完結 | `SPRINT3-S03-024-LIVE-TECHNIQUE-LOSS-CLOSURE-B2-20260921-R1` | **ACCEPT** |
+| S03-025 | Root check timeout **分類**（product 変更なし） | `SPRINT3-S03-025-ROOT-CHECK-TIMEOUT-CLOSURE-A-20260921-R1`（**A-owned**） | **READY** — gate 証跡 |
+| S03-026 | Formal-close 独立証跡監査 | `SPRINT3-S03-026-FORMAL-CLOSE-EVIDENCE-AUDIT-B2-20260921-R1` | **READY_FOR_FORMAL_CLOSE** |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
 
@@ -189,7 +210,7 @@ S03-001 `teachingEfficiency` を Sprint 1 週間訓練成果計算へ接続（�
 
 ### 目的
 
-SPEC 本文の教授方針・技段階・独自技研究値の **pure/config slice**（Sprint 4 引退/遺伝は対象外）。**状態を変える runtime 閉ループ**（S03-009〜S03-011）は別 ID で追跡する。
+SPEC 本文の教授方針・技段階・独自技研究値の **pure/config slice**（Sprint 4 引退/遺伝は対象外）。**状態を変える runtime 閉ループ**は S03-009〜S03-011（主表）および上記 **証跡表**（S03-012 以降）で追跡する；本 ID の受入は pure 関数契約が正本。
 
 ### 受入チェック（教授技選択 slice — published）
 
