@@ -328,6 +328,10 @@ describe("FE-02 PersonDetail mentorship visibility", () => {
         errorText={null}
         errorCode={null}
         uiRevision={4}
+        personNameById={{
+          person_000099: "師範・アルファ",
+          person_000100: "師範・ベータ",
+        }}
       />,
     );
     expect(html).toContain('data-testid="person-detail-mentorship"');
@@ -340,7 +344,32 @@ describe("FE-02 PersonDetail mentorship visibility", () => {
     expect(html).toContain('href="/people/person_000099"');
     expect(html).toContain('href="/people/person_000100"');
     expect(html).toContain('data-person-id="person_000099"');
+    expect(html).toContain('data-person-id="person_000100"');
+    expect(html).toContain(">師範・アルファ<");
+    expect(html).toContain(">師範・ベータ<");
+    expect(html).toMatch(
+      /data-testid="person-detail-formal-masters"[\s\S]*?>師範・アルファ<[\s\S]*?>師範・ベータ</,
+    );
     expect(html).not.toContain('data-qualified-master="false"');
+  });
+
+  it("formal-master links keep personId href when display names are not yet loaded", () => {
+    const html = renderToStaticMarkup(
+      <PersonDetailViewPanel
+        status="success"
+        personId="person_000003"
+        detail={{
+          ...populatedDetail,
+          formalMasterPersonIds: ["person_000099"],
+        }}
+        errorText={null}
+        errorCode={null}
+        uiRevision={1}
+      />,
+    );
+    expect(html).toContain('href="/people/person_000099"');
+    expect(html).toContain('data-person-id="person_000099"');
+    expect(html).toContain(">person_000099<");
   });
 
   it("empty mentorship shows なし without inventing masters or misleading labels", () => {

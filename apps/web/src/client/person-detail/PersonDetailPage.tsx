@@ -15,6 +15,9 @@ export function PersonDetailPage(props: PersonDetailPageProps) {
   const [errorText, setErrorText] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [uiRevision, setUiRevision] = useState<number | null>(null);
+  const [personNameById, setPersonNameById] = useState<ReadonlyMap<string, string>>(
+    () => new Map(),
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -23,6 +26,7 @@ export function PersonDetailPage(props: PersonDetailPageProps) {
     setErrorText(null);
     setErrorCode(null);
     setUiRevision(null);
+    setPersonNameById(new Map());
     void (async () => {
       const result = await loadPersonDetail(
         props.fetchImpl !== undefined
@@ -43,6 +47,35 @@ export function PersonDetailPage(props: PersonDetailPageProps) {
       setDetail(result.data);
       setUiRevision(result.uiRevision);
       setStatus("success");
+
+      const masterIds = result.data.formalMasterPersonIds;
+      if (masterIds.length === 0) {
+        return;
+      }
+      const nameEntries = await Promise.all(
+        masterIds.map(async (masterId) => {
+          const masterResult = await loadPersonDetail(
+            props.fetchImpl !== undefined
+              ? { personId: masterId, fetchImpl: props.fetchImpl }
+              : { personId: masterId },
+          );
+          if (masterResult.kind !== "success") {
+            return null;
+          }
+          const name = masterResult.data.displayName;
+          return typeof name === "string" && name.length > 0 ? ([masterId, name] as const) : null;
+        }),
+      );
+      if (cancelled) {
+        return;
+      }
+      const names = new Map<string, string>();
+      for (const entry of nameEntries) {
+        if (entry !== null) {
+          names.set(entry[0], entry[1]);
+        }
+      }
+      setPersonNameById(names);
     })();
     return () => {
       cancelled = true;
@@ -58,6 +91,7 @@ export function PersonDetailPage(props: PersonDetailPageProps) {
       errorCode={errorCode}
       uiRevision={uiRevision}
       peopleListHref="/people"
+      personNameById={personNameById}
     />
   );
 }

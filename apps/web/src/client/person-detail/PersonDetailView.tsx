@@ -23,6 +23,7 @@ import {
   abilityValueTier,
   abilityValueToneLabel,
 } from "../presentation/ability-value-presentation.js";
+import { personDisplayLabel } from "../presentation/person-display-label.js";
 import { presentTechniqueView } from "../presentation/technique-presentation.js";
 
 export type PersonDetailViewProps = {
@@ -33,6 +34,8 @@ export type PersonDetailViewProps = {
   errorCode: string | null;
   uiRevision: number | null;
   peopleListHref?: string;
+  /** UI-005 displayName for related persons (e.g. formal masters), keyed by personId. */
+  personNameById?: ReadonlyMap<string, string> | Record<string, string>;
 };
 
 function renderStatGrid(record: Record<string, number>, testId: string) {
@@ -245,7 +248,7 @@ export function PersonDetailViewPanel(props: PersonDetailViewProps) {
                             data-testid="person-detail-formal-master-link"
                             data-person-id={masterId}
                           >
-                            {masterId}
+                            {personDisplayLabel(masterId, props.personNameById)}
                           </a>
                         </li>
                       ))}
