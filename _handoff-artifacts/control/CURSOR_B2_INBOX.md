@@ -1,12 +1,12 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT3-S03-036-FORMAL-CLOSE-CONTROL-ARTIFACT-PREPARATION-B2-20260921-R1
-mode: CONTROL_ARTIFACT_PREPARATION
-priority: DEADLINE_CRITICAL
-updatedAt: 2026-09-21T15:24:44+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-036-FORMAL-CLOSE-CONTROL-ARTIFACT-PREPARATION-B2-20260921-R1/instruction.md
-authority-ref: GitHub thin-bt/dollworld master
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T15:27:30+09:00
+last-consumed-task-key: SPRINT3-S03-036-FORMAL-CLOSE-CONTROL-ARTIFACT-PREPARATION-B2-20260921-R1
+last-terminal: SPRINT3_S03_036_FORMAL_CLOSE_CONTROL_ARTIFACT_PREPARATION_B2_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-036-FORMAL-CLOSE-CONTROL-ARTIFACT-PREPARATION-B2-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
