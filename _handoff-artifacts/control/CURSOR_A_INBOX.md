@@ -1,21 +1,17 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1
-mode: IMPLEMENTATION_VERIFICATION
-priority: DEADLINE_CRITICAL
-updatedAt: 2026-09-21T07:55:49+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T09:03:21+09:00
+last-consumed-task-key: SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1
+last-terminal: READY / S03_016_LIVE_MASTER_QUALIFICATION_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
-recovery-request: REDISPATCH
 pickup-requirements:
-- fresh-read GitHub canonical instruction and current master
+- fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
-- trace live master qualification derivation/persistence; prove LIVE_CONNECTED or implement bounded PRODUCT_GAP
-- add focused regression evidence and run root npm run check when feasible
-- do not touch B2 S03-015 generated-technique battle consumption work
-- do not resume/duplicate the superseded pre-S03-015 evidence-manifest assignment
-- publish terminal result to canonical result path and verify GitHub master readback before READY
+- publish terminal result to GitHub canonical result path
