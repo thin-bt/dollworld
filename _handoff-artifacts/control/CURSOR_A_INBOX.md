@@ -1,12 +1,11 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T14:43:29+09:00
-last-consumed-task-key: SPRINT3-S03-033-BACKLOG-CANONICAL-PUBLISH-A-20260921-R1
-last-terminal: READY / S03_033_BACKLOG_CANONICAL_PUBLISH_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-033-BACKLOG-CANONICAL-PUBLISH-A-20260921-R1/result.md
+task-key: SPRINT3-S03-035-B2-PICKUP-HEALTH-DIAGNOSIS-A-20260921-R1
+mode: DEADLINE_CRITICAL_EXECUTOR_RECOVERY
+updatedAt: 2026-09-21T15:04:21+09:00
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-035-B2-PICKUP-HEALTH-DIAGNOSIS-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
@@ -14,4 +13,5 @@ sprint: Sprint3
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- diagnose B2 S03-034 pickup health without rewriting B2 Inbox
 - publish terminal result to GitHub canonical result path
