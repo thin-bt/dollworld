@@ -1,12 +1,12 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-055-PERSON-DETAIL-REVERSE-DISCIPLE-OBSERVABILITY-A-20260922-R1
-mode: IMPLEMENTATION
-priority: DEADLINE_CRITICAL
-updatedAt: 2026-09-22T08:01:56+09:00
-authority-ref: c85cf959446702985cc1dd051492856fef4ed624
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-055-PERSON-DETAIL-REVERSE-DISCIPLE-OBSERVABILITY-A-20260922-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-22T08:29:47+09:00
+last-consumed-task-key: SPRINT3-S03-055-PERSON-DETAIL-REVERSE-DISCIPLE-OBSERVABILITY-A-20260922-R1
+last-terminal: S03_055_PERSON_DETAIL_REVERSE_DISCIPLE_OBSERVABILITY_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-055-PERSON-DETAIL-REVERSE-DISCIPLE-OBSERVABILITY-A-20260922-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
