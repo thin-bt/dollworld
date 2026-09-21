@@ -9,7 +9,8 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-verify: 7e801e5ade25d00ab40ded4888f45a3bb2c859bc
-local-worktree-head-at-verify: 7e801e5ade25d00ab40ded4888f45a3bb2c859bc
+publication-commit: 7690c852d360389cd90afb5e94cc110b8d468f53
+local-worktree-head-at-verify: 7690c852d360389cd90afb5e94cc110b8d468f53
 pickup: ACTIVE_IDLE / SDK_EXECUTOR
 recovery: CURSOR-B2-001 — bounded attempt1 per check family; no same-case retry after exhaust
 production-change: NO
@@ -59,9 +60,10 @@ npm run check
 
 ## Canonical GitHub readback
 
-- **Tip SHA:** `7e801e5ade25d00ab40ded4888f45a3bb2c859bc`
-- **Tip message:** `control: consume SPRINT3-S03-017-LIVE-COMPETITIVE-RECORD-WIRING-A-20260921-R1 after READY`
-- **Format gate on bounded slice:** **PASS** at tip (recovery objective satisfied without additional B2 commit on product)
+- **Pre-verify tip SHA:** `7e801e5ade25d00ab40ded4888f45a3bb2c859bc` (format gate already green; no product commit)
+- **Publication SHA (B2 result only):** `7690c852d360389cd90afb5e94cc110b8d468f53`
+- **Post-push `origin/master`:** `7690c852d360389cd90afb5e94cc110b8d468f53` (readback fetch confirmed)
+- **Format gate on bounded slice:** **PASS** at pre-verify tip (recovery objective satisfied without additional B2 product diff)
 
 ## Non-conflict guard
 
