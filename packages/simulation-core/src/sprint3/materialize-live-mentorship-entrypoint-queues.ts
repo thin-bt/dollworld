@@ -14,6 +14,12 @@ import type { WeeklyTrainingPersonRecord } from "../sprint1/weekly-training-type
 import { isWeeklyActionPipelineEligible } from "../sprint1/weekly-update-eligibility.js";
 import type { WorldEngineState } from "../world-engine/types.js";
 import { cloneValidatedPlainJson, deepFreezePlainJson } from "../sprint1/plain-data.js";
+import type { CompetitiveRecord } from "../sprint2/competitive-record-update.js";
+import {
+  competitiveRecordForPerson,
+  deriveMasterQualificationEvaluationRecordFromPerson,
+  isPersonMasterQualificationEligible,
+} from "./derive-master-qualification-record.js";
 import { isEnrollmentAssignmentAiEnabled } from "./evaluate-enrollment-assignment.js";
 import { isExplicitWeeklyTeachActionEnabled } from "./evaluate-explicit-weekly-teach.js";
 import { evaluateMasterIntakeDecision } from "./evaluate-master-intake.js";
@@ -27,7 +33,6 @@ import type {
   EnrollmentMasterCandidate,
   ExplicitWeeklyTeachActionRecord,
   MasterIntakeAcceptance,
-  MasterQualificationEvaluationRecord,
   Sprint3Config,
 } from "./types.js";
 
@@ -37,6 +42,7 @@ export type MaterializeLiveEnrollmentQueueInput = {
   weeklyTrainingSidecars: WeeklyTrainingSidecarState;
   sprint3Config?: Sprint3Config;
   runtimeState: Sprint3MentorshipEntrypointRuntimeState | undefined;
+  competitiveRecordsByPersonId?: ReadonlyMap<PersonId, CompetitiveRecord>;
 };
 
 export type MaterializeLiveExplicitTeachQueueInput = {
@@ -64,53 +70,12 @@ function meanGrowthPotential(record: WeeklyTrainingPersonRecord): number {
   return Math.floor(sum / values.length);
 }
 
-function qualificationRecordFromPerson(person: Person): MasterQualificationEvaluationRecord {
-  if (person.lifeStatus !== "living") {
-    return {
-      careerStatus: person.careerStatus,
-      lifeStatus: person.lifeStatus,
-      highestRank: "F",
-      officialWins: 0,
-      limitedOfficialWins: 0,
-      tournamentTitles: 0,
-    };
-  }
-  if (person.careerStatus === "retired") {
-    return {
-      careerStatus: person.careerStatus,
-      lifeStatus: person.lifeStatus,
-      retirementRank: person.retirementRank,
-      highestRank: person.highestRank,
-      officialWins: 0,
-      limitedOfficialWins: 0,
-      tournamentTitles: 0,
-    };
-  }
-  if (person.careerStatus === "active_competitor") {
-    return {
-      careerStatus: person.careerStatus,
-      lifeStatus: person.lifeStatus,
-      highestRank: person.highestRank,
-      officialWins: 0,
-      limitedOfficialWins: 0,
-      tournamentTitles: 0,
-    };
-  }
-  return {
-    careerStatus: person.careerStatus,
-    lifeStatus: person.lifeStatus,
-    highestRank: "F",
-    officialWins: 0,
-    limitedOfficialWins: 0,
-    tournamentTitles: 0,
-  };
-}
-
 function buildMasterCandidate(
   masterPerson: Person,
   childPerson: Person,
   isBiologicalParent: boolean,
   masterRecord: WeeklyTrainingPersonRecord | undefined,
+  competitiveRecordsByPersonId: ReadonlyMap<PersonId, CompetitiveRecord> | undefined,
 ): EnrollmentMasterCandidate {
   const childAptitude = meanSurfaceAptitude(childPerson);
   const masterAptitude = meanSurfaceAptitude(masterPerson);
@@ -126,7 +91,16 @@ function buildMasterCandidate(
   return {
     masterPersonId: masterPerson.personId,
     isBiologicalParent,
-    qualificationRecord: qualificationRecordFromPerson(masterPerson),
+    qualificationRecord: (() => {
+      const competitiveRecord = competitiveRecordForPerson(
+        masterPerson.personId,
+        competitiveRecordsByPersonId,
+      );
+      return deriveMasterQualificationEvaluationRecordFromPerson({
+        person: masterPerson,
+        ...(competitiveRecord === undefined ? {} : { competitiveRecord }),
+      });
+    })(),
     parentChildCompatibilityScore: compatibility,
     lineageAptitudeScore: lineageAptitude,
     schoolFitScore: lineageAptitude,
@@ -193,6 +167,8 @@ function parentIdsForChild(worldState: WorldEngineState, childPersonId: PersonId
 function eligibleNonParentFormalMastersForChild(
   worldState: WorldEngineState,
   childPersonId: PersonId,
+  sprint3Config: Sprint3Config,
+  competitiveRecordsByPersonId: ReadonlyMap<PersonId, CompetitiveRecord> | undefined,
 ): Person[] {
   const parentIds = parentIdsForChild(worldState, childPersonId);
   const masters: Person[] = [];
@@ -206,10 +182,13 @@ function eligibleNonParentFormalMastersForChild(
     if (!isLivingParticipatingPerson(person)) {
       continue;
     }
-    if (person.careerStatus !== "retired") {
-      continue;
-    }
-    if (person.qualifiedMaster !== true) {
+    if (
+      !isPersonMasterQualificationEligible(
+        sprint3Config,
+        person,
+        competitiveRecordForPerson(person.personId, competitiveRecordsByPersonId),
+      )
+    ) {
       continue;
     }
     masters.push(person);
@@ -374,6 +353,8 @@ export function materializeLiveEnrollmentQueueBoundaries(
     const nonParentMasters = eligibleNonParentFormalMastersForChild(
       input.worldState,
       child.personId,
+      input.sprint3Config,
+      input.competitiveRecordsByPersonId,
     );
     const masterCandidates: EnrollmentMasterCandidate[] = [];
     for (const masterPerson of [...parents, ...nonParentMasters]) {
@@ -383,6 +364,7 @@ export function materializeLiveEnrollmentQueueBoundaries(
         child,
         isBiologicalParent,
         recordByPersonId.get(masterPerson.personId),
+        input.competitiveRecordsByPersonId,
       );
       const intakeResult = resolveLiveMaterializedIntakeAcceptance(
         input.sprint3Config,

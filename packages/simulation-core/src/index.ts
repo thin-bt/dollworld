@@ -1322,6 +1322,12 @@ export {
 } from "./sprint3/evaluate-master-intake.js";
 export { evaluateMasterQualificationEligibility } from "./sprint3/evaluate-master-qualification.js";
 export {
+  deriveMasterQualificationEvaluationRecordFromPerson,
+  isPersonMasterQualificationEligible,
+  resolvePersistedQualifiedMasterFlag,
+} from "./sprint3/derive-master-qualification-record.js";
+export { refreshQualifiedMasterFlagsInWorldState } from "./sprint3/refresh-qualified-master-flags-in-world-state.js";
+export {
   computeSprint3ConfigHash,
   createDefaultSprint3Config,
   validateNormalizedSprint3Config,

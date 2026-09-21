@@ -56,6 +56,8 @@ import {
   materializeLiveEnrollmentQueueBoundaries,
   materializeLiveExplicitWeeklyTeachQueueRecords,
 } from "../sprint3/materialize-live-mentorship-entrypoint-queues.js";
+import { refreshQualifiedMasterFlagsInWorldState } from "../sprint3/refresh-qualified-master-flags-in-world-state.js";
+import type { Sprint3Config } from "../sprint3/types.js";
 
 /** Matches world-engine WEEKS_PER_YEAR (48). */
 const WEEKS_PER_YEAR = 48;
@@ -112,6 +114,24 @@ function buildValidatedWeekObservation(input: {
     eventCountCumulative: input.eventCountCumulative,
     appendedEvents: deepFreezePlainJson([...input.appendedEvents]),
   });
+}
+
+function applySprint3QualifiedMasterRefresh(
+  working: { worldState: Sprint1RunRuntimeState["worldState"] },
+  sprint3Config: Sprint3Config | undefined,
+): ValidationResult<void> {
+  if (sprint3Config === undefined) {
+    return success(undefined);
+  }
+  const refreshed = refreshQualifiedMasterFlagsInWorldState({
+    worldState: working.worldState,
+    sprint3Config,
+  });
+  if (!refreshed.ok) {
+    return failure(prefixIssues(refreshed.issues, "/qualifiedMasterRefresh"));
+  }
+  working.worldState = refreshed.value;
+  return success(undefined);
 }
 
 function observerFailureIssues(error: unknown): ValidationIssue[] {
@@ -487,6 +507,13 @@ function executeSprint1WeeklyTransitionDraft(
     }
 
     working.worldState = yearStartPhase.value.worldState;
+    const yearStartQualifiedMasterRefresh = applySprint3QualifiedMasterRefresh(
+      working,
+      session.context.sprint3Config,
+    );
+    if (!yearStartQualifiedMasterRefresh.ok) {
+      return failure(yearStartQualifiedMasterRefresh.issues);
+    }
     eventStartSequence = yearStartPhase.value.nextSequence;
     // Year-start already advanced the date; skip a second calendar step and
     // do not re-run legacy processors (capture already ran on year-end week).
@@ -596,6 +623,14 @@ function executeSprint1WeeklyTransitionDraft(
     working.weeklyTrainingSidecars = adapterResult.value.weeklyTrainingSidecars;
     working.processorRuntimeStates = adapterResult.value.processorRuntimeStates;
 
+    const adapterQualifiedMasterRefresh = applySprint3QualifiedMasterRefresh(
+      working,
+      session.context.sprint3Config,
+    );
+    if (!adapterQualifiedMasterRefresh.ok) {
+      return failure(adapterQualifiedMasterRefresh.issues);
+    }
+
     const explicitTeachMaterialized = materializeLiveExplicitWeeklyTeachQueueRecords({
       absoluteWeek: working.worldState.worldDate.absoluteWeek,
       worldState: working.worldState,
@@ -680,6 +715,14 @@ function executeSprint1WeeklyTransitionDraft(
   }
 
   working.worldState = worldEngineResult.state;
+
+  const worldEngineQualifiedMasterRefresh = applySprint3QualifiedMasterRefresh(
+    working,
+    session.context.sprint3Config,
+  );
+  if (!worldEngineQualifiedMasterRefresh.ok) {
+    return failure(worldEngineQualifiedMasterRefresh.issues);
+  }
 
   const promotedWorldEvents = promoteLegacyWorldEngineEvents(
     worldEngineResult.events,
