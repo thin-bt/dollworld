@@ -1,16 +1,16 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T19:47:25+09:00
-last-consumed-task-key: SPRINT3-S03-041-WEEKLY-GUARD-TYPECHECK-CLOSURE-A-20260921-R1
-last-terminal: READY / S03_041_WEEKLY_GUARD_TYPECHECK_CLOSURE_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-041-WEEKLY-GUARD-TYPECHECK-CLOSURE-A-20260921-R1/result.md
+task-key: SPRINT2-REOPEN-FINAL-ROOT-GATE-A-20260921-R1
+mode: RELEASE_EVIDENCE
+updatedAt: 2026-09-21T20:00:47+09:00
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT2-REOPEN-FINAL-ROOT-GATE-A-20260921-R1/instruction.md
+priority: DEADLINE_CRITICAL
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
+sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
