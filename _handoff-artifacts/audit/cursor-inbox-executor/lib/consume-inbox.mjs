@@ -55,6 +55,54 @@ export function buildConsumedInboxMarkdown(input) {
 }
 
 /**
+ * Terminal class strings from Active/result metadata (not product code).
+ * `READY_FOR_FORMAL_CLOSE` and similar compound labels must not require a bare `\bREADY\b`
+ * match — underscore-adjacent READY is a common B2 formal-close shape (S03-034).
+ *
+ * @param {string} terminalBlob
+ */
+export function terminalStringIndicatesComplete(terminalBlob) {
+  const terminal = String(terminalBlob ?? "");
+  if (terminal.length === 0) {
+    return false;
+  }
+  if (/\b(READY|COMPLETE|FIX_REQUIRED|BLOCKED|TERMINAL)\b/.test(terminal)) {
+    return true;
+  }
+  if (/READY_FOR_FORMAL_CLOSE/i.test(terminal)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @param {Record<string, string>} resultFields
+ */
+export function resultFieldsHaveTerminal(resultFields) {
+  const state = (resultFields.state ?? "").trim();
+  if (/^(READY|TERMINAL|COMPLETE|FIX_REQUIRED|BLOCKED)$/i.test(state)) {
+    return true;
+  }
+  const terminal = `${resultFields.terminal ?? ""} ${resultFields["verificationOutcome"] ?? ""}`;
+  return terminalStringIndicatesComplete(terminal);
+}
+
+/**
+ * @param {Record<string, string>} resultFields
+ */
+export function readResultTerminalLabel(resultFields) {
+  const explicit = String(resultFields.terminal ?? "").trim();
+  if (explicit.length > 0) {
+    return explicit;
+  }
+  const state = (resultFields.state ?? "").trim();
+  if (state.length > 0) {
+    return `${state.toUpperCase()} / ${resultFields["task-key"] ?? "TASK"}`;
+  }
+  return "";
+}
+
+/**
  * @param {Record<string, string>} active
  * @param {string} taskKey
  */
@@ -72,7 +120,7 @@ export function activeHasTerminalForTask(active, taskKey) {
     return false;
   }
   const terminal = `${active.terminal ?? ""} ${active["last-terminal"] ?? ""} ${active["recovery-terminal"] ?? ""}`;
-  return /\bREADY\b|\bCOMPLETE\b|\bFIX_REQUIRED\b|\bBLOCKED\b/.test(terminal);
+  return terminalStringIndicatesComplete(terminal);
 }
 
 /**

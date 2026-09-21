@@ -1,3 +1,5 @@
+import { terminalStringIndicatesComplete } from "./consume-inbox.mjs";
+
 /**
  * @param {Record<string, string>} active
  * @param {number} staleMinutes
@@ -73,7 +75,7 @@ export function isAlreadyCompleteSameTask(inbox, active) {
     return false;
   }
   const terminal = `${active.terminal ?? ""} ${active["last-terminal"] ?? ""} ${active["recovery-terminal"] ?? ""}`;
-  return /\bREADY\b|\bCOMPLETE\b|\bFIX_REQUIRED\b|\bBLOCKED\b/.test(terminal);
+  return terminalStringIndicatesComplete(terminal);
 }
 
 /**

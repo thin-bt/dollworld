@@ -9,6 +9,8 @@ import {
   activeHasTerminalForTask,
   buildConsumedInboxMarkdown,
   readActiveTerminal,
+  readResultTerminalLabel,
+  resultFieldsHaveTerminal,
 } from "./consume-inbox.mjs";
 
 const execFileAsync = promisify(execFile);
@@ -69,20 +71,36 @@ export async function publishTerminalToGitHub(input) {
   const activeRead = await readLaneActive(lane, auditDir);
   const active = activeRead.fields;
 
-  if (!activeHasTerminalForTask(active, taskKey)) {
-    return { ok: false, reason: "NO_LOCAL_TERMINAL", pushed: false };
-  }
-
   const resultRel = `_handoff-artifacts/results/${taskKey}/result.md`;
   const resultAbs = path.join(repoRoot, resultRel);
-  if (!(await fileExists(resultAbs))) {
-    const alt = path.join(handoffRoot, "results", taskKey, "result.md");
-    if (!(await fileExists(alt))) {
-      return { ok: false, reason: "NO_RESULT_FILE", pushed: false };
-    }
+  const altResult = path.join(handoffRoot, "results", taskKey, "result.md");
+  const resultPathOnDisk = (await fileExists(resultAbs))
+    ? resultAbs
+    : (await fileExists(altResult))
+      ? altResult
+      : "";
+  if (!resultPathOnDisk) {
+    return { ok: false, reason: "NO_RESULT_FILE", pushed: false };
   }
 
-  const terminal = readActiveTerminal(active);
+  let terminalSource = "active";
+  let terminal = "";
+  if (activeHasTerminalForTask(active, taskKey)) {
+    terminal = readActiveTerminal(active);
+  } else {
+    const resultFields = await parseControlFile(resultPathOnDisk);
+    if (!resultFieldsHaveTerminal(resultFields)) {
+      return { ok: false, reason: "NO_LOCAL_TERMINAL", pushed: false };
+    }
+    terminalSource = "result-md";
+    terminal = readResultTerminalLabel(resultFields);
+    if (terminal.length === 0) {
+      terminal = readActiveTerminal(active);
+    }
+    if (terminal.length === 0) {
+      terminal = `TERMINAL / ${taskKey}`;
+    }
+  }
   const previousCanonical = await parseControlFile(paths.inboxCanonicalPath);
   const previousMirror = await parseControlFile(paths.inboxMirrorPath);
   const previous = {
@@ -157,6 +175,7 @@ export async function publishTerminalToGitHub(input) {
       pushed: true,
       commitSha: rev.stdout.trim(),
       idleMarkdown,
+      terminalSource,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

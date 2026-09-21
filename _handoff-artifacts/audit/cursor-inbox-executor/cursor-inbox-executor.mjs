@@ -233,6 +233,39 @@ async function pollLane(laneKey, cooldownMinutes, invokeTimeoutMinutes) {
   const pickup = evaluatePickup(inbox, active);
   const inboxKey = inbox["task-key"] ?? "";
 
+  if (!pickup.invoke && pickup.reason === "ALREADY_COMPLETE_SAME_TASK" && inboxKey.length > 0) {
+    const orphanPublish = await publishTerminalToGitHub({
+      lane: config.lane,
+      taskKey: inboxKey,
+      auditDir,
+      repoRoot,
+      updatedAt: formatJst(),
+    });
+    const orphanReason =
+      orphanPublish.ok && orphanPublish.pushed
+        ? "ORPHAN_PUBLISHED"
+        : orphanPublish.ok
+          ? `ORPHAN_${orphanPublish.reason}`
+          : `ORPHAN_FAILED_${orphanPublish.reason}`;
+    await writeExecutorHeartbeat({
+      lane: config.lane,
+      filePath: heartbeatPath,
+      status: "IDLE",
+      pollResult: `NOOP_${orphanReason}`,
+      lastInvokedTaskKey: prior.lastInvokedTaskKey ?? inboxKey,
+      lastInvokedAt: prior.lastInvokedAt ?? "",
+      lastAgentRunId: prior.lastAgentRunId ?? "",
+      lastError: orphanPublish.ok ? "" : `orphanPublish:${orphanPublish.reason}${orphanPublish.error ? `:${orphanPublish.error}` : ""}`,
+      pid: process.pid,
+    });
+    return {
+      lane: laneKey,
+      action: orphanPublish.pushed ? "orphan-published" : "noop",
+      reason: orphanReason,
+      githubPublish: orphanPublish,
+    };
+  }
+
   if (!pickup.invoke) {
     await writeExecutorHeartbeat({
       lane: config.lane,

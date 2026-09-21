@@ -183,6 +183,28 @@ test("REDISPATCH_SAME_TASK is cooldown-exempt", async () => {
   );
 });
 
+test("READY_FOR_FORMAL_CLOSE Active terminal => ALREADY_COMPLETE (S03-034 shape)", () => {
+  const taskKey =
+    "SPRINT3-S03-034-POST-PUBLICATION-FORMAL-CLOSE-ELIGIBILITY-B2-20260921-R1";
+  const pickup = evaluatePickup(
+    {
+      state: "PREPARED",
+      "task-key": taskKey,
+      updatedAt: "2026-09-21T14:50:42+09:00",
+    },
+    {
+      state: "IDLE",
+      "last-completed-task": taskKey,
+      terminal: "READY_FOR_FORMAL_CLOSE",
+      "last-terminal":
+        "SPRINT3_S03_034_POST_PUBLICATION_FORMAL_CLOSE_ELIGIBILITY_B2_READY_FOR_FORMAL_CLOSE",
+      completedAt: "2026-09-21T14:56:00+09:00",
+    },
+  );
+  assert.equal(pickup.invoke, false);
+  assert.equal(pickup.reason, "ALREADY_COMPLETE_SAME_TASK");
+});
+
 test("PICKUP_RECOVERY runtime-status counts as explicit redispatch", () => {
   const pickup = evaluatePickup(
     {

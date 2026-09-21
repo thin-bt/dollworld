@@ -4,6 +4,7 @@ import {
   activeHasTerminalForTask,
   buildConsumedInboxMarkdown,
   readActiveTerminal,
+  terminalStringIndicatesComplete,
 } from "../lib/consume-inbox.mjs";
 import { publishTerminalToGitHub } from "../lib/publish-terminal-github.mjs";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
@@ -49,6 +50,19 @@ test("activeHasTerminalForTask requires matching completed key + terminal class"
     false,
   );
   assert.equal(readActiveTerminal({ "last-terminal": "FIX_REQUIRED / X" }), "FIX_REQUIRED / X");
+  assert.equal(terminalStringIndicatesComplete("READY_FOR_FORMAL_CLOSE"), true);
+  assert.equal(
+    activeHasTerminalForTask(
+      {
+        state: "IDLE",
+        "last-completed-task":
+          "SPRINT3-S03-034-POST-PUBLICATION-FORMAL-CLOSE-ELIGIBILITY-B2-20260921-R1",
+        terminal: "READY_FOR_FORMAL_CLOSE",
+      },
+      "SPRINT3-S03-034-POST-PUBLICATION-FORMAL-CLOSE-ELIGIBILITY-B2-20260921-R1",
+    ),
+    true,
+  );
 });
 
 test("publishTerminalToGitHub dryRun builds idle when terminal+result exist", async () => {
