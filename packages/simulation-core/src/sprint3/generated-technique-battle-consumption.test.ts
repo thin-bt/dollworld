@@ -19,9 +19,7 @@ import {
   buildBattleTechniqueDefinitionCatalogMap,
   collectKnownTechniqueIdsForBattle,
 } from "./generated-technique-battle-catalog.js";
-import {
-  createSprint3Balance100ConfigInput,
-} from "./sprint3-config-defaults.js";
+import { createSprint3Balance100ConfigInput } from "./sprint3-config-defaults.js";
 import { validateSprint3Config } from "./validate-sprint3-config.js";
 import { materializeGeneratedTechniqueDefinition } from "./materialize-generated-technique-definition.js";
 import type { OriginalTechniqueFoundingHistoryRecord } from "./types.js";

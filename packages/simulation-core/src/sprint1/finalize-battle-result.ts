@@ -90,9 +90,7 @@ function snapshotFinalizeInput(input: unknown): ValidationResult<FinalizeBattleR
     postProcessContext: object[
       "postProcessContext"
     ] as FinalizeBattleResultInput["postProcessContext"],
-    ...(generatedTechniqueCatalogOverlay === undefined
-      ? {}
-      : { generatedTechniqueCatalogOverlay }),
+    ...(generatedTechniqueCatalogOverlay === undefined ? {} : { generatedTechniqueCatalogOverlay }),
   });
 }
 

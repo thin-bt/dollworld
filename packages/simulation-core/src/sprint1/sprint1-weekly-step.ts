@@ -57,6 +57,8 @@ import {
   materializeLiveExplicitWeeklyTeachQueueRecords,
 } from "../sprint3/materialize-live-mentorship-entrypoint-queues.js";
 import { refreshQualifiedMasterFlagsInWorldState } from "../sprint3/refresh-qualified-master-flags-in-world-state.js";
+import { resolveLiveCompetitiveRecordsForQualification } from "../sprint3/resolve-live-competitive-records-for-qualification.js";
+import type { CompetitiveRecordsByPersonId } from "../sprint3/derive-master-qualification-record.js";
 import type { Sprint3Config } from "../sprint3/types.js";
 
 /** Matches world-engine WEEKS_PER_YEAR (48). */
@@ -119,6 +121,7 @@ function buildValidatedWeekObservation(input: {
 function applySprint3QualifiedMasterRefresh(
   working: { worldState: Sprint1RunRuntimeState["worldState"] },
   sprint3Config: Sprint3Config | undefined,
+  competitiveRecordsByPersonId: CompetitiveRecordsByPersonId | undefined,
 ): ValidationResult<void> {
   if (sprint3Config === undefined) {
     return success(undefined);
@@ -126,6 +129,7 @@ function applySprint3QualifiedMasterRefresh(
   const refreshed = refreshQualifiedMasterFlagsInWorldState({
     worldState: working.worldState,
     sprint3Config,
+    ...(competitiveRecordsByPersonId === undefined ? {} : { competitiveRecordsByPersonId }),
   });
   if (!refreshed.ok) {
     return failure(prefixIssues(refreshed.issues, "/qualifiedMasterRefresh"));
@@ -269,6 +273,13 @@ function cloneSprint1RuntimeDraft(runtimeState: Sprint1RunRuntimeState): Sprint1
             runtimeState.generatedTechniqueCatalogOverlay,
           ),
         }),
+    ...(runtimeState.sprint2CompetitiveRecordRuntime === undefined
+      ? {}
+      : {
+          sprint2CompetitiveRecordRuntime: cloneValidatedPlainJson(
+            runtimeState.sprint2CompetitiveRecordRuntime,
+          ),
+        }),
   };
 }
 
@@ -285,6 +296,7 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
   originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
   generatedTechniqueCatalogOverlay?: Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"];
+  sprint2CompetitiveRecordRuntime?: Sprint1RunRuntimeState["sprint2CompetitiveRecordRuntime"];
 } {
   return {
     worldState: cloneWorldEngineState(runtimeState.worldState),
@@ -311,6 +323,13 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
       : {
           generatedTechniqueCatalogOverlay: cloneValidatedPlainJson(
             runtimeState.generatedTechniqueCatalogOverlay,
+          ),
+        }),
+    ...(runtimeState.sprint2CompetitiveRecordRuntime === undefined
+      ? {}
+      : {
+          sprint2CompetitiveRecordRuntime: cloneValidatedPlainJson(
+            runtimeState.sprint2CompetitiveRecordRuntime,
           ),
         }),
   };
@@ -386,6 +405,14 @@ function executeSprint1WeeklyTransitionDraft(
           eventStream: session.runtimeState.eventStream,
           battleResults: battleResultsRef,
         };
+
+  const competitiveRecordRuntime =
+    working.sprint2CompetitiveRecordRuntime ?? session.runtimeState.sprint2CompetitiveRecordRuntime;
+  const competitiveRecordsByPersonId = resolveLiveCompetitiveRecordsForQualification(
+    competitiveRecordRuntime === undefined
+      ? {}
+      : { sprint2CompetitiveRecordRuntime: competitiveRecordRuntime },
+  );
 
   const weekMatch = assertBattleResultWeekMatchesWorldDate({
     battleResultWeekState: working.battleResultWeekState,
@@ -525,6 +552,7 @@ function executeSprint1WeeklyTransitionDraft(
     const yearStartQualifiedMasterRefresh = applySprint3QualifiedMasterRefresh(
       working,
       session.context.sprint3Config,
+      competitiveRecordsByPersonId,
     );
     if (!yearStartQualifiedMasterRefresh.ok) {
       return failure(yearStartQualifiedMasterRefresh.issues);
@@ -592,6 +620,7 @@ function executeSprint1WeeklyTransitionDraft(
         ? {}
         : { sprint3Config: session.context.sprint3Config }),
       runtimeState: working.mentorshipEntrypointRuntime,
+      ...(competitiveRecordsByPersonId === undefined ? {} : { competitiveRecordsByPersonId }),
     });
     if (!enrollmentMaterialized.ok) {
       return failure(
@@ -641,6 +670,7 @@ function executeSprint1WeeklyTransitionDraft(
     const adapterQualifiedMasterRefresh = applySprint3QualifiedMasterRefresh(
       working,
       session.context.sprint3Config,
+      competitiveRecordsByPersonId,
     );
     if (!adapterQualifiedMasterRefresh.ok) {
       return failure(adapterQualifiedMasterRefresh.issues);
@@ -734,6 +764,7 @@ function executeSprint1WeeklyTransitionDraft(
   const worldEngineQualifiedMasterRefresh = applySprint3QualifiedMasterRefresh(
     working,
     session.context.sprint3Config,
+    competitiveRecordsByPersonId,
   );
   if (!worldEngineQualifiedMasterRefresh.ok) {
     return failure(worldEngineQualifiedMasterRefresh.issues);
@@ -815,6 +846,9 @@ function executeSprint1WeeklyTransitionDraft(
     ...(working.generatedTechniqueCatalogOverlay === undefined
       ? {}
       : { generatedTechniqueCatalogOverlay: working.generatedTechniqueCatalogOverlay }),
+    ...(working.sprint2CompetitiveRecordRuntime === undefined
+      ? {}
+      : { sprint2CompetitiveRecordRuntime: working.sprint2CompetitiveRecordRuntime }),
   };
 
   if (mode === "trusted") {

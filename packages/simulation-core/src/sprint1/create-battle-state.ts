@@ -340,9 +340,7 @@ export function preflightCreateBattleRequest(
     participantBActionSourceIdentity: identities.participantBActionSourceIdentity,
     runRuleSnapshot,
     initialRange: resolvedInitialRange,
-    ...(generatedTechniqueCatalogOverlay === undefined
-      ? {}
-      : { generatedTechniqueCatalogOverlay }),
+    ...(generatedTechniqueCatalogOverlay === undefined ? {} : { generatedTechniqueCatalogOverlay }),
   });
 }
 

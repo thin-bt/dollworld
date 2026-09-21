@@ -949,9 +949,5 @@ export function validateBattleStateReplayConsistency(
       ),
     ]);
   }
-  return validateBattleDetailedLogReplay(
-    state,
-    runRuleSnapshot,
-    generatedTechniqueCatalogOverlay,
-  );
+  return validateBattleDetailedLogReplay(state, runRuleSnapshot, generatedTechniqueCatalogOverlay);
 }

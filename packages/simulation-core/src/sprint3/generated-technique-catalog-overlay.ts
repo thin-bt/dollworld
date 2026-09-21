@@ -18,10 +18,7 @@ import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import { GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION } from "./constants.js";
 
-export const GENERATED_TECHNIQUE_CATALOG_OVERLAY_KEYS = [
-  "schemaVersion",
-  "definitions",
-] as const;
+export const GENERATED_TECHNIQUE_CATALOG_OVERLAY_KEYS = ["schemaVersion", "definitions"] as const;
 
 export type GeneratedTechniqueCatalogOverlay = {
   schemaVersion: typeof GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION;
@@ -66,7 +63,11 @@ export function validateGeneratedTechniqueCatalogOverlay(
     GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION,
     issues,
   );
-  const rawDefinitions = snapshotDenseArrayOrFail(object["definitions"], `${at}/definitions`, issues);
+  const rawDefinitions = snapshotDenseArrayOrFail(
+    object["definitions"],
+    `${at}/definitions`,
+    issues,
+  );
   const definitions: TechniqueDefinition[] = [];
   if (rawDefinitions !== undefined) {
     for (let index = 0; index < rawDefinitions.length; index += 1) {

@@ -933,6 +933,14 @@ export {
   createEmptyCompetitiveRecord,
   validateCompetitiveRecordShape,
 } from "./sprint2/competitive-record-update.js";
+export {
+  buildSprint2CompetitiveRecordRuntimeStateFromRecords,
+  competitiveRecordsByPersonIdFromRuntime,
+  createEmptySprint2CompetitiveRecordRuntimeState,
+  validateCompetitiveRecord,
+  validateSprint2CompetitiveRecordRuntimeState,
+} from "./sprint3/live-sprint2-competitive-record-runtime-state.js";
+export type { Sprint2CompetitiveRecordRuntimeState } from "./sprint3/live-sprint2-competitive-record-runtime-state.js";
 export type {
   ApplyTournamentFinalResultToCompetitiveRecordInput,
   ApplyTournamentFinalResultToCompetitiveRecordOutput,
@@ -1334,6 +1342,7 @@ export {
   resolvePersistedQualifiedMasterFlag,
 } from "./sprint3/derive-master-qualification-record.js";
 export { refreshQualifiedMasterFlagsInWorldState } from "./sprint3/refresh-qualified-master-flags-in-world-state.js";
+export { resolveLiveCompetitiveRecordsForQualification } from "./sprint3/resolve-live-competitive-records-for-qualification.js";
 export {
   computeSprint3ConfigHash,
   createDefaultSprint3Config,

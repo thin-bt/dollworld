@@ -33,6 +33,7 @@ import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-st
 import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import { validateGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
+import { validateSprint2CompetitiveRecordRuntimeState } from "../sprint3/live-sprint2-competitive-record-runtime-state.js";
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
   return issues.map((issue) => ({
@@ -59,6 +60,7 @@ export type TrustedWeeklyTransitionDraft = {
   originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
   generatedTechniqueCatalogOverlay?: Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"];
+  sprint2CompetitiveRecordRuntime?: Sprint1RunRuntimeState["sprint2CompetitiveRecordRuntime"];
 };
 
 export type ValidateTrustedWeeklyTransitionOptions = {
@@ -379,6 +381,23 @@ export function validateTrustedWeeklyTransition(
     }
   }
 
+  let sprint2CompetitiveRecordRuntime:
+    Sprint1RunRuntimeState["sprint2CompetitiveRecordRuntime"] | undefined;
+  if (draft.sprint2CompetitiveRecordRuntime !== undefined) {
+    const competitiveRuntime = validateSprint2CompetitiveRecordRuntimeState(
+      draft.sprint2CompetitiveRecordRuntime,
+      provider,
+      "/runtimeState/sprint2CompetitiveRecordRuntime",
+    );
+    if (!competitiveRuntime.ok) {
+      issues.push(
+        ...prefixIssues(competitiveRuntime.issues, "/runtimeState/sprint2CompetitiveRecordRuntime"),
+      );
+    } else {
+      sprint2CompetitiveRecordRuntime = competitiveRuntime.value;
+    }
+  }
+
   let generatedTechniqueCatalogOverlay:
     Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"] | undefined;
   if (draft.generatedTechniqueCatalogOverlay !== undefined) {
@@ -442,6 +461,7 @@ export function validateTrustedWeeklyTransition(
       ...(generatedTechniqueCatalogOverlay === undefined
         ? {}
         : { generatedTechniqueCatalogOverlay }),
+      ...(sprint2CompetitiveRecordRuntime === undefined ? {} : { sprint2CompetitiveRecordRuntime }),
     },
   });
 }

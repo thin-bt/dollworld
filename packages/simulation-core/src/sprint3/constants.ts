@@ -109,3 +109,8 @@ export const SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_PROCESSOR_ID =
 /** S03-013 live-world pending queue materialization before entrypoint processors. */
 export const SPRINT3_LIVE_MENTORSHIP_QUEUE_MATERIALIZATION_PROCESSOR_ID =
   "sprint3-live-mentorship-queue-materialization-0.1.0" as const;
+
+/** S03-017 authoritative Sprint2 competitive records persisted on Sprint1RunRuntimeState. */
+export const SPRINT2_COMPETITIVE_RECORD_RUNTIME_STATE_SCHEMA_VERSION = "0.1.0" as const;
+export const SPRINT2_COMPETITIVE_RECORD_RUNTIME_PROCESSOR_ID =
+  "sprint2-competitive-record-runtime-0.1.0" as const;

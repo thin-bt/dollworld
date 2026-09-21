@@ -39,6 +39,7 @@ import { validateTrainingProcessorRuntimeState } from "./training-processor-runt
 import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 import { validateGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
+import { validateSprint2CompetitiveRecordRuntimeState } from "../sprint3/live-sprint2-competitive-record-runtime-state.js";
 
 const SESSION_KEYS = ["context", "runtimeState"] as const;
 const RUNTIME_STATE_KEYS = [
@@ -54,6 +55,7 @@ const RUNTIME_STATE_KEYS = [
   "originalTechniqueLifecycleRuntime",
   "mentorshipEntrypointRuntime",
   "generatedTechniqueCatalogOverlay",
+  "sprint2CompetitiveRecordRuntime",
 ] as const;
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
@@ -373,6 +375,23 @@ export function validateSprint1RunSession(
     }
   }
 
+  let sprint2CompetitiveRecordRuntime:
+    Sprint1RunSession["runtimeState"]["sprint2CompetitiveRecordRuntime"] | undefined;
+  if (runtime["sprint2CompetitiveRecordRuntime"] !== undefined) {
+    const competitiveRuntime = validateSprint2CompetitiveRecordRuntimeState(
+      runtime["sprint2CompetitiveRecordRuntime"],
+      provider,
+      "/runtimeState/sprint2CompetitiveRecordRuntime",
+    );
+    if (!competitiveRuntime.ok) {
+      issues.push(
+        ...prefixIssues(competitiveRuntime.issues, "/runtimeState/sprint2CompetitiveRecordRuntime"),
+      );
+    } else {
+      sprint2CompetitiveRecordRuntime = competitiveRuntime.value;
+    }
+  }
+
   let generatedTechniqueCatalogOverlay:
     Sprint1RunSession["runtimeState"]["generatedTechniqueCatalogOverlay"] | undefined;
   if (runtime["generatedTechniqueCatalogOverlay"] !== undefined) {
@@ -438,6 +457,9 @@ export function validateSprint1RunSession(
         ...(generatedTechniqueCatalogOverlay === undefined
           ? {}
           : { generatedTechniqueCatalogOverlay }),
+        ...(sprint2CompetitiveRecordRuntime === undefined
+          ? {}
+          : { sprint2CompetitiveRecordRuntime }),
       },
     }),
   );

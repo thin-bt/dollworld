@@ -48,7 +48,11 @@ import {
 } from "./ui-session.js";
 import { buildProductionCreateSprint1RunSessionInput } from "./create-sprint1-run-session-input.js";
 import { syncCompetitionAutoProgressionForWeek } from "./ui009/competition-auto-progression.js";
-import { resetCompetitionStore } from "./ui009/competition-session-registry.js";
+import {
+  getCompetitionStore,
+  resetCompetitionStore,
+} from "./ui009/competition-session-registry.js";
+import { syncCompetitionStoreCompetitiveRecordsIntoWorldRuntime } from "./ui009/competition-world-runtime-sync.js";
 import {
   createValidationStoreFromInitialization,
   type ValidationStoreHooks,
@@ -85,6 +89,23 @@ export type SimulationRouteDeps = {
   serializerHooks?: EnvelopeSerializerHooks;
   hooks?: SimulationRouteHooks;
 };
+
+function applyCompetitionCompetitiveRecordsToWorldRuntime(
+  sessionId: string,
+  worldSession: Sprint1RunSession,
+  sha256: ReturnType<typeof createNodeSha256Provider>,
+): Sprint1RunSession {
+  const synced = syncCompetitionStoreCompetitiveRecordsIntoWorldRuntime(
+    worldSession,
+    getCompetitionStore(sessionId),
+    sha256,
+  );
+  if (!synced.ok) {
+    return worldSession;
+  }
+  const validated = validateSprint1RunSession(synced.value, sha256);
+  return validated.ok ? validated.value : worldSession;
+}
 
 function sendInternal(
   reply: FastifyReply,
@@ -1025,7 +1046,14 @@ export async function handlePostSimulationStep(
     !checkUiRevisionCapacity({ acceptedUiRevision: expectedUiRevision, maxRevisionDelta: weeks })
   ) {
     // FI-031: domain failure wins over capacity when first week cannot commit.
-    let probe = runSprint1WeeklyStep(session.worldEngineRuntime, sha256);
+    let probe = runSprint1WeeklyStep(
+      applyCompetitionCompetitiveRecordsToWorldRuntime(
+        session.sessionId,
+        session.worldEngineRuntime,
+        sha256,
+      ),
+      sha256,
+    );
     if (deps.hooks?.overrideWeeklyStep !== undefined) {
       probe = deps.hooks.overrideWeeklyStep(1, probe);
     }
@@ -1171,6 +1199,7 @@ export async function handlePostSimulationStep(
       return;
     }
 
+    current = applyCompetitionCompetitiveRecordsToWorldRuntime(session.sessionId, current, sha256);
     let stepResult = runSprint1WeeklyStep(current, sha256);
     if (deps.hooks?.overrideWeeklyStep !== undefined) {
       stepResult = deps.hooks.overrideWeeklyStep(weekIndex, stepResult);
@@ -1343,6 +1372,8 @@ export async function handlePostSimulationStep(
     current = stepResult.value;
     session.worldEngineRuntime = current;
     syncCompetitionAutoProgressionForWeek(session.sessionId, current, sha256);
+    current = applyCompetitionCompetitiveRecordsToWorldRuntime(session.sessionId, current, sha256);
+    session.worldEngineRuntime = current;
     session.uiRevision = expectedUiRevision + committedWeeks;
     session.committedValidationStore = validationStore;
     updateRunningWeekProgress({
