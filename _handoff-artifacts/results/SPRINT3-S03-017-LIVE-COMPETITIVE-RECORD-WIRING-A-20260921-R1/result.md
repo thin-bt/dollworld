@@ -8,8 +8,8 @@ updatedAt: 2026-09-21T09:50:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
-published-master-sha: f904fc6ca5ddeb9eba1dca72f5064a5d654255de
-product-commit-sha: f904fc6ca5ddeb9eba1dca72f5064a5d654255de
+published-master-sha: 0523401a19223368bf0c64a71847763d56322a92
+product-commit-sha: 0523401a19223368bf0c64a71847763d56322a92
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1
 production-change: YES
