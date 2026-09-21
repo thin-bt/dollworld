@@ -27,9 +27,7 @@ export function AnnualRankingTable(props: AnnualRankingTableProps) {
       <h3 id={`${prefix}-ranking-heading`} className="competition-section-heading">
         年間順位
       </h3>
-      <p className="competition-ranking-note">
-        公式戦戦績は本大会の結果を含まない通算記録です。
-      </p>
+      <p className="competition-ranking-note">公式戦戦績は本大会の結果を含まない通算記録です。</p>
       <div className="competition-ranking-year" data-testid={`${prefix}-ranking-year-nav`}>
         {observation.annualRankingYearOptions.map((option) => (
           <button

@@ -1,10 +1,7 @@
 import type { MockBattleView } from "../mock-battle/ui006-views.js";
 import { MOCK_BATTLE_VIEW_KEYS } from "../mock-battle/ui006-views.js";
 import type { BattleLogItemView } from "../battle-log/ui007-views.js";
-import type {
-  CompetitionBattleLogSummaryView,
-  CompetitionMatchDetailView,
-} from "./ui009-views.js";
+import type { CompetitionBattleLogSummaryView, CompetitionMatchDetailView } from "./ui009-views.js";
 
 export function mockBattleViewFromCompetitionSummary(
   summary: CompetitionBattleLogSummaryView,
@@ -44,7 +41,10 @@ export function mockBattleViewFromCompetitionSummary(
     techniqueCatalogHash: "",
     finalState: summary.finalState,
     finalRngState: { counter: 0 },
-    failure: summary.resultKind === "failed" ? { code: "unknown", severity: "error", targetIds: [], reason: "", canContinue: false } : null,
+    failure:
+      summary.resultKind === "failed"
+        ? { code: "unknown", severity: "error", targetIds: [], reason: "", canContinue: false }
+        : null,
     eventCandidates: [],
     validation: { overallPassed: summary.resultKind !== "failed" },
     logTotalCount: summary.logTotalCount,

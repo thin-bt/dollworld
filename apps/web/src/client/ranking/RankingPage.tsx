@@ -52,7 +52,11 @@ export function RankingPage(props: RankingPageProps) {
         <header>
           <h2 id="ranking-heading">ランキング</h2>
         </header>
-        <div className="panel-status panel-error" data-testid="ranking-load-status" data-status="error">
+        <div
+          className="panel-status panel-error"
+          data-testid="ranking-load-status"
+          data-status="error"
+        >
           <p>{loadError ?? "ランキングを読み込めませんでした。"}</p>
           <p>
             <button type="button" onClick={() => void refresh()}>

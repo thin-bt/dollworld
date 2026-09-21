@@ -149,7 +149,9 @@ export function BattleLogViewPanel(props: BattleLogViewProps) {
   return (
     <section
       className="dw-card"
-      data-testid={presentationMode === "competition" ? "competition-battle-log-panel" : "battle-log-page"}
+      data-testid={
+        presentationMode === "competition" ? "competition-battle-log-panel" : "battle-log-page"
+      }
     >
       {presentationMode === "mock-battle" ? (
         <>

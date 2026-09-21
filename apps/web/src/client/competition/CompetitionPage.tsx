@@ -333,9 +333,7 @@ function TournamentDetailPanel(props: {
             <AnnualRankingTable
               view={view}
               testIdPrefix="competition"
-              {...(onRankingYearChange !== undefined
-                ? { onRankingYearChange }
-                : {})}
+              {...(onRankingYearChange !== undefined ? { onRankingYearChange } : {})}
             />
           ) : null}
 
@@ -677,7 +675,10 @@ export function CompetitionPage(props: CompetitionPageProps) {
 
       <footer className="competition-actions">
         {!closed ? (
-          <p className="competition-auto-progression-note" data-testid="competition-auto-progression-note">
+          <p
+            className="competition-auto-progression-note"
+            data-testid="competition-auto-progression-note"
+          >
             通常プレイでは「シミュレーション」画面で週を進めると、予定週の大会が自動で進行・確定します。
             年間順位は <a href="/ranking">ランキング</a> 画面でも確認できます。
           </p>

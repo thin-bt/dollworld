@@ -46,12 +46,13 @@ function emptyParticipant(): ParticipantAccumulator {
   };
 }
 
-function applyActorSide(
-  acc: ParticipantAccumulator,
-  log: BattleActionLog,
-): ParticipantAccumulator {
+function applyActorSide(acc: ParticipantAccumulator, log: BattleActionLog): ParticipantAccumulator {
   const next = { ...acc };
-  next.maxDurability = Math.max(next.maxDurability, log.actorDurabilityBefore, log.actorDurabilityAfter);
+  next.maxDurability = Math.max(
+    next.maxDurability,
+    log.actorDurabilityBefore,
+    log.actorDurabilityAfter,
+  );
   next.maxMental = Math.max(next.maxMental, log.actorMentalBefore, log.actorMentalAfter);
   next.currentDurability = log.actorDurabilityAfter;
   next.currentMental = log.actorMentalAfter;
@@ -87,12 +88,9 @@ function applyTargetSide(
   return next;
 }
 
-function participantWire(
-  personId: PersonId,
-  acc: ParticipantAccumulator,
-): Record<string, unknown> {
-  const maxDurability = acc.maxDurability > 0 ? acc.maxDurability : acc.currentDurability ?? 0;
-  const maxMental = acc.maxMental > 0 ? acc.maxMental : acc.currentMental ?? 0;
+function participantWire(personId: PersonId, acc: ParticipantAccumulator): Record<string, unknown> {
+  const maxDurability = acc.maxDurability > 0 ? acc.maxDurability : (acc.currentDurability ?? 0);
+  const maxMental = acc.maxMental > 0 ? acc.maxMental : (acc.currentMental ?? 0);
   return {
     personId,
     currentDurability: acc.currentDurability ?? maxDurability,
