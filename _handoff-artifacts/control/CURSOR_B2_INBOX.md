@@ -1,20 +1,17 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT3-S03-015-CANONICAL-PUBLISH-RECOVERY-B2-20260921-R1
-mode: IMPLEMENTATION_RECOVERY
-priority: DEADLINE_CRITICAL
-updatedAt: 2026-09-21T08:54:16+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-015-CANONICAL-PUBLISH-RECOVERY-B2-20260921-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T09:12:26+09:00
+last-consumed-task-key: SPRINT3-S03-015-CANONICAL-PUBLISH-RECOVERY-B2-20260921-R1
+last-terminal: SPRINT3_S03_015_CANONICAL_PUBLISH_RECOVERY_B2_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-015-CANONICAL-PUBLISH-RECOVERY-B2-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
-recovery-request: REDISPATCH
 pickup-requirements:
-- fresh-read GitHub canonical instruction, current master, prior S03-015 BLOCKED result, and A lane state
-- claim ACTIVE before product changes
-- reconstruct and publish the bounded generated-technique production battle lookup integration lost to workspace sync
-- canonical product commit/readback is mandatory for READY; no audit-only terminalization
-- do not touch A S03-016 live master qualification/enrollment domain
-- publish terminal result to canonical result path and verify GitHub master readback before READY
+- fresh-read GitHub canonical instruction
+- claim ACTIVE before changes
+- publish terminal result to GitHub canonical result path
