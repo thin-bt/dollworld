@@ -30,33 +30,6 @@ type Envelope = {
   uiRevision: number;
 };
 
-type CompetitionGuardSnapshot = {
-  lifecyclePhase: string;
-  championDisplayName: string | null;
-  rankingRows: unknown[];
-  roundRobinProgress: {
-    matchesCompleted: number;
-    matchesTotal: number;
-  } | null;
-};
-
-function expectCompetitionNotFalseFinished(competition: CompetitionGuardSnapshot): void {
-  const progress = competition.roundRobinProgress;
-  if (
-    progress !== null &&
-    progress.matchesTotal > 0 &&
-    progress.matchesCompleted < progress.matchesTotal
-  ) {
-    expect(competition.lifecyclePhase).not.toBe("finished");
-    expect(competition.championDisplayName).toBeNull();
-  }
-  if (progress !== null && progress.matchesTotal === 0 && progress.matchesCompleted === 0) {
-    expect(competition.lifecyclePhase).not.toBe("finished");
-    expect(competition.championDisplayName).toBeNull();
-    expect(competition.rankingRows.length).toBe(0);
-  }
-}
-
 function parseSetCookieSessionId(setCookie: string | string[] | undefined): string {
   const header = Array.isArray(setCookie) ? setCookie[0] : setCookie;
   const match = /^dollworld_s15_session=([A-Za-z0-9_-]{43});/.exec(header as string);
@@ -296,13 +269,12 @@ describe("Sprint3 weekly runtime vs tournament auto-progression regression guard
       headers: { host: HOST, cookie },
     });
     expect(competitionRes.statusCode).toBe(200);
-    const competition = (JSON.parse(competitionRes.body) as Envelope)
-      .data as CompetitionGuardSnapshot;
-    if (competition.lifecyclePhase === "finished") {
-      expect(competition.championDisplayName).not.toBeNull();
-    } else {
-      expectCompetitionNotFalseFinished(competition);
-    }
+    const competition = (JSON.parse(competitionRes.body) as Envelope).data as {
+      lifecyclePhase: string;
+      championDisplayName: string | null;
+    };
+    expect(competition.lifecyclePhase).toBe("finished");
+    expect(competition.championDisplayName).not.toBeNull();
   }, 120_000);
 
   it("repeated simulation steps with Sprint3 binding remain deterministic", async () => {

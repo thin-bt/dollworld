@@ -264,22 +264,21 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
 
     expectNotFalseFinishedCompetition(competition);
     if (weeksUntilTournament === 0) {
-      expect(competition.lifecyclePhase).not.toBe("finished");
-      expect(competition.championDisplayName).toBeNull();
+      expectCoherentFinishedCompetition(competition);
     } else {
       expect(competition.lifecyclePhase).toBe("idle");
       expect(competition.championDisplayName).toBeNull();
     }
   }, 120_000);
 
-  it("simulation start on tournament week leaves manual competition-step path reachable", async () => {
+  it("simulation start on tournament week auto-finishes competition without manual step", async () => {
     app = await createUiApp({
       publicOrigin: ORIGIN,
       enableTestProbe: false,
       repoRoot: REPO_ROOT,
       processKeys: createTestProcessSecurityContext(914),
     });
-    const { cookie, csrf, sessionId } = await bootstrapSession(app);
+    const { cookie, sessionId } = await bootstrapSession(app);
     const row = app.uiSessionStore.get(sessionId)!;
     const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
     const slot = findUi009PlayableScheduleSlot(worldDate.year)!;
@@ -294,9 +293,33 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
       headers: { host: HOST, cookie },
     });
     const atStartData = (JSON.parse(atStart.body) as Envelope).data as CompetitionSnapshot;
-    expect(atStartData.lifecyclePhase).not.toBe("finished");
+    expectCoherentFinishedCompetition(atStartData);
+  }, 120_000);
 
-    await competitionStepUntilFinished(app, cookie, csrf);
+  it("ordinary simulation week steps alone reach finished competition with ranking rows", async () => {
+    app = await createUiApp({
+      publicOrigin: ORIGIN,
+      enableTestProbe: false,
+      repoRoot: REPO_ROOT,
+      processKeys: createTestProcessSecurityContext(915),
+    });
+    const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app, 7);
+    const row = app.uiSessionStore.get(sessionId)!;
+    const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
+    const slot = findUi009PlayableScheduleSlot(worldDate.year)!;
+    const weeksUntil = slot.absoluteWeek - worldDate.absoluteWeek;
+    if (weeksUntil > 0) {
+      await simulationStep(app, cookie, csrf, uiRevision, weeksUntil);
+    }
+
+    const competitionRes = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/competition`,
+      headers: { host: HOST, cookie },
+    });
+    expect(competitionRes.statusCode).toBe(200);
+    const competition = (JSON.parse(competitionRes.body) as Envelope).data as CompetitionSnapshot;
+    expectCoherentFinishedCompetition(competition);
   }, 120_000);
 
   it("manual competition step after auto finish is idempotent", async () => {

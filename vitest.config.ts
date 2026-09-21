@@ -11,7 +11,8 @@ export default defineConfig({
     // Long-horizon Sprint 0 Vitest wrapper is optional/manual; `npm run verify:sprint0`
     // runs the CLI suite (`verify-sprint0-main.js`), not this file.
     exclude: ["**/node_modules/**", "**/dist/**", "**/*.long.test.ts"],
-    // Post-perf gate path can exceed default 5000ms during UI server boot (FV-001).
-    testTimeout: 15_000,
+    // UI server boot (FV-001) and tournament-week simulation/start auto-progression
+    // can exceed 15s on accepted integration presets (seed 42 / UI009 playable week).
+    testTimeout: 120_000,
   },
 });

@@ -74,10 +74,10 @@ export function runCompetitionThroughFinish(
 
 /**
  * Runs accepted UI009 competition work for the current world week without mutating
- * canonical simulation state or session uiRevision / lastOperation.
+ * session uiRevision / lastOperation.
  *
- * Wired from simulation/week step only. Simulation start/reset intentionally omit this
- * hook so tournament-week bootstrap keeps the wireframe manual competition-step path reachable.
+ * Wired from simulation start, reset, and weekly step so ordinary week progression
+ * can reach persisted tournament results and ranking state without manual competition stepping.
  */
 export function syncCompetitionAutoProgressionForWeek(
   sessionId: string,

@@ -645,6 +645,12 @@ export async function handlePostSimulationStart(
     session.committedValidationStore = validationStore;
     session.mockBattleStore = createEmptyMockBattleStore();
     resetCompetitionStore(session.sessionId);
+    syncCompetitionAutoProgressionForWeek(session.sessionId, session.worldEngineRuntime, sha256);
+    session.worldEngineRuntime = applyCompetitionCompetitiveRecordsToWorldRuntime(
+      session.sessionId,
+      session.worldEngineRuntime,
+      sha256,
+    );
     completeJournalRecord({
       session,
       requestId,
@@ -898,6 +904,12 @@ export async function handlePostSimulationReset(
     session.committedValidationStore = validationStore;
     session.mockBattleStore = createEmptyMockBattleStore();
     resetCompetitionStore(session.sessionId);
+    syncCompetitionAutoProgressionForWeek(session.sessionId, session.worldEngineRuntime, sha256);
+    session.worldEngineRuntime = applyCompetitionCompetitiveRecordsToWorldRuntime(
+      session.sessionId,
+      session.worldEngineRuntime,
+      sha256,
+    );
     completeJournalRecord({
       session,
       requestId,
