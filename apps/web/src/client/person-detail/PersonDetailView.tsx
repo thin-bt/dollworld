@@ -219,6 +219,43 @@ export function PersonDetailViewPanel(props: PersonDetailViewProps) {
             </dl>
           </section>
 
+          <section className="dw-section" data-testid="person-detail-mentorship">
+            <h3>師弟関係</h3>
+            <dl className="dw-dl" data-testid="person-detail-mentorship-dl">
+              <div>
+                <dt>師範資格</dt>
+                <dd
+                  data-testid="person-detail-qualified-master"
+                  data-qualified-master={detail.qualifiedMaster ? "true" : "false"}
+                >
+                  {detail.qualifiedMaster ? "あり" : "なし"}
+                </dd>
+              </div>
+              <div>
+                <dt>正式師</dt>
+                <dd data-testid="person-detail-formal-masters">
+                  {detail.formalMasterPersonIds.length === 0 ? (
+                    <span data-empty="true">なし</span>
+                  ) : (
+                    <ul>
+                      {detail.formalMasterPersonIds.map((masterId) => (
+                        <li key={masterId}>
+                          <a
+                            href={`/people/${encodeURIComponent(masterId)}`}
+                            data-testid="person-detail-formal-master-link"
+                            data-person-id={masterId}
+                          >
+                            {masterId}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
           <section className="dw-section" data-testid="person-detail-stats">
             <h3>六能力</h3>
             {renderStatGrid(detail.stats, "person-detail-stats-grid")}

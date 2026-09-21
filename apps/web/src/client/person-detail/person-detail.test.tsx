@@ -312,6 +312,61 @@ describe("FE-02 PersonDetailView sparse + populated + safe-text", () => {
   });
 });
 
+describe("FE-02 PersonDetail mentorship visibility", () => {
+  it("shows qualified-master state and formal-master links in ordinary UI", () => {
+    const html = renderToStaticMarkup(
+      <PersonDetailViewPanel
+        status="success"
+        personId="person_000003"
+        detail={{
+          ...populatedDetail,
+          personId: "person_000003",
+          careerStatus: "retired",
+          qualifiedMaster: true,
+          formalMasterPersonIds: ["person_000099", "person_000100"],
+        }}
+        errorText={null}
+        errorCode={null}
+        uiRevision={4}
+      />,
+    );
+    expect(html).toContain('data-testid="person-detail-mentorship"');
+    expect(html).toContain("師弟関係");
+    expect(html).toContain('data-testid="person-detail-qualified-master"');
+    expect(html).toContain('data-qualified-master="true"');
+    expect(html).toContain("師範資格");
+    expect(html).toContain(">あり<");
+    expect(html).toContain('data-testid="person-detail-formal-masters"');
+    expect(html).toContain('href="/people/person_000099"');
+    expect(html).toContain('href="/people/person_000100"');
+    expect(html).toContain('data-person-id="person_000099"');
+    expect(html).not.toContain('data-qualified-master="false"');
+  });
+
+  it("empty mentorship shows なし without inventing masters or misleading labels", () => {
+    const html = renderToStaticMarkup(
+      <PersonDetailViewPanel
+        status="success"
+        personId="person_000002"
+        detail={{
+          ...sparseDetail,
+          qualifiedMaster: false,
+          formalMasterPersonIds: [],
+        }}
+        errorText={null}
+        errorCode={null}
+        uiRevision={1}
+      />,
+    );
+    expect(html).toContain('data-qualified-master="false"');
+    expect(html).toContain('data-testid="person-detail-formal-masters"');
+    expect(html).toContain('data-empty="true">なし</span>');
+    expect(html).not.toContain('data-testid="person-detail-formal-master-link"');
+    expect(html).not.toContain(">あり<");
+    expect(html).not.toContain('href="/people/');
+  });
+});
+
 describe("FE-02 static audit", () => {
   it("no portrait/family-tree/tournament leakage on person detail route shell", () => {
     const html = renderToStaticMarkup(
