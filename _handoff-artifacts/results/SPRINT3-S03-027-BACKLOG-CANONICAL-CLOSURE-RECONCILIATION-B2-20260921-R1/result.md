@@ -8,7 +8,8 @@ updatedAt: 2026-09-21T12:43:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
-origin-master-at-pickup: 9eb9ae69484df3037aace978f3d5c7376dfba781
+origin-master-at-pickup: 02d3ec2df9857f1083e294933a9a3e232bd1dcc8
+published-master-sha: 08c5ed80849dac88a547204aae5456038c786d7c
 canonical-product-sha: 47bdb9bf97471a5b66433d8ca05e260c6dbd51d3
 local-worktree-head-at-verify: 47bdb9bf97471a5b66433d8ca05e260c6dbd51d3
 pickup: ACTIVE_IDLE / SDK_EXECUTOR
@@ -62,6 +63,14 @@ npm run check
 - **No** S03-025 task/result/control edits or timeout re-investigation.
 - **No** product source, tests, config, or Sprint4 scope.
 
+## GitHub canonical readback
+
+```text
+origin/master @ 08c5ed80849dac88a547204aae5456038c786d7c
+docs/SPRINT_3_BACKLOG.md → S3-BACKLOG-0.1.3 + 証跡表 present on remote
+result path published on same commit
+```
+
 ## Terminal
 
-**READY** — Canonical backlog distinguishes accepted Sprint3 **product** evidence from **formal close label** (S03-025 gate cited; PM/control next step). Await commit/push readback on `master`.
+**READY** — Canonical backlog distinguishes accepted Sprint3 **product** evidence from **formal close label** (S03-025 gate cited; PM/control next step). Published on `master` @ **`08c5ed8`**; executor may consume B2 inbox.
