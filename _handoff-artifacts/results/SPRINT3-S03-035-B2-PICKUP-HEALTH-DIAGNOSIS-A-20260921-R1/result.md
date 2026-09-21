@@ -8,7 +8,9 @@ updatedAt: 2026-09-21T15:12:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
-canonical-master-sha: 83f50ec4e76e2dd2c98cbcb781b0ffefd84c2336
+canonical-master-sha: 231c915ce2b34b7f468a384effbfc40f8fd8663f
+executor-repair-sha: 83f50ec4e76e2dd2c98cbcb781b0ffefd84c2336
+publication-commit: 231c915ce2b34b7f468a384effbfc40f8fd8663f
 b2-consume-commit: 1966c7ab18a488f3800480fc3e8411d1fce42b87
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 production-change: NO
@@ -69,7 +71,7 @@ git show origin/master:_handoff-artifacts/results/SPRINT3-S03-034-POST-PUBLICATI
 
 | Check | Result |
 |-------|--------|
-| `origin/master` tip | **`83f50ec`** |
+| `origin/master` tip | **`231c915`** (includes this A terminal) |
 | GitHub B2 inbox | **IDLE** / last-consumed S03-034 |
 | GitHub S03-034 result | **TERMINAL** present |
 | Executor tests | **16/16 PASS** |
