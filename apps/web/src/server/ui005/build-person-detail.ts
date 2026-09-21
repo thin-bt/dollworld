@@ -1,5 +1,5 @@
 /**
- * Build PersonDetailView 0.2.0 exact25 from fixed UiReadSnapshot sources (API-008).
+ * Build PersonDetailView 0.2.1 exact26 from fixed UiReadSnapshot sources (API-008).
  */
 
 import {
@@ -44,6 +44,7 @@ export const PERSON_DETAIL_VIEW_KEYS = [
   "qualifiedMaster",
   "parentPersonIds",
   "formalMasterPersonIds",
+  "formalDisciplePersonIds",
   "stats",
   "aptitudes",
   "temporaryCondition",
@@ -73,6 +74,7 @@ export type PersonDetailView = {
   qualifiedMaster: boolean;
   parentPersonIds: string[];
   formalMasterPersonIds: string[];
+  formalDisciplePersonIds: string[];
   stats: PersonDetailDirectFields["stats"];
   aptitudes: PersonDetailDirectFields["aptitudes"];
   temporaryCondition: PersonDetailDirectFields["temporaryCondition"];
@@ -190,6 +192,7 @@ function assertRelationshipIntegrity(input: {
   personIds: ReadonlySet<string>;
   parentPersonIds: readonly string[];
   formalMasterPersonIds: readonly string[];
+  formalDisciplePersonIds: readonly string[];
 }): PureResult<void> {
   for (const id of input.parentPersonIds) {
     if (!input.personIds.has(id)) {
@@ -199,6 +202,11 @@ function assertRelationshipIntegrity(input: {
   for (const id of input.formalMasterPersonIds) {
     if (!input.personIds.has(id)) {
       return fail(`broken master reference: ${id}`);
+    }
+  }
+  for (const id of input.formalDisciplePersonIds) {
+    if (!input.personIds.has(id)) {
+      return fail(`broken disciple reference: ${id}`);
     }
   }
   // Cycle: A is parent of B and B is parent of A (involving this person)
@@ -310,6 +318,7 @@ export function buildPersonDetailView(input: {
     personIds: personIdSet,
     parentPersonIds: rel.value.parentPersonIds,
     formalMasterPersonIds: rel.value.formalMasterPersonIds,
+    formalDisciplePersonIds: rel.value.formalDisciplePersonIds,
   });
   if (!integrity.ok) {
     return integrity;
@@ -369,6 +378,7 @@ export function buildPersonDetailView(input: {
     qualifiedMaster: direct.value.qualifiedMaster,
     parentPersonIds: rel.value.parentPersonIds,
     formalMasterPersonIds: rel.value.formalMasterPersonIds,
+    formalDisciplePersonIds: rel.value.formalDisciplePersonIds,
     stats: direct.value.stats,
     aptitudes: direct.value.aptitudes,
     temporaryCondition: direct.value.temporaryCondition,

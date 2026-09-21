@@ -1,6 +1,6 @@
 /**
- * Client mirror of accepted UI-005 PersonDetailView 0.2.0 exact25.
- * Not a widened contract — keys must match server PERSON_DETAIL_VIEW_KEYS.
+ * Client mirror of accepted UI-005 PersonDetailView 0.2.1 exact26.
+ * Keys must match server PERSON_DETAIL_VIEW_KEYS (Sprint3 adds formalDisciplePersonIds).
  */
 
 export const PERSON_DETAIL_VIEW_KEYS = [
@@ -22,6 +22,7 @@ export const PERSON_DETAIL_VIEW_KEYS = [
   "qualifiedMaster",
   "parentPersonIds",
   "formalMasterPersonIds",
+  "formalDisciplePersonIds",
   "stats",
   "aptitudes",
   "temporaryCondition",
@@ -51,6 +52,7 @@ export type PersonDetailView = {
   qualifiedMaster: boolean;
   parentPersonIds: string[];
   formalMasterPersonIds: string[];
+  formalDisciplePersonIds: string[];
   stats: Record<string, number>;
   aptitudes: Record<string, number>;
   temporaryCondition: Record<string, number>;

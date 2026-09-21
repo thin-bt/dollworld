@@ -99,6 +99,7 @@ function sampleDetail(): PersonDetailView {
     qualifiedMaster: false,
     parentPersonIds: [],
     formalMasterPersonIds: [],
+    formalDisciplePersonIds: [],
     stats: {
       stamina: 10,
       strength: 10,

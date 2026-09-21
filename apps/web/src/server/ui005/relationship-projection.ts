@@ -1,6 +1,7 @@
 /**
- * Relationship projection: parentPersonIds / formalMasterPersonIds (BRIDGE-044/093, TX-064).
- * Future owner: UI-005. All matching records; no active/current/first/latest filter.
+ * Relationship projection: parentPersonIds / formalMasterPersonIds / formalDisciplePersonIds.
+ * (BRIDGE-044/093, TX-064; Sprint3 reverse observability via UI-005 0.2.1 exact26.)
+ * All matching records; no active/current/first/latest filter.
  * Do not encode Historical whole-detail-500 generalizations here.
  */
 
@@ -25,6 +26,7 @@ export type RelationshipRecord =
 export type RelationshipProjection = {
   parentPersonIds: string[];
   formalMasterPersonIds: string[];
+  formalDisciplePersonIds: string[];
 };
 
 export function projectRelationships(input: {
@@ -33,8 +35,10 @@ export function projectRelationships(input: {
 }): PureResult<RelationshipProjection> {
   const parents: string[] = [];
   const masters: string[] = [];
+  const disciples: string[] = [];
   const seenParent = new Set<string>();
   const seenMaster = new Set<string>();
+  const seenDisciple = new Set<string>();
 
   for (const rel of input.relationships) {
     if (rel.kind === "parent_child") {
@@ -55,10 +59,22 @@ export function projectRelationships(input: {
         seenMaster.add(rel.masterId);
         masters.push(rel.masterId);
       }
+      if (rel.masterId === input.personId) {
+        if (seenDisciple.has(rel.discipleId)) {
+          return fail(`duplicate disciple relationship: ${rel.discipleId}`);
+        }
+        seenDisciple.add(rel.discipleId);
+        disciples.push(rel.discipleId);
+      }
     }
   }
 
   parents.sort(compareUnicodeCodePoints);
   masters.sort(compareUnicodeCodePoints);
-  return ok({ parentPersonIds: parents, formalMasterPersonIds: masters });
+  disciples.sort(compareUnicodeCodePoints);
+  return ok({
+    parentPersonIds: parents,
+    formalMasterPersonIds: masters,
+    formalDisciplePersonIds: disciples,
+  });
 }

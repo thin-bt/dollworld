@@ -408,7 +408,30 @@ describe("UI-005 pure modules FI-039..046 / history contracts", () => {
     if (okRel.ok) {
       expect(okRel.value.parentPersonIds).toEqual(["person_000002"]);
       expect(okRel.value.formalMasterPersonIds).toEqual(["person_000003"]);
+      expect(okRel.value.formalDisciplePersonIds).toEqual([]);
     }
+
+    const masterView = projectRelationships({
+      personId: "person_000003",
+      relationships: [
+        { kind: "master_disciple", masterId: "person_000003", discipleId: "person_000001" },
+        { kind: "master_disciple", masterId: "person_000003", discipleId: "person_000004" },
+      ],
+    });
+    expect(masterView.ok).toBe(true);
+    if (masterView.ok) {
+      expect(masterView.value.formalDisciplePersonIds).toEqual(["person_000001", "person_000004"]);
+      expect(masterView.value.formalMasterPersonIds).toEqual([]);
+    }
+
+    const dupDisciple = projectRelationships({
+      personId: "person_000003",
+      relationships: [
+        { kind: "master_disciple", masterId: "person_000003", discipleId: "person_000001" },
+        { kind: "master_disciple", masterId: "person_000003", discipleId: "person_000001" },
+      ],
+    });
+    expect(dupDisciple.ok).toBe(false);
   });
 
   it("FI-041/042 duplicate technique / dangling focus → fail; repaired retry ok", () => {

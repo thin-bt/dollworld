@@ -45,6 +45,7 @@ const populatedDetail: PersonDetailView = {
   qualifiedMaster: false,
   parentPersonIds: ["person_000010"],
   formalMasterPersonIds: [],
+  formalDisciplePersonIds: [],
   stats: {
     stamina: 1,
     strength: 2,
@@ -393,6 +394,89 @@ describe("FE-02 PersonDetail mentorship visibility", () => {
     expect(html).not.toContain('data-testid="person-detail-formal-master-link"');
     expect(html).not.toContain(">あり<");
     expect(html).not.toContain('href="/people/');
+  });
+
+  it("shows formal-disciple links for qualified master with zero/one/many disciples", () => {
+    const noneHtml = renderToStaticMarkup(
+      <PersonDetailViewPanel
+        status="success"
+        personId="person_000010"
+        detail={{
+          ...sparseDetail,
+          qualifiedMaster: true,
+          formalMasterPersonIds: [],
+          formalDisciplePersonIds: [],
+        }}
+        errorText={null}
+        errorCode={null}
+        uiRevision={1}
+      />,
+    );
+    expect(noneHtml).toContain('data-testid="person-detail-formal-disciples"');
+    expect(noneHtml).toMatch(
+      /data-testid="person-detail-formal-disciples"[\s\S]*data-empty="true">なし/,
+    );
+    expect(noneHtml).not.toContain('data-testid="person-detail-formal-disciple-link"');
+
+    const oneHtml = renderToStaticMarkup(
+      <PersonDetailViewPanel
+        status="success"
+        personId="person_000010"
+        detail={{
+          ...sparseDetail,
+          qualifiedMaster: true,
+          formalDisciplePersonIds: ["person_000020"],
+        }}
+        errorText={null}
+        errorCode={null}
+        uiRevision={1}
+        personNameById={{ person_000020: "門下・一" }}
+      />,
+    );
+    expect(oneHtml).toContain('href="/people/person_000020"');
+    expect(oneHtml).toContain('data-person-id="person_000020"');
+    expect(oneHtml).toContain(">門下・一<");
+
+    const manyHtml = renderToStaticMarkup(
+      <PersonDetailViewPanel
+        status="success"
+        personId="person_000010"
+        detail={{
+          ...sparseDetail,
+          qualifiedMaster: true,
+          formalDisciplePersonIds: ["person_000021", "person_000022"],
+        }}
+        errorText={null}
+        errorCode={null}
+        uiRevision={1}
+        personNameById={{
+          person_000021: "門下・二",
+          person_000022: "門下・三",
+        }}
+      />,
+    );
+    expect(manyHtml).toMatch(
+      /data-testid="person-detail-formal-disciples"[\s\S]*?>門下・二<[\s\S]*?>門下・三</,
+    );
+  });
+
+  it("formal-disciple links keep personId href when display names are not yet loaded", () => {
+    const html = renderToStaticMarkup(
+      <PersonDetailViewPanel
+        status="success"
+        personId="person_000010"
+        detail={{
+          ...sparseDetail,
+          formalDisciplePersonIds: ["person_000020"],
+        }}
+        errorText={null}
+        errorCode={null}
+        uiRevision={1}
+      />,
+    );
+    expect(html).toContain('href="/people/person_000020"');
+    expect(html).toContain('data-person-id="person_000020"');
+    expect(html).toContain(">person_000020<");
   });
 });
 

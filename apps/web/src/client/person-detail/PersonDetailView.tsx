@@ -34,7 +34,7 @@ export type PersonDetailViewProps = {
   errorCode: string | null;
   uiRevision: number | null;
   peopleListHref?: string;
-  /** UI-005 displayName for related persons (e.g. formal masters), keyed by personId. */
+  /** UI-005 displayName for related persons (masters/disciples), keyed by personId. */
   personNameById?: ReadonlyMap<string, string> | Record<string, string>;
 };
 
@@ -249,6 +249,28 @@ export function PersonDetailViewPanel(props: PersonDetailViewProps) {
                             data-person-id={masterId}
                           >
                             {personDisplayLabel(masterId, props.personNameById)}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>正式門下</dt>
+                <dd data-testid="person-detail-formal-disciples">
+                  {detail.formalDisciplePersonIds.length === 0 ? (
+                    <span data-empty="true">なし</span>
+                  ) : (
+                    <ul>
+                      {detail.formalDisciplePersonIds.map((discipleId) => (
+                        <li key={discipleId}>
+                          <a
+                            href={`/people/${encodeURIComponent(discipleId)}`}
+                            data-testid="person-detail-formal-disciple-link"
+                            data-person-id={discipleId}
+                          >
+                            {personDisplayLabel(discipleId, props.personNameById)}
                           </a>
                         </li>
                       ))}

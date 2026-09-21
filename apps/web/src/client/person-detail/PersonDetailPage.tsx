@@ -48,22 +48,24 @@ export function PersonDetailPage(props: PersonDetailPageProps) {
       setUiRevision(result.uiRevision);
       setStatus("success");
 
-      const masterIds = result.data.formalMasterPersonIds;
-      if (masterIds.length === 0) {
+      const relatedPersonIds = [
+        ...new Set([...result.data.formalMasterPersonIds, ...result.data.formalDisciplePersonIds]),
+      ];
+      if (relatedPersonIds.length === 0) {
         return;
       }
       const nameEntries = await Promise.all(
-        masterIds.map(async (masterId) => {
-          const masterResult = await loadPersonDetail(
+        relatedPersonIds.map(async (relatedId) => {
+          const relatedResult = await loadPersonDetail(
             props.fetchImpl !== undefined
-              ? { personId: masterId, fetchImpl: props.fetchImpl }
-              : { personId: masterId },
+              ? { personId: relatedId, fetchImpl: props.fetchImpl }
+              : { personId: relatedId },
           );
-          if (masterResult.kind !== "success") {
+          if (relatedResult.kind !== "success") {
             return null;
           }
-          const name = masterResult.data.displayName;
-          return typeof name === "string" && name.length > 0 ? ([masterId, name] as const) : null;
+          const name = relatedResult.data.displayName;
+          return typeof name === "string" && name.length > 0 ? ([relatedId, name] as const) : null;
         }),
       );
       if (cancelled) {

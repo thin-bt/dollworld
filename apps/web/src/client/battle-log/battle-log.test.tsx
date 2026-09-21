@@ -265,6 +265,7 @@ describe("FE-04 BattleLogView grouping / sparse / safe-text", () => {
       qualifiedMaster: false,
       parentPersonIds: [],
       formalMasterPersonIds: [],
+      formalDisciplePersonIds: [],
       stats: {
         stamina: 30,
         strength: 40,

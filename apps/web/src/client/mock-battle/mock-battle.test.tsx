@@ -26,6 +26,7 @@ function sampleDetail(
     qualifiedMaster: false,
     parentPersonIds: [],
     formalMasterPersonIds: [],
+    formalDisciplePersonIds: [],
     stats: {
       stamina: 10,
       strength: 11,
