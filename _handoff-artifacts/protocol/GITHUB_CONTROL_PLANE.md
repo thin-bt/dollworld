@@ -34,3 +34,9 @@ TERMINAL must include result class and evidence references.
 Until the local Cursor executor is changed to poll GitHub directly, the PM may mirror GitHub PREPARED state into the old Drive/local Inbox solely as a compatibility bridge. GitHub remains canonical; a failed mirror may not invalidate or delete the GitHub task.
 
 The bridge itself must be removed once GitHub polling/materialization is operational.
+
+## Workspace hygiene
+
+- The project root `_handoff-artifacts/` is for canonical top-level structure only. Do not create transient `.tmp-*`, stash/asides, verification worktrees, publish scratch, merge scratch, or recovery scratch directly under it.
+- All transient local/Drive scratch must live under `_handoff-artifacts/control-tmp/` (or an explicitly task-scoped descendant). Temporary artifacts must be cleaned up or archived after use; creating another root-level temp directory is a control defect that must be corrected in the same run.
+- Historical recovery bundles and obsolete verification sandboxes belong under `_handoff-artifacts/audit/archive/`, not at project root. Moving them is organizational only and does not make them canonical authority.
