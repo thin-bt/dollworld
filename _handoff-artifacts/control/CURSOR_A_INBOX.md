@@ -1,17 +1,20 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T09:03:21+09:00
-last-consumed-task-key: SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1
-last-terminal: READY / S03_016_LIVE_MASTER_QUALIFICATION_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1/result.md
+task-key: SPRINT3-S03-017-LIVE-COMPETITIVE-RECORD-WIRING-A-20260921-R1
+mode: PRODUCT_IMPLEMENTATION
+updatedAt: 2026-09-21T09:23:00+09:00
+sprint: Sprint3
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-017-LIVE-COMPETITIVE-RECORD-WIRING-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
+predecessor: SPRINT3-S03-016-LIVE-MASTER-QUALIFICATION-PERSISTENCE-ROLE3-20260921-R1
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- implement/test/publish S03-017 to canonical master
 - publish terminal result to GitHub canonical result path
+- do not modify completed S03-015 generated-technique battle-consumption paths
+- do not start Sprint4
