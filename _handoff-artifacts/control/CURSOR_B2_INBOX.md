@@ -1,12 +1,12 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T20:57:31+09:00
-last-consumed-task-key: SPRINT2-REOPEN-TARGETED-BROWSER-REACCEPTANCE-B2-20260921-R1
-last-terminal: SPRINT2_REOPEN_TARGETED_BROWSER_REACCEPTANCE_B2_READY_FOR_STATUS_TRANSITION
-last-result-path: _handoff-artifacts/results/SPRINT2-REOPEN-TARGETED-BROWSER-REACCEPTANCE-B2-20260921-R1/result.md
+task-key: SPRINT2-REOPEN-BROWSER-HARNESS-GREEN-B2-20260921-R1
+mode: TEST_HARNESS_CLOSURE
+updatedAt: 2026-09-21T21:07:34+09:00
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT2-REOPEN-BROWSER-HARNESS-GREEN-B2-20260921-R1/instruction.md
+priority: DEADLINE_CRITICAL
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
