@@ -24,13 +24,19 @@ import { failure, success } from "../validation.js";
 import type { ValidationResult } from "../validation.js";
 import {
   evaluateTechniqueTeachingSelection,
+  evaluateTeachingSelectionReEvaluationDue,
   isTechniqueTeachingSelectionEnabled,
 } from "./evaluate-technique-teaching-selection.js";
 import type { Sprint3MentorshipEntrypointRuntimeState } from "./sprint3-mentorship-entrypoint-runtime-state.js";
+import {
+  lookupTechniqueTeachingSelectionPairSnapshot,
+  type TechniqueTeachingSelectionRuntimeState,
+} from "./technique-teaching-selection-runtime-state.js";
 import type {
   MentorshipRelationKind,
   Sprint3Config,
   TechniqueTeachingSelectionCandidate,
+  TechniqueTeachingSelectionOutcome,
   TechniqueTeachingSelectionRecord,
   WeeklyTeachDiscipleRequest,
   WeeklyTeachEvaluationInputScores,
@@ -169,6 +175,102 @@ function discipleHasIncompletePriorFocus(discipleRecord: WeeklyTrainingPersonRec
   return state === undefined || state.acquiredAbsoluteWeek === null;
 }
 
+function childEnrolledThisWeek(
+  mentorshipRuntime: Sprint3MentorshipEntrypointRuntimeState,
+  childPersonId: PersonId,
+  absoluteWeek: number,
+): boolean {
+  return mentorshipRuntime.completedEnrollmentOutcomes.some(
+    (entry) => entry.childPersonId === childPersonId && entry.absoluteWeek === absoluteWeek,
+  );
+}
+
+function discipleAcquiredTechniqueThisWeek(
+  discipleRecord: WeeklyTrainingPersonRecord,
+  absoluteWeek: number,
+): boolean {
+  const states = discipleRecord.person.sprint1State?.techniqueStates ?? [];
+  for (const state of states) {
+    if (state.acquiredAbsoluteWeek === absoluteWeek) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function topRankedTechniqueIdFromOutcome(
+  outcome: TechniqueTeachingSelectionOutcome,
+): string | undefined {
+  if (outcome.kind !== "selection_completed" || outcome.rankedCandidates.length === 0) {
+    return undefined;
+  }
+  const sorted = [...outcome.rankedCandidates].sort((left, right) => {
+    if (left.rank !== right.rank) {
+      return left.rank - right.rank;
+    }
+    return compareUnicodeCodePoints(left.techniqueId, right.techniqueId);
+  });
+  return sorted[0]?.techniqueId;
+}
+
+type PersistedSelectionPick =
+  { mode: "fallback" } | { mode: "resolved"; techniqueId: string | undefined };
+
+function pickTechniqueIdFromPersistedSelectionSnapshot(input: {
+  absoluteWeek: number;
+  masterPersonId: PersonId;
+  disciplePersonId: PersonId;
+  discipleRecord: WeeklyTrainingPersonRecord;
+  mentorshipRuntime: Sprint3MentorshipEntrypointRuntimeState;
+  sprint3Config: Sprint3Config;
+  techniqueTeachingSelectionRuntime: TechniqueTeachingSelectionRuntimeState | undefined;
+}): PersistedSelectionPick {
+  if (
+    !isTechniqueTeachingSelectionEnabled(input.sprint3Config) ||
+    input.techniqueTeachingSelectionRuntime === undefined
+  ) {
+    return { mode: "fallback" };
+  }
+  const policy = input.sprint3Config.teachingSelection;
+  if (policy === undefined) {
+    return { mode: "fallback" };
+  }
+  const snapshot = lookupTechniqueTeachingSelectionPairSnapshot(
+    input.techniqueTeachingSelectionRuntime,
+    input.masterPersonId,
+    input.disciplePersonId,
+  );
+  if (snapshot === undefined || snapshot.evaluatedAbsoluteWeek > input.absoluteWeek) {
+    return { mode: "fallback" };
+  }
+  if (snapshot.evaluatedAbsoluteWeek === input.absoluteWeek) {
+    return {
+      mode: "resolved",
+      techniqueId: topRankedTechniqueIdFromOutcome(snapshot.outcome),
+    };
+  }
+  const weeksSince = input.absoluteWeek - snapshot.evaluatedAbsoluteWeek;
+  const dueResult = evaluateTeachingSelectionReEvaluationDue(policy, {
+    weeksSinceLastTeachingSelectionEvaluation: weeksSince,
+    newEnrollmentThisEvaluation: childEnrolledThisWeek(
+      input.mentorshipRuntime,
+      input.disciplePersonId,
+      input.absoluteWeek,
+    ),
+    currentTechniqueAcquisitionCompleted: discipleAcquiredTechniqueThisWeek(
+      input.discipleRecord,
+      input.absoluteWeek,
+    ),
+  });
+  if (dueResult.due) {
+    return { mode: "fallback" };
+  }
+  return {
+    mode: "resolved",
+    techniqueId: topRankedTechniqueIdFromOutcome(snapshot.outcome),
+  };
+}
+
 export function buildTeachingSelectionRecord(input: {
   masterPersonId: PersonId;
   disciplePersonId: PersonId;
@@ -288,12 +390,14 @@ function pickTechniqueIdForDisciple(input: {
 
 export function deriveLiveExplicitWeeklyTeachDiscipleRequests(input: {
   masterPersonId: PersonId;
+  absoluteWeek: number;
   worldState: WorldEngineState;
   weeklyTrainingSidecars: WeeklyTrainingSidecarState;
   mentorshipRuntime: Sprint3MentorshipEntrypointRuntimeState;
   sprint3Config: Sprint3Config;
   sprint1Config: Sprint1Config;
   techniqueCatalog: TechniqueCatalog;
+  techniqueTeachingSelectionRuntime?: TechniqueTeachingSelectionRuntimeState;
 }): ValidationResult<readonly WeeklyTeachDiscipleRequest[]> {
   const recordsResult = buildWeeklyTrainingPersonRecords(
     input.worldState,
@@ -322,23 +426,37 @@ export function deriveLiveExplicitWeeklyTeachDiscipleRequests(input: {
     if (discipleRecord === undefined) {
       continue;
     }
-    const selectionRecord = buildTeachingSelectionRecord({
+    const persistedPick = pickTechniqueIdFromPersistedSelectionSnapshot({
+      absoluteWeek: input.absoluteWeek,
       masterPersonId: input.masterPersonId,
       disciplePersonId: pair.disciplePersonId,
-      mentorshipRelationKind: pair.mentorshipRelationKind,
-      masterRecord,
       discipleRecord,
-      techniqueCatalog: input.techniqueCatalog,
-      sprint1Config: input.sprint1Config,
-    });
-    if (!selectionRecord.ok) {
-      return selectionRecord;
-    }
-    const techniqueId = pickTechniqueIdForDisciple({
+      mentorshipRuntime: input.mentorshipRuntime,
       sprint3Config: input.sprint3Config,
-      selectionRecord: selectionRecord.value,
-      techniqueDefinitionsById,
+      techniqueTeachingSelectionRuntime: input.techniqueTeachingSelectionRuntime,
     });
+    let techniqueId: string | undefined;
+    if (persistedPick.mode === "resolved") {
+      techniqueId = persistedPick.techniqueId;
+    } else {
+      const selectionRecord = buildTeachingSelectionRecord({
+        masterPersonId: input.masterPersonId,
+        disciplePersonId: pair.disciplePersonId,
+        mentorshipRelationKind: pair.mentorshipRelationKind,
+        masterRecord,
+        discipleRecord,
+        techniqueCatalog: input.techniqueCatalog,
+        sprint1Config: input.sprint1Config,
+      });
+      if (!selectionRecord.ok) {
+        return selectionRecord;
+      }
+      techniqueId = pickTechniqueIdForDisciple({
+        sprint3Config: input.sprint3Config,
+        selectionRecord: selectionRecord.value,
+        techniqueDefinitionsById,
+      });
+    }
     if (techniqueId === undefined) {
       continue;
     }

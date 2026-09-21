@@ -726,6 +726,9 @@ function executeSprint1WeeklyTransitionDraft(
       sprint1Config: session.context.sprint1Config,
       techniqueCatalog: session.context.techniqueCatalog,
       runtimeState: working.mentorshipEntrypointRuntime,
+      ...(working.techniqueTeachingSelectionRuntime === undefined
+        ? {}
+        : { techniqueTeachingSelectionRuntime: working.techniqueTeachingSelectionRuntime }),
     });
     if (!explicitTeachMaterialized.ok) {
       return failure(

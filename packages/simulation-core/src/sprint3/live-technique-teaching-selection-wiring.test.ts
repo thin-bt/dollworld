@@ -10,6 +10,7 @@ import { validateSprint3Config } from "./validate-sprint3-config.js";
 import { processTechniqueTeachingSelectionWeek } from "./process-technique-teaching-selection-week.js";
 import { lookupTechniqueTeachingSelectionPairSnapshot } from "./technique-teaching-selection-runtime-state.js";
 import { evaluateTeachingSelectionReEvaluationDue } from "./evaluate-technique-teaching-selection.js";
+import { materializeLiveExplicitWeeklyTeachQueueRecords } from "./materialize-live-mentorship-entrypoint-queues.js";
 import { sidecarEntry, teachWorld } from "./live-explicit-weekly-teach-wiring.test.js";
 import { validateTechniqueDefinition } from "../sprint1/technique-definition.js";
 
@@ -102,6 +103,113 @@ describe("S03-022 live technique teaching-selection wiring", () => {
       DISCIPLE_ID,
     );
     expect(snapshot?.outcome.kind).toBe("selection_completed");
+  });
+
+  it("TTS-L002 explicit teach queue materialization consumes persisted ranked selection", () => {
+    const { world, runtime } = teachWorld("formal_master_disciple");
+    const absoluteWeek = 4;
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [sidecarEntry(DISCIPLE_ID), sidecarEntry(MASTER_ID, 1)],
+      }),
+    );
+    const sprint3Config = expectOk(
+      validateSprint3Config(createSprint3Balance090ConfigInput(), provider),
+    );
+    const sprint1Config = expectOk(validateSprint1Config(createDefaultSprint1ConfigInput()));
+    const definition = expectOk(
+      validateTechniqueDefinition({
+        techniqueId: "technique_alpha",
+        schemaVersion: "0.1.0",
+        dataVersion: "techniques-0.1.0",
+        name: "Test Technique",
+        category: "unarmed",
+        primaryStats: ["strength", "skill"],
+        requiredAptitude: 10,
+        requiredStats: { strength: 20 },
+        prerequisiteTechniqueMastery: [],
+        mentalCost: 5,
+        difficulty: 30,
+        learningTier: "basic",
+        consumptionClass: "small",
+        learningProgressRequired: 100,
+        learningProgressOverrideReason: null,
+        teachingProficiencyRequired: 20,
+        secrecy: 0,
+        power: 25,
+        accuracy: 70,
+        activationDifficulty: 10,
+        prerequisiteTechniqueIds: [],
+        originPersonId: null,
+        sourceTechniqueIds: [],
+        tags: ["strike"],
+        usableRanges: ["contact", "close"],
+        preferredRanges: ["contact"],
+        rangeShiftAfterUse: "none",
+        priority: 0,
+        speedModifier: 0,
+        injuryModifier: 0,
+        actionTraits: {
+          simultaneous: false,
+          counterOnHit: false,
+          interception: false,
+          interrupt: false,
+          defenseBreak: false,
+        },
+      }),
+    );
+    const catalog = {
+      identity: { dataVersion: "techniques-0.1.0", catalogHash: "0".repeat(64) },
+      definitions: [definition],
+    };
+
+    const processed = expectOk(
+      processTechniqueTeachingSelectionWeek({
+        absoluteWeek,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        mentorshipRuntime: runtime,
+        runtimeState: undefined,
+      }),
+    );
+    const snapshot = lookupTechniqueTeachingSelectionPairSnapshot(
+      processed.runtimeState,
+      MASTER_ID,
+      DISCIPLE_ID,
+    );
+    expect(snapshot?.outcome.kind).toBe("selection_completed");
+    if (snapshot === undefined || snapshot.outcome.kind !== "selection_completed") {
+      throw new Error("expected selection_completed snapshot");
+    }
+    const rankedTop = [...snapshot.outcome.rankedCandidates].sort((left, right) => {
+      if (left.rank !== right.rank) {
+        return left.rank - right.rank;
+      }
+      return left.techniqueId.localeCompare(right.techniqueId);
+    })[0]?.techniqueId;
+
+    const materialized = expectOk(
+      materializeLiveExplicitWeeklyTeachQueueRecords({
+        absoluteWeek,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        runtimeState: runtime,
+        ...(processed.runtimeState === undefined
+          ? {}
+          : { techniqueTeachingSelectionRuntime: processed.runtimeState }),
+      }),
+    );
+    const pending = materialized.pendingExplicitWeeklyTeachRecords;
+    expect(pending).toHaveLength(1);
+    expect(pending[0]?.discipleRequests).toHaveLength(1);
+    expect(pending[0]?.discipleRequests[0]?.techniqueId).toBe(rankedTop);
   });
 
   it("TTS-L004 reevaluation not-due vs due triggers", () => {

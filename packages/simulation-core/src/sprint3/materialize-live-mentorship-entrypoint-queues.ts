@@ -31,6 +31,7 @@ import {
   validateSprint3MentorshipEntrypointRuntimeState,
   type Sprint3MentorshipEntrypointRuntimeState,
 } from "./sprint3-mentorship-entrypoint-runtime-state.js";
+import type { TechniqueTeachingSelectionRuntimeState } from "./technique-teaching-selection-runtime-state.js";
 import type {
   EnrollmentAssignmentRecord,
   EnrollmentMasterCandidate,
@@ -56,6 +57,7 @@ export type MaterializeLiveExplicitTeachQueueInput = {
   sprint1Config?: Sprint1Config;
   techniqueCatalog?: TechniqueCatalog;
   runtimeState: Sprint3MentorshipEntrypointRuntimeState | undefined;
+  techniqueTeachingSelectionRuntime?: TechniqueTeachingSelectionRuntimeState;
 };
 
 function meanSurfaceAptitude(person: Person): number {
@@ -306,12 +308,16 @@ function resolveExplicitWeeklyTeachActionSelected(
   ) {
     const derived = deriveLiveExplicitWeeklyTeachDiscipleRequests({
       masterPersonId: person.personId,
+      absoluteWeek: input.absoluteWeek,
       worldState: input.worldState,
       weeklyTrainingSidecars: input.weeklyTrainingSidecars,
       mentorshipRuntime: runtime,
       sprint3Config: input.sprint3Config,
       sprint1Config: input.sprint1Config,
       techniqueCatalog: input.techniqueCatalog,
+      ...(input.techniqueTeachingSelectionRuntime === undefined
+        ? {}
+        : { techniqueTeachingSelectionRuntime: input.techniqueTeachingSelectionRuntime }),
     });
     if (!derived.ok) {
       return derived;
