@@ -80,3 +80,21 @@ Sprint2 must NOT be treated as fully UI-complete until visual acceptance is also
 - explicit visual-review terminal READY or FIX_REQUIRED; functional Playwright presence/navigation PASS alone is insufficient
 
 The historical terminal `SPRINT2_FORMAL_CLOSE_READY` from `SPRINT2-FORMAL-CLOSE-A-20260920-R1` remains an audit record of the earlier gate, but is superseded for current completion status by this visual-completion correction. Sprint2 is REOPENED until visual acceptance reaches READY.
+
+
+## Final completion resolution (2026-09-21)
+
+Sprint2 is **CLOSED**.
+
+Binding final product baseline:
+- `8d52ead09e7a5a6736777ab281db21ae79f28d48`
+
+Closure chain:
+- functional/wireframe formal close evidence: `SPRINT2-FORMAL-CLOSE-A-20260920-R1` = READY
+- wireframe Chrome acceptance: `SPRINT2-WIREFRAME-BROWSER-ACCEPTANCE-B2-20260920-R4` = READY, 12/12
+- visual fix publication: `SPRINT2-VISUAL-FIX-PUBLICATION-A-20260920-R1` = READY @ `8d52ead`
+- final visual browser reacceptance: `SPRINT2-VISUAL-BROWSER-REACCEPTANCE-B2-20260920-R1` = READY, 3/3 viewports, 36 screenshots
+
+The visual-completion correction reopened Sprint2 only until visual acceptance became READY. That condition was satisfied by the final visual reacceptance above. Historical FIX_REQUIRED and PREPARED Sprint2 artifacts are superseded audit history and are not live work queues.
+
+Current development may proceed in Sprint3. Re-opening Sprint2 requires a newly discovered Sprint2 regression, a contradictory canonical acceptance result newer than the closure chain above, or explicit user direction.
