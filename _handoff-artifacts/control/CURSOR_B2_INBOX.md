@@ -1,12 +1,12 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T00:09:41+09:00
-last-consumed-task-key: SPRINT3-FINAL-FORMAT-BLOCKER-REPAIR-B2-20260922-R1
-last-terminal: SPRINT3_FINAL_FORMAT_BLOCKER_REPAIR_B2_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-FINAL-FORMAT-BLOCKER-REPAIR-B2-20260922-R1/result.md
+task-key: SPRINT3-S03-044-PERSON-DETAIL-MENTORSHIP-VISIBILITY-B2-20260922-R1
+mode: PRODUCT_GAP_CLOSURE
+updatedAt: 2026-09-22T00:35:38+09:00
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-044-PERSON-DETAIL-MENTORSHIP-VISIBILITY-B2-20260922-R1/instruction.md
+priority: DEADLINE_CRITICAL
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
