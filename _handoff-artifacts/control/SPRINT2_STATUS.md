@@ -1,36 +1,38 @@
 # SPRINT2_STATUS
 
-state: REOPENED_FIX_REQUIRED
+state: CLOSED
 sprint: Sprint2
 control-authority: GitHub
-updatedAt: 2026-09-21T16:58:00+09:00
-previous-binding-product-baseline: 8d52ead09e7a5a6736777ab281db21ae79f28d48
-active-sprint: Sprint2
-blocks-sprint3-formal-close: true
+resolvedAt: 2026-09-21
+updatedAt: 2026-09-22T00:05:00+09:00
+binding-product-baseline: 410889b4087abba2c2315be1030e5a7834fb0060
+previous-state: REOPENED_FIX_REQUIRED
+next-active-sprint: Sprint3
+reconciliation: SPRINT2-SPRINT3-STATUS-AUTHORITY-RECONCILIATION-B2-20260921-R1
 
-## Reopen reason
+## Reopen resolution (ordinary-flow re-acceptance)
 
-Sprint2 was previously marked CLOSED from browser/wireframe/visual evidence that did not prove the normal user-facing game loop was complete.
-
-Newly discovered product defects invalidate that closure:
-
-- normal weekly progression does not prove tournament lifecycle from schedule -> participant selection -> automatic staging -> battle -> completion;
-- tournament UI exposes manual competition-step controls ("大会を開始して1試合進める" / "次の試合を進める") instead of demonstrating the intended normal world progression;
-- participant population/visibility in ordinary play is not established;
-- tournament completion -> result persistence -> annual ranking update is not established in ordinary play;
-- the standalone Ranking screen is effectively unimplemented and delegates users back to the tournament screen;
-- the tournament match screen does not inherit the battle presentation/UX already established in the mock-battle/battle-log presentation layer.
-
-These are completion-breaking Sprint2 regressions / omissions, not cosmetic follow-ups.
-
-## Required re-acceptance
-
-Sprint2 must remain open until ordinary user operation proves this full chain without test-only/manual competition stepping:
+Sprint2 was **`REOPENED_FIX_REQUIRED`** after core-loop / tournament / ranking / battle-presentation gaps were discovered post–2026-09-20 visual close. Canonical GitHub `master` now binds a completed **ordinary user-facing chain** (no test-only manual competition stepping as the proof path):
 
 `週進行 -> 大会予定 -> 参加者確定 -> 開催 -> 戦闘 -> 大会終了 -> 結果保存 -> ランキング更新 -> UI反映`
 
-Battle presentation used by official tournament matches must reuse the accepted common battle presentation from the earlier battle/mock-battle work unless a documented product requirement explicitly requires a difference.
+## Binding closure evidence (reopen chain)
 
-Historical READY/CLOSED artifacts remain audit history only and no longer authorize Sprint2 closure.
+| Evidence | Role |
+|----------|------|
+| `_handoff-artifacts/results/SPRINT2-REOPEN-CORE-LOOP-CANONICAL-PUBLICATION-A-20260921-R1/result.md` | Core-loop repair on `master` @ `5b5103a` |
+| `_handoff-artifacts/results/SPRINT2-REOPEN-REACCEPTANCE-EVIDENCE-B2-20260921-R1/result.md` | B2 UI ranking + battle presentation @ `085a545` |
+| `_handoff-artifacts/results/SPRINT2-REOPEN-TARGETED-BROWSER-REACCEPTANCE-B2-20260921-R1/result.md` | Targeted browser re-acceptance @ published repair lineage |
+| `_handoff-artifacts/results/SPRINT2-REOPEN-BROWSER-HARNESS-GREEN-B2-20260921-R1/result.md` | Playwright harness green |
+| `_handoff-artifacts/results/SPRINT2-REOPEN-BROWSER-HARNESS-CANONICAL-PUBLISH-B2-20260921-R1/result.md` | Harness on canonical `tests/e2e/` @ `bc1131b` |
+| `_handoff-artifacts/results/SPRINT2-REOPEN-FINAL-STATUS-READINESS-B2-20260921-R1/result.md` | B2/browser/product matrix **PASS** @ `05bec96` |
+| `_handoff-artifacts/results/SPRINT2-REOPEN-FORMAT-BLOCKER-REPAIR-B2-20260921-R1/result.md` | Scoped Prettier repair @ `7bd5cd6` |
+| `tests/e2e/s2-reopen-targeted-browser-reacceptance-b2.spec.ts` | Canonical targeted browser gate on `master` |
 
-Sprint3 may retain completed work as history, but no Sprint3 formal-close transition may proceed while Sprint2 is reopened.
+Prior 2026-09-20 visual/wireframe close artifacts remain audit history; they do **not** override this reopen resolution.
+
+## Release gate note (non-blocking for sprint status)
+
+`_handoff-artifacts/results/SPRINT2-REOPEN-FINAL-ROOT-GATE-A-20260921-R1/result.md` may remain **`BLOCKED_GATE_FAILURE`** until Cursor A clears full `npm run check` (Prettier on `sprint3-ordinary-session-activation.test.ts` @ pickup). That gate is **release hygiene**, not a reopen of the ordinary-flow acceptance finding above.
+
+Reopen Sprint2 only for a newly discovered Sprint2 regression, a newer contradictory canonical acceptance result, or explicit user direction.
