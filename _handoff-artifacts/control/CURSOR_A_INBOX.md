@@ -1,17 +1,20 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T16:45:02+09:00
-last-consumed-task-key: SPRINT3-S03-038-POST-STATUS-PRODUCT-IMMUTABILITY-AUDIT-A-20260921-R1
-last-terminal: READY / S03_038_POST_STATUS_PRODUCT_IMMUTABILITY_AUDIT_PASS
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-038-POST-STATUS-PRODUCT-IMMUTABILITY-AUDIT-A-20260921-R1/result.md
+task-key: SPRINT2-REOPEN-CORE-LOOP-REPAIR-A-20260921-R1
+mode: PRODUCT_IMPLEMENTATION
+updatedAt: 2026-09-21T17:03:50+09:00
+sprint: Sprint2
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT2-REOPEN-CORE-LOOP-REPAIR-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
+binding-status: _handoff-artifacts/control/SPRINT2_STATUS.md
 pickup-requirements:
-- fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- fresh-read GitHub canonical instruction and Sprint2 binding status
+- claim execution before changes
+- implement/test/publish ordinary weekly tournament lifecycle through persisted ranking state
 - publish terminal result to GitHub canonical result path
+- preserve completed Sprint3 work
+- do not duplicate B2-owned Ranking/battle-presentation implementation
