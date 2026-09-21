@@ -1,12 +1,12 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T07:47:39+09:00
-last-consumed-task-key: CONTROL-RECOVER-STASHED-HANDOFF-UNTRACKED-A-20260922-R1
-last-terminal: CONTROL_STASHED_HANDOFF_UNTRACKED_RECOVERY_READY
-last-result-path: _handoff-artifacts/results/CONTROL-RECOVER-STASHED-HANDOFF-UNTRACKED-A-20260922-R1/result.md
+task-key: SPRINT3-S03-055-PERSON-DETAIL-REVERSE-DISCIPLE-OBSERVABILITY-A-20260922-R1
+mode: IMPLEMENTATION
+priority: DEADLINE_CRITICAL
+updatedAt: 2026-09-22T08:01:56+09:00
+authority-ref: c85cf959446702985cc1dd051492856fef4ed624
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-055-PERSON-DETAIL-REVERSE-DISCIPLE-OBSERVABILITY-A-20260922-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
