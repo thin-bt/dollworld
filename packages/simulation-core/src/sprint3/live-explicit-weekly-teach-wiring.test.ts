@@ -9,7 +9,7 @@ import { validateSprint1Config } from "../sprint1/validate-sprint1-config.js";
 import { createDefaultSprint1ConfigInput } from "../sprint1/sprint1-config-defaults.js";
 import { WEEKLY_SCORED_ACTIONS } from "../sprint1/weekly-actions.js";
 import { validateWeeklyTrainingSidecarState } from "../sprint1/weekly-training-sidecar-state.js";
-import { createWorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
+import { advanceOneWeek, createWorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
 import type { WorldEngineState } from "../world-engine/types.js";
 import { applyExplicitWeeklyTeachOutcomesToWorldState } from "./apply-explicit-weekly-teach-outcomes-to-world-state.js";
 import { materializeLiveExplicitWeeklyTeachQueueRecords } from "./materialize-live-mentorship-entrypoint-queues.js";
@@ -423,5 +423,136 @@ describe("S03-021 live explicit weekly teach wiring", () => {
       }),
     );
     expect(rematerialized.pendingExplicitWeeklyTeachRecords).toHaveLength(0);
+  });
+
+  it("LWT-005 persisted techniqueStates remain visible on the next weekly step", () => {
+    const { world, runtime } = teachWorld("formal_master_disciple");
+    const absoluteWeek = 200;
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [sidecarEntry(DISCIPLE_ID), sidecarEntry(MASTER_ID, 1)],
+      }),
+    );
+    const materialized = expectOk(
+      materializeLiveExplicitWeeklyTeachQueueRecords({
+        absoluteWeek,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Teach,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        runtimeState: runtime,
+      }),
+    );
+    const processed = expectOk(
+      processExplicitWeeklyTeachWeek({
+        absoluteWeek,
+        sprint3Config: sprint3Teach,
+        techniqueCatalog: catalog,
+        runtimeState: materialized,
+      }),
+    );
+    const applied = expectOk(
+      applyExplicitWeeklyTeachOutcomesToWorldState({
+        worldState: world,
+        absoluteWeek,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        completedEntries: processed.runtimeState!.completedExplicitWeeklyTeachOutcomes,
+      }),
+    );
+    const progressBefore =
+      applied.persons
+        .find((person) => person.personId === DISCIPLE_ID)
+        ?.sprint1State?.techniqueStates.find((entry) => entry.techniqueId === TECH_ID)
+        ?.learningProgressTenths ?? 0;
+    expect(progressBefore).toBeGreaterThan(0);
+
+    const nextWeekWorld = {
+      ...applied,
+      worldDate: advanceOneWeek(applied.worldDate, DEFAULT_WORLD_CALENDAR_CONFIG),
+    };
+    const discipleNextWeek = nextWeekWorld.persons.find(
+      (person) => person.personId === DISCIPLE_ID,
+    );
+    const stateNextWeek = discipleNextWeek?.sprint1State?.techniqueStates.find(
+      (entry) => entry.techniqueId === TECH_ID,
+    );
+    expect(stateNextWeek?.learningProgressTenths).toBe(progressBefore);
+  });
+
+  it("LWT-006 replay with empty newly-completed slice does not double-apply world persistence", () => {
+    const { world, runtime } = teachWorld("formal_master_disciple");
+    const absoluteWeek = 204;
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [sidecarEntry(DISCIPLE_ID), sidecarEntry(MASTER_ID, 1)],
+      }),
+    );
+    const materialized = expectOk(
+      materializeLiveExplicitWeeklyTeachQueueRecords({
+        absoluteWeek,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Teach,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        runtimeState: runtime,
+      }),
+    );
+    const processed = expectOk(
+      processExplicitWeeklyTeachWeek({
+        absoluteWeek,
+        sprint3Config: sprint3Teach,
+        techniqueCatalog: catalog,
+        runtimeState: materialized,
+      }),
+    );
+    const completed = processed.runtimeState!.completedExplicitWeeklyTeachOutcomes;
+    const appliedOnce = expectOk(
+      applyExplicitWeeklyTeachOutcomesToWorldState({
+        worldState: world,
+        absoluteWeek,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        completedEntries: completed,
+      }),
+    );
+    const progressOnce =
+      appliedOnce.persons
+        .find((person) => person.personId === DISCIPLE_ID)
+        ?.sprint1State?.techniqueStates.find((entry) => entry.techniqueId === TECH_ID)
+        ?.learningProgressTenths ?? 0;
+
+    const rematerialized = expectOk(
+      materializeLiveExplicitWeeklyTeachQueueRecords({
+        absoluteWeek,
+        worldState: appliedOnce,
+        weeklyTrainingSidecars: sidecars,
+        sprint3Config: sprint3Teach,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        runtimeState: processed.runtimeState!,
+      }),
+    );
+    expect(rematerialized.pendingExplicitWeeklyTeachRecords).toHaveLength(0);
+
+    const appliedReplay = expectOk(
+      applyExplicitWeeklyTeachOutcomesToWorldState({
+        worldState: appliedOnce,
+        absoluteWeek,
+        sprint1Config,
+        techniqueCatalog: catalog,
+        completedEntries: [],
+      }),
+    );
+    const progressReplay =
+      appliedReplay.persons
+        .find((person) => person.personId === DISCIPLE_ID)
+        ?.sprint1State?.techniqueStates.find((entry) => entry.techniqueId === TECH_ID)
+        ?.learningProgressTenths ?? 0;
+    expect(progressReplay).toBe(progressOnce);
   });
 });
