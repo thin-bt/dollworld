@@ -1,11 +1,17 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-updatedAt: 2026-09-22T04:04:00+09:00
+task-key: SPRINT3-S03-050-POST030-EVIDENCE-LEDGER-RECONCILIATION-A-20260922-R1
+mode: RELEASE_EVIDENCE_RECONCILIATION
+updatedAt: 2026-09-22T04:51:00+09:00
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-050-POST030-EVIDENCE-LEDGER-RECONCILIATION-A-20260922-R1/instruction.md
+priority: DEADLINE_CRITICAL
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-last-task-key: SPRINT2-REOPEN-FINAL-ROOT-GATE-A-20260921-R1
-last-terminal: SUPERSEDED
-last-result-path: _handoff-artifacts/results/SPRINT2-REOPEN-FINAL-ROOT-GATE-A-20260921-R1/result.md
-note: stale Sprint2 root gate consumed; current-master release-gate closure is owned by active B2 S03-049 and must not be duplicated under executor load contention.
+sprint: Sprint3
+pickup-requirements:
+- fresh-read GitHub canonical instruction
+- claim ACTIVE before changes
+- publish terminal result to GitHub canonical result path
