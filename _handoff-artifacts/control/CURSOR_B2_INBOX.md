@@ -1,12 +1,12 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T22:46:03+09:00
-last-consumed-task-key: SPRINT3-S03-042-ORDINARY-SESSION-ACTIVATION-B2-20260921-R1
-last-terminal: SPRINT3_S03_042_ORDINARY_SESSION_ACTIVATION_B2_READY_LOCAL
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-042-ORDINARY-SESSION-ACTIVATION-B2-20260921-R1/result.md
+task-key: SPRINT3-S03-043-ORDINARY-SESSION-ACTIVATION-CANONICAL-PUBLISH-B2-20260921-R1
+mode: CANONICAL_PUBLICATION_RECOVERY
+updatedAt: 2026-09-21T22:52:10+09:00
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-043-ORDINARY-SESSION-ACTIVATION-CANONICAL-PUBLISH-B2-20260921-R1/instruction.md
+priority: DEADLINE_CRITICAL
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
