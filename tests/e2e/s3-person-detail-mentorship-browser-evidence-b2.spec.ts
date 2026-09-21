@@ -61,7 +61,10 @@ async function sessionCsrf(page: Page): Promise<{ csrf: string; uiRevision: numb
   return { csrf, uiRevision: session.body.uiRevision ?? 0 };
 }
 
-async function bootstrapAcceptedSession(page: Page, context: import("@playwright/test").BrowserContext): Promise<void> {
+async function bootstrapAcceptedSession(
+  page: Page,
+  context: import("@playwright/test").BrowserContext,
+): Promise<void> {
   await context.clearCookies();
   await page.goto("/");
   await expect(page.getByTestId("ui001-shell")).toBeVisible();
@@ -107,7 +110,11 @@ async function listPersonIds(page: Page): Promise<string[]> {
   const items = Array.isArray(peopleApi.body.data?.items) ? peopleApi.body.data.items : [];
   const ids: string[] = [];
   for (const item of items) {
-    if (typeof item === "object" && item !== null && typeof (item as { personId?: unknown }).personId === "string") {
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      typeof (item as { personId?: unknown }).personId === "string"
+    ) {
       ids.push((item as { personId: string }).personId);
     }
   }
@@ -189,7 +196,10 @@ async function assertMentorshipSectionVisible(page: Page): Promise<void> {
 }
 
 test.describe("Sprint3 S03-045 person detail mentorship browser evidence (B2)", () => {
-  test("ordinary /people route shows 師弟関係 states from accepted fixtures", async ({ page, context }) => {
+  test("ordinary /people route shows 師弟関係 states from accepted fixtures", async ({
+    page,
+    context,
+  }) => {
     test.setTimeout(360_000);
     await page.setViewportSize({ width: 1440, height: 1000 });
 
@@ -205,9 +215,13 @@ test.describe("Sprint3 S03-045 person detail mentorship browser evidence (B2)", 
     const openPersonDetail = async (personId: string): Promise<void> => {
       await page.goto(`/people/${encodeURIComponent(personId)}`);
       await expect(page.getByTestId("person-detail-page")).toBeVisible();
-      await expect(page.getByTestId("person-detail-status")).toHaveAttribute("data-status", "success", {
-        timeout: 60_000,
-      });
+      await expect(page.getByTestId("person-detail-status")).toHaveAttribute(
+        "data-status",
+        "success",
+        {
+          timeout: 60_000,
+        },
+      );
       await assertMentorshipSectionVisible(page);
     };
 
@@ -241,7 +255,9 @@ test.describe("Sprint3 S03-045 person detail mentorship browser evidence (B2)", 
       await expect(link).toHaveAttribute("href", `/people/${masterId}`);
       await link.click();
       await expect(page.getByTestId("person-detail-page")).toBeVisible();
-      await expect(page).toHaveURL(new RegExp(`/people/${masterId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
+      await expect(page).toHaveURL(
+        new RegExp(`/people/${masterId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`),
+      );
     }
   });
 });
