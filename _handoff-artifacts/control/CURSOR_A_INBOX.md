@@ -1,12 +1,11 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-21T15:11:07+09:00
-last-consumed-task-key: SPRINT3-S03-035-B2-PICKUP-HEALTH-DIAGNOSIS-A-20260921-R1
-last-terminal: READY / SPRINT3_S03_035_B2_PICKUP_HEALTH_DIAGNOSIS_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-035-B2-PICKUP-HEALTH-DIAGNOSIS-A-20260921-R1/result.md
+task-key: SPRINT3-S03-037-FORMAL-STATUS-CANONICAL-PUBLICATION-A-20260921-R1
+mode: DEADLINE_CRITICAL
+updatedAt: 2026-09-21T15:38:53+09:00
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-037-FORMAL-STATUS-CANONICAL-PUBLICATION-A-20260921-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
