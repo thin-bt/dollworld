@@ -14,5 +14,9 @@ export default defineConfig({
     // UI server boot (FV-001) and tournament-week simulation/start auto-progression
     // can exceed 15s on accepted integration presets (seed 42 / UI009 playable week).
     testTimeout: 120_000,
+    // Serialize test files on the canonical executor so heavy simulation suites
+    // (ST-012, CHK-009, WIN-006) are not starved by parallel Vitest workers.
+    fileParallelism: false,
+    maxWorkers: 1,
   },
 });
