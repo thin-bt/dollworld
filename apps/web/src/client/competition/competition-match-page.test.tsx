@@ -21,6 +21,7 @@ function baseDetail(overrides: Partial<CompetitionMatchDetailView>): Competition
     detailedLogActionCount: 0,
     turnOrderLogs: [],
     logItems: [],
+    battleLogSummary: null,
     ...overrides,
   };
 }

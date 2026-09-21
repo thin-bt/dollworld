@@ -51,49 +51,18 @@ export function CompetitionMatchPage(props: CompetitionMatchPageProps) {
   }
 
   return (
-    <article className="competition-match-page" data-testid="competition-match-page">
-      <h2 className="competition-section-heading">大会試合詳細</h2>
+    <article className="competition-match-page dw-card" data-testid="competition-match-page">
+      <p>
+        <a href="/competition" data-testid="competition-match-back">
+          ← 大会画面へ
+        </a>
+      </p>
+      <h2 className="competition-section-heading">大会試合結果 / 詳細ログ</h2>
       <p className="competition-detail-meta" data-testid="competition-match-id">
         試合ID: {detail.matchId}
+        {detail.tournamentId !== null ? ` · 大会: ${detail.tournamentId}` : ""}
       </p>
-      <table className="data-table">
-        <tbody>
-          <tr>
-            <th>対戦</th>
-            <td>
-              <a href={`/people/${encodeURIComponent(detail.participantAId)}`}>
-                {detail.participantADisplayName}
-              </a>
-              {" vs "}
-              <a href={`/people/${encodeURIComponent(detail.participantBId)}`}>
-                {detail.participantBDisplayName}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <th>結果</th>
-            <td>{detail.resultKind}</td>
-          </tr>
-          <tr>
-            <th>勝者</th>
-            <td>
-              {detail.winnerDisplayName === null ? (
-                "—"
-              ) : detail.winnerPersonId === null ? (
-                detail.winnerDisplayName
-              ) : (
-                <a href={`/people/${encodeURIComponent(detail.winnerPersonId)}`}>
-                  {detail.winnerDisplayName}
-                </a>
-              )}
-            </td>
-          </tr>
-        </tbody>
-      </table>
       <CompetitionMatchDetailedLog detail={detail} />
-      <p>
-        <a href="/competition">大会画面に戻る</a>
-      </p>
     </article>
   );
 }

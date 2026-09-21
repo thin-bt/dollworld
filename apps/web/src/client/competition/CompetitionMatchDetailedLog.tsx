@@ -1,6 +1,10 @@
 import { BattleLogViewPanel } from "../battle-log/BattleLogView.js";
 import type { BattleLogItemView } from "../battle-log/ui007-views.js";
 import type { CompetitionMatchDetailView, CompetitionTurnOrderLogView } from "./ui009-views.js";
+import {
+  battleLogItemsFromDetail,
+  mockBattleViewFromCompetitionSummary,
+} from "./competition-match-battle-presentation.js";
 
 function sideLabel(side: unknown, detail: CompetitionMatchDetailView): string {
   if (side === "sideA") {
@@ -46,11 +50,14 @@ export function CompetitionMatchDetailedLog(props: CompetitionMatchDetailedLogPr
     );
   }
 
-  const logItems = detail.logItems as BattleLogItemView[];
+  const logItems = battleLogItemsFromDetail(detail);
+  const summary =
+    detail.battleLogSummary === null
+      ? null
+      : mockBattleViewFromCompetitionSummary(detail.battleLogSummary);
 
   return (
     <section data-testid="competition-match-log-availability" data-log-state="available">
-      <h3 className="competition-section-heading">詳細戦闘ログ</h3>
       {detail.turnOrderLogs.length > 0 ? (
         <div className="competition-match-turn-order" data-testid="competition-match-turn-order">
           <h4 className="competition-section-heading">ターン行動順</h4>
@@ -80,12 +87,13 @@ export function CompetitionMatchDetailedLog(props: CompetitionMatchDetailedLogPr
         </div>
       ) : null}
       <BattleLogViewPanel
-        summaryStatus="empty"
-        summary={null}
+        presentationMode="competition"
+        summaryStatus={summary === null ? "empty" : "success"}
+        summary={summary}
         summaryError={null}
         summaryErrorCode={null}
         logStatus={logItems.length > 0 ? "success" : "empty"}
-        logItems={logItems}
+        logItems={logItems as BattleLogItemView[]}
         logTotalCount={detail.detailedLogActionCount}
         logError={null}
         logErrorCode={null}

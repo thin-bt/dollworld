@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadUiSession } from "../session-client.js";
 import type { FetchLike } from "../session-client.js";
+import { AnnualRankingTable } from "./AnnualRankingTable.js";
 import { CompetitionScheduleMatrix } from "./competition-schedule-matrix.js";
 import { loadCompetitionState, postCompetitionStep } from "./fetch-ui009.js";
 import type { CompetitionProgressView, CompetitionScheduleEntry } from "./ui009-views.js";
@@ -328,64 +329,14 @@ function TournamentDetailPanel(props: {
             </section>
           ) : null}
 
-          {showProgress && view.rankingRows.length > 0 ? (
-            <section className="competition-ranking" aria-labelledby="competition-ranking-heading">
-              <h4 id="competition-ranking-heading" className="competition-section-heading">
-                年間順位
-              </h4>
-              <p className="competition-ranking-note">
-                公式戦戦績は本大会の結果を含まない通算記録です。
-              </p>
-              <div className="competition-ranking-year" data-testid="competition-ranking-year-nav">
-                {view.wireframeObservation.annualRankingYearOptions.map((option) => (
-                  <button
-                    key={option.worldYear}
-                    type="button"
-                    data-testid="competition-ranking-year-option"
-                    data-year={option.worldYear}
-                    aria-pressed={
-                      option.worldYear === view.wireframeObservation.selectedRankingYear
-                    }
-                    disabled={
-                      !option.hasData && option.worldYear !== view.scheduleOverview.currentWorldYear
-                    }
-                    onClick={() => onRankingYearChange?.(option.worldYear)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              <table className="data-table" data-testid="competition-annual-ranking-table">
-                <thead>
-                  <tr>
-                    <th>順位</th>
-                    <th>選手</th>
-                    <th>年間獲得金</th>
-                    <th>ランク</th>
-                    <th>出場</th>
-                    <th>優勝</th>
-                    <th>公式戦戦績（本大会除く）</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {view.rankingRows.map((row) => (
-                    <tr key={row.personId}>
-                      <td>{row.annualRank}</td>
-                      <td>
-                        <a href={`/people/${encodeURIComponent(row.personId)}`}>
-                          {row.displayName}
-                        </a>
-                      </td>
-                      <td>{row.yearlyCumulativeEarningsLabel}</td>
-                      <td>{row.currentRankLabel}</td>
-                      <td>{row.tournamentAppearances}</td>
-                      <td>{row.tournamentWins}</td>
-                      <td>{row.officialRecordLabel}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
+          {showProgress ? (
+            <AnnualRankingTable
+              view={view}
+              testIdPrefix="competition"
+              {...(onRankingYearChange !== undefined
+                ? { onRankingYearChange }
+                : {})}
+            />
           ) : null}
 
           {view.wireframeObservation.tournamentSeriesHistory.length > 0 ? (
@@ -725,6 +676,12 @@ export function CompetitionPage(props: CompetitionPageProps) {
       </div>
 
       <footer className="competition-actions">
+        {!closed ? (
+          <p className="competition-auto-progression-note" data-testid="competition-auto-progression-note">
+            通常プレイでは「シミュレーション」画面で週を進めると、予定週の大会が自動で進行・確定します。
+            年間順位は <a href="/ranking">ランキング</a> 画面でも確認できます。
+          </p>
+        ) : null}
         {closed ? (
           <div className="competition-finished-actions" data-testid="competition-finished">
             <p className="competition-finished-message">
@@ -747,7 +704,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
             </p>
           </div>
         ) : (
-          <p>
+          <p className="competition-manual-step">
             <button
               type="button"
               data-testid="competition-step-cta"
@@ -757,6 +714,10 @@ export function CompetitionPage(props: CompetitionPageProps) {
             >
               {actionPending ? "試合を処理中…" : primaryCtaLabel}
             </button>
+            <span className="competition-step-hint">
+              {" "}
+              手動操作は自動進行の補助です。週進行で進まない場合のみ使用してください。
+            </span>
             {!canStep &&
             selectedEntry !== null &&
             !selectedEntry.isPlayable &&

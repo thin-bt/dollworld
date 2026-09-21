@@ -10,6 +10,10 @@ import {
   projectCompetitionMatchDetailedLog,
   type CompetitionTurnOrderLogView,
 } from "./competition-match-log-projection.js";
+import {
+  projectCompetitionBattleLogSummary,
+  type CompetitionBattleLogSummaryView,
+} from "./competition-match-battle-presentation.js";
 
 export type CompetitionMatchDetailUnavailableReason =
   "not_retained" | "pruned" | "missing_payload" | null;
@@ -31,6 +35,7 @@ export type CompetitionMatchDetailView = {
   detailedLogActionCount: number;
   turnOrderLogs: readonly CompetitionTurnOrderLogView[];
   logItems: readonly BattleLogItemView[];
+  battleLogSummary: CompetitionBattleLogSummaryView | null;
 };
 
 export function findStoredBattleRecord(
@@ -64,6 +69,7 @@ export function mapCompetitionMatchDetailView(input: {
   let detailedLogActionCount = 0;
   let turnOrderLogs: readonly CompetitionTurnOrderLogView[] = [];
   let logItems: readonly BattleLogItemView[] = [];
+  let battleLogSummary: CompetitionBattleLogSummaryView | null = null;
 
   if (record.detailedLogRetentionStatus === "pruned") {
     detailedLogUnavailableReason = "pruned";
@@ -83,6 +89,7 @@ export function mapCompetitionMatchDetailView(input: {
       detailedLogActionCount = projected.value.actionCount;
       turnOrderLogs = projected.value.turnOrderLogs;
       logItems = projected.value.logItems;
+      battleLogSummary = projectCompetitionBattleLogSummary(record, materialized.value.detailedLog);
     }
   }
 
@@ -107,6 +114,7 @@ export function mapCompetitionMatchDetailView(input: {
       detailedLogActionCount,
       turnOrderLogs,
       logItems,
+      battleLogSummary,
     },
   };
 }

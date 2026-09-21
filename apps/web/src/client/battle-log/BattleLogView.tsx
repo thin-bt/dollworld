@@ -52,6 +52,8 @@ export type BattleLogViewProps = {
   participantBDetailStatus?: "idle" | "loading" | "success" | "error";
   participantADetailError?: string | null;
   participantBDetailError?: string | null;
+  /** When set, replaces mock-battle chrome (back link + default heading). */
+  presentationMode?: "mock-battle" | "competition";
 };
 
 function personName(
@@ -136,6 +138,7 @@ function localizeRangeChangeLine(line: string): string {
 }
 
 export function BattleLogViewPanel(props: BattleLogViewProps) {
+  const presentationMode = props.presentationMode ?? "mock-battle";
   const summary = props.summary;
   const partA = summary !== null ? readFinalParticipant(summary.finalState, "participantA") : null;
   const partB = summary !== null ? readFinalParticipant(summary.finalState, "participantB") : null;
@@ -144,13 +147,20 @@ export function BattleLogViewPanel(props: BattleLogViewProps) {
   const turnGroups = groupLogItemsByTurn(props.logItems);
 
   return (
-    <section className="dw-card" data-testid="battle-log-page">
-      <p>
-        <a href="/mock-battle" data-testid="battle-log-back">
-          ← 模擬戦選択へ
-        </a>
-      </p>
-      <h2>模擬戦結果 / 詳細ログ</h2>
+    <section
+      className="dw-card"
+      data-testid={presentationMode === "competition" ? "competition-battle-log-panel" : "battle-log-page"}
+    >
+      {presentationMode === "mock-battle" ? (
+        <>
+          <p>
+            <a href="/mock-battle" data-testid="battle-log-back">
+              ← 模擬戦選択へ
+            </a>
+          </p>
+          <h2>模擬戦結果 / 詳細ログ</h2>
+        </>
+      ) : null}
 
       {props.summaryStatus === "loading" ? (
         <p className="dw-status" data-testid="battle-summary-status" data-status="loading">

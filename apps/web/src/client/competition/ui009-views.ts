@@ -221,6 +221,21 @@ export type CompetitionMatchDetailView = {
   detailedLogActionCount: number;
   turnOrderLogs: readonly CompetitionTurnOrderLogView[];
   logItems: readonly Record<string, unknown>[];
+  battleLogSummary: CompetitionBattleLogSummaryView | null;
+};
+
+export type CompetitionBattleLogSummaryView = {
+  matchId: string;
+  simulationId: string;
+  participantAPersonId: string;
+  participantBPersonId: string;
+  winnerPersonId: string | null;
+  loserPersonId: string | null;
+  resultKind: string;
+  endReason: string;
+  logTotalCount: number;
+  finalState: Record<string, unknown>;
+  judgeScore: null;
 };
 
 export type CompetitionStepDataView = {
