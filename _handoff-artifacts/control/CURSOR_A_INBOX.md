@@ -1,17 +1,18 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T06:29:01+09:00
-last-consumed-task-key: SPRINT3-S03-052-S03-051-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1
-last-terminal: S03_052_S03_051_CANONICAL_PUBLICATION_RECOVERY_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-052-S03-051-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1/result.md
+task-key: CONTROL-RECOVER-STASHED-HANDOFF-UNTRACKED-A-20260922-R1
+mode: CONTROL_RECOVERY
+updatedAt: 2026-09-22T06:55:00+09:00
+sprint: Sprint3
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/CONTROL-RECOVER-STASHED-HANDOFF-UNTRACKED-A-20260922-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
 pickup-requirements:
 - fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- preserve current tracked worktree
+- no stash apply/pop/drop
+- restore affected untracked handoff files path-by-path
 - publish terminal result to GitHub canonical result path
