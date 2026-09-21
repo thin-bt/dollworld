@@ -32,6 +32,7 @@ import { validateBattleParticipant } from "./battle-participant.js";
 import { clampInteger } from "./battle-turn-math.js";
 import { allocateBattleEventCandidates } from "./event-envelope-sprint1.js";
 import type { InitialWeeklyTrainingSidecarEntry } from "./initial-weekly-training-sidecar.js";
+import { collectKnownTechniqueIdsForBattle } from "../sprint3/generated-technique-battle-catalog.js";
 import {
   assertNoAccessors,
   cloneValidatedPlainJson,
@@ -141,6 +142,13 @@ function cloneSprint1RuntimeDraft(
         : {
             mentorshipEntrypointRuntime: cloneValidatedPlainJson(
               runtimeState.mentorshipEntrypointRuntime,
+            ),
+          }),
+      ...(runtimeState.generatedTechniqueCatalogOverlay === undefined
+        ? {}
+        : {
+            generatedTechniqueCatalogOverlay: cloneValidatedPlainJson(
+              runtimeState.generatedTechniqueCatalogOverlay,
             ),
           }),
     });
@@ -624,9 +632,10 @@ function preflightCommitRunBattlePlan(
     issues.push(...prefixIssues(transition.issues, "/commitPlan/startRuntimeTransition"));
   }
 
-  const knownTechniqueIds = new Set<TechniqueId>(
-    context.techniqueCatalog.definitions.map((definition) => definition.techniqueId),
-  );
+  const knownTechniqueIds = collectKnownTechniqueIdsForBattle(
+    context.techniqueCatalog.definitions,
+    runtimeState.generatedTechniqueCatalogOverlay,
+  ) as Set<TechniqueId>;
   const hashA = rebuildParticipantSourceSnapshotHash({
     worldState: runtimeState.worldState,
     sidecars: runtimeState.weeklyTrainingSidecars,

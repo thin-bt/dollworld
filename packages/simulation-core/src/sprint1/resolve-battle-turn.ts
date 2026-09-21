@@ -59,6 +59,14 @@ import {
 import type { BattleSide } from "./battle-enums.js";
 import type { BattleRange } from "./types.js";
 import {
+  buildBattleTechniqueDefinitionCatalogMap,
+  mergeTechniqueDefinitionsForBattlePreflight,
+} from "../sprint3/generated-technique-battle-catalog.js";
+import {
+  type GeneratedTechniqueCatalogOverlay,
+  validateGeneratedTechniqueCatalogOverlay,
+} from "../sprint3/generated-technique-catalog-overlay.js";
+import {
   mutableParticipant,
   opponentOf,
   participantOf,
@@ -71,6 +79,15 @@ import {
 } from "./battle-action-resolution.js";
 
 export const RESOLVE_BATTLE_TURN_INPUT_KEYS = [
+  "battleState",
+  "preparedTurn",
+  "runRuleSnapshot",
+  "participantAActionsSource",
+  "participantBActionsSource",
+  "generatedTechniqueCatalogOverlay",
+] as const;
+
+export const RESOLVE_BATTLE_TURN_REQUIRED_INPUT_KEYS = [
   "battleState",
   "preparedTurn",
   "runRuleSnapshot",
@@ -235,10 +252,21 @@ export function resolveBattleTurn(
   }
   assertNoAccessors(object, "", issues);
   rejectUnknownKeys(object, RESOLVE_BATTLE_TURN_INPUT_KEYS, "", issues);
-  for (const key of RESOLVE_BATTLE_TURN_INPUT_KEYS) {
+  for (const key of RESOLVE_BATTLE_TURN_REQUIRED_INPUT_KEYS) {
     if (!hasOwn(object, key)) {
       issues.push({ path: `/${key}`, message: "required key is missing" });
     }
+  }
+  let generatedTechniqueCatalogOverlay: GeneratedTechniqueCatalogOverlay | undefined;
+  if (hasOwn(object, "generatedTechniqueCatalogOverlay")) {
+    const overlayResult = validateGeneratedTechniqueCatalogOverlay(
+      object["generatedTechniqueCatalogOverlay"],
+      "/generatedTechniqueCatalogOverlay",
+    );
+    if (!overlayResult.ok) {
+      return resolveFailure(overlayResult.issues, "invalid_generated_technique_catalog_overlay");
+    }
+    generatedTechniqueCatalogOverlay = overlayResult.value;
   }
   if (issues.length > 0) {
     return resolveFailure(issues, "invalid_resolve_input_structure");
@@ -362,7 +390,11 @@ export function resolveBattleTurn(
     );
   }
 
-  const inputReplay = validateBattleStateReplayConsistency(battleState.value, snapshot.value);
+  const inputReplay = validateBattleStateReplayConsistency(
+    battleState.value,
+    snapshot.value,
+    generatedTechniqueCatalogOverlay,
+  );
   if (!inputReplay.ok) {
     return resolveFailure(inputReplay.issues, "battle_state_replay_mismatch");
   }
@@ -453,17 +485,22 @@ export function resolveBattleTurn(
     }
   }
 
-  const traits = rejectReservedTraits(snapshot.value.techniqueDefinitions);
+  const traits = rejectReservedTraits(
+    mergeTechniqueDefinitionsForBattlePreflight(
+      snapshot.value.techniqueDefinitions,
+      generatedTechniqueCatalogOverlay,
+    ),
+  );
   if (!traits.ok) {
     return resolveFailure(traits.issues, "reserved_action_traits");
   }
 
   // ---------- Phase C: clone-local execution ----------
   try {
-    const catalog = new Map<string, TechniqueDefinition>();
-    for (const definition of snapshot.value.techniqueDefinitions) {
-      catalog.set(definition.techniqueId, definition);
-    }
+    const catalog = buildBattleTechniqueDefinitionCatalogMap(
+      snapshot.value.techniqueDefinitions,
+      generatedTechniqueCatalogOverlay,
+    );
 
     const view = prepared.value.stateView;
     const working: WorkingState = {
@@ -782,7 +819,11 @@ export function resolveBattleTurn(
       return resolveFailure(validated.issues, "final_battle_state_invalid");
     }
 
-    const outputReplay = validateBattleStateReplayConsistency(validated.value, snapshot.value);
+    const outputReplay = validateBattleStateReplayConsistency(
+      validated.value,
+      snapshot.value,
+      generatedTechniqueCatalogOverlay,
+    );
     if (!outputReplay.ok) {
       return resolveFailure(outputReplay.issues, "final_battle_state_replay_mismatch");
     }

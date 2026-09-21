@@ -219,4 +219,5 @@ export type FinalizeBattleResultInput = {
   terminalBattleState: BattleState;
   runRuleSnapshot: unknown;
   postProcessContext: BattlePostProcessContext;
+  generatedTechniqueCatalogOverlay?: import("../sprint3/generated-technique-catalog-overlay.js").GeneratedTechniqueCatalogOverlay;
 };

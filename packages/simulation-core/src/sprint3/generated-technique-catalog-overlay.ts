@@ -3,10 +3,25 @@
  */
 import { compareUnicodeCodePoints } from "../canonical-json.js";
 import type { TechniqueCatalog, TechniqueCatalogIdentity } from "../sprint1/technique-catalog.js";
-import type { TechniqueDefinition } from "../sprint1/technique-definition.js";
+import {
+  validateTechniqueDefinition,
+  type TechniqueDefinition,
+} from "../sprint1/technique-definition.js";
+import {
+  assertNoAccessors,
+  rejectUnknownKeys,
+  requireLiteralString,
+  snapshotDenseArrayOrFail,
+  snapshotPlainObjectOrFail,
+} from "../sprint1/plain-data.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import { GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION } from "./constants.js";
+
+export const GENERATED_TECHNIQUE_CATALOG_OVERLAY_KEYS = [
+  "schemaVersion",
+  "definitions",
+] as const;
 
 export type GeneratedTechniqueCatalogOverlay = {
   schemaVersion: typeof GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION;
@@ -19,6 +34,62 @@ export function createEmptyGeneratedTechniqueCatalogOverlay(): GeneratedTechniqu
     schemaVersion: GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION,
     definitions: [],
   };
+}
+
+export function validateGeneratedTechniqueCatalogOverlay(
+  input: unknown,
+  path = "",
+): ValidationResult<GeneratedTechniqueCatalogOverlay> {
+  const issues: ValidationIssue[] = [];
+  const at = path === "" ? "" : path;
+  const object = snapshotPlainObjectOrFail(input, at, issues);
+  if (object === undefined) {
+    return failure(
+      issues.length > 0
+        ? issues
+        : [
+            {
+              path: at,
+              message: "GeneratedTechniqueCatalogOverlay must be a plain object",
+              actual: input,
+              expected: "GeneratedTechniqueCatalogOverlay",
+            },
+          ],
+    );
+  }
+  assertNoAccessors(object, at, issues);
+  rejectUnknownKeys(object, GENERATED_TECHNIQUE_CATALOG_OVERLAY_KEYS, at, issues);
+  requireLiteralString(
+    object,
+    "schemaVersion",
+    at,
+    GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION,
+    issues,
+  );
+  const rawDefinitions = snapshotDenseArrayOrFail(object["definitions"], `${at}/definitions`, issues);
+  const definitions: TechniqueDefinition[] = [];
+  if (rawDefinitions !== undefined) {
+    for (let index = 0; index < rawDefinitions.length; index += 1) {
+      const validated = validateTechniqueDefinition(rawDefinitions[index]);
+      if (validated.ok) {
+        definitions.push(validated.value);
+      } else {
+        issues.push(
+          ...validated.issues.map((issue) => ({
+            ...issue,
+            path: `${at}/definitions/${String(index)}${issue.path}`,
+          })),
+        );
+      }
+    }
+  }
+  if (issues.length > 0) {
+    return failure(issues);
+  }
+  return success({
+    schemaVersion: GENERATED_TECHNIQUE_CATALOG_OVERLAY_SCHEMA_VERSION,
+    definitions,
+  });
 }
 
 export function lookupTechniqueDefinitionWithOverlay(

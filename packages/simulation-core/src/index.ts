@@ -1276,8 +1276,15 @@ export {
   createEmptyGeneratedTechniqueCatalogOverlay,
   lookupTechniqueDefinitionWithOverlay,
   registerGeneratedTechniqueInOverlay,
+  validateGeneratedTechniqueCatalogOverlay,
 } from "./sprint3/generated-technique-catalog-overlay.js";
 export type { GeneratedTechniqueCatalogOverlay } from "./sprint3/generated-technique-catalog-overlay.js";
+export {
+  buildBattleTechniqueDefinitionCatalogMap,
+  collectKnownTechniqueIdsForBattle,
+  mergeTechniqueDefinitionsForBattlePreflight,
+  readOptionalGeneratedTechniqueCatalogOverlayFromCreateBattleRequest,
+} from "./sprint3/generated-technique-battle-catalog.js";
 export {
   isGeneratedTechniqueRegistrationEnabled,
   materializeGeneratedTechniqueDefinition,

@@ -31,6 +31,7 @@ import { validateTrainingProcessorRuntimeState } from "./training-processor-runt
 import { validateSeededRngState } from "./validate-seeded-rng-state.js";
 import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
 import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
+import { validateGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
@@ -57,6 +58,7 @@ export type TrustedWeeklyTransitionDraft = {
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
   originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
+  generatedTechniqueCatalogOverlay?: Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"];
 };
 
 export type ValidateTrustedWeeklyTransitionOptions = {
@@ -377,6 +379,22 @@ export function validateTrustedWeeklyTransition(
     }
   }
 
+  let generatedTechniqueCatalogOverlay:
+    Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"] | undefined;
+  if (draft.generatedTechniqueCatalogOverlay !== undefined) {
+    const overlayRuntime = validateGeneratedTechniqueCatalogOverlay(
+      draft.generatedTechniqueCatalogOverlay,
+      "/runtimeState/generatedTechniqueCatalogOverlay",
+    );
+    if (!overlayRuntime.ok) {
+      issues.push(
+        ...prefixIssues(overlayRuntime.issues, "/runtimeState/generatedTechniqueCatalogOverlay"),
+      );
+    } else {
+      generatedTechniqueCatalogOverlay = overlayRuntime.value;
+    }
+  }
+
   if (
     draft.mentorshipEntrypointRuntime !== undefined &&
     mentorshipEntrypointRuntime === undefined
@@ -421,6 +439,9 @@ export function validateTrustedWeeklyTransition(
         ? {}
         : { originalTechniqueLifecycleRuntime }),
       ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
+      ...(generatedTechniqueCatalogOverlay === undefined
+        ? {}
+        : { generatedTechniqueCatalogOverlay }),
     },
   });
 }

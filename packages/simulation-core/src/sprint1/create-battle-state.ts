@@ -53,6 +53,9 @@ import {
 import type { RunRuleSnapshot } from "./run-rule-snapshot.js";
 import { BATTLE_RANGES } from "./types.js";
 import type { BattleRange } from "./types.js";
+import { collectKnownTechniqueIdsForBattle } from "../sprint3/generated-technique-battle-catalog.js";
+import type { GeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
+import { readOptionalGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-battle-catalog.js";
 
 export const CREATE_BATTLE_REQUEST_KEYS = [
   "simulationId",
@@ -64,6 +67,7 @@ export const CREATE_BATTLE_REQUEST_KEYS = [
   "participantBActionSourceIdentity",
   "runRuleSnapshot",
   "initialRange",
+  "generatedTechniqueCatalogOverlay",
 ] as const;
 
 export type CreateBattleRequest = {
@@ -102,6 +106,7 @@ export type PreflightCreateBattleRequest = {
   participantBActionSourceIdentity: BattleActionSourceIdentity;
   runRuleSnapshot: RunRuleSnapshot;
   initialRange: BattleRange;
+  generatedTechniqueCatalogOverlay?: GeneratedTechniqueCatalogOverlay;
 };
 
 export type InternalCreateBattleStateInput = {
@@ -274,8 +279,15 @@ export function preflightCreateBattleRequest(
   const resolvedInitialRange =
     initialRange ?? runRuleSnapshot.sprint1Config.battle.defaultInitialRange;
 
-  const knownTechniqueIds = new Set<string>(
-    runRuleSnapshot.techniqueDefinitions.map((definition) => definition.techniqueId),
+  const generatedTechniqueCatalogOverlay = readOptionalGeneratedTechniqueCatalogOverlay(
+    object,
+    "",
+    issues,
+  );
+
+  const knownTechniqueIds = collectKnownTechniqueIdsForBattle(
+    runRuleSnapshot.techniqueDefinitions,
+    generatedTechniqueCatalogOverlay,
   );
 
   const participants: Partial<
@@ -328,6 +340,9 @@ export function preflightCreateBattleRequest(
     participantBActionSourceIdentity: identities.participantBActionSourceIdentity,
     runRuleSnapshot,
     initialRange: resolvedInitialRange,
+    ...(generatedTechniqueCatalogOverlay === undefined
+      ? {}
+      : { generatedTechniqueCatalogOverlay }),
   });
 }
 

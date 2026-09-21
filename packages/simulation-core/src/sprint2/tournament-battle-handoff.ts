@@ -24,6 +24,7 @@ import {
   type RunBattleToCompletionResult,
 } from "../sprint1/run-battle-to-completion.js";
 import type { Sprint1RunSession } from "../sprint1/sprint1-run-session.js";
+import { collectKnownTechniqueIdsForBattle } from "../sprint3/generated-technique-battle-catalog.js";
 import { TOURNAMENT_BATTLE_HANDOFF_RESULT_SCHEMA_VERSION } from "./constants.js";
 import type {
   TournamentMatchPlan,
@@ -130,10 +131,9 @@ function participantSource(
       battleKind: "official",
       worldDate: session.runtimeState.worldState.worldDate,
       config: session.context.runRuleSnapshot.sprint1Config,
-      knownTechniqueIds: new Set(
-        session.context.runRuleSnapshot.techniqueDefinitions.map(
-          (definition) => definition.techniqueId,
-        ),
+      knownTechniqueIds: collectKnownTechniqueIdsForBattle(
+        session.context.runRuleSnapshot.techniqueDefinitions,
+        session.runtimeState.generatedTechniqueCatalogOverlay,
       ),
     },
     provider,
@@ -302,6 +302,12 @@ export function executeTournamentBattleHandoff(
           participantAActionSourceIdentity: input.participantAActionSourceIdentity,
           participantBActionSourceIdentity: input.participantBActionSourceIdentity,
           runRuleSnapshot: session.context.runRuleSnapshot,
+          ...(session.runtimeState.generatedTechniqueCatalogOverlay === undefined
+            ? {}
+            : {
+                generatedTechniqueCatalogOverlay:
+                  session.runtimeState.generatedTechniqueCatalogOverlay,
+              }),
         },
         worldRngState: session.runtimeState.worldRngState,
         matchIdGeneratorState: session.runtimeState.matchIdGeneratorState,

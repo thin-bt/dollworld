@@ -39,6 +39,8 @@ import {
 } from "./battle-action-replacement.js";
 import { priorityForResolvedAction, resolveActionOrder } from "./battle-action-order.js";
 import type { TechniqueDefinition } from "./technique-definition.js";
+import { buildBattleTechniqueDefinitionCatalogMap } from "../sprint3/generated-technique-battle-catalog.js";
+import type { GeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 import { battleEndedAfterAction } from "./battle-surrender.js";
 import {
   accumulateTurnDamageTotals,
@@ -434,6 +436,7 @@ export function assertEmptyLogMatchesBaseline(
 export function validateBattleDetailedLogReplay(
   state: BattleState,
   runRuleSnapshot: RunRuleSnapshot,
+  generatedTechniqueCatalogOverlay?: GeneratedTechniqueCatalogOverlay,
 ): ValidationResult<true> {
   const config = runRuleSnapshot.sprint1Config;
   const issues: ValidationIssue[] = [];
@@ -481,10 +484,10 @@ export function validateBattleDetailedLogReplay(
     return issues.length === 0 ? success(true) : failure(issues);
   }
 
-  const catalog = new Map<string, TechniqueDefinition>();
-  for (const definition of runRuleSnapshot.techniqueDefinitions) {
-    catalog.set(definition.techniqueId, definition);
-  }
+  const catalog = buildBattleTechniqueDefinitionCatalogMap(
+    runRuleSnapshot.techniqueDefinitions,
+    generatedTechniqueCatalogOverlay,
+  );
 
   const working: WorkingState = {
     range: state.initialRange,
@@ -934,6 +937,7 @@ export function validateBattleDetailedLogReplay(
 export function validateBattleStateReplayConsistency(
   state: BattleState,
   runRuleSnapshot: RunRuleSnapshot,
+  generatedTechniqueCatalogOverlay?: GeneratedTechniqueCatalogOverlay,
 ): ValidationResult<true> {
   if (runRuleSnapshot.runRuleSnapshotHash !== state.runRuleSnapshotHash) {
     return failure([
@@ -945,5 +949,9 @@ export function validateBattleStateReplayConsistency(
       ),
     ]);
   }
-  return validateBattleDetailedLogReplay(state, runRuleSnapshot);
+  return validateBattleDetailedLogReplay(
+    state,
+    runRuleSnapshot,
+    generatedTechniqueCatalogOverlay,
+  );
 }

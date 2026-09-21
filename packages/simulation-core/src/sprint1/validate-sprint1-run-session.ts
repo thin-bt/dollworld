@@ -38,6 +38,7 @@ import { validateWeeklyTrainingSidecarState } from "./weekly-training-sidecar-st
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 import { validateOriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import { validateSprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
+import { validateGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 
 const SESSION_KEYS = ["context", "runtimeState"] as const;
 const RUNTIME_STATE_KEYS = [
@@ -52,6 +53,7 @@ const RUNTIME_STATE_KEYS = [
   "battleResultWeekState",
   "originalTechniqueLifecycleRuntime",
   "mentorshipEntrypointRuntime",
+  "generatedTechniqueCatalogOverlay",
 ] as const;
 
 function prefixIssues(issues: readonly ValidationIssue[], prefix: string): ValidationIssue[] {
@@ -371,6 +373,22 @@ export function validateSprint1RunSession(
     }
   }
 
+  let generatedTechniqueCatalogOverlay:
+    Sprint1RunSession["runtimeState"]["generatedTechniqueCatalogOverlay"] | undefined;
+  if (runtime["generatedTechniqueCatalogOverlay"] !== undefined) {
+    const overlayRuntime = validateGeneratedTechniqueCatalogOverlay(
+      runtime["generatedTechniqueCatalogOverlay"],
+      "/runtimeState/generatedTechniqueCatalogOverlay",
+    );
+    if (!overlayRuntime.ok) {
+      issues.push(
+        ...prefixIssues(overlayRuntime.issues, "/runtimeState/generatedTechniqueCatalogOverlay"),
+      );
+    } else {
+      generatedTechniqueCatalogOverlay = overlayRuntime.value;
+    }
+  }
+
   let originalTechniqueLifecycleRuntime:
     Sprint1RunSession["runtimeState"]["originalTechniqueLifecycleRuntime"] | undefined;
   if (runtime["originalTechniqueLifecycleRuntime"] !== undefined) {
@@ -417,6 +435,9 @@ export function validateSprint1RunSession(
           ? {}
           : { originalTechniqueLifecycleRuntime }),
         ...(mentorshipEntrypointRuntime === undefined ? {} : { mentorshipEntrypointRuntime }),
+        ...(generatedTechniqueCatalogOverlay === undefined
+          ? {}
+          : { generatedTechniqueCatalogOverlay }),
       },
     }),
   );

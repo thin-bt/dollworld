@@ -21,6 +21,7 @@ import type { TechniqueCatalog } from "./technique-catalog.js";
 import type { OriginalTechniqueLifecycleRuntimeState } from "../sprint3/original-technique-lifecycle-runtime-state.js";
 import type { Sprint3MentorshipEntrypointRuntimeState } from "../sprint3/sprint3-mentorship-entrypoint-runtime-state.js";
 import type { Sprint3Config } from "../sprint3/types.js";
+import type { GeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 import type { Sprint1Config } from "./types.js";
 import type { WeeklyTrainingEventCandidate } from "./weekly-training-types.js";
 import type { WeeklyTrainingSidecarState } from "./weekly-training-sidecar-state.js";
@@ -48,6 +49,8 @@ export type Sprint1RunRuntimeState = {
   originalTechniqueLifecycleRuntime?: OriginalTechniqueLifecycleRuntimeState;
   /** S03-012: enrollment / intake / explicit-teach entrypoint persistence when Sprint3 is bound. */
   mentorshipEntrypointRuntime?: Sprint3MentorshipEntrypointRuntimeState;
+  /** S03-015: runtime generated-technique overlay for production battle technique lookup. */
+  generatedTechniqueCatalogOverlay?: GeneratedTechniqueCatalogOverlay;
 };
 
 /**

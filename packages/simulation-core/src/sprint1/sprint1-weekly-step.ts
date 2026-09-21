@@ -262,6 +262,13 @@ function cloneSprint1RuntimeDraft(runtimeState: Sprint1RunRuntimeState): Sprint1
             runtimeState.mentorshipEntrypointRuntime,
           ),
         }),
+    ...(runtimeState.generatedTechniqueCatalogOverlay === undefined
+      ? {}
+      : {
+          generatedTechniqueCatalogOverlay: cloneValidatedPlainJson(
+            runtimeState.generatedTechniqueCatalogOverlay,
+          ),
+        }),
   };
 }
 
@@ -277,6 +284,7 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
   battleResultWeekState: Sprint1RunRuntimeState["battleResultWeekState"];
   originalTechniqueLifecycleRuntime?: Sprint1RunRuntimeState["originalTechniqueLifecycleRuntime"];
   mentorshipEntrypointRuntime?: Sprint1RunRuntimeState["mentorshipEntrypointRuntime"];
+  generatedTechniqueCatalogOverlay?: Sprint1RunRuntimeState["generatedTechniqueCatalogOverlay"];
 } {
   return {
     worldState: cloneWorldEngineState(runtimeState.worldState),
@@ -296,6 +304,13 @@ function cloneTrustedWeeklyWorkingDraft(runtimeState: Sprint1RunRuntimeState): {
       : {
           mentorshipEntrypointRuntime: cloneValidatedPlainJson(
             runtimeState.mentorshipEntrypointRuntime,
+          ),
+        }),
+    ...(runtimeState.generatedTechniqueCatalogOverlay === undefined
+      ? {}
+      : {
+          generatedTechniqueCatalogOverlay: cloneValidatedPlainJson(
+            runtimeState.generatedTechniqueCatalogOverlay,
           ),
         }),
   };
@@ -797,6 +812,9 @@ function executeSprint1WeeklyTransitionDraft(
     ...(working.mentorshipEntrypointRuntime === undefined
       ? {}
       : { mentorshipEntrypointRuntime: working.mentorshipEntrypointRuntime }),
+    ...(working.generatedTechniqueCatalogOverlay === undefined
+      ? {}
+      : { generatedTechniqueCatalogOverlay: working.generatedTechniqueCatalogOverlay }),
   };
 
   if (mode === "trusted") {

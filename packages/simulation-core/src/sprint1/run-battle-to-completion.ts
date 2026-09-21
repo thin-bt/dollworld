@@ -42,6 +42,8 @@ import { validateRunRuleSnapshot } from "./run-rule-snapshot.js";
 import { safeHashUtf8 } from "./safe-sha256.js";
 import type { StartBattleRuntimeTransition } from "./start-battle-runtime-transition.js";
 import { startBattleTransaction } from "./start-battle-transaction.js";
+import { readOptionalGeneratedTechniqueCatalogOverlayFromCreateBattleRequest } from "../sprint3/generated-technique-battle-catalog.js";
+import type { GeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 
 export const RUN_BATTLE_TO_COMPLETION_INPUT_KEYS = [
   "expectedWorldStateHash",
@@ -1011,6 +1013,20 @@ export function runBattleToCompletion(
     );
   }
 
+  const overlayRead = readOptionalGeneratedTechniqueCatalogOverlayFromCreateBattleRequest(
+    startInputObject["createBattleRequest"],
+  );
+  if (!overlayRead.ok) {
+    return preStartFailure(
+      overlayRead.issues.map((i) => ({
+        ...i,
+        path: `/startBattleInput/createBattleRequest${i.path}`,
+      })),
+    );
+  }
+  const generatedTechniqueCatalogOverlay: GeneratedTechniqueCatalogOverlay | undefined =
+    overlayRead.value;
+
   const context = validateBattlePostProcessContext(object["postProcessContext"], {
     participantAId: preflight.value.participantA.personId,
     participantBId: preflight.value.participantB.personId,
@@ -1102,6 +1118,9 @@ export function runBattleToCompletion(
         runRuleSnapshot: runRule.value,
         participantAActionsSource: sourceA.value,
         participantBActionsSource: sourceB.value,
+        ...(generatedTechniqueCatalogOverlay === undefined
+          ? {}
+          : { generatedTechniqueCatalogOverlay }),
       },
       provider,
     );
@@ -1145,6 +1164,9 @@ export function runBattleToCompletion(
       terminalBattleState: terminalState,
       runRuleSnapshot: runRule.value,
       postProcessContext: context.value,
+      ...(generatedTechniqueCatalogOverlay === undefined
+        ? {}
+        : { generatedTechniqueCatalogOverlay }),
     },
     provider,
   );

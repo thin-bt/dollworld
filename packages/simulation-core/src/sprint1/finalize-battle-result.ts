@@ -25,10 +25,19 @@ import {
   computeRunRuleSnapshotHash,
   validateRunRuleSnapshot,
 } from "./run-rule-snapshot.js";
+import { validateGeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
+import type { GeneratedTechniqueCatalogOverlay } from "../sprint3/generated-technique-catalog-overlay.js";
 
 export { computeFinalStateHash } from "./battle-result-compute.js";
 
 export const FINALIZE_BATTLE_RESULT_INPUT_KEYS = [
+  "terminalBattleState",
+  "runRuleSnapshot",
+  "postProcessContext",
+  "generatedTechniqueCatalogOverlay",
+] as const;
+
+const FINALIZE_BATTLE_RESULT_REQUIRED_INPUT_KEYS = [
   "terminalBattleState",
   "runRuleSnapshot",
   "postProcessContext",
@@ -52,9 +61,21 @@ function snapshotFinalizeInput(input: unknown): ValidationResult<FinalizeBattleR
   }
   assertNoAccessors(object, "", issues);
   rejectUnknownKeys(object, FINALIZE_BATTLE_RESULT_INPUT_KEYS, "", issues);
-  for (const key of FINALIZE_BATTLE_RESULT_INPUT_KEYS) {
+  for (const key of FINALIZE_BATTLE_RESULT_REQUIRED_INPUT_KEYS) {
     if (!hasOwn(object, key)) {
       issues.push({ path: `/${key}`, message: "required key is missing" });
+    }
+  }
+  let generatedTechniqueCatalogOverlay: GeneratedTechniqueCatalogOverlay | undefined;
+  if (hasOwn(object, "generatedTechniqueCatalogOverlay")) {
+    const overlayResult = validateGeneratedTechniqueCatalogOverlay(
+      object["generatedTechniqueCatalogOverlay"],
+      "/generatedTechniqueCatalogOverlay",
+    );
+    if (!overlayResult.ok) {
+      issues.push(...overlayResult.issues);
+    } else {
+      generatedTechniqueCatalogOverlay = overlayResult.value;
     }
   }
   if (issues.length > 0) {
@@ -69,6 +90,9 @@ function snapshotFinalizeInput(input: unknown): ValidationResult<FinalizeBattleR
     postProcessContext: object[
       "postProcessContext"
     ] as FinalizeBattleResultInput["postProcessContext"],
+    ...(generatedTechniqueCatalogOverlay === undefined
+      ? {}
+      : { generatedTechniqueCatalogOverlay }),
   });
 }
 
@@ -78,7 +102,12 @@ export function finalizeBattleResult(
 ): ValidationResult<BattleResult> {
   const snapped = snapshotFinalizeInput(input);
   if (!snapped.ok) return snapped;
-  const { terminalBattleState, runRuleSnapshot, postProcessContext } = snapped.value;
+  const {
+    terminalBattleState,
+    runRuleSnapshot,
+    postProcessContext,
+    generatedTechniqueCatalogOverlay,
+  } = snapped.value;
 
   const snapshot = validateRunRuleSnapshot(runRuleSnapshot, provider);
   if (!snapshot.ok) {
@@ -126,7 +155,11 @@ export function finalizeBattleResult(
     ]);
   }
 
-  const replay = validateBattleStateReplayConsistency(state, runRule);
+  const replay = validateBattleStateReplayConsistency(
+    state,
+    runRule,
+    generatedTechniqueCatalogOverlay,
+  );
   if (!replay.ok) {
     return failure(
       replay.issues.map((issue) => ({
