@@ -1,12 +1,12 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT2-SPRINT3-STATUS-AUTHORITY-RECONCILIATION-B2-20260921-R1
-mode: RELEASE_EVIDENCE
-updatedAt: 2026-09-21T23:55:38+09:00
-authority-ref: master
-instruction-path: _handoff-artifacts/tasks/SPRINT2-SPRINT3-STATUS-AUTHORITY-RECONCILIATION-B2-20260921-R1/instruction.md
-priority: DEADLINE_CRITICAL
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-22T00:03:09+09:00
+last-consumed-task-key: SPRINT2-SPRINT3-STATUS-AUTHORITY-RECONCILIATION-B2-20260921-R1
+last-terminal: READY_STATUS_RECONCILED
+last-result-path: _handoff-artifacts/results/SPRINT2-SPRINT3-STATUS-AUTHORITY-RECONCILIATION-B2-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
