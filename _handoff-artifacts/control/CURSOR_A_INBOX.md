@@ -1,11 +1,12 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-037-FORMAL-STATUS-CANONICAL-PUBLICATION-A-20260921-R1
-mode: DEADLINE_CRITICAL
-updatedAt: 2026-09-21T15:38:53+09:00
-authority-ref: master
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-037-FORMAL-STATUS-CANONICAL-PUBLICATION-A-20260921-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T15:43:32+09:00
+last-consumed-task-key: SPRINT3-S03-037-FORMAL-STATUS-CANONICAL-PUBLICATION-A-20260921-R1
+last-terminal: READY / S03_037_FORMAL_STATUS_CANONICAL_PUBLISH_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-037-FORMAL-STATUS-CANONICAL-PUBLICATION-A-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
