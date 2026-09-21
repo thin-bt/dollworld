@@ -47,6 +47,7 @@ import {
   type UiSession,
 } from "./ui-session.js";
 import { buildProductionCreateSprint1RunSessionInput } from "./create-sprint1-run-session-input.js";
+import { bindAcceptedProductionSprint3RunSession } from "./production-sprint3-run-session-binding.js";
 import { syncCompetitionAutoProgressionForWeek } from "./ui009/competition-auto-progression.js";
 import {
   getCompetitionStore,
@@ -89,6 +90,19 @@ export type SimulationRouteDeps = {
   serializerHooks?: EnvelopeSerializerHooks;
   hooks?: SimulationRouteHooks;
 };
+
+function applyAcceptedProductionSprint3RunSessionBinding(
+  worldSession: Sprint1RunSession,
+  sha256: ReturnType<typeof createNodeSha256Provider>,
+): Sprint1RunSession {
+  const bound = bindAcceptedProductionSprint3RunSession(worldSession, sha256);
+  if (!bound.ok) {
+    throw new Error(
+      `production Sprint3 run-session binding failed: ${JSON.stringify(bound.issues)}`,
+    );
+  }
+  return bound.value;
+}
 
 function applyCompetitionCompetitiveRecordsToWorldRuntime(
   sessionId: string,
@@ -600,12 +614,16 @@ export async function handlePostSimulationStart(
   let mutation: SimulationMutationView;
   let responseBody: string;
   try {
+    const sessionWithSprint3 = applyAcceptedProductionSprint3RunSessionBinding(
+      created.value.session,
+      sha256,
+    );
     runInit = buildRunInitializationSnapshot({
       presetId,
       seed,
       config: materials.config,
       nameData: materials.nameData,
-      session: created.value.session,
+      session: sessionWithSprint3,
     });
     const validationStore = createValidationStoreFromInitialization({
       simulationId: created.value.session.context.simulationId,
@@ -618,7 +636,7 @@ export async function handlePostSimulationStart(
     });
     summary = buildWorldSummaryView({
       runInitializationSnapshot: runInit,
-      runtime: created.value.session,
+      runtime: sessionWithSprint3,
     });
     mutation = {
       acceptedUiRevision: expectedUiRevision,
@@ -640,7 +658,7 @@ export async function handlePostSimulationStart(
 
     session.committedLifecycle = "ready";
     session.uiRevision = expectedUiRevision + 1;
-    session.worldEngineRuntime = created.value.session;
+    session.worldEngineRuntime = sessionWithSprint3;
     session.runInitializationSnapshot = runInit;
     session.committedValidationStore = validationStore;
     session.mockBattleStore = createEmptyMockBattleStore();
@@ -867,18 +885,22 @@ export async function handlePostSimulationReset(
     if (!runInitializationSnapshotsEqual(validatedSnap.value, saved as RunInitializationSnapshot)) {
       throw new Error("RunInitializationSnapshot drifted");
     }
+    const sessionWithSprint3 = applyAcceptedProductionSprint3RunSessionBinding(
+      created.value.session,
+      sha256,
+    );
     const validationStore = createValidationStoreFromInitialization({
-      simulationId: created.value.session.context.simulationId,
+      simulationId: sessionWithSprint3.context.simulationId,
       results: [],
       hooks: deps.hooks?.validationStore,
     });
     const counts = countOperationAggregates({
-      events: created.value.session.runtimeState.eventStream,
+      events: sessionWithSprint3.runtimeState.eventStream,
       validationResultCount: validationStore.items.length,
     });
     const summary = buildWorldSummaryView({
       runInitializationSnapshot: validatedSnap.value,
-      runtime: created.value.session,
+      runtime: sessionWithSprint3,
     });
     const mutation: SimulationMutationView = {
       acceptedUiRevision: expectedUiRevision,
@@ -899,7 +921,7 @@ export async function handlePostSimulationReset(
     responseBody = serializeMutationSuccess(mutation, deps);
     session.committedLifecycle = "ready";
     session.uiRevision = expectedUiRevision + 1;
-    session.worldEngineRuntime = created.value.session;
+    session.worldEngineRuntime = sessionWithSprint3;
     session.runInitializationSnapshot = validatedSnap.value;
     session.committedValidationStore = validationStore;
     session.mockBattleStore = createEmptyMockBattleStore();

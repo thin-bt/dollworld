@@ -5,19 +5,11 @@
 import { randomUUID } from "node:crypto";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  createInitialOriginalTechniqueLifecycleRuntimeState,
-  createInitialSprint3MentorshipEntrypointRuntimeState,
-  createSprint3Balance080ConfigInput,
-  ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
-  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
-  type Sprint1RunSession,
-  validateSprint3Config,
-} from "@shared-world/simulation-core";
+import { type Sprint1RunSession } from "@shared-world/simulation-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { API_PREFIX } from "../../shared/ui001-contracts.js";
 import { createUiApp, type UiApp } from "../app.js";
-import { createNodeSha256Provider, DEFAULT_SPRINT1_PRESET_ID } from "../presets.js";
+import { DEFAULT_SPRINT1_PRESET_ID } from "../presets.js";
 import { createTestProcessSecurityContext } from "../process-keys.js";
 import { CSRF_HEADER_NAME, SESSION_COOKIE_NAME } from "../session-cookie.js";
 import { findUi009PlayableScheduleSlot } from "./competition-schedule-slot.js";
@@ -25,39 +17,6 @@ import { findUi009PlayableScheduleSlot } from "./competition-schedule-slot.js";
 const ORIGIN = "http://127.0.0.1:8787";
 const HOST = "127.0.0.1:8787";
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..", "..");
-const sprint3ConfigSha256Provider = createNodeSha256Provider();
-
-/** Mirrors `createSprint3Balance090ConfigInput` without a deep simulation-core source import. */
-function createSprint3Balance090ConfigInputForWeeklyGuard() {
-  const balance080 = createSprint3Balance080ConfigInput();
-  return {
-    ...balance080,
-    configVersion: SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
-    mentorshipFeatures: {
-      ...balance080.mentorshipFeatures,
-      originalTechniqueLifecycleEnabled: true,
-    },
-    originalTechniqueLifecycle: {
-      evaluationPolicyVersion: ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
-      researchThresholds: {
-        derivedTechnique: 180,
-        compositeTechnique: 320,
-        fullOriginalTechnique: 550,
-      },
-      generation: {
-        baseSuccessPercent: 50,
-        minimumSuccessPercent: 20,
-        maximumSuccessPercent: 80,
-        failureResearchRetentionPercent: 80,
-        regenerationCooldownWeeks: 24,
-        initialMasteryHundredthsMinimum: 1000,
-        initialMasteryHundredthsMaximum: 2500,
-        maximumPositiveSuccessAdjustmentPoints: 30,
-        maximumNegativeSuccessAdjustmentPoints: 30,
-      },
-    },
-  };
-}
 
 type Envelope = {
   ok: boolean;
@@ -142,41 +101,6 @@ async function bootstrapSession(
     csrf,
     uiRevision: started.uiRevision,
     sessionId,
-  };
-}
-
-function expectOk<T>(result: { ok: true; value: T } | { ok: false; issues?: unknown }): T {
-  expect(result.ok).toBe(true);
-  if (!result.ok) {
-    throw new Error(`expected success: ${JSON.stringify(result)}`);
-  }
-  return result.value;
-}
-
-/** Test-only Sprint3 binding on the production web session runtime (no product surface change). */
-function attachSprint3WeeklyRegressionGuard(session: Sprint1RunSession): Sprint1RunSession {
-  const sprint3Config = expectOk(
-    validateSprint3Config(
-      createSprint3Balance090ConfigInputForWeeklyGuard(),
-      sprint3ConfigSha256Provider,
-    ),
-  );
-  const seed = session.context.simulationIdentity.seed;
-  return {
-    ...session,
-    context: {
-      ...session.context,
-      sprint3Config,
-    },
-    runtimeState: {
-      ...session.runtimeState,
-      mentorshipEntrypointRuntime:
-        session.runtimeState.mentorshipEntrypointRuntime ??
-        createInitialSprint3MentorshipEntrypointRuntimeState(),
-      originalTechniqueLifecycleRuntime:
-        session.runtimeState.originalTechniqueLifecycleRuntime ??
-        createInitialOriginalTechniqueLifecycleRuntimeState(seed),
-    },
   };
 }
 
@@ -288,8 +212,6 @@ describe("Sprint3 weekly runtime vs tournament auto-progression regression guard
       processKeys: createTestProcessSecurityContext(916),
     });
     const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app, 11);
-    const row = app.uiSessionStore.get(sessionId)!;
-    row.worldEngineRuntime = attachSprint3WeeklyRegressionGuard(row.worldEngineRuntime!);
 
     let revision = uiRevision;
     let runtime = runtimeFromStore(app, sessionId);
@@ -314,10 +236,8 @@ describe("Sprint3 weekly runtime vs tournament auto-progression regression guard
       processKeys: createTestProcessSecurityContext(917),
     });
     const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app, 7);
-    const row = app.uiSessionStore.get(sessionId)!;
-    row.worldEngineRuntime = attachSprint3WeeklyRegressionGuard(row.worldEngineRuntime!);
 
-    const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
+    const worldDate = runtimeFromStore(app, sessionId).runtimeState.worldState.worldDate;
     const slot = findUi009PlayableScheduleSlot(worldDate.year)!;
     const weeksUntil = slot.absoluteWeek - worldDate.absoluteWeek;
     let revision = uiRevision;
@@ -356,8 +276,6 @@ describe("Sprint3 weekly runtime vs tournament auto-progression regression guard
       });
       try {
         const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(localApp, seed);
-        const row = localApp.uiSessionStore.get(sessionId)!;
-        row.worldEngineRuntime = attachSprint3WeeklyRegressionGuard(row.worldEngineRuntime!);
         const observations: Sprint3WeeklyGuardObservation[] = [
           observeSprint3WeeklyGuard(runtimeFromStore(localApp, sessionId)),
         ];
@@ -386,10 +304,8 @@ describe("Sprint3 weekly runtime vs tournament auto-progression regression guard
       processKeys: createTestProcessSecurityContext(919),
     });
     const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app, 7);
-    const row = app.uiSessionStore.get(sessionId)!;
-    row.worldEngineRuntime = attachSprint3WeeklyRegressionGuard(row.worldEngineRuntime!);
 
-    const startWeek = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
+    const startWeek = runtimeFromStore(app, sessionId).runtimeState.worldState.worldDate;
     const slot = findUi009PlayableScheduleSlot(startWeek.year)!;
     const weeksUntil = slot.absoluteWeek - startWeek.absoluteWeek;
     let revision = uiRevision;
