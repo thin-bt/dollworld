@@ -1,18 +1,17 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT3-S03-039-SPRINT2-REPAIR-REGRESSION-GUARD-B2-20260921-R1
-mode: PRODUCT_REGRESSION_GUARD
-updatedAt: 2026-09-21T17:39:22+09:00
-sprint: Sprint3
-priority: DEADLINE_CRITICAL
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-039-SPRINT2-REPAIR-REGRESSION-GUARD-B2-20260921-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-21T18:07:25+09:00
+last-consumed-task-key: SPRINT3-S03-039-SPRINT2-REPAIR-REGRESSION-GUARD-B2-20260921-R1
+last-terminal: SPRINT3_SPRINT2_REPAIR_REGRESSION_GUARD_B2_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-039-SPRINT2-REPAIR-REGRESSION-GUARD-B2-20260921-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-binding-status: _handoff-artifacts/control/SPRINT3_STATUS.md
+sprint: Sprint3
 pickup-requirements:
-- fresh-read GitHub canonical instruction plus Sprint2/Sprint3 binding status
-- claim execution before changes
-- preserve A-owned Sprint2 core-loop repair; implement only non-conflicting Sprint3 regression guard/evidence
+- fresh-read GitHub canonical instruction
+- claim ACTIVE before changes
 - publish terminal result to GitHub canonical result path
