@@ -51,6 +51,7 @@ import { validateWorldYearStartRuntimeState } from "./world-year-start-runtime-s
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 import { processOriginalTechniqueLifecycleWeek } from "../sprint3/process-original-technique-lifecycle-week.js";
 import { processOriginalTechniqueLossWeek } from "../sprint3/process-original-technique-loss-week.js";
+import { applyExplicitWeeklyTeachOutcomesToWorldState } from "../sprint3/apply-explicit-weekly-teach-outcomes-to-world-state.js";
 import { processExplicitWeeklyTeachWeek } from "../sprint3/process-explicit-weekly-teach-week.js";
 import { processSprint3EnrollmentIntakeBoundary } from "../sprint3/process-sprint3-enrollment-intake-boundary.js";
 import {
@@ -677,6 +678,8 @@ function executeSprint1WeeklyTransitionDraft(
       return failure(adapterQualifiedMasterRefresh.issues);
     }
 
+    const explicitTeachCompletedBefore =
+      working.mentorshipEntrypointRuntime?.completedExplicitWeeklyTeachOutcomes.length ?? 0;
     const explicitTeachMaterialized = materializeLiveExplicitWeeklyTeachQueueRecords({
       absoluteWeek: working.worldState.worldDate.absoluteWeek,
       worldState: working.worldState,
@@ -684,6 +687,8 @@ function executeSprint1WeeklyTransitionDraft(
       ...(session.context.sprint3Config === undefined
         ? {}
         : { sprint3Config: session.context.sprint3Config }),
+      sprint1Config: session.context.sprint1Config,
+      techniqueCatalog: session.context.techniqueCatalog,
       runtimeState: working.mentorshipEntrypointRuntime,
     });
     if (!explicitTeachMaterialized.ok) {
@@ -705,6 +710,29 @@ function executeSprint1WeeklyTransitionDraft(
       return failure(prefixIssues(explicitTeachWeek.issues, "/explicitWeeklyTeachWeek"));
     }
     working.mentorshipEntrypointRuntime = explicitTeachWeek.value.runtimeState;
+
+    const explicitTeachCompletedAfter =
+      working.mentorshipEntrypointRuntime?.completedExplicitWeeklyTeachOutcomes.length ?? 0;
+    const newExplicitTeachOutcomes =
+      working.mentorshipEntrypointRuntime?.completedExplicitWeeklyTeachOutcomes.slice(
+        explicitTeachCompletedBefore,
+        explicitTeachCompletedAfter,
+      ) ?? [];
+    if (newExplicitTeachOutcomes.length > 0) {
+      const explicitTeachWorldApplied = applyExplicitWeeklyTeachOutcomesToWorldState({
+        worldState: working.worldState,
+        absoluteWeek: working.worldState.worldDate.absoluteWeek,
+        sprint1Config: session.context.sprint1Config,
+        techniqueCatalog: session.context.techniqueCatalog,
+        completedEntries: newExplicitTeachOutcomes,
+      });
+      if (!explicitTeachWorldApplied.ok) {
+        return failure(
+          prefixIssues(explicitTeachWorldApplied.issues, "/explicitWeeklyTeachWorldPersistence"),
+        );
+      }
+      working.worldState = explicitTeachWorldApplied.value;
+    }
 
     const otlWeek = processOriginalTechniqueLifecycleWeek({
       absoluteWeek: working.worldState.worldDate.absoluteWeek,

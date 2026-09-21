@@ -21,7 +21,10 @@ import {
   isPersonMasterQualificationEligible,
 } from "./derive-master-qualification-record.js";
 import { isEnrollmentAssignmentAiEnabled } from "./evaluate-enrollment-assignment.js";
+import { deriveLiveExplicitWeeklyTeachDiscipleRequests } from "./derive-live-explicit-weekly-teach-disciple-requests.js";
 import { isExplicitWeeklyTeachActionEnabled } from "./evaluate-explicit-weekly-teach.js";
+import type { TechniqueCatalog } from "../sprint1/technique-catalog.js";
+import type { Sprint1Config } from "../sprint1/types.js";
 import { evaluateMasterIntakeDecision } from "./evaluate-master-intake.js";
 import {
   createInitialSprint3MentorshipEntrypointRuntimeState,
@@ -50,6 +53,8 @@ export type MaterializeLiveExplicitTeachQueueInput = {
   worldState: WorldEngineState;
   weeklyTrainingSidecars: WeeklyTrainingSidecarState;
   sprint3Config?: Sprint3Config;
+  sprint1Config?: Sprint1Config;
+  techniqueCatalog?: TechniqueCatalog;
   runtimeState: Sprint3MentorshipEntrypointRuntimeState | undefined;
 };
 
@@ -272,16 +277,17 @@ function masterHasAssignedDisciple(
 function resolveExplicitWeeklyTeachActionSelected(
   record: WeeklyTrainingPersonRecord,
   runtime: Sprint3MentorshipEntrypointRuntimeState,
-): ExplicitWeeklyTeachActionRecord | undefined {
+  input: MaterializeLiveExplicitTeachQueueInput,
+): ValidationResult<ExplicitWeeklyTeachActionRecord | undefined> {
   const person = record.person;
   if (person.lifeStatus !== "living") {
-    return undefined;
+    return success(undefined);
   }
   if (record.discipleCount < 1) {
-    return undefined;
+    return success(undefined);
   }
   if (!masterHasAssignedDisciple(runtime, person.personId)) {
-    return undefined;
+    return success(undefined);
   }
   const pipelineEligible = isWeeklyActionPipelineEligible({
     lifeStatus: person.lifeStatus,
@@ -290,16 +296,36 @@ function resolveExplicitWeeklyTeachActionSelected(
     currentAge: person.currentAge,
   });
   if (!pipelineEligible) {
-    return undefined;
+    return success(undefined);
   }
-  return {
+  let discipleRequests: ExplicitWeeklyTeachActionRecord["discipleRequests"] = [];
+  if (
+    input.sprint3Config !== undefined &&
+    input.sprint1Config !== undefined &&
+    input.techniqueCatalog !== undefined
+  ) {
+    const derived = deriveLiveExplicitWeeklyTeachDiscipleRequests({
+      masterPersonId: person.personId,
+      worldState: input.worldState,
+      weeklyTrainingSidecars: input.weeklyTrainingSidecars,
+      mentorshipRuntime: runtime,
+      sprint3Config: input.sprint3Config,
+      sprint1Config: input.sprint1Config,
+      techniqueCatalog: input.techniqueCatalog,
+    });
+    if (!derived.ok) {
+      return derived;
+    }
+    discipleRequests = derived.value;
+  }
+  return success({
     masterPersonId: person.personId,
     masterWeeklyPipelineEligible: true,
     masterFormalDiscipleCount: record.discipleCount,
     teachingAbilityScore: meanGrowthPotential(record),
     selectedWeeklyAction: "teach",
-    discipleRequests: [],
-  };
+    discipleRequests,
+  });
 }
 
 /**
@@ -456,11 +482,19 @@ export function materializeLiveExplicitWeeklyTeachQueueRecords(
     if (masterCompletedExplicitTeachThisWeek(runtime, record.person.personId, input.absoluteWeek)) {
       continue;
     }
-    const boundary = resolveExplicitWeeklyTeachActionSelected(record, runtime);
-    if (boundary === undefined) {
+    const boundary = resolveExplicitWeeklyTeachActionSelected(record, runtime, input);
+    if (!boundary.ok) {
+      return failure(
+        boundary.issues.map((issue) => ({
+          ...issue,
+          path: `/liveExplicitTeachQueueMaterialization${issue.path}`,
+        })),
+      );
+    }
+    if (boundary.value === undefined) {
       continue;
     }
-    materialized.push(boundary);
+    materialized.push(boundary.value);
   }
 
   if (materialized.length === 0) {
