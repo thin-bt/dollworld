@@ -163,7 +163,10 @@ describe("Sprint3 ordinary session activation (production start boundary)", () =
     expect(isOrdinaryWeeklyWeek(runtime)).toBe(true);
 
     const otl = runtime.runtimeState.originalTechniqueLifecycleRuntime!;
-    const beforeResearch = otl.personEntries.reduce((sum, entry) => sum + entry.researchValueTenths, 0);
+    const beforeResearch = otl.personEntries.reduce(
+      (sum, entry) => sum + entry.researchValueTenths,
+      0,
+    );
     const beforeRng = JSON.stringify(otl.rngState);
     const beforeWeek = runtime.runtimeState.worldState.worldDate.absoluteWeek;
     const beforeEvents = runtime.runtimeState.eventStream.length;
