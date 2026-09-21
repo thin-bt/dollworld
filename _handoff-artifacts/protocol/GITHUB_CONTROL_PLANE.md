@@ -11,7 +11,7 @@ authority: GitHub `thin-bt/dollworld` / `master`
 4. A mirror failure is recovery work, not a terminal state.
 5. Do not disable or stop any dollworld automation because a local/Drive folder is absent.
 6. Only explicit user PAUSE/STOP authorizes disabling a loop.
-7. Sprint2 is formally CLOSED. The binding completion status is `_handoff-artifacts/control/SPRINT2_STATUS.md`. Sprint3 is the active development sprint. Do not re-open Sprint2 merely because historical Sprint2 tasks/results or retired control files remain in Git history.
+7. Sprint2 is currently REOPENED / FIX_REQUIRED. The binding completion status is `_handoff-artifacts/control/SPRINT2_STATUS.md`. Sprint3 work already produced is preserved, but Sprint3 formal close is blocked by `_handoff-artifacts/control/SPRINT3_STATUS.md` until Sprint2 is repaired and re-accepted.
 
 ## Canonical path map
 
