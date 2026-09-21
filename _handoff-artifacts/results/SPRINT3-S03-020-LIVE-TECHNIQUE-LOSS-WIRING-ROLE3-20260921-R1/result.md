@@ -8,8 +8,8 @@ updatedAt: 2026-09-21T10:38:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
-published-master-sha: (set at commit push)
-product-commit-sha: (set at commit push)
+published-master-sha: decd5d3899f7694833f5971a83a819e7ec68d856
+product-commit-sha: decd5d3899f7694833f5971a83a819e7ec68d856
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-S03-017-LIVE-COMPETITIVE-RECORD-WIRING-A-20260921-R1
 production-change: YES
