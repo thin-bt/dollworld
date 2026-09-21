@@ -24,7 +24,7 @@ export function isStaleActive(active, staleMinutes = 30) {
  */
 export function isExplicitSameTaskRedispatch(inbox, active) {
   const recovery = `${inbox.recovery ?? ""} ${inbox["recovery-request"] ?? ""} ${inbox["runtime-status"] ?? ""}`;
-  if (!/(REDISPATCH|RETRIGGER|FAILOVER|RE-?DISPATCH)/i.test(recovery)) {
+  if (!/(REDISPATCH|RETRIGGER|FAILOVER|RE-?DISPATCH|PICKUP_RECOVERY)/i.test(recovery)) {
     return false;
   }
   const inboxUpdated = Date.parse(inbox.updatedAt ?? "");
