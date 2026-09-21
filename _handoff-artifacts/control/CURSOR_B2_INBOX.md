@@ -1,12 +1,12 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT3-S03-046-MENTORSHIP-BROWSER-EVIDENCE-CANONICAL-PUBLISH-B2-20260922-R1
-mode: CANONICAL_PUBLICATION_RECOVERY
-updatedAt: 2026-09-22T01:40:31+09:00
-authority-ref: master
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-046-MENTORSHIP-BROWSER-EVIDENCE-CANONICAL-PUBLISH-B2-20260922-R1/instruction.md
-priority: DEADLINE_CRITICAL
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-22T01:43:44+09:00
+last-consumed-task-key: SPRINT3-S03-046-MENTORSHIP-BROWSER-EVIDENCE-CANONICAL-PUBLISH-B2-20260922-R1
+last-terminal: SPRINT3_S03_046_MENTORSHIP_BROWSER_EVIDENCE_CANONICAL_PUBLISH_B2_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-S03-046-MENTORSHIP-BROWSER-EVIDENCE-CANONICAL-PUBLISH-B2-20260922-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
