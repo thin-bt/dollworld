@@ -25,6 +25,7 @@ import { deriveLiveExplicitWeeklyTeachDiscipleRequests } from "./derive-live-exp
 import { isExplicitWeeklyTeachActionEnabled } from "./evaluate-explicit-weekly-teach.js";
 import type { TechniqueCatalog } from "../sprint1/technique-catalog.js";
 import type { Sprint1Config } from "../sprint1/types.js";
+import { deriveLiveEnrollmentActiveSpecialReasons } from "./derive-live-enrollment-active-special-reasons.js";
 import { evaluateMasterIntakeDecision } from "./evaluate-master-intake.js";
 import {
   createInitialSprint3MentorshipEntrypointRuntimeState,
@@ -415,6 +416,13 @@ export function materializeLiveEnrollmentQueueBoundaries(
     masterCandidates.sort((left, right) =>
       compareUnicodeCodePoints(left.masterPersonId, right.masterPersonId),
     );
+    const parentPersonById = new Map(parents.map((parent) => [parent.personId, parent]));
+    const activeSpecialReasons = deriveLiveEnrollmentActiveSpecialReasons(
+      input.sprint3Config,
+      child,
+      masterCandidates,
+      parentPersonById,
+    );
     const temporaryGuidanceParentPersonId = parents[0]?.personId;
     const childAge = child.currentAge;
     if (typeof childAge !== "number") {
@@ -423,7 +431,7 @@ export function materializeLiveEnrollmentQueueBoundaries(
     materialized.push({
       childPersonId: child.personId,
       childAge,
-      activeSpecialReasons: [],
+      activeSpecialReasons,
       masterCandidates,
       ...(temporaryGuidanceParentPersonId === undefined ? {} : { temporaryGuidanceParentPersonId }),
     });

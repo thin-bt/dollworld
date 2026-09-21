@@ -1335,6 +1335,7 @@ export {
 export { processExplicitWeeklyTeachWeek } from "./sprint3/process-explicit-weekly-teach-week.js";
 export { applyExplicitWeeklyTeachOutcomesToWorldState } from "./sprint3/apply-explicit-weekly-teach-outcomes-to-world-state.js";
 export { deriveLiveExplicitWeeklyTeachDiscipleRequests } from "./sprint3/derive-live-explicit-weekly-teach-disciple-requests.js";
+export { deriveLiveEnrollmentActiveSpecialReasons } from "./sprint3/derive-live-enrollment-active-special-reasons.js";
 export { processSprint3EnrollmentIntakeBoundary } from "./sprint3/process-sprint3-enrollment-intake-boundary.js";
 export {
   materializeLiveEnrollmentQueueBoundaries,
