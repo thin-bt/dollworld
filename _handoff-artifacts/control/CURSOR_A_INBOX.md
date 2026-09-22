@@ -1,10 +1,12 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-BACKLOG-TERMINAL-PUBLICATION-DRIFT-A-20260923-R1
-mode: CONTROL_PUBLICATION_REPAIR
-updatedAt: 2026-09-23T04:03:20+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-BACKLOG-TERMINAL-PUBLICATION-DRIFT-A-20260923-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-23T04:47:07+09:00
+last-consumed-task-key: SPRINT3-BACKLOG-TERMINAL-PUBLICATION-DRIFT-A-20260923-R1
+last-terminal: SPRINT3_BACKLOG_TERMINAL_PUBLICATION_DRIFT_A_PASS
+last-result-path: _handoff-artifacts/results/SPRINT3-BACKLOG-TERMINAL-PUBLICATION-DRIFT-A-20260923-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
