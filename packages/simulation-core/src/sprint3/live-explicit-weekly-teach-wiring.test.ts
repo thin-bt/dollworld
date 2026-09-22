@@ -244,7 +244,7 @@ export function teachWorld(mentorshipKind: "formal_master_disciple" | "parent_te
           mentorshipRelationKind: mentorshipKind,
           enrollmentOutcomeKind:
             mentorshipKind === "parent_temporary_guidance"
-              ? ("parent_master_assigned" as const)
+              ? ("parent_temporary_guidance" as const)
               : ("formal_master_assigned" as const),
           assignedAbsoluteWeek: 100,
         },

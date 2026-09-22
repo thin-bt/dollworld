@@ -32,6 +32,7 @@ import type { MentorshipRelationKind, Sprint3Config } from "./types.js";
 const ACTIVE_MENTORSHIP_ENROLLMENT_KINDS = new Set([
   "formal_master_assigned",
   "parent_master_assigned",
+  "parent_temporary_guidance",
 ]);
 
 type LiveMasterDiscipleMentorshipPair = {
