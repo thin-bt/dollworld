@@ -498,6 +498,18 @@ export type EnrollmentAssignmentKind =
   | "parent_temporary_guidance"
   | "no_eligible_or_accepted_master";
 
+export const ENROLLMENT_ASSIGNMENT_KINDS = [
+  "not_at_enrollment_boundary",
+  "parent_master_assigned",
+  "formal_master_assigned",
+  "parent_temporary_guidance",
+  "no_eligible_or_accepted_master",
+] as const satisfies readonly EnrollmentAssignmentKind[];
+
+export function isEnrollmentAssignmentKind(value: string): value is EnrollmentAssignmentKind {
+  return (ENROLLMENT_ASSIGNMENT_KINDS as readonly string[]).includes(value);
+}
+
 export type EnrollmentAssignmentOutcome = {
   kind: EnrollmentAssignmentKind;
   selectedMasterPersonId?: string;

@@ -16,7 +16,9 @@ import {
 } from "../sprint1/plain-data.js";
 import { SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_PROCESSOR_ID } from "./constants.js";
 import {
+  ENROLLMENT_ASSIGNMENT_KINDS,
   MENTORSHIP_RELATION_KINDS,
+  isEnrollmentAssignmentKind,
   isMentorshipRelationKind,
   type EnrollmentAssignmentOutcome,
   type EnrollmentAssignmentRecord,
@@ -181,15 +183,25 @@ function validateMentorshipAssignmentEntry(
     0,
     issues,
   );
-  const enrollmentOutcomeKind = object["enrollmentOutcomeKind"];
-  if (typeof enrollmentOutcomeKind !== "string") {
+  const enrollmentOutcomeKindRaw = object["enrollmentOutcomeKind"];
+  if (typeof enrollmentOutcomeKindRaw !== "string") {
     issues.push({
       path: `${path}/enrollmentOutcomeKind`,
       message: "enrollmentOutcomeKind must be a string",
-      actual: enrollmentOutcomeKind,
+      actual: enrollmentOutcomeKindRaw,
     });
     return undefined;
   }
+  if (!isEnrollmentAssignmentKind(enrollmentOutcomeKindRaw)) {
+    issues.push({
+      path: `${path}/enrollmentOutcomeKind`,
+      message: "enrollmentOutcomeKind must be a known EnrollmentAssignmentOutcome kind",
+      actual: enrollmentOutcomeKindRaw,
+      expected: ENROLLMENT_ASSIGNMENT_KINDS.join(" | "),
+    });
+    return undefined;
+  }
+  const enrollmentOutcomeKind = enrollmentOutcomeKindRaw;
 
   let selectedMasterPersonId: PersonId | undefined;
   if (object["selectedMasterPersonId"] !== undefined) {
@@ -234,7 +246,7 @@ function validateMentorshipAssignmentEntry(
     childPersonId: asPersonId(childPersonIdRaw),
     ...(selectedMasterPersonId === undefined ? {} : { selectedMasterPersonId }),
     ...(mentorshipRelationKind === undefined ? {} : { mentorshipRelationKind }),
-    enrollmentOutcomeKind: enrollmentOutcomeKind as EnrollmentAssignmentOutcome["kind"],
+    enrollmentOutcomeKind,
     assignedAbsoluteWeek,
   };
 }
