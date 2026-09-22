@@ -8,6 +8,49 @@ import {
 import { ENROLLMENT_ASSIGNMENT_KINDS, type EnrollmentAssignmentKind } from "./types.js";
 
 const CHILD_ID = asPersonId("child_enrollment_outcome_kind_validation");
+const MASTER_ID = asPersonId("master_enrollment_outcome_kind_validation");
+
+function coherentAssignmentEntry(
+  enrollmentOutcomeKind: EnrollmentAssignmentKind,
+): Record<string, unknown> {
+  switch (enrollmentOutcomeKind) {
+    case "formal_master_assigned":
+      return {
+        childPersonId: CHILD_ID,
+        enrollmentOutcomeKind,
+        assignedAbsoluteWeek: 1,
+        selectedMasterPersonId: MASTER_ID,
+        mentorshipRelationKind: "formal_master_disciple",
+      };
+    case "parent_master_assigned":
+      return {
+        childPersonId: CHILD_ID,
+        enrollmentOutcomeKind,
+        assignedAbsoluteWeek: 1,
+        selectedMasterPersonId: MASTER_ID,
+        mentorshipRelationKind: "parent_master_disciple",
+      };
+    case "parent_temporary_guidance":
+      return {
+        childPersonId: CHILD_ID,
+        enrollmentOutcomeKind,
+        assignedAbsoluteWeek: 1,
+        selectedMasterPersonId: MASTER_ID,
+        mentorshipRelationKind: "parent_temporary_guidance",
+      };
+    case "not_at_enrollment_boundary":
+    case "no_eligible_or_accepted_master":
+      return {
+        childPersonId: CHILD_ID,
+        enrollmentOutcomeKind,
+        assignedAbsoluteWeek: 1,
+      };
+    default: {
+      const _exhaustive: never = enrollmentOutcomeKind;
+      throw new Error(String(_exhaustive));
+    }
+  }
+}
 
 function runtimeWithEnrollmentOutcomeKind(
   enrollmentOutcomeKind: EnrollmentAssignmentKind,
@@ -15,13 +58,7 @@ function runtimeWithEnrollmentOutcomeKind(
   const base = createInitialSprint3MentorshipEntrypointRuntimeState();
   return {
     ...base,
-    mentorshipByChildPersonId: [
-      {
-        childPersonId: CHILD_ID,
-        enrollmentOutcomeKind,
-        assignedAbsoluteWeek: 1,
-      },
-    ],
+    mentorshipByChildPersonId: [coherentAssignmentEntry(enrollmentOutcomeKind)],
   };
 }
 

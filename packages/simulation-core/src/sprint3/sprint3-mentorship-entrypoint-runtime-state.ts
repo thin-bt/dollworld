@@ -20,6 +20,7 @@ import {
   MENTORSHIP_RELATION_KINDS,
   isEnrollmentAssignmentKind,
   isMentorshipRelationKind,
+  type EnrollmentAssignmentKind,
   type EnrollmentAssignmentOutcome,
   type EnrollmentAssignmentRecord,
   type ExplicitWeeklyTeachActionOutcome,
@@ -155,6 +156,111 @@ export function createInitialSprint3MentorshipEntrypointRuntimeState(): Sprint3M
   });
 }
 
+function appendMentorshipAssignmentSemanticIssues(
+  path: string,
+  enrollmentOutcomeKind: EnrollmentAssignmentKind,
+  selectedMasterPersonId: PersonId | undefined,
+  mentorshipRelationKind: MentorshipRelationKind | undefined,
+  issues: ValidationIssue[],
+): void {
+  const hasMaster = selectedMasterPersonId !== undefined;
+  const hasRelation = mentorshipRelationKind !== undefined;
+
+  switch (enrollmentOutcomeKind) {
+    case "formal_master_assigned":
+      if (!hasMaster) {
+        issues.push({
+          path: `${path}/selectedMasterPersonId`,
+          message: "formal_master_assigned requires selectedMasterPersonId",
+          actual: undefined,
+        });
+      }
+      if (!hasRelation) {
+        issues.push({
+          path: `${path}/mentorshipRelationKind`,
+          message: "formal_master_assigned requires mentorshipRelationKind",
+          actual: undefined,
+        });
+      } else if (mentorshipRelationKind !== "formal_master_disciple") {
+        issues.push({
+          path: `${path}/mentorshipRelationKind`,
+          message: "formal_master_assigned requires mentorshipRelationKind formal_master_disciple",
+          actual: mentorshipRelationKind,
+          expected: "formal_master_disciple",
+        });
+      }
+      break;
+    case "parent_master_assigned":
+      if (!hasMaster) {
+        issues.push({
+          path: `${path}/selectedMasterPersonId`,
+          message: "parent_master_assigned requires selectedMasterPersonId",
+          actual: undefined,
+        });
+      }
+      if (!hasRelation) {
+        issues.push({
+          path: `${path}/mentorshipRelationKind`,
+          message: "parent_master_assigned requires mentorshipRelationKind",
+          actual: undefined,
+        });
+      } else if (mentorshipRelationKind !== "parent_master_disciple") {
+        issues.push({
+          path: `${path}/mentorshipRelationKind`,
+          message: "parent_master_assigned requires mentorshipRelationKind parent_master_disciple",
+          actual: mentorshipRelationKind,
+          expected: "parent_master_disciple",
+        });
+      }
+      break;
+    case "parent_temporary_guidance":
+      if (!hasMaster) {
+        issues.push({
+          path: `${path}/selectedMasterPersonId`,
+          message: "parent_temporary_guidance requires selectedMasterPersonId",
+          actual: undefined,
+        });
+      }
+      if (!hasRelation) {
+        issues.push({
+          path: `${path}/mentorshipRelationKind`,
+          message: "parent_temporary_guidance requires mentorshipRelationKind",
+          actual: undefined,
+        });
+      } else if (mentorshipRelationKind !== "parent_temporary_guidance") {
+        issues.push({
+          path: `${path}/mentorshipRelationKind`,
+          message:
+            "parent_temporary_guidance requires mentorshipRelationKind parent_temporary_guidance",
+          actual: mentorshipRelationKind,
+          expected: "parent_temporary_guidance",
+        });
+      }
+      break;
+    case "not_at_enrollment_boundary":
+    case "no_eligible_or_accepted_master":
+      if (hasMaster) {
+        issues.push({
+          path: `${path}/selectedMasterPersonId`,
+          message: `${enrollmentOutcomeKind} must not include selectedMasterPersonId`,
+          actual: selectedMasterPersonId,
+        });
+      }
+      if (hasRelation) {
+        issues.push({
+          path: `${path}/mentorshipRelationKind`,
+          message: `${enrollmentOutcomeKind} must not include mentorshipRelationKind`,
+          actual: mentorshipRelationKind,
+        });
+      }
+      break;
+    default: {
+      const _exhaustive: never = enrollmentOutcomeKind;
+      void _exhaustive;
+    }
+  }
+}
+
 function validateMentorshipAssignmentEntry(
   input: unknown,
   path: string,
@@ -239,6 +345,18 @@ function validateMentorshipAssignmentEntry(
   }
 
   if (assignedAbsoluteWeek === undefined) {
+    return undefined;
+  }
+
+  const issueCountBeforeSemantic = issues.length;
+  appendMentorshipAssignmentSemanticIssues(
+    path,
+    enrollmentOutcomeKind,
+    selectedMasterPersonId,
+    mentorshipRelationKind,
+    issues,
+  );
+  if (issues.length > issueCountBeforeSemantic) {
     return undefined;
   }
 
