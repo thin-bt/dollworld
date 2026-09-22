@@ -1,17 +1,16 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T22:35:54+09:00
-last-consumed-task-key: SPRINT3-PENDING-ENTRYPOINT-RUNTIME-VALIDATION-B2-20260922-R1
-last-terminal: SPRINT3_PENDING_ENTRYPOINT_RUNTIME_VALIDATION_B2_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-PENDING-ENTRYPOINT-RUNTIME-VALIDATION-B2-20260922-R1/result.md
+task-key: UI-PAGE-MOCK-CURRENT-SCREENSHOTS-B2-20260922-R1
+mode: BROWSER_EVIDENCE_CAPTURE
+updatedAt: 2026-09-22T22:51:00+09:00
+instruction-path: _handoff-artifacts/tasks/UI-PAGE-MOCK-CURRENT-SCREENSHOTS-B2-20260922-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
+sprint: cross-sprint UI evidence
 pickup-requirements:
 - fresh-read GitHub canonical instruction
-- claim ACTIVE before changes
+- claim ACTIVE before browser capture
+- capture current origin/master only
 - publish terminal result to GitHub canonical result path
