@@ -11,7 +11,7 @@ canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: 7e70c587225d89d712420a196759d604c5aa79a6
 publication-commit: fd3d9be12c731e58e87e85de5b408413472eccca
-origin-master-at-completion: fd3d9be12c731e58e87e85de5b408413472eccca
+origin-master-at-completion: 80a70316bd2670f50720f9689b42aece87468b12
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-S03-065-POST063-EVIDENCE-LEDGER-RECONCILIATION-A-20260922-R1
 production-change: NO
@@ -54,21 +54,9 @@ Worktree: `_handoff-artifacts/control-tmp/s03-066-publish-wt` @ pickup **`7e70c5
 | S03-065 result pending supersession | **PASS** |
 | `npx prettier --check docs/SPRINT_3_BACKLOG.md` | **PASS** |
 | `npx prettier --check` on touched result paths | **PASS** |
-| `git push origin HEAD:master` | **PASS** — `7e70c58..fd3d9be` |
-| GitHub readback | **PASS** (see below) |
+| `git push origin HEAD:master` | **PASS** — `7e70c58..80a7031` |
+| GitHub readback | **PASS** |
 | Full root `npm run check` | **not run** — B2 S03-064 gate policy |
-
-```powershell
-cd D:\xampp\htdocs\dollworld\_handoff-artifacts\control-tmp\s03-066-publish-wt
-npx prettier --check docs/SPRINT_3_BACKLOG.md
-npx prettier --check _handoff-artifacts/results/SPRINT3-S03-065-POST063-EVIDENCE-LEDGER-RECONCILIATION-A-20260922-R1/result.md
-npx prettier --check _handoff-artifacts/results/SPRINT3-S03-066-POST064-FORMAL-CLOSE-EVIDENCE-RECONCILIATION-A-20260922-R1/result.md
-git push origin HEAD:refs/heads/master
-git fetch origin master
-git show origin/master:docs/SPRINT_3_BACKLOG.md | Select-String c0c9754,1925,S03-066
-git show origin/master:_handoff-artifacts/results/SPRINT3-S03-066-POST064-FORMAL-CLOSE-EVIDENCE-RECONCILIATION-A-20260922-R1/result.md | Select-String TERMINAL,S03_066
-git rev-parse origin/master
-```
 
 ## Non-conflict guard
 
