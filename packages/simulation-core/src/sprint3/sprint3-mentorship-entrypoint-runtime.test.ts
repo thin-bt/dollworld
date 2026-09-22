@@ -17,6 +17,7 @@ import { processSprint3EnrollmentIntakeBoundary } from "./process-sprint3-enroll
 import {
   createInitialSprint3MentorshipEntrypointRuntimeState,
   lookupMentorshipRelationKindForChild,
+  validateSprint3MentorshipEntrypointRuntimeState,
 } from "./sprint3-mentorship-entrypoint-runtime-state.js";
 import {
   createSprint3Balance040ConfigInput,
@@ -83,6 +84,7 @@ function sidecarEntry(personId: string, discipleCount = 0): Record<string, unkno
 
 const CHILD_ID = asPersonId("child_enrollment_001");
 const PARENT_ID = asPersonId("parent_master_001");
+const MASTER_B_ID = asPersonId("master_reassignment_b");
 
 function validatedSidecar() {
   return expectOk(
@@ -267,5 +269,36 @@ describe("S03-012 mentorship entrypoint runtime wiring", () => {
     expect(typeof runSprint1WeeklyStep).toBe("function");
     expect(typeof processSprint3EnrollmentIntakeBoundary).toBe("function");
     expect(typeof processExplicitWeeklyTeachWeek).toBe("function");
+  });
+
+  it("MER-005 S03-061 rejects duplicate childPersonId in mentorshipByChildPersonId", () => {
+    const invalid = validateSprint3MentorshipEntrypointRuntimeState({
+      ...createInitialSprint3MentorshipEntrypointRuntimeState(),
+      mentorshipByChildPersonId: [
+        {
+          childPersonId: CHILD_ID,
+          selectedMasterPersonId: PARENT_ID,
+          mentorshipRelationKind: "formal_master_disciple",
+          enrollmentOutcomeKind: "formal_master_assigned",
+          assignedAbsoluteWeek: 1,
+        },
+        {
+          childPersonId: CHILD_ID,
+          selectedMasterPersonId: MASTER_B_ID,
+          mentorshipRelationKind: "formal_master_disciple",
+          enrollmentOutcomeKind: "formal_master_assigned",
+          assignedAbsoluteWeek: 2,
+        },
+      ],
+    });
+    expect(invalid.ok).toBe(false);
+    if (invalid.ok) {
+      return;
+    }
+    expect(
+      invalid.issues.some((issue) =>
+        issue.message.includes("duplicate childPersonId in mentorshipByChildPersonId"),
+      ),
+    ).toBe(true);
   });
 });

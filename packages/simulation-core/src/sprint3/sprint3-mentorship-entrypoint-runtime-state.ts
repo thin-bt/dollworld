@@ -341,6 +341,21 @@ export function validateSprint3MentorshipEntrypointRuntimeState(
     }
   }
 
+  if (mentorshipEntries.length > 0) {
+    const seenChildPersonIds = new Set<string>();
+    for (let index = 0; index < mentorshipEntries.length; index += 1) {
+      const childPersonId = mentorshipEntries[index]!.childPersonId;
+      if (seenChildPersonIds.has(childPersonId)) {
+        issues.push({
+          path: `/mentorshipByChildPersonId/${String(index)}/childPersonId`,
+          message: "duplicate childPersonId in mentorshipByChildPersonId",
+          actual: childPersonId,
+        });
+      }
+      seenChildPersonIds.add(childPersonId);
+    }
+  }
+
   if (
     issues.length > 0 ||
     pendingEnrollmentBoundaries === undefined ||

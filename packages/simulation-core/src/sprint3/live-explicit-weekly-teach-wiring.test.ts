@@ -12,6 +12,7 @@ import { validateWeeklyTrainingSidecarState } from "../sprint1/weekly-training-s
 import { advanceOneWeek, createWorldDate, DEFAULT_WORLD_CALENDAR_CONFIG } from "../world-date.js";
 import type { WorldEngineState } from "../world-engine/types.js";
 import { applyExplicitWeeklyTeachOutcomesToWorldState } from "./apply-explicit-weekly-teach-outcomes-to-world-state.js";
+import { deriveLiveExplicitWeeklyTeachDiscipleRequests } from "./derive-live-explicit-weekly-teach-disciple-requests.js";
 import { materializeLiveExplicitWeeklyTeachQueueRecords } from "./materialize-live-mentorship-entrypoint-queues.js";
 import { processExplicitWeeklyTeachWeek } from "./process-explicit-weekly-teach-week.js";
 import {
@@ -554,5 +555,54 @@ describe("S03-021 live explicit weekly teach wiring", () => {
         ?.sprint1State?.techniqueStates.find((entry) => entry.techniqueId === TECH_ID)
         ?.learningProgressTenths ?? 0;
     expect(progressReplay).toBe(progressOnce);
+  });
+
+  it("LWT-007 S03-061 former master receives no teach requests after persisted reassignment", () => {
+    const { world, runtime } = teachWorld("formal_master_disciple");
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [sidecarEntry(DISCIPLE_ID), sidecarEntry(MASTER_ID, 1)],
+      }),
+    );
+    const before = expectOk(
+      deriveLiveExplicitWeeklyTeachDiscipleRequests({
+        masterPersonId: MASTER_ID,
+        absoluteWeek: 200,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        mentorshipRuntime: runtime,
+        sprint3Config: sprint3Teach,
+        sprint1Config,
+        techniqueCatalog: catalog,
+      }),
+    );
+    expect(before.length).toBeGreaterThan(0);
+
+    const reassignedRuntime: Sprint3MentorshipEntrypointRuntimeState = {
+      ...runtime,
+      mentorshipByChildPersonId: [
+        {
+          childPersonId: DISCIPLE_ID,
+          selectedMasterPersonId: asPersonId("master_reassignment_successor"),
+          mentorshipRelationKind: "formal_master_disciple",
+          enrollmentOutcomeKind: "formal_master_assigned",
+          assignedAbsoluteWeek: 150,
+        },
+      ],
+    };
+    const afterFormer = expectOk(
+      deriveLiveExplicitWeeklyTeachDiscipleRequests({
+        masterPersonId: MASTER_ID,
+        absoluteWeek: 201,
+        worldState: world,
+        weeklyTrainingSidecars: sidecars,
+        mentorshipRuntime: reassignedRuntime,
+        sprint3Config: sprint3Teach,
+        sprint1Config,
+        techniqueCatalog: catalog,
+      }),
+    );
+    expect(afterFormer).toHaveLength(0);
   });
 });
