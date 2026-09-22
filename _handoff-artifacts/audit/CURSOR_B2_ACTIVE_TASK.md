@@ -4,16 +4,10 @@ state: IDLE
 lane: B2
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-21T12:43:00+09:00
+updatedAt: 2026-09-22T12:43:00+09:00
 pickup: (none)
-startedAt: (none)
-branch: master
-completedAt: 2026-09-21T12:43:00+09:00
-last-completed-task: SPRINT3-S03-027-BACKLOG-CANONICAL-CLOSURE-RECONCILIATION-B2-20260921-R1
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-027-BACKLOG-CANONICAL-CLOSURE-RECONCILIATION-B2-20260921-R1/result.md
-last-terminal: SPRINT3_S03_027_BACKLOG_CANONICAL_CLOSURE_RECONCILIATION_B2_READY
-terminal: READY
 control-authority: GitHub
+instruction-path: (none)
 
 Rules:
 - Cursor B2 writes ACTIVE lock before B2 verification work.
