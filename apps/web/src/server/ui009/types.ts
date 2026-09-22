@@ -6,6 +6,7 @@ export const COMPETITION_VIEW_KEYS = [
   "schemaVersion",
   "lifecyclePhase",
   "tournamentId",
+  "tournamentDisplayName",
   "tournamentKind",
   "targetRank",
   "participantIds",
@@ -37,6 +38,7 @@ export type CompetitionParticipantLinkView = {
 export type CompetitionScheduleEntryView = {
   selectionKey: string;
   matrixRowKey: string;
+  tournamentDisplayName: string;
   month: number;
   weekOfMonth: number;
   absoluteWeek: number;
@@ -99,6 +101,7 @@ export type CompetitionRankingRowView = {
 export type TournamentHistorySummaryView = {
   seriesKey: string;
   seriesDisplayLabel: string;
+  tournamentDisplayName: string;
   tournamentId: string;
   worldYear: number;
   timingLabel: string;
@@ -159,6 +162,7 @@ export type CompetitionWireframeObservationView = {
 };
 
 export type CompetitionPreStartPreviewView = {
+  tournamentDisplayName: string;
   tournamentKindLabel: string;
   targetRankLabel: string;
   participantDisplayNames: readonly string[];
@@ -234,6 +238,7 @@ export type CompetitionProgressView = {
   schemaVersion: typeof COMPETITION_VIEW_SCHEMA_VERSION;
   lifecyclePhase: CompetitionLifecyclePhase;
   tournamentId: string | null;
+  tournamentDisplayName: string | null;
   tournamentKind: string | null;
   targetRank: string | null;
   participantIds: readonly string[];

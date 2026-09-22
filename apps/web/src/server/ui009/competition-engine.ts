@@ -6,8 +6,10 @@
  * an accepted domain contract before finalResult/earnings/ranking are committed.
  */
 import {
+  buildSeriesKey,
   buildStructuralBracketDefinition,
   computeParticipantListHash,
+  resolveTournamentDisplayName,
   createEmptyAnnualEarningsLedger,
   createEmptyCompetitiveRecord,
   createEmptyDetailedLogPayloadStore,
@@ -108,6 +110,7 @@ export function pickTwoParticipantIdsForPreview(session: Sprint1RunSession): Per
 
 /** Idle-state preview for player-facing pre-start context (no competition store mutation). */
 export function buildIdleCompetitionPreStartPreview(session: Sprint1RunSession): {
+  tournamentDisplayName: string;
   tournamentKindLabel: string;
   targetRankLabel: string;
   participantDisplayNames: readonly string[];
@@ -122,7 +125,9 @@ export function buildIdleCompetitionPreStartPreview(session: Sprint1RunSession):
   const personsById = new Map(
     session.runtimeState.worldState.persons.map((person) => [person.personId, person as Person]),
   );
+  const seriesKey = buildSeriesKey("normal", "F");
   return {
+    tournamentDisplayName: resolveTournamentDisplayName(seriesKey),
     tournamentKindLabel: "通常大会",
     targetRankLabel: "Fランク",
     participantDisplayNames: participantIds.map((id) => personDisplayName(personsById.get(id))),

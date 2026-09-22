@@ -2,6 +2,7 @@ export type CompetitionLifecyclePhase =
   "idle" | "awaiting_match" | "round_robin_complete" | "finished";
 
 export type CompetitionPreStartPreview = {
+  tournamentDisplayName: string;
   tournamentKindLabel: string;
   targetRankLabel: string;
   participantDisplayNames: readonly string[];
@@ -23,6 +24,7 @@ export type CompetitionParticipantLink = {
 export type CompetitionScheduleEntry = {
   selectionKey: string;
   matrixRowKey: string;
+  tournamentDisplayName: string;
   month: number;
   weekOfMonth: number;
   absoluteWeek: number;
@@ -158,6 +160,7 @@ export type CompetitionProgressView = {
   schemaVersion: string;
   lifecyclePhase: CompetitionLifecyclePhase;
   tournamentId: string | null;
+  tournamentDisplayName: string | null;
   tournamentKind: string | null;
   targetRank: string | null;
   participantIds: readonly string[];

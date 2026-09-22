@@ -12,6 +12,7 @@ export function toScheduleReadModelEntry(
 ): TournamentScheduleReadModelEntry {
   const readModel: TournamentScheduleReadModelEntry = {
     tournamentId: entry.tournamentId,
+    seriesKey: entry.seriesKey,
     worldYear: entry.worldYear,
     month: entry.month,
     weekOfMonth: entry.weekOfMonth,

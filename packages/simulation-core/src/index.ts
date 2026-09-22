@@ -809,6 +809,7 @@ export {
   buildTournamentScheduleReadModel,
   toScheduleReadModelEntry,
 } from "./sprint2/tournament-schedule-read-model.js";
+export { resolveTournamentDisplayName } from "./sprint2/tournament-display-name.js";
 export {
   assertScheduleLifecycleIdentityFresh,
   buildPlannedParticipantList,

@@ -184,10 +184,13 @@ export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps)
                           data-testid="competition-schedule-cell"
                           data-selection-key={entry.selectionKey}
                           aria-pressed={selected}
-                          title={`${entry.timingLabel} ${entry.rankOrCategoryLabel} ${entry.lifecycleStateLabel}`}
+                          title={`${entry.tournamentDisplayName}（${entry.timingLabel} ${entry.rankOrCategoryLabel}）`}
+                          aria-label={`${entry.tournamentDisplayName} ${entry.timingLabel}`}
                           onClick={() => onSelect(entry.selectionKey)}
                         >
-                          ◆
+                          <span className="competition-schedule-marker-label">
+                            {entry.tournamentDisplayName}
+                          </span>
                         </button>
                       </td>
                     );

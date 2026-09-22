@@ -1,8 +1,9 @@
-import type {
-  AnnualRankingDisplayFacts,
-  Sprint1RunSession,
-  StoredBattleResultRecord,
-  TournamentBracketDefinition,
+import {
+  resolveTournamentDisplayName,
+  type AnnualRankingDisplayFacts,
+  type Sprint1RunSession,
+  type StoredBattleResultRecord,
+  type TournamentBracketDefinition,
 } from "@shared-world/simulation-core";
 import { createNodeSha256Provider } from "../presets.js";
 import {
@@ -22,6 +23,7 @@ import {
 import {
   annualRankingHistoryStoreFromState,
   buildAnnualRankingYearOptions,
+  findScheduleEntryForTournament,
   groupTournamentSeriesHistory,
   personRankHistoryEntriesFromState,
   promotionSummariesFromState,
@@ -159,6 +161,20 @@ function buildWireframeObservation(input: {
     ),
     selectedRankingYear: input.selectedRankingYear,
   };
+}
+
+function tournamentDisplayNameForPersistedState(
+  state: CompetitionPersistedState,
+): string | null {
+  const entry = findScheduleEntryForTournament(
+    state.tournamentId,
+    state.worldYear,
+    buildAnnualSchedule,
+  );
+  if (entry !== null) {
+    return resolveTournamentDisplayName(entry.seriesKey);
+  }
+  return null;
 }
 
 const EMPTY_PLAYER_FIELDS = {
@@ -374,6 +390,7 @@ export function mapCompetitionProgressView(
       schemaVersion: COMPETITION_VIEW_SCHEMA_VERSION,
       lifecyclePhase: "idle",
       tournamentId: null,
+      tournamentDisplayName: preStartPreview?.tournamentDisplayName ?? null,
       tournamentKind: null,
       targetRank: null,
       participantIds: plannedIds,
@@ -424,6 +441,7 @@ export function mapCompetitionProgressView(
     schemaVersion: COMPETITION_VIEW_SCHEMA_VERSION,
     lifecyclePhase,
     tournamentId: state.tournamentId,
+    tournamentDisplayName: tournamentDisplayNameForPersistedState(state),
     tournamentKind: state.tournamentKind,
     targetRank: state.targetRank,
     participantIds,

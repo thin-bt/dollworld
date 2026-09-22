@@ -99,11 +99,15 @@ function TournamentDetailPanel(props: {
 
       {detailPane === "overview" ? (
         <div className="competition-detail-body" data-testid="competition-detail-overview">
-          <h3 className="competition-section-heading">
-            {entry.timingLabel} {entry.rankOrCategoryLabel}
+          <h3
+            className="competition-section-heading"
+            data-testid="competition-tournament-display-name"
+          >
+            {entry.tournamentDisplayName}
           </h3>
           <p className="competition-detail-meta">
-            {entry.kindLabel} · {entry.lifecycleStateLabel}
+            {entry.timingLabel} · {entry.rankOrCategoryLabel} · {entry.kindLabel} ·{" "}
+            {entry.lifecycleStateLabel}
             {entry.participantCountLabel !== null ? ` · 参加 ${entry.participantCountLabel}` : ""}
           </p>
           {entry.isPlayable && view.lifecyclePhase === "idle" ? (
@@ -142,7 +146,9 @@ function TournamentDetailPanel(props: {
 
           {finished && view.championDisplayName !== null ? (
             <div className="competition-result-hero" data-testid="competition-champion">
-              <p className="competition-result-hero-kicker">大会結果</p>
+              <p className="competition-result-hero-kicker">
+                {view.tournamentDisplayName ?? entry.tournamentDisplayName} — 大会結果
+              </p>
               <p className="competition-result-hero-title">優勝</p>
               <p className="competition-result-hero-name">{view.championDisplayName}</p>
             </div>

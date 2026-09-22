@@ -237,6 +237,7 @@ export type TournamentScheduleState = {
 
 export type TournamentScheduleReadModelEntry = {
   tournamentId: TournamentId;
+  seriesKey: TournamentSeriesKey;
   worldYear: number;
   month: WorldMonth;
   weekOfMonth: WeekOfMonth;

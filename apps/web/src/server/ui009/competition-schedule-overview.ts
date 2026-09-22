@@ -7,6 +7,7 @@ import {
   createDefaultSprint2ConfigInput,
   createInitialTournamentIdGeneratorState,
   DEFAULT_WORLD_CALENDAR_CONFIG,
+  resolveTournamentDisplayName,
   type Sprint1RunSession,
   type TournamentScheduleReadModelEntry,
 } from "@shared-world/simulation-core";
@@ -181,6 +182,7 @@ export function buildCompetitionScheduleOverview(
     return {
       selectionKey,
       matrixRowKey: scheduleRowKey(entry),
+      tournamentDisplayName: resolveTournamentDisplayName(entry.seriesKey),
       month: entry.month,
       weekOfMonth: entry.weekOfMonth,
       absoluteWeek: entry.absoluteWeek,

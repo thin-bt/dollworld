@@ -282,6 +282,13 @@ describe("UI-009 competition progression", () => {
     ).scheduleOverview;
     expect(scheduleOverview.worldTimeLabel.length).toBeGreaterThan(0);
     expect(scheduleOverview.entries.length).toBeGreaterThan(10);
+    const firstEntry = (
+      idleBody.data as {
+        scheduleOverview: { entries: { tournamentDisplayName: string }[] };
+      }
+    ).scheduleOverview.entries[0]!;
+    expect(firstEntry.tournamentDisplayName.length).toBeGreaterThan(0);
+    expect(firstEntry.tournamentDisplayName).not.toMatch(/^tournament_/);
     expect(
       (idleBody.data as { scheduleOverview: { playableSelectionKey: string | null } })
         .scheduleOverview.playableSelectionKey,

@@ -1,5 +1,6 @@
 import {
   buildSeriesKey,
+  resolveTournamentDisplayName,
   computeCurrentAge,
   type AnnualRankingDisplayFacts,
   type AnnualRankingHistoryStore,
@@ -211,10 +212,7 @@ export function buildTournamentHistorySummaryOnFinalize(input: {
         : kind === "promotion"
           ? buildSeriesKey("promotion")
           : buildSeriesKey("limited", undefined, entry?.domain);
-  const seriesDisplayLabel =
-    entry !== null
-      ? `${tournamentKindPlayerLabel(entry.kind) ?? "大会"} ${entry.targetRank ?? ""}`.trim()
-      : `${tournamentKindPlayerLabel(kind) ?? "大会"}`;
+  const seriesDisplayLabel = resolveTournamentDisplayName(seriesKey);
   const timingLabel =
     entry !== null
       ? tournamentTimingPlayerLabel(entry.month, entry.weekOfMonth)
@@ -222,6 +220,7 @@ export function buildTournamentHistorySummaryOnFinalize(input: {
   return {
     seriesKey,
     seriesDisplayLabel,
+    tournamentDisplayName: seriesDisplayLabel,
     tournamentId: input.state.tournamentId,
     worldYear: input.state.worldYear,
     timingLabel,
