@@ -118,8 +118,8 @@ A newer/different PREPARED task waits until this recovery is complete. PM may re
 
 ## CURSOR-COMMIT-001 — commit/staging
 Default commit policy is `REQUIRED_ON_SUCCESS` unless current instruction says otherwise.
-Before commit: required checks pass, stage-set reviewed, only task-owned paths staged, never `.cursor/` or `_handoff-artifacts/`, unrelated changes excluded, branch/HEAD still valid, no STOP condition remains.
-No broad staging. `commit: FORBIDDEN` means no commit; dirty state classification follows CORE-BLOCK-001/current instruction.
+Before commit: required checks pass, stage-set reviewed, only task-owned paths staged, never `.cursor/`, unrelated changes excluded, branch/HEAD still valid, no STOP condition remains. `_handoff-artifacts/` is not globally excluded: task-relevant files under `_handoff-artifacts/specs/**` and `_handoff-artifacts/tools/**` are persistent project assets and MUST be staged in the same task commit when the task legitimately creates or updates them, unless the current task explicitly sets `commit: FORBIDDEN` for those paths or proves them disposable generated scratch. Other `_handoff-artifacts/**` paths remain excluded from ordinary implementation commits unless their owning control/protocol task explicitly authorizes them.
+No broad staging. Never delete, stash away, or omit task-relevant `_handoff-artifacts/specs/**` or `_handoff-artifacts/tools/**` merely to obtain a clean worktree. `commit: FORBIDDEN` means no commit; dirty state classification follows CORE-BLOCK-001/current instruction.
 
 ## CURSOR-B2-001 — secondary lane controls
 Canonical files are `CURSOR_B2_INBOX.md` and `CURSOR_B2_ACTIVE_TASK.md`. Legacy `CURSOR_B_*` or `(1)` collision files are non-canonical.
