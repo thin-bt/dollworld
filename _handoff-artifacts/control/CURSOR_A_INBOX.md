@@ -1,17 +1,18 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T15:32:23+09:00
-last-consumed-task-key: SPRINT2-WIREFRAME-CURRENT-MASTER-AUDIT-A-20260922-R1
-last-terminal: CURRENT_MASTER_WIREFRAME_AUDIT_FIX_REQUIRED
-last-result-path: _handoff-artifacts/results/SPRINT2-WIREFRAME-CURRENT-MASTER-AUDIT-A-20260922-R1/result.md
+task-key: SPRINT3-MENTORSHIP-REAL-UI-GAP-CLOSURE-A-20260922-R1
+mode: PRODUCT_GAP_CLOSURE
+updatedAt: 2026-09-22T15:38:43+09:00
+sprint: Sprint3
+priority: DEADLINE_CRITICAL
+instruction-path: _handoff-artifacts/tasks/SPRINT3-MENTORSHIP-REAL-UI-GAP-CLOSURE-A-20260922-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- avoid B2 completed-history runtime validation source
+- prove ordinary real-UI mentorship flow or close discovered web gap
 - publish terminal result to GitHub canonical result path
