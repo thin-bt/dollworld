@@ -93,6 +93,18 @@ const MASTER_INTAKE_EVALUATION_OUTCOME_KEYS = [
 
 const MASTER_INTAKE_ACCEPTANCE_VALUES = ["accept", "reject", "defer"] as const;
 
+type MasterIntakeAcceptance = (typeof MASTER_INTAKE_ACCEPTANCE_VALUES)[number];
+
+const MASTER_INTAKE_PRODUCER_REASON_BY_ACCEPTANCE: Record<MasterIntakeAcceptance, string> = {
+  accept: "under_autonomous_limit",
+  defer: "at_autonomous_limit_high_aptitude_defer",
+  reject: "at_or_over_autonomous_limit_reject",
+};
+
+const MASTER_INTAKE_PRODUCER_BRANCH_REASONS = Object.values(
+  MASTER_INTAKE_PRODUCER_REASON_BY_ACCEPTANCE,
+);
+
 const EXPLICIT_WEEKLY_TEACH_ACTION_OUTCOME_KEYS = [
   "kind",
   "weeklyTeachSlotLimit",
@@ -550,6 +562,37 @@ function validateEnrollmentAssignmentOutcome(
   }) as EnrollmentAssignmentOutcome;
 }
 
+function appendMasterIntakeEvaluationSemanticIssues(
+  path: string,
+  acceptance: MasterIntakeAcceptance,
+  reasons: readonly string[],
+  issues: ValidationIssue[],
+): void {
+  const expectedReason = MASTER_INTAKE_PRODUCER_REASON_BY_ACCEPTANCE[acceptance];
+  for (const reason of reasons) {
+    if (
+      (MASTER_INTAKE_PRODUCER_BRANCH_REASONS as readonly string[]).includes(reason) &&
+      reason !== expectedReason
+    ) {
+      issues.push({
+        path: `${path}/reasons`,
+        message: `master intake acceptance ${acceptance} is incompatible with producer branch reason ${reason}`,
+        actual: reasons,
+        expected: expectedReason,
+      });
+      return;
+    }
+  }
+  if (reasons.length !== 1 || reasons[0] !== expectedReason) {
+    issues.push({
+      path: `${path}/reasons`,
+      message: `master intake acceptance ${acceptance} requires exactly one producer reason ${expectedReason}`,
+      actual: reasons,
+      expected: expectedReason,
+    });
+  }
+}
+
 function validateMasterIntakeEvaluationOutcome(
   input: unknown,
   path: string,
@@ -594,8 +637,15 @@ function validateMasterIntakeEvaluationOutcome(
     return undefined;
   }
 
+  const acceptance = acceptanceRaw as MasterIntakeAcceptance;
+  const issueCountBeforeSemantic = issues.length;
+  appendMasterIntakeEvaluationSemanticIssues(path, acceptance, reasons, issues);
+  if (issues.length > issueCountBeforeSemantic) {
+    return undefined;
+  }
+
   return deepFreezePlainJson({
-    acceptance: acceptanceRaw,
+    acceptance,
     autonomousMaxDisciples,
     reasons,
   }) as MasterIntakeEvaluationOutcome;

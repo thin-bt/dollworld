@@ -30,7 +30,7 @@ function validIntakeHistoryEntry(): Record<string, unknown> {
     outcome: {
       acceptance: "accept",
       autonomousMaxDisciples: 3,
-      reasons: ["within_limit"],
+      reasons: ["under_autonomous_limit"],
     },
   };
 }
