@@ -1,10 +1,12 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-BACKLOG-TE011-GATE-RECONCILIATION-A-20260923-R1
-mode: CONTROL_PUBLICATION_REPAIR
-updatedAt: 2026-09-23T07:50:41+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-BACKLOG-TE011-GATE-RECONCILIATION-A-20260923-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-23T08:06:53+09:00
+last-consumed-task-key: SPRINT3-BACKLOG-TE011-GATE-RECONCILIATION-A-20260923-R1
+last-terminal: SPRINT3_BACKLOG_TE011_GATE_RECONCILIATION_A_PASS
+last-result-path: _handoff-artifacts/results/SPRINT3-BACKLOG-TE011-GATE-RECONCILIATION-A-20260923-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
