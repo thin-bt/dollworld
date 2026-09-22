@@ -57,7 +57,7 @@
 
 ## Production / integration 受理証跡（主表外・S03-012 以降）
 
-S03-001..011 の **計画順序を変更しない**。以下は canonical `master` 上で **terminal/READY result 証跡**に基づく recovery/integration・reconciliation・control 作業（**S03-064** B2 **TERMINAL** post-**S03-063** root gate + S03-062/065 ledger reconciliation まで整合）。
+S03-001..011 の **計画順序を変更しない**。以下は canonical `master` 上で **terminal/READY result 証跡**に基づく recovery/integration・reconciliation・control 作業（**S03-064** B2 **TERMINAL** post-**S03-063** root gate **1925/1925** @ `c0c9754` + S03-062/065/066 ledger reconciliation まで整合）。
 
 | ID | ドメイン（要約） | 代表 result（lane） | 受理 |
 |---|---|---|---|
