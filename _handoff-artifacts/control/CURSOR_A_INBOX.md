@@ -1,17 +1,18 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-23T01:07:42+09:00
-last-consumed-task-key: SPRINT2-F02-MULTI-TOURNAMENT-YEARLY-PROGRESSION-A-20260923-R1
-last-terminal: SPRINT2_F02_MULTI_TOURNAMENT_YEARLY_PROGRESSION_A_PASS
-last-result-path: _handoff-artifacts/results/SPRINT2-F02-MULTI-TOURNAMENT-YEARLY-PROGRESSION-A-20260923-R1/result.md
+task-key: SPRINT3-POST-F02-LOCAL-DELTA-PUBLICATION-GATE-A-20260923-R1
+mode: PUBLICATION_AND_RELEASE_GATE_RECOVERY
+updatedAt: 2026-09-23T01:40:47+09:00
+instruction-path: _handoff-artifacts/tasks/SPRINT3-POST-F02-LOCAL-DELTA-PUBLICATION-GATE-A-20260923-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2
+sprint: Sprint3
+priority: DEADLINE_CRITICAL
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- preserve and attribute all existing local product deltas before publication
 - publish terminal result to GitHub canonical result path
+- do not assign Sprint2/Sprint3 CLOSED
