@@ -1,16 +1,15 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T14:01:12+09:00
-last-consumed-task-key: SPRINT2-REOPEN-RECOVERY-CANONICAL-PUBLISH-B2-20260922-R1
-last-terminal: SPRINT2_REOPEN_RECOVERY_CANONICAL_PUBLISH_B2_PASS
-last-result-path: _handoff-artifacts/results/SPRINT2-REOPEN-RECOVERY-CANONICAL-PUBLISH-B2-20260922-R1/result.md
+task-key: SPRINT2-CURRENT-MASTER-FULL-REAL-UI-REACCEPTANCE-B2-20260922-R1
+mode: CURRENT_MASTER_FULL_REAL_UI_REACCEPTANCE
+updatedAt: 2026-09-22T14:04:13+09:00
+sprint: Sprint2
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT2-CURRENT-MASTER-FULL-REAL-UI-REACCEPTANCE-B2-20260922-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
