@@ -476,20 +476,6 @@ Lazy connector/tool exposure is not evidence that an authorized capability is un
 
 A runtime must not report a tool/capability blocker merely because its initial tool surface omitted the required action. A capability blocker is valid only after bounded discovery was attempted and the required action is genuinely absent, permission-denied, unsupported for the target, or fails on invocation. Any such blocker records the attempted capability/action and concrete failure. For raw Markdown Drive controls, updates preserve the stable Drive file ID; lifecycle transitions move the same file identity rather than creating a second canonical copy. If an earlier run left an otherwise-determined transition unapplied solely because an unloaded action was mistaken for an unavailable capability, the next authorized run reconciles that stale state before unrelated new work.
 
-## QUEUE-CAPABILITY-PROOF-001 — Drive/tool permission blocker requires concrete proof
-A PM/Role must never infer "no permission", "cannot access Drive", "cannot write Drive", "connector unavailable", or an equivalent capability blocker from missing UI affordances, an initially omitted tool, an empty/partial list response, `access_not_verified`, a failed folder listing, a stale mirror, or one unsupported action shape.
-
-Before any such blocker may stop or defer work, the actor must perform a bounded capability proof in the same run:
-1. identify the exact required operation (for example Drive fetch, search, create, update, move, copy, upload, list, or readback);
-2. apply `QUEUE-CAPABILITY-DISCOVERY-001` to discover the exact connector action if it is not already exposed;
-3. invoke a safe non-destructive probe against the exact target or a task-scoped test target when possible;
-4. distinguish **operation-shape limitation** (for example OAuth vs service-account restrictions on one create/move form) from **actual permission denial**;
-5. if one action form fails but another authorized action can accomplish the same required operation, use the working form instead of declaring a blocker;
-6. after any write/move/copy, perform readback using the target identity and, when placement matters, verify the intended parent/list/search visibility before claiming success;
-7. only classify permission/capability blocked when the provider returns a concrete permission-denied/forbidden/unsupported result for the required operation and no authorized equivalent route exists.
-
-A false capability/permission blocker that causes PM/Role to skip otherwise executable work is a **control defect**, not ordinary waiting. The discovering run must reconcile the skipped transition/work where still safe, record the false-blocker evidence, and continue/reroute under `QUEUE-BLOCKER-ROUTE-001`. The scheduler/PM loop must not be disabled, and the user must not be asked to perform Drive work merely because the actor misclassified its own connector capability.
-
 ## QUEUE-READ-COMPLETENESS-001 — complete reads before absence conclusions
 A partial provider response is not evidence of absence. Folder/list/search pagination limits, provider-side top-N limits, response truncation, clipped text hydration, or an incomplete first page must not be used to conclude that a request/control/evidence file does not exist or that no executable item remains.
 When correctness depends on an exhaustive set, use bounded provider pagination or an exact parent/identity query until the relevant set is complete. When correctness depends on full file content and the readable response is clipped, use the provider's full/raw fetch path. When a stable Drive file ID or canonical pointer is already known, fetch that identity directly before falling back to broad name search.
