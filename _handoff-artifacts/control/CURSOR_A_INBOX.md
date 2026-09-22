@@ -1,17 +1,18 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T14:03:26+09:00
-last-consumed-task-key: SPRINT3-S03-068-SEMANTIC-INVARIANT-CANONICAL-PUBLISH-A-20260922-R1
-last-terminal: SPRINT3_S03_068_SEMANTIC_INVARIANT_CANONICAL_PUBLISH_A_READY
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-068-SEMANTIC-INVARIANT-CANONICAL-PUBLISH-A-20260922-R1/result.md
+task-key: SPRINT2-WIREFRAME-CURRENT-MASTER-AUDIT-A-20260922-R1
+mode: CURRENT_MASTER_WIREFRAME_AUDIT
+updatedAt: 2026-09-22T14:10:00+09:00
+sprint: Sprint2
+priority: IMMEDIATE
+instruction-path: _handoff-artifacts/tasks/SPRINT2-WIREFRAME-CURRENT-MASTER-AUDIT-A-20260922-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
 pickup-requirements:
 - fresh-read GitHub canonical instruction
+- fresh-read the three Google Drive wireframe authorities
 - claim ACTIVE before changes
+- audit current master requirement-by-requirement
 - publish terminal result to GitHub canonical result path
