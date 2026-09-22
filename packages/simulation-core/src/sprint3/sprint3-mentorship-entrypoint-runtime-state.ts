@@ -15,13 +15,15 @@ import {
   snapshotPlainObjectOrFail,
 } from "../sprint1/plain-data.js";
 import { SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_PROCESSOR_ID } from "./constants.js";
-import type {
-  EnrollmentAssignmentOutcome,
-  EnrollmentAssignmentRecord,
-  ExplicitWeeklyTeachActionOutcome,
-  ExplicitWeeklyTeachActionRecord,
-  MasterIntakeEvaluationOutcome,
-  MentorshipRelationKind,
+import {
+  MENTORSHIP_RELATION_KINDS,
+  isMentorshipRelationKind,
+  type EnrollmentAssignmentOutcome,
+  type EnrollmentAssignmentRecord,
+  type ExplicitWeeklyTeachActionOutcome,
+  type ExplicitWeeklyTeachActionRecord,
+  type MasterIntakeEvaluationOutcome,
+  type MentorshipRelationKind,
 } from "./types.js";
 
 export const SPRINT3_MENTORSHIP_ENTRYPOINT_RUNTIME_STATE_SCHEMA_VERSION = "0.2.0" as const;
@@ -212,8 +214,15 @@ function validateMentorshipAssignmentEntry(
         message: "mentorshipRelationKind must be a string when present",
         actual: raw,
       });
+    } else if (!isMentorshipRelationKind(raw)) {
+      issues.push({
+        path: `${path}/mentorshipRelationKind`,
+        message: "mentorshipRelationKind must be a known MentorshipRelationKind",
+        actual: raw,
+        expected: MENTORSHIP_RELATION_KINDS.join(" | "),
+      });
     } else {
-      mentorshipRelationKind = raw as MentorshipRelationKind;
+      mentorshipRelationKind = raw;
     }
   }
 

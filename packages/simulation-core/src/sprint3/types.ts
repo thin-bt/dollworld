@@ -179,6 +179,16 @@ export type Sprint3Config = Sprint3ConfigInput;
 export type MentorshipRelationKind =
   "formal_master_disciple" | "parent_master_disciple" | "parent_temporary_guidance";
 
+export const MENTORSHIP_RELATION_KINDS = [
+  "formal_master_disciple",
+  "parent_master_disciple",
+  "parent_temporary_guidance",
+] as const satisfies readonly MentorshipRelationKind[];
+
+export function isMentorshipRelationKind(value: string): value is MentorshipRelationKind {
+  return (MENTORSHIP_RELATION_KINDS as readonly string[]).includes(value);
+}
+
 /**
  * Boundary for explicit weekly `teach` (docs/specs/09-technique-system.md Sprint 3).
  */
