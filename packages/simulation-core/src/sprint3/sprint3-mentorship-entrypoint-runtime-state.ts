@@ -601,6 +601,45 @@ function validateMasterIntakeEvaluationOutcome(
   }) as MasterIntakeEvaluationOutcome;
 }
 
+function appendExplicitWeeklyTeachActionSemanticIssues(
+  path: string,
+  kind: ExplicitWeeklyTeachActionOutcome["kind"],
+  weeklyTeachSlotLimit: number,
+  discipleOutcomesLength: number,
+  issues: ValidationIssue[],
+): void {
+  switch (kind) {
+    case "invalid_master_action":
+    case "master_not_pipeline_eligible":
+      if (weeklyTeachSlotLimit !== 0) {
+        issues.push({
+          path: `${path}/weeklyTeachSlotLimit`,
+          message: `${kind} requires weeklyTeachSlotLimit 0`,
+          actual: weeklyTeachSlotLimit,
+          expected: "0",
+        });
+      }
+      if (discipleOutcomesLength !== 0) {
+        issues.push({
+          path: `${path}/discipleOutcomes`,
+          message: `${kind} must not include discipleOutcomes`,
+          actual: discipleOutcomesLength,
+          expected: "0",
+        });
+      }
+      break;
+    case "feature_disabled":
+      // Legacy closed-union member; current S03-007 producer does not persist this kind.
+      break;
+    case "teach_week_completed":
+      break;
+    default: {
+      const _exhaustive: never = kind;
+      void _exhaustive;
+    }
+  }
+}
+
 function validateWeeklyTeachDiscipleOutcome(
   input: unknown,
   path: string,
@@ -710,6 +749,7 @@ function validateExplicitWeeklyTeachActionOutcome(
     });
     return undefined;
   }
+  const kind = kindRaw as ExplicitWeeklyTeachActionOutcome["kind"];
 
   const weeklyTeachSlotLimit = requireSafeIntegerAtLeast(
     object,
@@ -748,8 +788,20 @@ function validateExplicitWeeklyTeachActionOutcome(
     return undefined;
   }
 
+  const issueCountBeforeSemantic = issues.length;
+  appendExplicitWeeklyTeachActionSemanticIssues(
+    path,
+    kind,
+    weeklyTeachSlotLimit,
+    discipleOutcomes.length,
+    issues,
+  );
+  if (issues.length > issueCountBeforeSemantic) {
+    return undefined;
+  }
+
   return deepFreezePlainJson({
-    kind: kindRaw,
+    kind,
     weeklyTeachSlotLimit,
     discipleOutcomes,
     reasons,
