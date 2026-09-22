@@ -10,8 +10,9 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: a28553375d03d3c56462b86b4b58de2fc3e6c1ec
-origin-master-at-completion: b2114460e73c2421d41088fc26cd9e4d16102d63
+origin-master-at-completion: 4d8fedafd5b5028002a7ae4e4077a47f966ea695
 publication-commit: b2114460e73c2421d41088fc26cd9e4d16102d63
+result-publication-commit: 4d8fedafd5b5028002a7ae4e4077a47f966ea695
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 production-change: NO
 documentation-change: YES
@@ -53,7 +54,7 @@ Aligned coordination-only `_handoff-artifacts/PROJECT_ROADMAP.md` with binding s
 | Fresh-read `GITHUB_CONTROL_PLANE.md`, `SPRINT2_STATUS.md`, `SPRINT3_STATUS.md` | **PASS** |
 | Local grep: stale FUTURE/S02-012/mirror critical path | **PASS** (Sprint4 **FUTURE** retained by design) |
 | Publish `PROJECT_ROADMAP.md` → `origin/master` | **PASS** @ **`b211446`** |
-| GitHub readback | **PASS** — tip **`b211446`**; roadmap Sprint3 **`REOPENED_FIX_REQUIRED`** |
+| GitHub readback | **PASS** — tip **`4d8feda`**; roadmap @ **`b211446`** Sprint3 **`REOPENED_FIX_REQUIRED`** |
 
 ## Publication
 
