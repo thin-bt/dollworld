@@ -11,7 +11,7 @@ authority: GitHub `thin-bt/dollworld` / `master`
 4. A mirror failure is recovery work, not a terminal state.
 5. Do not disable or stop any dollworld automation because a local/Drive folder is absent.
 6. Only explicit user PAUSE/STOP authorizes disabling a loop.
-7. Sprint status is governed by the binding canonical status artifacts, not stale historical prose. `_handoff-artifacts/control/SPRINT2_STATUS.md` is currently `CLOSED` after reopen re-acceptance; `_handoff-artifacts/control/SPRINT3_STATUS.md` is currently `READY_FOR_FORMAL_CLOSE`. Sprint3 must not be labeled `CLOSED` except by the explicit PM/control transition required by that status artifact and `docs/SPRINT_3_BACKLOG.md`. If a status artifact changes later, its fresh canonical value governs this rule.
+7. Sprint status is governed by the binding canonical status artifacts, not stale historical prose. Fresh-read the status artifacts every run. As of 2026-09-22, `_handoff-artifacts/control/SPRINT2_STATUS.md` is `REOPENED_FIX_REQUIRED` because current-master web production build/start/real-UI playability has not been re-established. Historical CLOSED labels, focused/root tests, or older browser evidence never override a current-master build/start/UI failure. A sprint may be closed only after CURRENT MASTER production build succeeds, the app starts, and the ordinary real user-facing UI flow for that sprint is verified end-to-end. If a status artifact changes later, its fresh canonical value governs this rule.
 
 ## Canonical path map
 
