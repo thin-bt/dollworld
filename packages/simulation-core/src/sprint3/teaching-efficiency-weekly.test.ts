@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ABILITY_KEYS, APTITUDE_KEYS, type AbilityKey } from "../abilities.js";
 import {
   computeTechniqueCatalogHash,
   createInitialTrainingProcessorRuntimeState,
@@ -9,6 +10,12 @@ import {
   validateTechniqueCatalog,
 } from "../index.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
+import { WEEKLY_SCORED_ACTIONS } from "../sprint1/weekly-actions.js";
+import { applyTrainStat, createWeeklyTrainingDraft } from "../sprint1/weekly-training-effects.js";
+import {
+  validateWeeklyTrainingPersonRecord,
+  type WeeklyTrainingPersonRecord,
+} from "../sprint1/weekly-training-types.js";
 import {
   createSprint3Balance040ConfigInput,
   createSprint3Balance050ConfigInput,
@@ -29,6 +36,80 @@ function expectOk<T>(result: { ok: boolean; value?: T; issues?: unknown }): T {
     throw new Error(JSON.stringify(result.issues));
   }
   return result.value as T;
+}
+
+function statTriple(surfaceValue: number) {
+  return { surfaceValue, expressedGeneticValue: surfaceValue, latentGeneticValue: surfaceValue };
+}
+
+function weeklyTrainingPerson(overrides: Record<string, unknown> = {}) {
+  return {
+    personId: "person_0000000000000001",
+    givenName: "Ai",
+    familyName: "Doll",
+    displayName: "Doll Ai",
+    nameDataVersion: "names-0.1.0",
+    sex: "female",
+    birthYear: 1,
+    familyId: "family_0000000000000001",
+    lifeStatus: "living",
+    participationStatus: "active",
+    careerStatus: "trainee",
+    currentAge: 20,
+    qualifiedMaster: false,
+    abilities: Object.fromEntries(ABILITY_KEYS.map((key) => [key, statTriple(50)])),
+    aptitudes: Object.fromEntries(APTITUDE_KEYS.map((key) => [key, statTriple(50)])),
+    sprint1State: {
+      sprint1StateSchemaVersion: "0.1.0",
+      currentMental: 100,
+      techniqueStates: [],
+      learningFocusTechniqueId: null,
+    },
+    ...overrides,
+  };
+}
+
+function weeklyPlannerContext() {
+  const byAction: Record<string, unknown> = {};
+  for (const action of WEEKLY_SCORED_ACTIONS) {
+    byAction[action] = {
+      personality: 0,
+      developmentNeed: 0,
+      recentResult: 0,
+      teacherAdvice: 0,
+      schedule: 0,
+    };
+  }
+  return { byAction };
+}
+
+function weeklyStatTargetContext() {
+  const byAbility: Record<string, unknown> = {};
+  for (const key of ABILITY_KEYS) {
+    byAbility[key] = {
+      relatedAptitude: 50,
+      teacherRecommendation: key === "strength" ? 100 : 0,
+    };
+  }
+  return { byAbility };
+}
+
+function masterWeeklyRecord(discipleCount: number): WeeklyTrainingPersonRecord {
+  return expectOk(
+    validateWeeklyTrainingPersonRecord({
+      person: weeklyTrainingPerson(),
+      growthProfile: "normal",
+      growthPotential: Object.fromEntries(ABILITY_KEYS.map((key) => [key, 50])),
+      statGrowthRemainders: ABILITY_KEYS.map((stat: AbilityKey) => ({ stat, milliPoints: 0 })),
+      temporaryCondition: { fatigue: 0, injury: 0, condition: 0, confidence: 0 },
+      motivationFactor: 10000,
+      plannerContext: weeklyPlannerContext(),
+      statTargetContext: weeklyStatTargetContext(),
+      techniqueTargetContexts: [],
+      teacherFactorKey: "averageMaster",
+      discipleCount,
+    }),
+  ).record;
 }
 
 describe("S03-005 teachingEfficiency weekly training binding", () => {
@@ -147,5 +228,62 @@ describe("S03-005 teachingEfficiency weekly training binding", () => {
     );
     const one = expectOk(selectDiscipleCountTeachingEfficiencyFactor(1, config.teachingEfficiency));
     expect(many).toBeLessThan(one);
+  });
+
+  it("TE-011 live sidecar discipleCount drives applyTrainStat factor once and persists surface gain", () => {
+    const sprint3 = expectOk(validateSprint3Config(createSprint3Balance050ConfigInput(), provider));
+    const catalogHash = expectOk(computeTechniqueCatalogHash([], provider));
+    const catalog = expectOk(
+      validateTechniqueCatalog(
+        { identity: { dataVersion: "techniques-0.1.0", catalogHash }, definitions: [] },
+        provider,
+      ),
+    );
+    const factorOne = expectOk(
+      selectDiscipleCountTeachingEfficiencyFactor(1, sprint3.teachingEfficiency),
+    );
+    const factorSeven = expectOk(
+      selectDiscipleCountTeachingEfficiencyFactor(7, sprint3.teachingEfficiency),
+    );
+    expect(factorSeven).toBeLessThan(factorOne);
+
+    const applyForDiscipleCount = (discipleCount: number) => {
+      const record = masterWeeklyRecord(discipleCount);
+      const draft = expectOk(createWeeklyTrainingDraft(record));
+      const outcome = expectOk(
+        applyTrainStat(
+          draft,
+          record,
+          catalog,
+          sprint1Config,
+          "strength",
+          10,
+          createSeededRng(9001),
+          sprint3,
+        ),
+      );
+      return { draft, outcome };
+    };
+
+    const oneDisciple = applyForDiscipleCount(1);
+    const sevenDisciples = applyForDiscipleCount(7);
+
+    expect(oneDisciple.outcome.events[0]?.payload["factorBreakdown"]).toMatchObject({
+      discipleCountFactor: factorOne,
+    });
+    expect(sevenDisciples.outcome.events[0]?.payload["factorBreakdown"]).toMatchObject({
+      discipleCountFactor: factorSeven,
+    });
+    const appliedOne = oneDisciple.outcome.events[0]?.payload["appliedMilliPoints"];
+    const appliedSeven = sevenDisciples.outcome.events[0]?.payload["appliedMilliPoints"];
+    expect(typeof appliedOne).toBe("number");
+    expect(typeof appliedSeven).toBe("number");
+    expect(appliedOne).toBeGreaterThan(appliedSeven as number);
+    expect(oneDisciple.draft.remainderMilliPoints.strength).toBe(
+      (oneDisciple.outcome.events[0]?.payload["remainderAfter"] as number) ?? -1,
+    );
+    expect(sevenDisciples.draft.remainderMilliPoints.strength).toBe(
+      (sevenDisciples.outcome.events[0]?.payload["remainderAfter"] as number) ?? -1,
+    );
   });
 });
