@@ -31,8 +31,9 @@ Authority boundary:
 
 Read boundary:
 - PM reads Roadmap before issuing a distinct new roadmap item/task family, advancing a milestone/Sprint/phase, choosing among multiple safe next workstreams, or resolving project/Sprint objective, scope-gap, or dependency ambiguity.
+- For every distinct product implementation, product-fix, acceptance, re-acceptance, or formal-close task family, PM MUST carry the applicable Roadmap Sprint objective / completion meaning / material gap into the canonical task instruction as an alignment requirement. Omitting Roadmap alignment from such an instruction is a control defect.
 - PM / Role1 / Role2 / Role3 / Protocol Design thread restart reads Roadmap once after the fixed handoff to restore big-purpose context before relying on live controls for the immediate action. Same-assignment hourly work does not reread it merely for polling.
-- Cursor follows the canonical task instruction; Roadmap alone never authorizes implementation, acceptance, release, or scope expansion.
+- Cursor follows the canonical task instruction, but for every distinct product implementation, product-fix, acceptance, re-acceptance, or formal-close task it MUST fresh-read PROJECT_ROADMAP.md once before execution and explicitly check that the proposed implementation/evidence closes the Sprint-level objective rather than only a local test or UI surface. Roadmap alone never authorizes implementation, acceptance, release, or scope expansion.
 
 Update boundary:
 - update only for material project/Sprint objective, phase, critical-path, dependency, milestone-direction, Sprint-completion-meaning, or material scope-gap changes;
@@ -40,6 +41,7 @@ Update boundary:
 
 Completion alignment:
 - a Sprint must not be declared COMPLETE while Roadmap records a material Sprint-completion gap that remains unresolved;
+- a task/result/acceptance PASS MUST NOT be used as Sprint completion evidence when the observed product behavior contradicts the Roadmap Sprint objective or completion meaning, even if focused tests are green;
 - such a gap is closed only when it is incorporated into current authority as needed and its required implementation/independent acceptance is complete, or when explicit user/higher-authority direction removes or defers that completion requirement;
 - Roadmap records and preserves the gap but does not invent implementation semantics by itself.
 
