@@ -60,7 +60,6 @@ If two files contain competing versions of the same rule, the owner listed here 
 - `QUEUE-RESULT-WAKE-001` — terminal Role result wakes PM for prompt reconciliation/next-lane dispatch
 - `QUEUE-CURSOR-RESULT-RELAY-001` — Role-loop read-only relay wakes PM for terminal Cursor A/B2 results
 - `QUEUE-CAPABILITY-DISCOVERY-001` — connector capability discovery before declaring tool/capability blocker
-- `QUEUE-CAPABILITY-PROOF-001` — Drive/tool permission blocker requires concrete proof; false blocker is a control defect
 - `QUEUE-READ-COMPLETENESS-001` — pagination/truncation-safe complete reads before absence conclusions
 - `QUEUE-TRANSIENT-FAILURE-001` — retryable connector/provider failure handling
 - `QUEUE-CONTROL-RECOVERY-001` — stable-ID fixed-control mechanical self-recovery
