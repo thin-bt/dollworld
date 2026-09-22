@@ -44,6 +44,8 @@ Completion alignment:
 - a task/result/acceptance PASS MUST NOT be used as Sprint completion evidence when the observed product behavior contradicts the Roadmap Sprint objective or completion meaning, even if focused tests are green;
 - such a gap is closed only when it is incorporated into current authority as needed and its required implementation/independent acceptance is complete, or when explicit user/higher-authority direction removes or defers that completion requirement;
 - Roadmap records and preserves the gap but does not invent implementation semantics by itself.
+- **Formal-close authority guard:** for Sprint2 and every later Sprint, PM/control, Cursor, Role1/2/3, and automation MUST NOT assign `CLOSED`, `COMPLETE`, project-complete, or loop-stop on their own authority. They may only publish `READY_FOR_USER_CLOSE_REVIEW` after independently proving all binding completion conditions and Roadmap alignment. The transition to `CLOSED` / `COMPLETE` requires an explicit user instruction approving that Sprint close after the evidence is presented. Absence of objection, old approval, test PASS, release-gate PASS, prior CLOSED state, or downstream work does not count as approval.
+- If a Sprint was previously auto-closed without this explicit approval, that historical label is not reusable as authority for a later close and must not suppress remaining or reopened work.
 
 ## CORE-THROUGHPUT-001 — development progress first
 The control plane exists to advance safe, meaningful development toward the next accepted milestone. Monitoring, timer operation, queue hygiene, logging, and reporting are control mechanisms, not substitutes for executable work.
