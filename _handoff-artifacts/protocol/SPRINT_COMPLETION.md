@@ -93,15 +93,24 @@ PM may coordinate, request certification, update Roadmap only within `CORE-ROADM
 ### 3. 最終検証
 原則は exact completion snapshot SHA で required Sprint verify を1回通す。
 
-clean cloneは **必須ではない**。次の場合だけ使う:
-- 元repoの状態が原因で対象SHAやtracked差分の判定が曖昧になる。
-- environment contaminationが疑われる。
-- user/higher authorityが明示要求する。
+**repo-external clean clone / clean checkout verification is mandatory for Sprint formal close.**
+- completion snapshot SHA を repository 外の clean clone / clean checkout に materialize する。
+- dependency install / production build / required verification を、その clean environment で current canonical command により実行する。
+- 元 working tree の untracked files、local-only tooling、stale build output、cache、未追跡設定に依存していないことを証明する。
+- clean clone / clean checkout で production build または required verify が再現しない場合、その Sprint は CLOSED にしてはならない。
 
-既に同一SHAで有効なrequired verify PASSがあり、その後product/spec/config tracked bytesが変わっていなければ、operational evidence output path / archive / control-file整備だけを理由にfull verifyを再実行しない。
+**User-facing product flow requirement.**
+Sprint scope に user-facing application / UI が含まれる、または Sprint の機能が通常ユーザー経路で利用される場合、formal close には同じ completion snapshot の current production build と app startup の成功、および ordinary real user-facing flow の end-to-end acceptance が必要。
+- test-only API bootstrap、固定seed直注入、専用step/hidden/manual bypass、内部関数直呼びは、その機能自体の単体/統合証跡には使えても ordinary user-facing acceptance の代替にはならない。
+- required flow は実際のユーザー入口から開始し、Sprint authority が要求する状態変化・永続化・画面反映まで確認する。
+- UI 非対象 Sprint では N/A と根拠を completion evidence に明記する。
+
+既に同一SHAで有効なrequired verify PASSがあり、その後product/spec/config tracked bytesが変わっていなければ、operational evidence output path / archive / control-file整備だけを理由にfull verifyを再実行しない。ただし上記 clean clone / production build / startup / ordinary real user-facing acceptance の必須証跡が未実施・欠落・無効なら、その欠落は operational-only ではなく completion blocker である。
 
 ### 4. 最終verify合格条件
 **Blocking requirements:**
+- repo-external clean clone / clean checkout 上で current completion snapshot の production build / required verify が再現可能。
+- user-facing application / UI が対象の場合、同一snapshotで app startup と ordinary real user-facing end-to-end flow がPASSし、test-only bypass で代替されていない。
 - required functional/unit/integration/browser/determinism checks が current Sprint authority の必要範囲でPASS。
 - verify exit code = 0（current canonical commandがexit codeを持つ場合）。
 - completion reportの `overallPassed = true` / `failures = []` 等、current report schemaが持つfunctional PASS fieldsがPASS。
@@ -166,6 +175,8 @@ Sprint COMPLETEに必要なのは次だけ:
 - current authority上の required product/implementation task accepted
 - unresolved material Roadmap completion gap = 0
 - completion snapshot SHA確定
+- repo-external clean clone / clean checkout で同snapshotの production build / required verify が再現可能
+- user-facing application / UI が対象の場合、同snapshotで app startup と ordinary real user-facing end-to-end acceptance PASS
 - 同一snapshotの required functional final verify PASS
 - completion tagが同snapshotを指す
 
