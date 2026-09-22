@@ -11,10 +11,10 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: a51cb8c0d294520b20333b2b034cd6dd0af4dc04
-origin-master-at-completion: 7f06278 (pre-push; verify after push)
+origin-master-at-completion: 928d4fb8c5fd307c82f302dd799611b945d64d52
 origin-master-product-sha-at-pickup: ae23fb9e0cc4c446bc052e75d303db44c9e5f911
 local-worktree-head-at-pickup: 9da74a532325605a95882613f6d71aca118a990f
-publication-commit: 7f06278
+publication-commit: 928d4fb8c5fd307c82f302dd799611b945d64d52
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-BACKLOG-TERMINAL-PUBLICATION-DRIFT-A-20260923-R1
 production-change: NO
@@ -63,8 +63,8 @@ git show origin/master:_handoff-artifacts/control/SPRINT3_STATUS.md | Select-Str
 | A ACTIVE lock (CURSOR-START-001) | **PASS** |
 | Fresh-read predecessor drift + POST-F02 gate + backlog readback | **PASS** |
 | No false bind when later product delta exists | **PASS** (none) |
-| Pristine worktree publish → `origin/master` | **PASS** @ **`7f06278`** |
-| GitHub readback live gate prose | **verify post-push** |
+| Pristine worktree publish → `origin/master` | **PASS** @ **`928d4fb`** |
+| GitHub readback live gate prose | **PASS** — **POST-F02** @ **`ae23fb9`**, **POST-E2A9** historical, **`REOPENED_FIX_REQUIRED`** |
 | Full root `npm run check` | **not run** — POST-F02 owns applicable gate @ **`ae23fb9`** |
 
 ## Non-conflict guard
@@ -74,4 +74,4 @@ git show origin/master:_handoff-artifacts/control/SPRINT3_STATUS.md | Select-Str
 
 ## Terminal
 
-**SPRINT3_STATUS_POST_F02_LIVE_GATE_RECONCILIATION_A_PASS** — canonical `origin/master` `SPRINT3_STATUS.md` live release-gate binding reconciled to **POST-F02** @ **`ae23fb9`** (**1972/1972**); publication commit **`7f06278`**.
+**SPRINT3_STATUS_POST_F02_LIVE_GATE_RECONCILIATION_A_PASS** — canonical `origin/master` `SPRINT3_STATUS.md` live release-gate binding reconciled to **POST-F02** @ **`ae23fb9`** (**1972/1972**); publication commit **`928d4fb`**.
