@@ -61,6 +61,13 @@ A transient connector/provider/tool failure, local file-reference failure, searc
 
 Non-blocking flow: `detect -> unique authority -> minimum correction/recovery -> bounded re-check -> continue`.
 
+### Persistent acceptance requirements
+Acceptance requirements explicitly established by the user remain binding across later Sprints, task boundaries, lane handoffs, and queue drains until the user explicitly changes them.
+
+PM/control and all lanes must not silently replace or weaken such requirements. In particular, a previously required real-browser visual review, screenshot evidence, reference/mock fidelity check, usability/readability review, or ordinary-user end-to-end check must not later be reduced to DOM presence, test-id existence, automated test PASS, or result-report claims alone.
+
+A later task that does not restate an earlier acceptance requirement does not cancel it. If the requirement has not yet been evidenced, it remains unfinished work and must stay visible in current control state. It may not be used as grounds for READY, CLOSED, NO_WORK, or ending the development loop.
+
 ### Capability / route verification guard
 PM, Role, Cursor, automation, and GPT-side control work MUST NOT infer that an action, connector, storage path, tool capability, or next-step route is unavailable merely because the current actor has not yet used it, one attempted interface failed, or the capability is not visible in the actor's immediate working context.
 
