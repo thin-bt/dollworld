@@ -34,12 +34,17 @@ Sprint2 may return to CLOSED only after current-master evidence proves all of:
 
 | Condition | Terminal result | Tested SHA / note |
 |-----------|-----------------|-------------------|
-| 1–6 (Sprint2 ordinary real UI + build/start) | `SPRINT23-CURRENT-MASTER-WEB-PLAYABILITY-REACCEPTANCE-B2-20260922-R1` **PASS** | `5fad321` on canonical `origin/master` worktree |
+| 1,2,4,5 only (build/start/ranking page opens/battle presentation) | `SPRINT23-CURRENT-MASTER-WEB-PLAYABILITY-REACCEPTANCE-B2-20260922-R1` **PARTIAL_PASS_ONLY** | Claude independent audit `claude-sprint23-pass-evidence-audit-20260922-05.md` found conditions 3 and 6 were not actually tested; latest-master recheck `claude-recheck-latest-master-20260922-04.md` reproduces the product gap |
 | Recovery publication chain (supersedes original B2 recovery task) | `SPRINT2-REOPEN-RECOVERY-CANONICAL-PUBLISH-B2-20260922-R1` **PASS** | product paths already on master @ `7aa8208`+ |
 
 ## Current disposition
 
-- Sprint2: **REOPENED_FIX_REQUIRED** — formal **`CLOSED` not assigned** (PM/control authority; no inference from historical gates alone).
+- Sprint2: **REOPENED_FIX_REQUIRED** — formal **`CLOSED` not assigned**. The prior `conditions 1–6 PASS` claim is invalidated: conditions 3 and 6 are explicitly OPEN/FIX_REQUIRED after Claude independent review.
 - **Superseded active recovery pointer:** `SPRINT2-REOPEN-CURRENT-MASTER-WEB-BUILD-UI-RECOVERY-B2-20260922-R1` — do not treat as live work; terminal playability + recovery publish evidence governs web/UI binding.
 - **Separate product/acceptance gap (not the reopen web-build driver):** `SPRINT2-WIREFRAME-CURRENT-MASTER-AUDIT-A-20260922-R1` **FIX_REQUIRED** (e.g. WF-14-01 tournament display name) @ audited `fc65e02`.
 - Do not return Sprint2 to **CLOSED** until PM/control binds every applicable acceptance surface, including wireframe/product gaps outside the superseded web-build recovery chain.
+
+
+## Independent-review correction — 2026-09-22
+
+Claude independently reproduced on latest master that the ordinary user flow does not yet prove/perform the required competition cycle and ranking evolution. Observed gaps include: tournament already completed at elapsed week 0, only one tournament per session, ranking unchanged after extended week progression/year crossing, historical-year navigation unavailable, production participant planning projected through fixed year 21, contradictory scheduled/finished presentation, and no promotion/rank-history progression. The earlier targeted Playwright acceptance could pass by detecting already-present champion/ranking UI and returning early; therefore it cannot satisfy conditions 3 or 6. Sprint2 closure is forbidden until a corrected product flow and value-changing E2E acceptance prove the full chain without early-return bypass.
