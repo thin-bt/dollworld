@@ -1,4 +1,4 @@
-# SPRINT3-S03-060-POST-S03-058-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1
+﻿# SPRINT3-S03-060-POST-S03-058-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1
 
 state: TERMINAL
 terminal: SPRINT3_S03_060_POST_S03_058_CURRENT_MASTER_ROOT_GATE_B2_READY_FOR_FORMAL_CLOSE_CURRENT_MASTER
@@ -14,13 +14,13 @@ post-gate-product-sha: 47104c39e8d3a637e6c9e98881c1108112368eed
 prior-root-gate-sha: f4c19e6eb9993e04f85bc6db499cbc4126e3f20b
 origin-master-at-pickup: 4ed0cf4274c5b987da93e42a77ed9835cd3eb2c1
 pickup: RECOVERY_SAME_TASK_ACTIVE / SDK_EXECUTOR
-recovery: CURSOR-B2-001 — bounded attempt1 per check family; no same-case retry after exhaust
+recovery: CURSOR-B2-001 窶・bounded attempt1 per check family; no same-case retry after exhaust
 production-change: NO
 documentation-change: YES
 
 ## Summary
 
-Closed **`POST_S03_058_FRESH_ROOT_GATE_REQUIRED`** with one bounded root **`npm run check`** on clean worktree `_handoff-artifacts/control-tmp/s03-060-root-gate-wt` @ canonical **`origin/master`** tip **`4ed0cf4`**, which **descends from** S03-058 product publication **`47104c3`**. Vitest **129** files **1915/1915** PASS (S03-049 serialize policy unchanged). **Sprint3 `CLOSED` not assigned** — eligibility **`READY_FOR_FORMAL_CLOSE_CURRENT_MASTER`** at tested tip pending PM/control explicit transition only.
+Closed **`POST_S03_058_FRESH_ROOT_GATE_REQUIRED`** with one bounded root **`npm run check`** on clean worktree `_handoff-artifacts/control-tmp/s03-060-root-gate-wt` @ canonical **`origin/master`** tip **`4ed0cf4`**, which **descends from** S03-058 product publication **`47104c3`**. Vitest **129** files **1915/1915** PASS (S03-049 serialize policy unchanged). **Sprint3 `CLOSED` not assigned** 窶・eligibility **`READY_FOR_FORMAL_CLOSE_CURRENT_MASTER`** at tested tip pending PM/control explicit transition only.
 
 ## Ancestry verification
 
@@ -44,14 +44,14 @@ git merge-base --is-ancestor 47104c39e8d3a637e6c9e98881c1108112368eed HEAD
 | Fresh-read instruction + S03-058/059 + control/backlog | 1 | **PASS** |
 | B2 ACTIVE lock (recovery reconcile) | 1 | **PASS** |
 | S03-058 commit `47104c3` on tested master | 1 | **PASS** |
-| Root `npm run check` @ `4ed0cf4` (bounded) | 1 | **PASS** — format/lint/typecheck OK; vitest **1915/1915** (~2010s total wall); wiki:check OK; build OK |
-| Same-case root-gate retry | — | **not run** |
-| Timeout/assertion/workload weakening | — | **none** |
+| Root `npm run check` @ `4ed0cf4` (bounded) | 1 | **PASS** 窶・format/lint/typecheck OK; vitest **1915/1915** (~2010s total wall); wiki:check OK; build OK |
+| Same-case root-gate retry | 窶・| **not run** |
+| Timeout/assertion/workload weakening | 窶・| **none** |
 
 **Command:** `npm run check`  
 **Evidence log:** `_handoff-artifacts/control-tmp/s03-060-evidence/root-check-bounded-4ed0cf4.log`  
 **Wall:** `_handoff-artifacts/control-tmp/s03-060-evidence/root-check-wall.txt`  
-**Vitest policy:** root `vitest.config.ts` — `fileParallelism: false`, `maxWorkers: 1` (S03-049 canonical)
+**Vitest policy:** root `vitest.config.ts` 窶・`fileParallelism: false`, `maxWorkers: 1` (S03-049 canonical)
 
 **Recovery note:** Prior in-flight gate @ dispatch tip `7ba70d0` overlapped with a second `npm run check` and produced simulation-core resolve failures (environment concurrency, not product). Worktree reset to current `origin/master` before the single bounded gate above.
 
@@ -87,4 +87,4 @@ git show origin/master:_handoff-artifacts/control/SPRINT3_STATUS.md | Select-Str
 
 ## Terminal
 
-**SPRINT3_S03_060_POST_S03_058_CURRENT_MASTER_ROOT_GATE_B2_READY_FOR_FORMAL_CLOSE_CURRENT_MASTER** — Post-S03-058 bounded root gate green @ **`4ed0cf4`** (**1915/1915**); S03-058 product lineage covered; no unauthorized Sprint3 **`CLOSED`**.
+**SPRINT3_S03_060_POST_S03_058_CURRENT_MASTER_ROOT_GATE_B2_READY_FOR_FORMAL_CLOSE_CURRENT_MASTER** 窶・Post-S03-058 bounded root gate green @ **`4ed0cf4`** (**1915/1915**); S03-058 product lineage covered; no unauthorized Sprint3 **`CLOSED`**.
