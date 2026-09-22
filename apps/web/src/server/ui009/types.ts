@@ -1,5 +1,7 @@
 /** UI-009 Sprint2 competition progression wire types (session-scoped, isolated from canonical world). */
 
+import type { AptitudeSetView, StatSetView } from "../ui004/project-person.js";
+
 export const COMPETITION_VIEW_SCHEMA_VERSION = "0.1.0" as const;
 
 export const COMPETITION_VIEW_KEYS = [
@@ -33,6 +35,8 @@ export type CompetitionParticipantLinkView = {
   currentRankLabel?: string | null;
   ageLabel?: string | null;
   officialRecordLabel?: string | null;
+  stats?: StatSetView | null;
+  aptitudes?: AptitudeSetView | null;
 };
 
 export type CompetitionScheduleEntryView = {

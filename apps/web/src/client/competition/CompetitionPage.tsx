@@ -4,6 +4,12 @@ import type { FetchLike } from "../session-client.js";
 import { AnnualRankingTable } from "./AnnualRankingTable.js";
 import { CompetitionScheduleMatrix } from "./competition-schedule-matrix.js";
 import { loadCompetitionState, postCompetitionStep } from "./fetch-ui009.js";
+import {
+  APTITUDE_KEYS,
+  aptitudeLabel,
+  STAT_KEYS,
+  statLabel,
+} from "../presentation/display-labels.js";
 import type { CompetitionProgressView, CompetitionScheduleEntry } from "./ui009-views.js";
 
 export type CompetitionPageProps = {
@@ -479,16 +485,38 @@ function TournamentDetailPanel(props: {
                   <th>ランク</th>
                   <th>年齢</th>
                   <th>公式戦</th>
+                  {STAT_KEYS.map((key) => (
+                    <th key={key}>{statLabel(key)}</th>
+                  ))}
+                  {APTITUDE_KEYS.map((key) => (
+                    <th key={key}>{aptitudeLabel(key)}</th>
+                  ))}
                   <th>詳細</th>
                 </tr>
               </thead>
               <tbody>
                 {entry.participantLinks.map((link) => (
-                  <tr key={link.personId}>
+                  <tr key={link.personId} data-testid={`competition-participant-row-${link.personId}`}>
                     <td>{link.displayName}</td>
                     <td>{link.currentRankLabel ?? "—"}</td>
                     <td>{link.ageLabel ?? "—"}</td>
                     <td>{link.officialRecordLabel ?? "—"}</td>
+                    {STAT_KEYS.map((key) => (
+                      <td
+                        key={key}
+                        data-testid={`competition-participant-stat-${key}-${link.personId}`}
+                      >
+                        {link.stats?.[key] ?? "—"}
+                      </td>
+                    ))}
+                    {APTITUDE_KEYS.map((key) => (
+                      <td
+                        key={key}
+                        data-testid={`competition-participant-aptitude-${key}-${link.personId}`}
+                      >
+                        {link.aptitudes?.[key] ?? "—"}
+                      </td>
+                    ))}
                     <td>
                       <a href={`/people/${encodeURIComponent(link.personId)}`}>人物詳細</a>
                     </td>

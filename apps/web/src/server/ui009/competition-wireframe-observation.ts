@@ -11,6 +11,7 @@ import {
   type TournamentScheduleReadModelEntry,
   upsertAnnualRankingHistoryEntry,
 } from "@shared-world/simulation-core";
+import { projectPersonStatsAndAptitudes } from "../ui004/project-person.js";
 import { createNodeSha256Provider } from "../presets.js";
 import { displayNameForPersonIdInSession } from "./competition-engine.js";
 import {
@@ -54,11 +55,15 @@ export function enrichParticipantLinks(
     const officialWins = record?.officialWins ?? 0;
     const officialLosses = record?.officialLosses ?? 0;
     const rank = person?.currentRank ?? record?.currentRank ?? null;
+    const projected =
+      person !== undefined ? projectPersonStatsAndAptitudes(person) : null;
     return {
       ...link,
       currentRankLabel: rankBandPlayerLabel(typeof rank === "string" ? rank : null),
       ageLabel: age === null ? null : `${age}歳`,
       officialRecordLabel: `${officialWins}勝${officialLosses}敗`,
+      stats: projected?.stats ?? null,
+      aptitudes: projected?.aptitudes ?? null,
     };
   });
 }

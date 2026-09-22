@@ -93,6 +93,17 @@ function projectStats(person: Person): StatSetView | null {
   };
 }
 
+export function projectPersonStatsAndAptitudes(
+  person: Person,
+): { stats: StatSetView; aptitudes: AptitudeSetView } | null {
+  const stats = projectStats(person);
+  const aptitudes = projectAptitudes(person);
+  if (stats === null || aptitudes === null) {
+    return null;
+  }
+  return { stats, aptitudes };
+}
+
 function projectAptitudes(person: Person): AptitudeSetView | null {
   const a = person.aptitudes;
   if (

@@ -13,12 +13,29 @@ export type CompetitionLastMatchPlayerLabels = {
   loserDisplayName: string;
 };
 
+export type CompetitionParticipantStatSet = {
+  stamina: number;
+  strength: number;
+  skill: number;
+  speed: number;
+  spirit: number;
+  magic: number;
+};
+
+export type CompetitionParticipantAptitudeSet = {
+  unarmed: number;
+  sword: number;
+  magic: number;
+};
+
 export type CompetitionParticipantLink = {
   displayName: string;
   personId: string;
   currentRankLabel?: string | null;
   ageLabel?: string | null;
   officialRecordLabel?: string | null;
+  stats?: CompetitionParticipantStatSet | null;
+  aptitudes?: CompetitionParticipantAptitudeSet | null;
 };
 
 export type CompetitionScheduleEntry = {
