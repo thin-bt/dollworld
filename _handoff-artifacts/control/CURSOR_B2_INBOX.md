@@ -1,16 +1,16 @@
 # Cursor B2 Inbox
-state: PREPARED
+state: IDLE
 lane: B2
-task-key: SPRINT3-PENDING-ENTRYPOINT-RUNTIME-VALIDATION-B2-20260922-R1
-mode: PRODUCT_GAP_CLOSURE
-updatedAt: 2026-09-22T22:25:52+09:00
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-22T22:35:54+09:00
+last-consumed-task-key: SPRINT3-PENDING-ENTRYPOINT-RUNTIME-VALIDATION-B2-20260922-R1
+last-terminal: SPRINT3_PENDING_ENTRYPOINT_RUNTIME_VALIDATION_B2_READY
+last-result-path: _handoff-artifacts/results/SPRINT3-PENDING-ENTRYPOINT-RUNTIME-VALIDATION-B2-20260922-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
-priority: DEADLINE_CRITICAL
-authority-ref: master
-instruction-path: _handoff-artifacts/tasks/SPRINT3-PENDING-ENTRYPOINT-RUNTIME-VALIDATION-B2-20260922-R1/instruction.md
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
