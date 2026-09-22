@@ -8,9 +8,6 @@ import { describe, expect, it } from "vitest";
 import { enrichParticipantLinks } from "./competition-wireframe-observation.js";
 import type { CompetitionParticipantLinkView } from "./types.js";
 
-const STAT_KEYS = ["stamina", "strength", "skill", "speed", "spirit", "magic"] as const;
-const APTITUDE_KEYS = ["unarmed", "sword", "magic"] as const;
-
 function surface(value: number) {
   return { surfaceValue: value };
 }

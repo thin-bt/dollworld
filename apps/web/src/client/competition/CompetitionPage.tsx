@@ -496,7 +496,10 @@ function TournamentDetailPanel(props: {
               </thead>
               <tbody>
                 {entry.participantLinks.map((link) => (
-                  <tr key={link.personId} data-testid={`competition-participant-row-${link.personId}`}>
+                  <tr
+                    key={link.personId}
+                    data-testid={`competition-participant-row-${link.personId}`}
+                  >
                     <td>{link.displayName}</td>
                     <td>{link.currentRankLabel ?? "—"}</td>
                     <td>{link.ageLabel ?? "—"}</td>

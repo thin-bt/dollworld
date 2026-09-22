@@ -55,8 +55,7 @@ export function enrichParticipantLinks(
     const officialWins = record?.officialWins ?? 0;
     const officialLosses = record?.officialLosses ?? 0;
     const rank = person?.currentRank ?? record?.currentRank ?? null;
-    const projected =
-      person !== undefined ? projectPersonStatsAndAptitudes(person) : null;
+    const projected = person !== undefined ? projectPersonStatsAndAptitudes(person) : null;
     return {
       ...link,
       currentRankLabel: rankBandPlayerLabel(typeof rank === "string" ? rank : null),

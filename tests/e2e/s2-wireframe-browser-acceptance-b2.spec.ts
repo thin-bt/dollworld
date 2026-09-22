@@ -122,7 +122,9 @@ test.describe("Sprint2 wireframe browser acceptance (B2 completion gate)", () =>
     await expect(comparison).toContainText("格闘");
     await expect(comparison).toContainText("剣技");
     const firstRow = comparison.locator("tbody tr").first();
-    await expect(firstRow.locator('[data-testid^="competition-participant-stat-stamina-"]')).toBeVisible();
+    await expect(
+      firstRow.locator('[data-testid^="competition-participant-stat-stamina-"]'),
+    ).toBeVisible();
     await expect(
       firstRow.locator('[data-testid^="competition-participant-aptitude-unarmed-"]'),
     ).toBeVisible();
