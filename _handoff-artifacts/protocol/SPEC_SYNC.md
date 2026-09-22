@@ -9,7 +9,7 @@ Read this file only when creating, refreshing, validating, or troubleshooting `s
 
 ## SYNC-REFRESH-001 — mirror refresh
 Refresh when authoritative Git-managed spec/design/acceptance/Wiki material changed, a consuming audit/acceptance needs a current mirror, an explicit refresh is requested, or currentness validation shows the mirror stale.
-Rebuild from the current authoritative Git state; do not preserve files deleted from the authoritative source merely because they remain in an old mirror.
+Rebuild from the current authoritative Git state. `_handoff-artifacts/specs/**` is a persistent preservation boundary: never wipe, recreate, broadly purge, or stash out the specs subtree as a refresh shortcut. Within `specs/current` only, an individual obsolete mirror file may be removed when its authoritative source is proven deleted/out-of-scope and the removal is part of the same bounded mirror refresh. Do not remove unrelated `specs/proposed/**`, manually maintained spec material, or other spec assets. Task-relevant mirror/spec changes are committed with the same task unless current task authority explicitly forbids that commit.
 Include only material needed for spec/audit decisions, normally relevant `SPEC.md`/`docs`/Wiki source and required schemas/config/manifests. Do not copy dependencies, build products, large generated outputs, or audit artifacts into `specs/current`.
 Local mirror: `D:\xampp\htdocs\dollworld\_handoff-artifacts\specs\current\`.
 Drive mirror: `dollworld-audit/specs/current/`.
