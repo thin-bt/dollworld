@@ -61,6 +61,20 @@ A transient connector/provider/tool failure, local file-reference failure, searc
 
 Non-blocking flow: `detect -> unique authority -> minimum correction/recovery -> bounded re-check -> continue`.
 
+### Capability / route verification guard
+PM, Role, Cursor, automation, and GPT-side control work MUST NOT infer that an action, connector, storage path, tool capability, or next-step route is unavailable merely because the current actor has not yet used it, one attempted interface failed, or the capability is not visible in the actor's immediate working context.
+
+Before declaring `UNAVAILABLE`, `UNSUPPORTED`, `BLOCKED`, `NO_WORK`, resting all lanes, or ending a loop on capability grounds, the actor MUST:
+1. inspect the currently available tool/capability registry or the canonical route documentation applicable to the task;
+2. discover the relevant action by capability/name/description when the exact action is not already known;
+3. attempt the smallest safe read/write/probe needed to verify whether the route actually works;
+4. if one interface fails, try the governed alternate route when available;
+5. record the concrete failure/result rather than converting uncertainty into absence of capability.
+
+"Not checked", "not yet used", "not found on first search", "one route failed", or "I assumed it was unavailable" are never valid stop conditions.
+
+Capability uncertainty is recovery work. It does not authorize queue drain, project completion, or loop stop.
+
 ## CORE-ACTION-001 — same-run action closure
 If a release gate opens a uniquely determined next task, target lane is IDLE, no different unconsumed PREPARED task exists, and no material blocker exists, PM PREPARES the next task in the same run before reporting.
 `NEXT_ACTION_IDENTIFIED` without actual issuance or a concrete blocker is invalid.
