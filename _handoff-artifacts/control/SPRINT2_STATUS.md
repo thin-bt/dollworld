@@ -1,38 +1,38 @@
 # SPRINT2_STATUS
 
-state: CLOSED
+state: REOPENED_FIX_REQUIRED
 sprint: Sprint2
 control-authority: GitHub
-resolvedAt: 2026-09-21
-updatedAt: 2026-09-22T00:05:00+09:00
-binding-product-baseline: 410889b4087abba2c2315be1030e5a7834fb0060
-previous-state: REOPENED_FIX_REQUIRED
-next-active-sprint: Sprint3
-reconciliation: SPRINT2-SPRINT3-STATUS-AUTHORITY-RECONCILIATION-B2-20260921-R1
+updatedAt: 2026-09-22
+previous-state: CLOSED
+reopen-trigger: CURRENT_MASTER_WEB_BUILD_FAILURE
+assigned-recovery-task: SPRINT2-REOPEN-CURRENT-MASTER-WEB-BUILD-UI-RECOVERY-B2-20260922-R1
 
-## Reopen resolution (ordinary-flow re-acceptance)
+## Reopen reason
 
-Sprint2 was **`REOPENED_FIX_REQUIRED`** after core-loop / tournament / ranking / battle-presentation gaps were discovered post–2026-09-20 visual close. Canonical GitHub `master` now binds a completed **ordinary user-facing chain** (no test-only manual competition stepping as the proof path):
+The prior CLOSED state is invalid for the current master because the actual completion rule requires the CURRENT MASTER to be playable through the real UI, and the current web production build has been reported failing before startup/UI acceptance can even begin.
 
-`週進行 -> 大会予定 -> 参加者確定 -> 開催 -> 戦闘 -> 大会終了 -> 結果保存 -> ランキング更新 -> UI反映`
+Reported failing production build scope:
+- `apps/web/src/server/routes-simulation.ts`
+- `apps/web/src/server/ui009/competition-match-view.ts`
 
-## Binding closure evidence (reopen chain)
+Historical CLOSED labels, focused tests, Playwright subsets, root test counts, and older acceptance evidence do not override a current-master build/start/UI failure.
 
-| Evidence | Role |
-|----------|------|
-| `_handoff-artifacts/results/SPRINT2-REOPEN-CORE-LOOP-CANONICAL-PUBLICATION-A-20260921-R1/result.md` | Core-loop repair on `master` @ `5b5103a` |
-| `_handoff-artifacts/results/SPRINT2-REOPEN-REACCEPTANCE-EVIDENCE-B2-20260921-R1/result.md` | B2 UI ranking + battle presentation @ `085a545` |
-| `_handoff-artifacts/results/SPRINT2-REOPEN-TARGETED-BROWSER-REACCEPTANCE-B2-20260921-R1/result.md` | Targeted browser re-acceptance @ published repair lineage |
-| `_handoff-artifacts/results/SPRINT2-REOPEN-BROWSER-HARNESS-GREEN-B2-20260921-R1/result.md` | Playwright harness green |
-| `_handoff-artifacts/results/SPRINT2-REOPEN-BROWSER-HARNESS-CANONICAL-PUBLISH-B2-20260921-R1/result.md` | Harness on canonical `tests/e2e/` @ `bc1131b` |
-| `_handoff-artifacts/results/SPRINT2-REOPEN-FINAL-STATUS-READINESS-B2-20260921-R1/result.md` | B2/browser/product matrix **PASS** @ `05bec96` |
-| `_handoff-artifacts/results/SPRINT2-REOPEN-FORMAT-BLOCKER-REPAIR-B2-20260921-R1/result.md` | Scoped Prettier repair @ `7bd5cd6` |
-| `tests/e2e/s2-reopen-targeted-browser-reacceptance-b2.spec.ts` | Canonical targeted browser gate on `master` |
+## Binding completion rule
 
-Prior 2026-09-20 visual/wireframe close artifacts remain audit history; they do **not** override this reopen resolution.
+Sprint2 may return to CLOSED only after current-master evidence proves all of:
 
-## Release gate note (non-blocking for sprint status)
+1. web production build succeeds;
+2. web app starts;
+3. ordinary real browser/UI flow works end-to-end:
+   `週進行 -> 大会予定 -> 参加者確定 -> 開催 -> 戦闘 -> 大会終了 -> 結果保存 -> ランキング更新 -> UI反映`;
+4. Ranking screen works;
+5. battle presentation works;
+6. persistence and ranking update are visible through the ordinary UI-backed flow.
 
-`_handoff-artifacts/results/SPRINT2-REOPEN-FINAL-ROOT-GATE-A-20260921-R1/result.md` may remain **`BLOCKED_GATE_FAILURE`** until Cursor A clears full `npm run check` (Prettier on `sprint3-ordinary-session-activation.test.ts` @ pickup). That gate is **release hygiene**, not a reopen of the ordinary-flow acceptance finding above.
+## Current disposition
 
-Reopen Sprint2 only for a newly discovered Sprint2 regression, a newer contradictory canonical acceptance result, or explicit user direction.
+- Sprint2: **REOPENED_FIX_REQUIRED**
+- Active recovery task: `SPRINT2-REOPEN-CURRENT-MASTER-WEB-BUILD-UI-RECOVERY-B2-20260922-R1`
+- Assigned lane: Cursor B2
+- Do not assert completion until terminal current-master build/start/real-UI evidence satisfies every binding condition above.
