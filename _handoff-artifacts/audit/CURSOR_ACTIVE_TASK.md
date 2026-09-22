@@ -4,20 +4,21 @@ state: IDLE
 lane: A
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-21T13:01:00+09:00
+updatedAt: 2026-09-22T18:32:00+09:00
 pickup: (none)
 startedAt: (none)
 branch: master
-HEAD: f8891d6a7281369a0da26a0cea88d69e772f62ae
-origin-master-head: f8891d6a7281369a0da26a0cea88d69e772f62ae
-completedAt: 2026-09-21T13:01:00+09:00
-last-completed-task: SPRINT3-S03-028-LIVE-ENROLLMENT-SPECIAL-REASON-MATERIALIZATION-A-20260921-R1
-last-result-path: _handoff-artifacts/results/SPRINT3-S03-028-LIVE-ENROLLMENT-SPECIAL-REASON-MATERIALIZATION-A-20260921-R1/result.md
-last-terminal: READY / S03_028_LIVE_ENROLLMENT_SPECIAL_REASON_MATERIALIZATION_READY
-terminal: READY / S03_028_LIVE_ENROLLMENT_SPECIAL_REASON_MATERIALIZATION_READY
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-028-LIVE-ENROLLMENT-SPECIAL-REASON-MATERIALIZATION-A-20260921-R1/instruction.md
+HEAD: 4a0a80f09faa2c4ace5a8edcbd196d9a48fc229c
+origin-master-head: (pending publication readback)
+completedAt: 2026-09-22T18:32:00+09:00
+last-completed-task: SPRINT23-REOPEN-BLOCKER-AUTHORITY-RECONCILIATION-A-20260922-R1
+last-result-path: _handoff-artifacts/results/SPRINT23-REOPEN-BLOCKER-AUTHORITY-RECONCILIATION-A-20260922-R1/result.md
+last-terminal: SPRINT23_REOPEN_BLOCKER_AUTHORITY_RECONCILIATION_A_PASS
+terminal: (none)
+instruction-path: (none)
 control-authority: GitHub
-predecessor: SPRINT3-S03-020-LIVE-TECHNIQUE-LOSS-WIRING-ROLE3-20260921-R1
+predecessor: SPRINT3-S03-070-POST-TEACH-UI-REGRESSION-A-20260922-R1
+publication-commit: (pending)
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
