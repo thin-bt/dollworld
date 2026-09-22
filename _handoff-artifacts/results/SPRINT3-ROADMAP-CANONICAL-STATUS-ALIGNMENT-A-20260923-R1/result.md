@@ -10,9 +10,9 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: a28553375d03d3c56462b86b4b58de2fc3e6c1ec
-origin-master-at-completion: 4d8fedafd5b5028002a7ae4e4077a47f966ea695
+origin-master-at-completion: f85ba09f76638c3707eabb24edd79c9a0c3ec970
 publication-commit: b2114460e73c2421d41088fc26cd9e4d16102d63
-result-publication-commit: 4d8fedafd5b5028002a7ae4e4077a47f966ea695
+result-publication-commit: f85ba09f76638c3707eabb24edd79c9a0c3ec970
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 production-change: NO
 documentation-change: YES
