@@ -1,16 +1,16 @@
 # Cursor B2 Inbox
-state: IDLE
+state: PREPARED
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T16:27:29+09:00
-last-consumed-task-key: SPRINT23-CURRENT-MASTER-WEB-PLAYABILITY-REACCEPTANCE-B2-20260922-R1
-last-terminal: SPRINT23_CURRENT_MASTER_WEB_PLAYABILITY_REACCEPTANCE_B2_PASS
-last-result-path: _handoff-artifacts/results/SPRINT23-CURRENT-MASTER-WEB-PLAYABILITY-REACCEPTANCE-B2-20260922-R1/result.md
+task-key: SPRINT3-S03-069-POST-COMPLETED-TEACH-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1
+mode: RELEASE_EVIDENCE
+updatedAt: 2026-09-22T16:55:00+09:00
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2+Sprint3
+sprint: Sprint3
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-069-POST-COMPLETED-TEACH-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1/instruction.md
+priority: DEADLINE_CRITICAL
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
