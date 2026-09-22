@@ -1,16 +1,14 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T22:28:18+09:00
-last-consumed-task-key: SPRINT2-F02-MULTI-TOURNAMENT-YEARLY-PROGRESSION-A-20260922-R1
-last-terminal: READY
-last-result-path: _handoff-artifacts/results/SPRINT2-F02-MULTI-TOURNAMENT-YEARLY-PROGRESSION-A-20260922-R1/result.md
+task-key: SPRINT3-POST-E2A9-CURRENT-PRODUCT-ROOT-GATE-A-20260922-R1
+mode: RELEASE_GATE_VERIFICATION
+instruction-path: _handoff-artifacts/tasks/SPRINT3-POST-E2A9-CURRENT-PRODUCT-ROOT-GATE-A-20260922-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2
+sprint: Sprint3
+priority: DEADLINE_CRITICAL
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
