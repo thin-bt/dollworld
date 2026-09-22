@@ -2,7 +2,7 @@
 
 authority: coordination-only
 owner: PM / ChatGPT
-updatedAt: 2026-09-07T16:47:00+09:00
+updatedAt: 2026-09-23T00:27:00+09:00
 
 ## 目的
 
@@ -13,13 +13,14 @@ updatedAt: 2026-09-07T16:47:00+09:00
 詳細仕様、受入条件、実装内容、Git 状態、live task state の正本ではない。
 
 - 実装・Git 管理契約の正本: Git + accepted current spec/freeze
-- Role の現在仕事/結果: `audit/assignments/ROLE*_CURRENT.md` / `ROLE*_OUTBOX.md`
-- Cursor の現在仕事/結果: Cursor Inbox / Active controls
+- **Live sprint disposition（正本）:** `_handoff-artifacts/control/SPRINT2_STATUS.md` / `SPRINT3_STATUS.md` — 実行前に毎回 fresh-read すること（`protocol/GITHUB_CONTROL_PLANE.md`）
+- **Cursor lane dispatch（正本）:** GitHub canonical Inbox / Active controls（Drive/local mirror 欠落は recovery 対象であり、terminal/blocking authority ではない）
+- **Role1/Role2/Role3:** direct-execution automation roles（canonical ROLE*_INBOX キューなし — `protocol/GITHUB_CONTROL_PLANE.md`）
 - 運用ルール: `AUDIT_HANDOFF_PROTOCOL.md` -> `protocol/CONTROL_RULE_INDEX.md` -> Rule ID owner
 - thread 再開用 snapshot: `audit/handoff/*.md`
 
-**CURRENT / OUTBOX は「今何をするか」を示す。**  
-**PROJECT_ROADMAP.md は「なぜそれをするか・その先どこへ進むか」を示す。**  
+**PROJECT_ROADMAP.md は「なぜそれをするか・その先どこへ進むか」を示す stable intent map である。**  
+**「今どの Sprint が open/closed か・何が release gate か」は binding status artifacts が正本。**  
 **HANDOFF は「スレッドを再開するために直前の状態を復元する」ための snapshot であり、Roadmap の代用品ではない。**
 
 ## 運用上の位置づけ
@@ -115,7 +116,7 @@ Status: **COMPLETE — tag `sprint1.5-complete` at `b1f44603046834f8b4bab8c44cc0
 
 **到達点:** 選手が大会へ参加し、結果が ranking / 昇格へつながる競技サイクルを回せる。
 
-Status: **IN PROGRESS — current critical path is S02-012 long-horizon determinism / canonical event-stream hash repair verification and independent re-acceptance. Earlier accepted Sprint2 items remain governed by their own exact acceptance evidence; S02-012 remains open until post-repair V10/V11/V12 evidence and Role3 re-adjudication close.**
+Status: **REOPENED_FIX_REQUIRED** — formal **`CLOSED` not assigned** by PM/control. Current binding disposition, terminal web/UI evidence, wireframe/product acceptance gaps, and return-to-CLOSED rules are authoritative in `_handoff-artifacts/control/SPRINT2_STATUS.md` (fresh-read each run). Historical S02-012 and other item-level evidence remain governed by their own acceptance records; they do not override the binding sprint status artifact.
 
 ### Sprint 3 — 師弟・技継承・流派
 
@@ -130,7 +131,7 @@ Status: **IN PROGRESS — current critical path is S02-012 long-horizon determin
 
 **到達点:** 強い人物が引退して終わらず、知識・技が次世代へ伝わる。
 
-Status: **FUTURE**
+Status: **REOPENED_FIX_REQUIRED** — formal **`CLOSED` not assigned** by PM/control. Sprint3 objective and dependency intent above remain stable; live terminal evidence, pristine root-gate binding, UI acceptance, and reopen/superseded-blocker pointers are authoritative in `_handoff-artifacts/control/SPRINT3_STATUS.md` (fresh-read each run).
 
 ### Sprint 4 — 人生・家系・世代継承
 
@@ -150,14 +151,19 @@ Status: **FUTURE**
 
 ---
 
-## NOW — current critical path
+## NOW — coordination snapshot (non-authoritative for live disposition)
 
-current-phase: **Sprint 2 — 大会・ランキング・競技進行**
-current-major-step: **S02-012 long-horizon determinism / canonical event-stream hash repair verification and independent re-acceptance**
-current-gate: **Sprint1.5 COMPLETE / Sprint2 transition CERTIFIED; S02-012 exact-target verification at `1dc56b4bf54c6b2163ab2308e3d0b0a44726fcba` exposed a production-scale canonical event-stream hashing failure in V10 LONG-100; repair commit `f35f256a38ae2d6fe4f7affe2bd266136cc67657` exists and requires independent post-repair V10/V11/V12 evidence before Role3 re-adjudication**
-last-formally-accepted: **Earlier Sprint2 items remain accepted under their own exact evidence; S02-012 is not yet accepted because its long-horizon/performance gate remains open after the V10 failure.**
-next-gate: **materialize the exact B2 post-repair instruction on the B2 SDK host -> run independent G296 V10/V11/V12 against `f35f256a38ae2d6fe4f7affe2bd266136cc67657` with required performance/runtime-memory evidence -> Role3 exact-commit re-adjudication -> continue Sprint2 closure**
-material-project-gap: **S02-012 independent post-repair evidence is the active Sprint2 completion gap. Canonical Drive publication is complete, but the B2 SDK host local instruction mirror is missing, so the verification lane is not locally claimable yet. This is an execution-transport gap, not a user gameplay/spec decision. Sprint3 semantic-neutral readiness/preflight may continue in parallel only where it does not displace this Sprint2 critical path.**
+**Live sprint state is not mirrored here.** Before lane work, fresh-read:
+
+- `_handoff-artifacts/control/SPRINT2_STATUS.md`
+- `_handoff-artifacts/control/SPRINT3_STATUS.md`
+- `protocol/GITHUB_CONTROL_PLANE.md`
+
+As of the Roadmap `updatedAt` above, binding artifacts report **Sprint2** and **Sprint3** both **`REOPENED_FIX_REQUIRED`** with formal **`CLOSED` not assigned**. Superseded shared web-build recovery pointers are historical only. Current-master terminal playability, pristine root-gate evidence, and PM/control closure rules live in those status files — not in stale Roadmap prose.
+
+coordination-focus: **Sprint 2 — 大会・ランキング・競技進行** and **Sprint 3 — 師弟・技継承・流派** remain the active product/engineering arcs until PM/control assigns formal sprint closure on canonical `master`.
+
+material-project-gap: **See binding status artifacts** for wireframe/product acceptance gaps (e.g. Sprint2 wireframe audit items), release-gate SHA bindings, and any FIX_REQUIRED tasks — do not infer terminal blockers from local/Drive mirror absence.
 
 Frontend/Browser closure evidence:
 - FE-01 + FE-02 implementation: `PASS / FRONTEND_FE01_FE02_IMPLEMENTATION_COMPLETE` (People list/navigation + Person detail).
@@ -187,7 +193,7 @@ Sprint 0 COMPLETE
 -> Sprint 4
 ```
 
-Sprint3 semantic-neutral preparation may proceed only when current authority permits it and it does not displace the active Sprint2 S02-012 verification/re-acceptance critical path.
+Cross-sprint preparation may proceed only when binding sprint status artifacts and PM/control permit it without displacing applicable current-master acceptance and release-gate work.
 
 ---
 
@@ -200,7 +206,7 @@ Sprint3 semantic-neutral preparation may proceed only when current authority per
 3. Are predecessor gates actually satisfied?
 4. Does the work close a real completion requirement, or only improve an internal layer while leaving the user-visible objective unfulfilled?
 5. Is there a known scope gap that must be carried forward explicitly?
-6. Is a different live CURRENT/Inbox already consuming the target lane?
+6. Is a different live Cursor Inbox / Active lane already consuming the target executor?
 7. Will this task cause the project to drift from the stated Sprint completion gate?
 
 新しい仕事がRoadmap上のobjective / gap / dependencyに対応しない場合は、laneを埋めるためだけの仕事になっていないかを再確認する。
@@ -220,6 +226,7 @@ Sprint3 semantic-neutral preparation may proceed only when current authority per
 - `protocol/CONTROL_CORE.md` (`CORE-ROADMAP-001`)
 - `protocol/ASSIGNMENT_QUEUE_PROTOCOL.md`
 - current accepted Git/spec authority
-- `audit/assignments/ROLE*_CURRENT.md` / `ROLE*_OUTBOX.md`
-- Cursor Inbox / Active controls
+- `_handoff-artifacts/control/SPRINT2_STATUS.md` / `SPRINT3_STATUS.md`
+- `protocol/GITHUB_CONTROL_PLANE.md`
+- Cursor Inbox / Active controls (GitHub canonical)
 - `audit/handoff/PM_HANDOFF.md` — continuity snapshot only, not Roadmap replacement
