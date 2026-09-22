@@ -63,6 +63,18 @@ If a release gate opens a uniquely determined next task, target lane is IDLE, no
 `NEXT_ACTION_IDENTIFIED` without actual issuance or a concrete blocker is invalid.
 For a distinct new roadmap item/task family or milestone transition, also apply `CORE-ROADMAP-001`.
 
+### Project-continuation / stop guard
+An empty CURRENT/Inbox, terminal-consumed lane, `IDLE`, `CLOSED` Sprint, or absence of an already-published next task is **never** by itself evidence that dollworld has no remaining work or that the PM/Role loop may stop.
+
+Before PM may classify the project as complete, end the development loop, disable/pause the assignment loop, or leave all lanes resting after a Sprint/milestone close, PM MUST:
+1. fresh-read `PROJECT_ROADMAP.md`;
+2. identify the next incomplete Roadmap objective/phase, including any reopened earlier Sprint defect that invalidates downstream closure;
+3. if a safe next task family is uniquely derivable from current authority, PREPARE and read back that task in the same PM drain cycle;
+4. if the next phase requires a new canonical backlog/spec/control artifact before implementation, issue the bounded readiness/preparation task instead of declaring no work;
+5. only classify true project completion when every Roadmap objective through the currently defined final phase is complete under current authority and no material reopened gap remains, or when the user/higher authority explicitly pauses/stops/defers further work.
+
+Therefore `queue empty` != `project complete`, and `Sprint CLOSED` != `loop stop`. A loop stop derived only from empty controls or lack of a pre-existing next task is a control defect and must be recovered as missed continuation work.
+
 ## CORE-ACCEPT-001 — delta acceptance reuse
 Independent acceptance remains required where applicable. For a tightly bounded follow-up that does not invalidate independently passed surfaces, reuse those surfaces and verify only the exact delta plus directly affected integrity. Expand only when prior evidence is invalidated or material semantics/integrity changed.
 
