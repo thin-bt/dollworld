@@ -10,7 +10,8 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: 7bf732a6d253dd2fa88cc7700cfa2bfd9c0f1e4f
-origin-master-at-publication: (bound after push readback)
+origin-master-at-publication: 2cb0f5790ca963810ff645dfefd4185f18854cc1
+publication-commit: 2cb0f5790ca963810ff645dfefd4185f18854cc1
 local-head-at-pickup: 4a0a80f09faa2c4ace5a8edcbd196d9a48fc229c
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-S03-070-POST-TEACH-UI-REGRESSION-A-20260922-R1

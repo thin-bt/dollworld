@@ -9,7 +9,7 @@ pickup: (none)
 startedAt: (none)
 branch: master
 HEAD: 4a0a80f09faa2c4ace5a8edcbd196d9a48fc229c
-origin-master-head: (pending publication readback)
+origin-master-head: 2cb0f5790ca963810ff645dfefd4185f18854cc1
 completedAt: 2026-09-22T18:32:00+09:00
 last-completed-task: SPRINT23-REOPEN-BLOCKER-AUTHORITY-RECONCILIATION-A-20260922-R1
 last-result-path: _handoff-artifacts/results/SPRINT23-REOPEN-BLOCKER-AUTHORITY-RECONCILIATION-A-20260922-R1/result.md
@@ -18,7 +18,7 @@ terminal: (none)
 instruction-path: (none)
 control-authority: GitHub
 predecessor: SPRINT3-S03-070-POST-TEACH-UI-REGRESSION-A-20260922-R1
-publication-commit: (pending)
+publication-commit: 2cb0f5790ca963810ff645dfefd4185f18854cc1
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
