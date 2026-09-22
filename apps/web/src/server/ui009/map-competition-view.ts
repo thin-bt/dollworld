@@ -163,9 +163,7 @@ function buildWireframeObservation(input: {
   };
 }
 
-function tournamentDisplayNameForPersistedState(
-  state: CompetitionPersistedState,
-): string | null {
+function tournamentDisplayNameForPersistedState(state: CompetitionPersistedState): string | null {
   const entry = findScheduleEntryForTournament(
     state.tournamentId,
     state.worldYear,
