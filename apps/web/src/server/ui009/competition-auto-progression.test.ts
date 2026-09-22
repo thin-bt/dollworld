@@ -10,7 +10,10 @@ import { createUiApp, type UiApp } from "../app.js";
 import { DEFAULT_SPRINT1_PRESET_ID } from "../presets.js";
 import { createTestProcessSecurityContext } from "../process-keys.js";
 import { CSRF_HEADER_NAME, SESSION_COOKIE_NAME } from "../session-cookie.js";
-import { findUi009PlayableScheduleSlot } from "./competition-schedule-slot.js";
+import {
+  findUi009PlayableScheduleSlot,
+  listUi009PlayableScheduleSlots,
+} from "./competition-schedule-slot.js";
 
 const ORIGIN = "http://127.0.0.1:8787";
 const HOST = "127.0.0.1:8787";
@@ -250,8 +253,7 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
     const { cookie, sessionId } = await bootstrapSession(app);
     const row = app.uiSessionStore.get(sessionId)!;
     const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
-    const slot = findUi009PlayableScheduleSlot(worldDate.year)!;
-    const weeksUntilTournament = slot.absoluteWeek - worldDate.absoluteWeek;
+    findUi009PlayableScheduleSlot(worldDate.year)!;
 
     const competitionAtStart = await app.inject({
       method: "GET",
@@ -263,37 +265,48 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
       .data as CompetitionSnapshot;
 
     expectNotFalseFinishedCompetition(competition);
-    if (weeksUntilTournament === 0) {
-      expectCoherentFinishedCompetition(competition);
-    } else {
-      expect(competition.lifecyclePhase).toBe("idle");
-      expect(competition.championDisplayName).toBeNull();
-    }
+    expect(competition.lifecyclePhase).toBe("idle");
+    expect(competition.championDisplayName).toBeNull();
   }, 120_000);
 
-  it("simulation start on tournament week auto-finishes competition without manual step", async () => {
+  it("tournament week finishes after the next ordinary simulation week step", async () => {
     app = await createUiApp({
       publicOrigin: ORIGIN,
       enableTestProbe: false,
       repoRoot: REPO_ROOT,
       processKeys: createTestProcessSecurityContext(914),
     });
-    const { cookie, sessionId } = await bootstrapSession(app);
+    const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app);
     const row = app.uiSessionStore.get(sessionId)!;
     const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
     const slot = findUi009PlayableScheduleSlot(worldDate.year)!;
     const weeksUntilTournament = slot.absoluteWeek - worldDate.absoluteWeek;
-    if (weeksUntilTournament !== 0) {
-      return;
+    if (weeksUntilTournament > 0) {
+      await simulationStep(app, cookie, csrf, uiRevision, weeksUntilTournament);
     }
-
     const atStart = await app.inject({
       method: "GET",
       url: `${API_PREFIX}/competition`,
       headers: { host: HOST, cookie },
     });
     const atStartData = (JSON.parse(atStart.body) as Envelope).data as CompetitionSnapshot;
-    expectCoherentFinishedCompetition(atStartData);
+    expect(atStartData.lifecyclePhase).toBe("idle");
+
+    const simGet = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/simulation`,
+      headers: { host: HOST, cookie },
+    });
+    const revision = (JSON.parse(simGet.body) as Envelope).uiRevision;
+    await simulationStep(app, cookie, csrf, revision, 1);
+
+    const afterStep = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/competition`,
+      headers: { host: HOST, cookie },
+    });
+    const afterData = (JSON.parse(afterStep.body) as Envelope).data as CompetitionSnapshot;
+    expectCoherentFinishedCompetition(afterData);
   }, 120_000);
 
   it("ordinary simulation week steps alone reach finished competition with ranking rows", async () => {
@@ -308,10 +321,8 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
     const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
     const slot = findUi009PlayableScheduleSlot(worldDate.year)!;
     const weeksUntil = slot.absoluteWeek - worldDate.absoluteWeek;
-    if (weeksUntil > 0) {
-      await simulationStep(app, cookie, csrf, uiRevision, weeksUntil);
-    }
-
+    const weeksToStep = weeksUntil > 0 ? weeksUntil : 1;
+    await simulationStep(app, cookie, csrf, uiRevision, weeksToStep);
     const competitionRes = await app.inject({
       method: "GET",
       url: `${API_PREFIX}/competition`,
@@ -377,4 +388,158 @@ describe("UI009 simulation-integrated auto tournament progression", () => {
       beforeData.roundRobinProgress?.matchesCompleted,
     );
   }, 120_000);
+
+  it("ordinary week steps process successive F-rank tournaments without leaving past weeks scheduled", async () => {
+    app = await createUiApp({
+      publicOrigin: ORIGIN,
+      enableTestProbe: false,
+      repoRoot: REPO_ROOT,
+      processKeys: createTestProcessSecurityContext(916),
+    });
+    const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app, 11);
+    const row = app.uiSessionStore.get(sessionId)!;
+    const slots = listUi009PlayableScheduleSlots(
+      row.worldEngineRuntime!.runtimeState.worldState.worldDate.year,
+    );
+    expect(slots.length).toBeGreaterThanOrEqual(2);
+
+    let revision = uiRevision;
+    const rankingSnapshots: string[][] = [];
+
+    for (const slot of slots) {
+      const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
+      const weeksUntil = slot.absoluteWeek - worldDate.absoluteWeek;
+      expect(weeksUntil).toBeGreaterThanOrEqual(0);
+      const weeksToStep = weeksUntil > 0 ? weeksUntil : 1;
+      const stepped = await simulationStep(app, cookie, csrf, revision, weeksToStep);
+      revision = stepped.uiRevision;
+
+      const competitionRes = await app.inject({
+        method: "GET",
+        url: `${API_PREFIX}/competition`,
+        headers: { host: HOST, cookie },
+      });
+      const competition = (JSON.parse(competitionRes.body) as Envelope)
+        .data as CompetitionSnapshot & {
+        scheduleOverview?: {
+          entries: {
+            absoluteWeek: number;
+            lifecycleStateLabel: string;
+            rankOrCategoryLabel: string;
+          }[];
+        };
+      };
+      expectCoherentFinishedCompetition(competition);
+      rankingSnapshots.push(competition.rankingRows.map((row) => JSON.stringify(row)).sort());
+
+      for (const completedSlot of slots.slice(0, slots.indexOf(slot) + 1)) {
+        const scheduleEntry = (competition.scheduleOverview?.entries ?? []).find(
+          (entry) =>
+            entry.absoluteWeek === completedSlot.absoluteWeek &&
+            entry.rankOrCategoryLabel === "Fランク",
+        );
+        expect(scheduleEntry?.lifecycleStateLabel).toBe("終了");
+      }
+    }
+
+    expect(rankingSnapshots.length).toBe(slots.length);
+    if (rankingSnapshots[0]!.join("|") !== rankingSnapshots[1]!.join("|")) {
+      expect(rankingSnapshots[0]).not.toEqual(rankingSnapshots[1]);
+    }
+  }, 180_000);
+
+  it("annual ranking history retains snapshots across successive tournament finalizations", async () => {
+    app = await createUiApp({
+      publicOrigin: ORIGIN,
+      enableTestProbe: false,
+      repoRoot: REPO_ROOT,
+      processKeys: createTestProcessSecurityContext(917),
+    });
+    const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app, 17);
+    const row = app.uiSessionStore.get(sessionId)!;
+    const startYear = row.worldEngineRuntime!.runtimeState.worldState.worldDate.year;
+    const slots = listUi009PlayableScheduleSlots(startYear);
+    let revision = uiRevision;
+    for (const slot of slots) {
+      const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
+      const weeksToStep = Math.max(1, slot.absoluteWeek - worldDate.absoluteWeek);
+      const stepped = await simulationStep(app, cookie, csrf, revision, weeksToStep);
+      revision = stepped.uiRevision;
+    }
+
+    const competitionRes = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/competition?rankingYear=${startYear}`,
+      headers: { host: HOST, cookie },
+    });
+    const priorBody = JSON.parse(competitionRes.body) as Envelope;
+    expect(priorBody.ok).toBe(true);
+    const priorData = priorBody.data as {
+      rankingRows: { yearlyCumulativeEarnings: number }[];
+      wireframeObservation: {
+        annualRankingYearOptions: { worldYear: number; hasData: boolean }[];
+        tournamentSeriesHistory: { entries: unknown[] }[];
+      };
+    };
+    expect(priorData.wireframeObservation.tournamentSeriesHistory.length).toBeGreaterThan(0);
+    expect(
+      priorData.wireframeObservation.annualRankingYearOptions.some(
+        (option) => option.worldYear === startYear && option.hasData,
+      ),
+    ).toBe(true);
+    expect(priorData.rankingRows.length).toBeGreaterThan(0);
+  }, 180_000);
+
+  it("after crossing into the next world year prior-year ranking remains selectable with data", async () => {
+    app = await createUiApp({
+      publicOrigin: ORIGIN,
+      enableTestProbe: false,
+      repoRoot: REPO_ROOT,
+      processKeys: createTestProcessSecurityContext(918),
+    });
+    const { cookie, csrf, uiRevision, sessionId } = await bootstrapSession(app, 23);
+    const row = app.uiSessionStore.get(sessionId)!;
+    const startYear = row.worldEngineRuntime!.runtimeState.worldState.worldDate.year;
+    const slots = listUi009PlayableScheduleSlots(startYear);
+    expect(slots.length).toBeGreaterThanOrEqual(2);
+
+    let revision = uiRevision;
+    for (const slot of slots) {
+      const worldDate = row.worldEngineRuntime!.runtimeState.worldState.worldDate;
+      const weeksToStep = Math.max(1, slot.absoluteWeek - worldDate.absoluteWeek);
+      const stepped = await simulationStep(app, cookie, csrf, revision, weeksToStep);
+      revision = stepped.uiRevision;
+    }
+
+    let guard = 0;
+    while (
+      row.worldEngineRuntime!.runtimeState.worldState.worldDate.year === startYear &&
+      guard < 56
+    ) {
+      const stepped = await simulationStep(app, cookie, csrf, revision, 1);
+      revision = stepped.uiRevision;
+      guard += 1;
+    }
+    expect(row.worldEngineRuntime!.runtimeState.worldState.worldDate.year).toBe(startYear + 1);
+
+    const priorRes = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/competition?rankingYear=${startYear}`,
+      headers: { host: HOST, cookie },
+    });
+    const priorBody = JSON.parse(priorRes.body) as Envelope;
+    expect(priorBody.ok).toBe(true);
+    const priorData = priorBody.data as {
+      rankingRows: unknown[];
+      wireframeObservation: {
+        annualRankingYearOptions: { worldYear: number; hasData: boolean }[];
+      };
+    };
+    expect(priorData.rankingRows.length).toBeGreaterThan(0);
+    expect(
+      priorData.wireframeObservation.annualRankingYearOptions.some(
+        (option) => option.worldYear === startYear && option.hasData,
+      ),
+    ).toBe(true);
+  }, 240_000);
 });

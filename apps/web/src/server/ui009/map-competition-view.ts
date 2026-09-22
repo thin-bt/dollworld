@@ -219,8 +219,13 @@ function scheduleOverviewForSession(
   }));
   const activeLinks =
     persisted === null ? [] : participantLinksFromIds(persisted, activeParticipantIds(persisted));
-  const scheduleOptions: { viewWorldYear?: number; rosterSession: Sprint1RunSession } = {
+  const scheduleOptions: {
+    viewWorldYear?: number;
+    rosterSession: Sprint1RunSession;
+    completionStore: CompetitionSessionStore;
+  } = {
     rosterSession,
+    completionStore: store,
   };
   if (options?.viewWorldYear !== undefined) {
     scheduleOptions.viewWorldYear = options.viewWorldYear;

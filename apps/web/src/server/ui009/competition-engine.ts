@@ -22,6 +22,7 @@ import {
   type Sha256Provider,
   type Sprint1RunSession,
   type TournamentBracketDefinition,
+  type TournamentScheduleReadModelEntry,
   type ValidationIssue,
 } from "@shared-world/simulation-core";
 import { createNodeSha256Provider } from "../presets.js";
@@ -41,7 +42,11 @@ import { buildUi009StructuralPolicy } from "./competition-structural-policy.js";
 import { resolveKnockoutByeAdvancements } from "./competition-bracket-runtime.js";
 import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
 import { COMPETITION_STORE_SCHEMA_VERSION } from "./competition-store.js";
-import { EMPTY_OBSERVATION_PERSISTENCE } from "./competition-wireframe-observation.js";
+import {
+  EMPTY_OBSERVATION_PERSISTENCE,
+  type CompetitionObservationPersistence,
+  observationPersistenceFromState,
+} from "./competition-wireframe-observation.js";
 
 export type CompetitionEngineOutcome =
   | {
@@ -137,8 +142,17 @@ export function buildIdleCompetitionPreStartPreview(session: Sprint1RunSession):
 function initializeCompetitionState(
   worldSession: Sprint1RunSession,
   provider: Sha256Provider,
+  options?: {
+    targetTournament?: TournamentScheduleReadModelEntry;
+    observationPersistence?: CompetitionObservationPersistence;
+    earningsLedger?: Record<string, unknown>;
+  },
 ): CompetitionEngineOutcome {
-  const resolved = buildAcceptedCompetitionParticipantPlan(worldSession, provider);
+  const resolved = buildAcceptedCompetitionParticipantPlan(
+    worldSession,
+    provider,
+    options?.targetTournament,
+  );
   if (resolved === null || resolved.plan.selectedPersonIds.length < 2) {
     return {
       kind: "insufficient_participants",
@@ -257,14 +271,13 @@ function initializeCompetitionState(
     matchesCompleted: 0,
     lastMatch: null,
     competitiveRecordByPersonId,
-    earningsLedger: JSON.parse(toCanonicalJson(createEmptyAnnualEarningsLedger())) as Record<
-      string,
-      unknown
-    >,
+    earningsLedger:
+      options?.earningsLedger ??
+      (JSON.parse(toCanonicalJson(createEmptyAnnualEarningsLedger())) as Record<string, unknown>),
     finalResult: null,
-    worldYear: isolatedSession.runtimeState.worldState.worldDate.year,
+    worldYear: worldSession.runtimeState.worldState.worldDate.year,
     rankingDisplayFacts: [],
-    ...EMPTY_OBSERVATION_PERSISTENCE,
+    ...(options?.observationPersistence ?? EMPTY_OBSERVATION_PERSISTENCE),
   };
 
   return {
@@ -272,6 +285,22 @@ function initializeCompetitionState(
     store: { schemaVersion: COMPETITION_STORE_SCHEMA_VERSION, state },
     stepKind: "initialized",
   };
+}
+
+export function initializeCompetitionStateForTournament(
+  worldSession: Sprint1RunSession,
+  provider: Sha256Provider,
+  targetTournament: TournamentScheduleReadModelEntry,
+  priorStore: CompetitionSessionStore,
+): CompetitionEngineOutcome {
+  const priorState = priorStore.state;
+  return initializeCompetitionState(worldSession, provider, {
+    targetTournament,
+    observationPersistence: observationPersistenceFromState(priorState),
+    earningsLedger:
+      priorState?.earningsLedger ??
+      (JSON.parse(toCanonicalJson(createEmptyAnnualEarningsLedger())) as Record<string, unknown>),
+  });
 }
 
 function playNextMatch(

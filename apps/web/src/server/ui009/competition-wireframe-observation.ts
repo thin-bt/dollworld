@@ -36,6 +36,22 @@ export const EMPTY_OBSERVATION_PERSISTENCE = {
   personRankHistoryBundles: [] as readonly Record<string, unknown>[],
 };
 
+export type CompetitionObservationPersistence = typeof EMPTY_OBSERVATION_PERSISTENCE;
+
+export function observationPersistenceFromState(
+  state: CompetitionPersistedState | null,
+): CompetitionObservationPersistence {
+  if (state === null) {
+    return EMPTY_OBSERVATION_PERSISTENCE;
+  }
+  return {
+    tournamentHistorySummaries: state.tournamentHistorySummaries ?? [],
+    annualRankingHistoryStore: state.annualRankingHistoryStore ?? { entries: [] },
+    promotionResultSummaries: state.promotionResultSummaries ?? [],
+    personRankHistoryBundles: state.personRankHistoryBundles ?? [],
+  };
+}
+
 function provider(): Sha256Provider {
   return createNodeSha256Provider();
 }

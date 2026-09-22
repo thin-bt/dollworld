@@ -1,13 +1,17 @@
-import type { Sha256Provider, Sprint1RunSession } from "@shared-world/simulation-core";
+import type {
+  Sha256Provider,
+  Sprint1RunSession,
+  TournamentScheduleReadModelEntry,
+} from "@shared-world/simulation-core";
 import {
+  initializeCompetitionStateForTournament,
   runCompetitionProgressionStep,
   type CompetitionEngineOutcome,
 } from "./competition-engine.js";
 import { finalizeRoundRobinCompetitionStore } from "./competition-round-robin-finalize.js";
 import {
-  findUi009PlayableScheduleSlot,
+  listUi009DueUnprocessedScheduleSlots,
   resolveUi009PlayableScheduleLifecycleIdentity,
-  ui009PlayableSlotMatchesWorldWeek,
 } from "./competition-schedule-slot.js";
 import { getCompetitionStore, setCompetitionStore } from "./competition-session-registry.js";
 import type { CompetitionSessionStore } from "./competition-store.js";
@@ -29,7 +33,7 @@ export function runCompetitionThroughFinish(
 
   for (let stepIndex = 0; stepIndex < MAX_MATCH_STEPS; stepIndex += 1) {
     if (current.state?.phase === "finished") {
-      return { kind: "ok", store: current, progressed };
+      return { kind: "ok", store: current, progressed: progressed || true };
     }
     if (current.state?.phase === "round_robin_complete") {
       const finalized = finalizeRoundRobinCompetitionStore(current, provider);
@@ -69,44 +73,84 @@ export function runCompetitionThroughFinish(
     }
   }
 
+  if (current.state?.phase === "finished") {
+    return { kind: "ok", store: current, progressed: progressed || true };
+  }
+
   return { kind: "ok", store: current, progressed };
+}
+
+function storeMatchesScheduleLifecycle(
+  store: CompetitionSessionStore,
+  lifecycleIdentityHash: string,
+): boolean {
+  return (
+    store.state !== null && store.state.scheduleLifecycleIdentityHash === lifecycleIdentityHash
+  );
+}
+
+function ensureStoreReadyForSlot(
+  store: CompetitionSessionStore,
+  worldSession: Sprint1RunSession,
+  provider: Sha256Provider,
+  slot: TournamentScheduleReadModelEntry,
+): CompetitionThroughFinishOutcome | { kind: "ready"; store: CompetitionSessionStore } {
+  const lifecycle = resolveUi009PlayableScheduleLifecycleIdentity(slot, provider);
+  if (lifecycle === null) {
+    return { kind: "ready", store };
+  }
+
+  if (store.state !== null && storeMatchesScheduleLifecycle(store, lifecycle.identityHash)) {
+    return { kind: "ready", store };
+  }
+
+  if (store.state !== null && store.state.phase !== "finished") {
+    return { kind: "ready", store };
+  }
+
+  const initialized = initializeCompetitionStateForTournament(worldSession, provider, slot, store);
+  if (initialized.kind !== "ok" || initialized.store.state === null) {
+    if (initialized.kind === "ok") {
+      return { kind: "corrupt" };
+    }
+    return initialized;
+  }
+  return { kind: "ready", store: initialized.store };
 }
 
 /**
  * Runs accepted UI009 competition work for the current world week without mutating
  * session uiRevision / lastOperation.
  *
- * Wired from simulation start, reset, and weekly step so ordinary week progression
- * can reach persisted tournament results and ranking state without manual competition stepping.
+ * Wired from ordinary weekly simulation step only. Start/reset must not auto-finish
+ * competitions; reopen scope is week progression without manual competition-step.
  */
 export function syncCompetitionAutoProgressionForWeek(
   sessionId: string,
   worldSession: Sprint1RunSession,
   provider: Sha256Provider,
 ): void {
-  const worldYear = worldSession.runtimeState.worldState.worldDate.year;
-  const slot = findUi009PlayableScheduleSlot(worldYear);
-  if (slot === null || !ui009PlayableSlotMatchesWorldWeek(worldSession, slot)) {
+  let store = getCompetitionStore(sessionId);
+  const dueSlots = listUi009DueUnprocessedScheduleSlots(worldSession, store);
+  if (dueSlots.length === 0) {
     return;
   }
 
-  const lifecycle = resolveUi009PlayableScheduleLifecycleIdentity(slot, provider);
-  if (lifecycle === null) {
-    return;
-  }
-
-  const store = getCompetitionStore(sessionId);
-  if (store.state !== null) {
-    if (store.state.scheduleLifecycleIdentityHash !== lifecycle.identityHash) {
+  for (const slot of dueSlots) {
+    const prepared = ensureStoreReadyForSlot(store, worldSession, provider, slot);
+    if (prepared.kind !== "ready") {
       return;
     }
-    if (store.state.phase === "finished") {
+    store = prepared.store;
+    if (store.state === null || store.state.phase === "finished") {
+      continue;
+    }
+
+    const outcome = runCompetitionThroughFinish(store, worldSession, provider);
+    if (outcome.kind !== "ok") {
       return;
     }
-  }
-
-  const outcome = runCompetitionThroughFinish(store, worldSession, provider);
-  if (outcome.kind === "ok" && outcome.progressed) {
     setCompetitionStore(sessionId, outcome.store);
+    store = outcome.store;
   }
 }

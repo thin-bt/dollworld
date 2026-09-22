@@ -11,7 +11,10 @@ import {
   type Sprint1RunSession,
   type TournamentScheduleReadModelEntry,
 } from "@shared-world/simulation-core";
-import { tinyScheduleConfig } from "./competition-engine-schedule-config.js";
+import {
+  isUi009ScheduleSlotCompleted,
+  listUi009PlayableScheduleSlots,
+} from "./competition-schedule-slot.js";
 import {
   tournamentKindPlayerLabel,
   tournamentLifecyclePlayerLabel,
@@ -20,7 +23,7 @@ import {
 } from "./competition-player-labels.js";
 import { rankOrCategoryLabelFromScheduleEntry } from "./competition-schedule-overview-labels.js";
 import { enrichParticipantLinks } from "./competition-wireframe-observation.js";
-import type { CompetitionPersistedState } from "./competition-store.js";
+import type { CompetitionPersistedState, CompetitionSessionStore } from "./competition-store.js";
 import type {
   CompetitionParticipantLinkView,
   CompetitionScheduleEntryView,
@@ -76,25 +79,6 @@ function buildAnnualSchedule(worldYear: number): readonly TournamentScheduleRead
   return buildTournamentScheduleReadModel(committed.scheduleState);
 }
 
-function findUi009PlayableSlot(worldYear: number): TournamentScheduleReadModelEntry | null {
-  const config = tinyScheduleConfig();
-  const generator = createInitialTournamentIdGeneratorState();
-  if (!generator.ok) {
-    return null;
-  }
-  const committed = commitSchedulePlan(
-    config,
-    DEFAULT_WORLD_CALENDAR_CONFIG,
-    worldYear,
-    generator.value,
-  );
-  if (committed.kind !== "success") {
-    return null;
-  }
-  const schedule = buildTournamentScheduleReadModel(committed.scheduleState);
-  return schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F") ?? null;
-}
-
 function entryMatchesSlot(
   entry: TournamentScheduleReadModelEntry,
   slot: TournamentScheduleReadModelEntry,
@@ -118,12 +102,46 @@ function clampViewYear(viewYear: number, currentWorldYear: number): number {
   return Math.min(maxViewYear, Math.max(minViewYear, viewYear));
 }
 
+function lifecycleLabelForScheduleEntry(
+  entry: TournamentScheduleReadModelEntry,
+  persisted: CompetitionPersistedState | null,
+  storeForCompletion: CompetitionSessionStore | null,
+  isPast: boolean,
+): string {
+  const integrationSlot = listUi009PlayableScheduleSlots(entry.worldYear).find((slot) =>
+    entryMatchesSlot(entry, slot),
+  );
+  const completedByIntegration =
+    integrationSlot !== undefined &&
+    storeForCompletion !== null &&
+    isUi009ScheduleSlotCompleted(storeForCompletion, integrationSlot);
+  const completedByHistory =
+    persisted !== null &&
+    (persisted.tournamentHistorySummaries ?? []).some(
+      (row) =>
+        (row as { tournamentId?: string }).tournamentId === entry.tournamentId &&
+        (row as { worldYear?: number }).worldYear === entry.worldYear,
+    );
+  if (
+    completedByIntegration ||
+    completedByHistory ||
+    (isPast && persisted?.tournamentId === entry.tournamentId)
+  ) {
+    return "終了";
+  }
+  return tournamentLifecyclePlayerLabel(entry.lifecycleState);
+}
+
 export function buildCompetitionScheduleOverview(
   session: Sprint1RunSession,
   persisted: CompetitionPersistedState | null,
   participantRosterForPlayable: readonly CompetitionParticipantLinkView[],
   participantRosterForActive: readonly CompetitionParticipantLinkView[],
-  options?: { viewWorldYear?: number; rosterSession?: Sprint1RunSession },
+  options?: {
+    viewWorldYear?: number;
+    rosterSession?: Sprint1RunSession;
+    completionStore?: CompetitionSessionStore | null;
+  },
 ): CompetitionScheduleOverviewView {
   const rosterSession = options?.rosterSession ?? session;
   const worldDate = session.runtimeState.worldState.worldDate;
@@ -133,11 +151,19 @@ export function buildCompetitionScheduleOverview(
     currentWorldYear,
   );
   const schedule = buildAnnualSchedule(viewingWorldYear);
-  const playableSlot =
-    persisted === null && viewingWorldYear === currentWorldYear
-      ? findUi009PlayableSlot(currentWorldYear)
-      : null;
+  const integrationSlots =
+    viewingWorldYear === currentWorldYear ? listUi009PlayableScheduleSlots(currentWorldYear) : [];
+  const completionStore =
+    options?.completionStore ??
+    (persisted === null ? null : { schemaVersion: "0.1.0" as const, state: persisted });
   const activeTournamentId = persisted?.tournamentId ?? null;
+  const focusPlayableIntegrationSlot =
+    persisted === null && viewingWorldYear === currentWorldYear
+      ? (integrationSlots.find(
+          (slot) =>
+            completionStore === null || !isUi009ScheduleSlotCompleted(completionStore, slot),
+        ) ?? null)
+      : null;
 
   let playableSelectionKey: string | null = null;
   let activeSelectionKey: string | null = null;
@@ -149,11 +175,18 @@ export function buildCompetitionScheduleOverview(
       (viewingWorldYear === currentWorldYear && entry.absoluteWeek < worldDate.absoluteWeek);
     const isCurrentWeek =
       viewingWorldYear === currentWorldYear && entry.absoluteWeek === worldDate.absoluteWeek;
+    const integrationSlot = integrationSlots.find((slot) => entryMatchesSlot(entry, slot));
+    const integrationCompleted =
+      integrationSlot !== undefined &&
+      completionStore !== null &&
+      isUi009ScheduleSlotCompleted(completionStore, integrationSlot);
     const isPlayable =
       viewingWorldYear === currentWorldYear &&
-      playableSlot !== null &&
-      entryMatchesSlot(entry, playableSlot) &&
-      persisted === null;
+      integrationSlot !== undefined &&
+      !integrationCompleted &&
+      (focusPlayableIntegrationSlot === null ||
+        entryMatchesSlot(entry, focusPlayableIntegrationSlot)) &&
+      (persisted === null || persisted.tournamentId === entry.tournamentId);
     const isActiveCompetition =
       viewingWorldYear === currentWorldYear &&
       activeTournamentId !== null &&
@@ -188,7 +221,12 @@ export function buildCompetitionScheduleOverview(
       absoluteWeek: entry.absoluteWeek,
       kindLabel: tournamentKindPlayerLabel(entry.kind) ?? "大会",
       rankOrCategoryLabel: rankOrCategoryLabelFromScheduleEntry(entry),
-      lifecycleStateLabel: tournamentLifecyclePlayerLabel(entry.lifecycleState),
+      lifecycleStateLabel: lifecycleLabelForScheduleEntry(
+        entry,
+        persisted,
+        completionStore,
+        isPast,
+      ),
       timingLabel: tournamentTimingPlayerLabel(entry.month, entry.weekOfMonth),
       temporalState,
       isPlayable,

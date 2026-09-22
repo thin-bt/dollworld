@@ -14,6 +14,7 @@ import {
   type Rank,
   type Sha256Provider,
   type Sprint1RunSession,
+  type TournamentScheduleReadModelEntry,
 } from "@shared-world/simulation-core";
 import { tinyScheduleConfig } from "./competition-engine-schedule-config.js";
 import {
@@ -86,23 +87,35 @@ function entrantFacts(person: Person, worldYear: number): EntrantCandidateFacts 
 function buildAcceptedCompetitionParticipantPlanOnSession(
   session: Sprint1RunSession,
   provider: Sha256Provider,
+  targetTournament?: TournamentScheduleReadModelEntry,
 ) {
   const config = tinyScheduleConfig();
   const generator = createInitialTournamentIdGeneratorState();
   if (!generator.ok) {
     return null;
   }
+  const scheduleWorldYear =
+    targetTournament?.worldYear ?? session.runtimeState.worldState.worldDate.year;
   const committed = commitSchedulePlan(
     config,
     DEFAULT_WORLD_CALENDAR_CONFIG,
-    session.runtimeState.worldState.worldDate.year,
+    scheduleWorldYear,
     generator.value,
   );
   if (committed.kind !== "success") {
     return null;
   }
   const schedule = buildTournamentScheduleReadModel(committed.scheduleState);
-  const tournament = schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F");
+  const tournament =
+    targetTournament === undefined
+      ? schedule.find((entry) => entry.kind === "normal" && entry.targetRank === "F")
+      : schedule.find(
+          (entry) =>
+            entry.kind === "normal" &&
+            entry.targetRank === "F" &&
+            entry.scheduleOrdinal === targetTournament.scheduleOrdinal &&
+            entry.absoluteWeek === targetTournament.absoluteWeek,
+        );
   if (tournament === undefined) {
     return null;
   }
@@ -172,9 +185,14 @@ function resolveUi009PlanningSession(
 export function buildAcceptedCompetitionParticipantPlan(
   session: Sprint1RunSession,
   provider: Sha256Provider,
+  targetTournament?: TournamentScheduleReadModelEntry,
 ) {
   const planningSession = resolveUi009PlanningSession(session, provider);
-  const plan = buildAcceptedCompetitionParticipantPlanOnSession(planningSession, provider);
+  const plan = buildAcceptedCompetitionParticipantPlanOnSession(
+    planningSession,
+    provider,
+    targetTournament,
+  );
   if (plan === null) {
     return null;
   }
