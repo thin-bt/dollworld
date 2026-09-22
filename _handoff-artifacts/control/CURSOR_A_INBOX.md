@@ -1,16 +1,16 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T16:44:30+09:00
-last-consumed-task-key: SPRINT3-COMPLETED-TEACH-OUTCOME-SEMANTIC-INVARIANT-A-20260922-R1
-last-terminal: SPRINT3_COMPLETED_TEACH_OUTCOME_SEMANTIC_INVARIANT_A_PASS
-last-result-path: _handoff-artifacts/results/SPRINT3-COMPLETED-TEACH-OUTCOME-SEMANTIC-INVARIANT-A-20260922-R1/result.md
+task-key: SPRINT3-S03-070-POST-TEACH-UI-REGRESSION-A-20260922-R1
+mode: CURRENT_MASTER_UI_REGRESSION
+updatedAt: 2026-09-22T16:59:55+09:00
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-070-POST-TEACH-UI-REGRESSION-A-20260922-R1/instruction.md
+priority: DEADLINE_CRITICAL
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
