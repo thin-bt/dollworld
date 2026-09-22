@@ -5,12 +5,13 @@ terminal: SPRINT3_ROADMAP_CANONICAL_STATUS_ALIGNMENT_A_PASS
 verificationOutcome: PASS
 resultClass: CANONICAL_COORDINATION_REPAIR
 lane: A
-updatedAt: 2026-09-23T00:30:00+09:00
+updatedAt: 2026-09-23T00:32:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: a28553375d03d3c56462b86b4b58de2fc3e6c1ec
-origin-master-at-completion: (pending publication)
+origin-master-at-completion: b2114460e73c2421d41088fc26cd9e4d16102d63
+publication-commit: b2114460e73c2421d41088fc26cd9e4d16102d63
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 production-change: NO
 documentation-change: YES
@@ -51,11 +52,16 @@ Aligned coordination-only `_handoff-artifacts/PROJECT_ROADMAP.md` with binding s
 | A ACTIVE lock (CURSOR-START-001) | **PASS** |
 | Fresh-read `GITHUB_CONTROL_PLANE.md`, `SPRINT2_STATUS.md`, `SPRINT3_STATUS.md` | **PASS** |
 | Local grep: stale FUTURE/S02-012/mirror critical path | **PASS** (Sprint4 **FUTURE** retained by design) |
-| Publish `PROJECT_ROADMAP.md` → `origin/master` | **PENDING** — see publication commit below |
-| GitHub readback | **PENDING** |
+| Publish `PROJECT_ROADMAP.md` → `origin/master` | **PASS** @ **`b211446`** |
+| GitHub readback | **PASS** — tip **`b211446`**; roadmap Sprint3 **`REOPENED_FIX_REQUIRED`** |
 
 ## Publication
 
 Worktree: `_handoff-artifacts/control-tmp/roadmap-canonical-status-wt-20260923`
 
-(Publication SHA and readback evidence appended after push.)
+```powershell
+git -C D:\xampp\htdocs\dollworld\_handoff-artifacts\control-tmp\roadmap-canonical-status-wt-20260923 fetch origin master
+git -C D:\xampp\htdocs\dollworld\_handoff-artifacts\control-tmp\roadmap-canonical-status-wt-20260923 show origin/master:_handoff-artifacts/PROJECT_ROADMAP.md
+```
+
+Readback @ **`b211446`**: Sprint2/Sprint3 status lines show **`REOPENED_FIX_REQUIRED`**; Sprint4 retains **`FUTURE`**; NOW section defers to binding status artifacts.
