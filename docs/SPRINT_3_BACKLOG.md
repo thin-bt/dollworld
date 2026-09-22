@@ -17,7 +17,7 @@
   - **S03-011 implemented on canonical `master`**（初使用 MatchId 永続化 — `SPRINT3-S03-011-CANONICAL-PUBLICATION-RECOVERY-B2-20260921-R1` @ `fbb83b1`）
 - 実装順序の正本: S03-001 → S03-002 → … → S03-008 → S03-009 → S03-010 → S03-011（下表）
 - **S03-026 監査（歴史的受理 @ `47bdb9b`）**: `SPRINT3-S03-026-FORMAL-CLOSE-EVIDENCE-AUDIT-B2-20260921-R1` は当時点の入門/資格、persisted 教授技選択 **consumption**、生成技 battle consumption、独自技 **loss** チェーンについて **残存 product gap なし** と判定。**ただし** 後続 **S03-028** B2 権威監査により、enrollment **`EnrollmentSpecialReason` / live `activeSpecialReasons`** スライスでは当該 no-gap 結論は **superseded**（`47bdb9b` では live boundary が常に `activeSpecialReasons: []` で、supported reason が live-unreachable だった）。**S03-028 A**（`8e9b825`）+ **S03-029/030 A**（rebellion 信号の canonical publication @ `db14129`）で当該スライス gap は **canonical `master` 上で閉じ**；S03-026 の主表 production チェーン受理は **歴史証跡として維持**。
-- **formal release gate**（A-owned `SPRINT3-S03-025-ROOT-CHECK-TIMEOUT-CLOSURE-A-20260921-R1` **READY**）: root `npm run check` 全緑（`1889/1889` 当時）；S03-024 executor-timeout 差分は **環境/load 由来**。**S03-031** A final release gate（`SPRINT3-S03-031-FINAL-RELEASE-GATE-A-20260921-R1` **READY** @ master `eb39e2d`、**1896/1896**）は **歴史的** ゲート証跡。**S03-049** B2（`bb8dd30`、**1906/1906**）は pre-**`95c1e49`** current-master gate 正本。**S03-052** A canonical publication（`95c1e49`）は post-gate product。**current master tip** の formal-close 用 fresh root gate 正本は **S03-054** B2（`SPRINT3-S03-054-POST-S03-052-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1` **READY** @ `1bb58b7`、**1907/1907**）— post-**`95c1e49`** bounded `npm run check`、Vitest serialize policy は S03-049 維持。
+- **formal release gate**（A-owned `SPRINT3-S03-025-ROOT-CHECK-TIMEOUT-CLOSURE-A-20260921-R1` **READY**）: root `npm run check` 全緑（`1889/1889` 当時）；S03-024 executor-timeout 差分は **環境/load 由来**。**S03-031** A final release gate（`SPRINT3-S03-031-FINAL-RELEASE-GATE-A-20260921-R1` **READY** @ master `eb39e2d`、**1896/1896**）は **歴史的** ゲート証跡。**S03-049** B2（`bb8dd30`、**1906/1906**）は pre-**`95c1e49`** current-master gate 正本。**S03-052** A canonical publication（`95c1e49`）は post-gate product。**S03-055** A canonical publication（`ffad8126`）は Person Detail exact26 product。**S03-058** B2 canonical publication（`47104c3`）は persisted mentorship relation-kind runtime validation。**current master tip** の formal-close 用 fresh root gate 正本は **S03-060** B2（`SPRINT3-S03-060-POST-S03-058-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1` **READY** @ `4ed0cf4`、**1915/1915**）— post-**`47104c3`** bounded `npm run check`、Vitest serialize policy は S03-049 維持。**S03-056** @ `f4c19e6`（**1909/1909**）は pre-S03-058 歴史正本。
 - **formal Sprint3 `CLOSED`**: A **S03-030** canonical **READY** @ `db14129` + fresh root gate 緑は **必要条件**；本ファイル単独では Sprint 3 を `CLOSED` と **しない**（PM/制御面の最終遷移待ち）。Sprint 4 着手不可は product 受理と formal ラベルを混同しない。
 
 ## 目的
@@ -57,7 +57,7 @@
 
 ## Production / integration 受理証跡（主表外・S03-012 以降）
 
-S03-001..011 の **計画順序を変更しない**。以下は canonical `master` 上で **terminal/READY result 証跡**に基づく recovery/integration・reconciliation・control 作業（**S03-054** まで整合；S03-053/054 B2 で control/backlog anchor を更新）。
+S03-001..011 の **計画順序を変更しない**。以下は canonical `master` 上で **terminal/READY result 証跡**に基づく recovery/integration・reconciliation・control 作業（**S03-060** まで整合；S03-060 B2 で post-058 root gate anchor を更新）。
 
 | ID | ドメイン（要約） | 代表 result（lane） | 受理 |
 |---|---|---|---|
@@ -102,7 +102,11 @@ S03-001..011 の **計画順序を変更しない**。以下は canonical `maste
 | S03-051 | Person detail formal-master displayName（A） | `SPRINT3-S03-051-PERSON-DETAIL-MASTER-NAME-VISIBILITY-A-20260922-R1` | **READY** — local product；canonical は **S03-052** |
 | S03-052 | S03-051 canonical publication recovery（A） | `SPRINT3-S03-052-S03-051-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1` @ `95c1e49` | **READY** — post-gate product；root gate は **S03-054** |
 | S03-053 | Formal-close anchor reconciliation（B2） | `SPRINT3-S03-053-CURRENT-MASTER-FORMAL-CLOSE-ANCHOR-RECONCILIATION-B2-20260922-R1` | **READY** — post-`95c1e49` blocker 記録 |
-| S03-054 | Post-S03-052 current-master root gate（B2） | `SPRINT3-S03-054-POST-S03-052-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1` @ `1bb58b7` | **READY** — **1907/1907**；current-tip root gate 正本 |
+| S03-054 | Post-S03-052 current-master root gate（B2） | `SPRINT3-S03-054-POST-S03-052-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1` @ `1bb58b7` | **READY** — **1907/1907**；pre-S03-055 歴史正本 |
+| S03-055 | Person detail reverse-disciple observability（A） | `SPRINT3-S03-055-PERSON-DETAIL-REVERSE-DISCIPLE-OBSERVABILITY-A-20260922-R1` @ `ffad8126` | **READY** — UI-005 exact26 product；root gate は **S03-056** |
+| S03-056 | Post-S03-055 current-master root gate（B2） | `SPRINT3-S03-056-POST-S03-055-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1` @ `f4c19e6` | **READY** — **1909/1909**；pre-S03-058 歴史正本 |
+| S03-058 | Mentorship relation-kind runtime validation（B2） | `SPRINT3-S03-058-MENTORSHIP-RUNTIME-RELATION-KIND-VALIDATION-B2-20260922-R1` @ `47104c3` | **READY** — persisted relation-kind guard；root gate は **S03-060** |
+| S03-060 | Post-S03-058 current-master root gate（B2） | `SPRINT3-S03-060-POST-S03-058-CURRENT-MASTER-ROOT-GATE-B2-20260922-R1` @ `4ed0cf4` | **READY** — **1915/1915**；current-tip root gate 正本 |
 
 ## S03-001 Sprint 3 設定・師弟ドメイン validation 基盤
 
