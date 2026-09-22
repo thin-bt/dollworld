@@ -54,26 +54,29 @@ describe("Sprint3 completed master intake outcome semantic invariant", () => {
     ["defer", "at_or_over_autonomous_limit_reject"],
     ["reject", "under_autonomous_limit"],
     ["reject", "at_autonomous_limit_high_aptitude_defer"],
-  ] as const)("rejects %s with incompatible producer branch reason %s", (acceptance, foreignReason) => {
-    const result = validateSprint3MentorshipEntrypointRuntimeState(
-      runtimeWithCompletedIntakeOutcome({
-        acceptance,
-        autonomousMaxDisciples: 8,
-        reasons: [foreignReason],
-      }),
-    );
-    expect(result.ok).toBe(false);
-    if (result.ok) {
-      throw new Error("expected validation failure");
-    }
-    expect(result.issues).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          path: "/completedMasterIntakeOutcomes/0/outcome/reasons",
+  ] as const)(
+    "rejects %s with incompatible producer branch reason %s",
+    (acceptance, foreignReason) => {
+      const result = validateSprint3MentorshipEntrypointRuntimeState(
+        runtimeWithCompletedIntakeOutcome({
+          acceptance,
+          autonomousMaxDisciples: 8,
+          reasons: [foreignReason],
         }),
-      ]),
-    );
-  });
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) {
+        throw new Error("expected validation failure");
+      }
+      expect(result.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "/completedMasterIntakeOutcomes/0/outcome/reasons",
+          }),
+        ]),
+      );
+    },
+  );
 
   it("rejects accept with non-producer reason only", () => {
     const result = validateSprint3MentorshipEntrypointRuntimeState(
