@@ -10,8 +10,9 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: 65069ce12002b072d2a59a016a676d1a46256cd5
-origin-master-at-completion: (pending push readback)
-publication-commit: (pending push)
+origin-master-at-completion: 0eed74a62e099a97b3d61c2f7e7f5e68c3a6dd0f
+publication-commit: 0eed74a62e099a97b3d61c2f7e7f5e68c3a6dd0f
+readback-tip: 0eed74a62e099a97b3d61c2f7e7f5e68c3a6dd0f
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-ROADMAP-CANONICAL-STATUS-ALIGNMENT-A-20260923-R1
 production-change: NO
@@ -63,7 +64,7 @@ Worktree: `_handoff-artifacts/control-tmp/backlog-current-gate-reconcile-wt-2026
 | No false bind when later product delta exists | **PASS** (none) |
 | `npx prettier --check` on touched markdown | **PASS** |
 | Full root `npm run check` | **not run** — POST-E2A9 owns applicable gate @ **`a3776c1`** |
-| GitHub publish + readback | **pending** — see Publication section |
+| GitHub publish + readback | **PASS** — tip **`0eed74a`**; backlog + status bind **POST-E2A9** @ **`a3776c1`** |
 
 ## Non-conflict guard
 
