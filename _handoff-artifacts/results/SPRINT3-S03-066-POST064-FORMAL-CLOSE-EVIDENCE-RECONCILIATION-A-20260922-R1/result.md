@@ -10,8 +10,8 @@ control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 origin-master-at-pickup: 7e70c587225d89d712420a196759d604c5aa79a6
-publication-commit: (pending push)
-origin-master-at-completion: (pending push)
+publication-commit: fd3d9be12c731e58e87e85de5b408413472eccca
+origin-master-at-completion: fd3d9be12c731e58e87e85de5b408413472eccca
 pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 predecessor: SPRINT3-S03-065-POST063-EVIDENCE-LEDGER-RECONCILIATION-A-20260922-R1
 production-change: NO
@@ -52,8 +52,10 @@ Worktree: `_handoff-artifacts/control-tmp/s03-066-publish-wt` @ pickup **`7e70c5
 | A ACTIVE lock before edits (CURSOR-START-001) | **PASS** |
 | No stale **S03-064 pending** on `origin/master` backlog prose | **PASS** (pre-existing S03-064 bind) |
 | S03-065 result pending supersession | **PASS** |
-| `npx prettier --check docs/SPRINT_3_BACKLOG.md` | (run at publish) |
-| `npx prettier --check` on touched result paths | (run at publish) |
+| `npx prettier --check docs/SPRINT_3_BACKLOG.md` | **PASS** |
+| `npx prettier --check` on touched result paths | **PASS** |
+| `git push origin HEAD:master` | **PASS** — `7e70c58..fd3d9be` |
+| GitHub readback | **PASS** (see below) |
 | Full root `npm run check` | **not run** — B2 S03-064 gate policy |
 
 ```powershell
