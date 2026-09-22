@@ -1,12 +1,12 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT2-WF5-PARTICIPANT-ABILITY-APTITUDE-UI-A-20260922-R1
-mode: PRODUCT_FIX
-updatedAt: 2026-09-22T21:02:00+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT2-WF5-PARTICIPANT-ABILITY-APTITUDE-UI-A-20260922-R1/instruction.md
-authority-ref: master
-priority: HIGH
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-22T21:36:51+09:00
+last-consumed-task-key: SPRINT2-WF5-PARTICIPANT-ABILITY-APTITUDE-UI-A-20260922-R1
+last-terminal: SPRINT2_WF5_PARTICIPANT_ABILITY_APTITUDE_UI_A_PASS
+last-result-path: _handoff-artifacts/results/SPRINT2-WF5-PARTICIPANT-ABILITY-APTITUDE-UI-A-20260922-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
