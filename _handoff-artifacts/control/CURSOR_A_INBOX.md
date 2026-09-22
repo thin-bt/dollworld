@@ -1,16 +1,16 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-22T18:29:35+09:00
-last-consumed-task-key: SPRINT23-REOPEN-BLOCKER-AUTHORITY-RECONCILIATION-A-20260922-R1
-last-terminal: SPRINT23_REOPEN_BLOCKER_AUTHORITY_RECONCILIATION_A_PASS
-last-result-path: _handoff-artifacts/results/SPRINT23-REOPEN-BLOCKER-AUTHORITY-RECONCILIATION-A-20260922-R1/result.md
+task-key: SPRINT3-S03-074-MASTER-INTAKE-PERSISTED-SEMANTIC-INVARIANT-A-20260922-R1
+mode: PRODUCT_GAP_CLOSURE
+priority: DEADLINE_CRITICAL
+updatedAt: 2026-09-22T18:35:34+09:00
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint2+Sprint3
+sprint: Sprint3
+authority-ref: master
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-074-MASTER-INTAKE-PERSISTED-SEMANTIC-INVARIANT-A-20260922-R1/instruction.md
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
