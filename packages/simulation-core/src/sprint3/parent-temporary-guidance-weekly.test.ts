@@ -11,6 +11,9 @@ import {
 import { asPersonId } from "../ids.js";
 import { createNodeSha256Provider } from "../test-fixtures/name-data-loader.fixture.js";
 import { WEEKLY_SCORED_ACTIONS } from "../sprint1/weekly-actions.js";
+import { INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION } from "../sprint1/constants.js";
+import { applyTrainStat, createWeeklyTrainingDraft } from "../sprint1/weekly-training-effects.js";
+import { validateWeeklyTrainingSidecarState } from "../sprint1/weekly-training-sidecar-state.js";
 import {
   validateWeeklyTrainingPersonRecord,
   type WeeklyTrainingPersonRecord,
@@ -20,12 +23,17 @@ import {
   createSprint3Balance060ConfigInput,
 } from "./sprint3-config-defaults.js";
 import { evaluateEnrollmentAssignment as evaluateEnrollmentAssignmentDirect } from "./evaluate-enrollment-assignment.js";
+import { processSprint3EnrollmentIntakeBoundary } from "./process-sprint3-enrollment-intake-boundary.js";
 import {
   isWeeklyTrainingParentTemporaryGuidanceEnabled,
   selectParentTemporaryGuidanceTeacherFactor,
   selectWeeklyTrainingTeacherFactorBasisPoints,
   validateWeeklyTrainingSprint3ConfigBinding,
 } from "./resolve-weekly-parent-temporary-guidance.js";
+import {
+  createInitialSprint3MentorshipEntrypointRuntimeState,
+  lookupMentorshipRelationKindForChild,
+} from "./sprint3-mentorship-entrypoint-runtime-state.js";
 import { validateSprint3Config } from "./validate-sprint3-config.js";
 import type { EnrollmentAssignmentRecord, EnrollmentMasterCandidate } from "./types.js";
 
@@ -114,6 +122,22 @@ function minimalWeeklyRecord(
     ...overrides,
   };
   return expectOk(validateWeeklyTrainingPersonRecord(raw)).record;
+}
+
+function sidecarEntry(personId: string): Record<string, unknown> {
+  return {
+    personId,
+    growthProfile: "normal",
+    growthPotential: Object.fromEntries(ABILITY_KEYS.map((key) => [key, 50])),
+    statGrowthRemainders: ABILITY_KEYS.map((stat) => ({ stat, milliPoints: 0 })),
+    temporaryCondition: { fatigue: 0, injury: 0, condition: 0, confidence: 0 },
+    motivationFactor: 10000,
+    plannerContext: weeklyPlannerContext(),
+    statTargetContext: weeklyStatTargetContext(),
+    techniqueTargetContexts: [],
+    teacherFactorKey: "averageMaster",
+    discipleCount: 0,
+  };
 }
 
 describe("S03-006 parent temporary guidance weekly binding", () => {
@@ -251,5 +275,111 @@ describe("S03-006 parent temporary guidance weekly binding", () => {
       selectParentTemporaryGuidanceTeacherFactor(sprint3.teachingEfficiency),
     );
     expect(factorA).toBe(factorB);
+  });
+
+  it("PTG-011 persisted mentorshipRelationKind drives applyTrainStat teacher factor once", () => {
+    const sprint3 = expectOk(validateSprint3Config(createSprint3Balance060ConfigInput(), provider));
+    const catalogHash = expectOk(computeTechniqueCatalogHash([], provider));
+    const catalog = expectOk(
+      validateTechniqueCatalog(
+        { identity: { dataVersion: "techniques-0.1.0", catalogHash }, definitions: [] },
+        provider,
+      ),
+    );
+    const parentGuidanceFactor = expectOk(
+      selectParentTemporaryGuidanceTeacherFactor(sprint3.teachingEfficiency),
+    );
+    const formalTeacherFactor = sprint1Config.growth.teacherFactors.eraLeadingInstructor;
+
+    const applyWithKind = (kind: "parent_temporary_guidance" | "formal_master_disciple") => {
+      const record = minimalWeeklyRecord({
+        mentorshipRelationKind: kind,
+        teacherFactorKey: "eraLeadingInstructor",
+      });
+      const draft = expectOk(createWeeklyTrainingDraft(record));
+      return expectOk(
+        applyTrainStat(
+          draft,
+          record,
+          catalog,
+          sprint1Config,
+          "strength",
+          10,
+          createSeededRng(9012),
+          sprint3,
+        ),
+      );
+    };
+
+    const temp = applyWithKind("parent_temporary_guidance");
+    const formal = applyWithKind("formal_master_disciple");
+    expect(temp.events[0]?.payload["factorBreakdown"]).toMatchObject({
+      teacherFactor: parentGuidanceFactor,
+    });
+    expect(formal.events[0]?.payload["factorBreakdown"]).toMatchObject({
+      teacherFactor: formalTeacherFactor,
+    });
+    expect(parentGuidanceFactor).not.toBe(formalTeacherFactor);
+    const appliedTemp = temp.events[0]?.payload["appliedMilliPoints"];
+    const appliedFormal = formal.events[0]?.payload["appliedMilliPoints"];
+    expect(typeof appliedTemp).toBe("number");
+    expect(typeof appliedFormal).toBe("number");
+    expect(appliedTemp).not.toBe(appliedFormal);
+  });
+
+  it("PTG-012 enrollment intake persists parent_temporary_guidance for weekly lookup", () => {
+    const sprint3 = expectOk(validateSprint3Config(createSprint3Balance060ConfigInput(), provider));
+    const CHILD_ID = asPersonId("child_enrollment_ptg012");
+    const PARENT_ID = asPersonId("parent_ptg012");
+    const pending: EnrollmentAssignmentRecord = {
+      childPersonId: CHILD_ID,
+      childAge: 8,
+      activeSpecialReasons: [],
+      masterCandidates: [
+        {
+          masterPersonId: PARENT_ID,
+          isBiologicalParent: true,
+          qualificationRecord: {
+            careerStatus: "active_competitor",
+            lifeStatus: "living",
+            retirementRank: "C",
+            highestRank: "D",
+            officialWins: 0,
+            limitedOfficialWins: 0,
+            tournamentTitles: 0,
+          },
+          parentChildCompatibilityScore: 0,
+          lineageAptitudeScore: 0,
+          schoolFitScore: 0,
+          teachingEfficiencyScore: 0,
+          intakeAcceptance: "accept",
+        },
+      ],
+      temporaryGuidanceParentPersonId: PARENT_ID,
+    };
+    const runtime = {
+      ...createInitialSprint3MentorshipEntrypointRuntimeState(),
+      pendingEnrollmentBoundaries: [pending],
+    };
+    const sidecars = expectOk(
+      validateWeeklyTrainingSidecarState({
+        schemaVersion: INITIAL_WEEKLY_TRAINING_SIDECAR_SNAPSHOT_SCHEMA_VERSION,
+        entries: [sidecarEntry(CHILD_ID), sidecarEntry(PARENT_ID)],
+      }),
+    );
+    const result = expectOk(
+      processSprint3EnrollmentIntakeBoundary({
+        absoluteWeek: 384,
+        sprint3Config: sprint3,
+        weeklyTrainingSidecars: sidecars,
+        runtimeState: runtime,
+      }),
+    );
+    expect(result.runtimeState!.completedEnrollmentOutcomes[0]?.outcome.kind).toBe(
+      "parent_temporary_guidance",
+    );
+    expect(lookupMentorshipRelationKindForChild(result.runtimeState, CHILD_ID)).toBe(
+      "parent_temporary_guidance",
+    );
   });
 });
