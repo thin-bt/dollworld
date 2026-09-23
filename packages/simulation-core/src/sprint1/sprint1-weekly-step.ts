@@ -794,7 +794,9 @@ function executeSprint1WeeklyTransitionDraft(
           ? {}
           : { sprint3Config: session.context.sprint3Config }),
         techniqueCatalog: session.context.techniqueCatalog,
-        originalTechniqueLifecycleRuntime: working.originalTechniqueLifecycleRuntime,
+        ...(working.originalTechniqueLifecycleRuntime === undefined
+          ? {}
+          : { originalTechniqueLifecycleRuntime: working.originalTechniqueLifecycleRuntime }),
         ...(working.generatedTechniqueCatalogOverlay === undefined
           ? {}
           : { generatedTechniqueCatalogOverlay: working.generatedTechniqueCatalogOverlay }),

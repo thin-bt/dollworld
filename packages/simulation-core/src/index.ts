@@ -1234,6 +1234,8 @@ export {
   createSprint3Balance060ConfigInput,
   createSprint3Balance070ConfigInput,
   createSprint3Balance080ConfigInput,
+  createSprint3Balance090ConfigInput,
+  createSprint3Balance100ConfigInput,
 } from "./sprint3/sprint3-config-defaults.js";
 export {
   isWeeklyTrainingDiscipleCountTeachingEfficiencyEnabled,
