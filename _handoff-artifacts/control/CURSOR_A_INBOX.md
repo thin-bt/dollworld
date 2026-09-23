@@ -1,17 +1,16 @@
 # Cursor A Inbox
-state: IDLE
+state: PREPARED
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-23T19:56:00+09:00
-last-consumed-task-key: UI-BATTLE-SHARED-MOCK-V03-20260923-R2
-last-terminal: UI_BATTLE_SHARED_MOCK_V03_PASS
-last-result-path: _handoff-artifacts/results/UI-BATTLE-SHARED-MOCK-V03-20260923-R2/result.md
+task-key: SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1
+mode: BROWSER_ACCEPTANCE_FIX_IF_REQUIRED
+updatedAt: 2026-09-23T20:01:00+09:00
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1/instruction.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: cross-sprint UI implementation
+sprint: Sprint3
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
+- use ordinary production web flow and real Chrome evidence
 - publish terminal result to GitHub canonical result path
