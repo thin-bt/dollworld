@@ -1,7 +1,9 @@
 import {
   createInitialOriginalTechniqueLifecycleRuntimeState,
   createInitialSprint3MentorshipEntrypointRuntimeState,
-  createSprint3Balance100ConfigInput,
+  createSprint3Balance080ConfigInput,
+  ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
+  SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   validateSprint1RunSession,
   validateSprint3Config,
   type Sha256Provider,
@@ -10,9 +12,41 @@ import {
   type ValidationResult,
 } from "@shared-world/simulation-core";
 
-/** Canonical accepted production Sprint3 balance (S03-008..S03-010 weekly closure). */
+/** Canonical accepted production Sprint3 balance (matches S03-008..S03-009 weekly closure). */
 export function createAcceptedProductionSprint3ConfigInput(): Sprint3ConfigInput {
-  return createSprint3Balance100ConfigInput();
+  const balance080 = createSprint3Balance080ConfigInput();
+  return {
+    ...balance080,
+    configVersion: SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+    mentorshipFeatures: {
+      ...balance080.mentorshipFeatures,
+      explicitWeeklyTeachActionEnabled: true,
+      enrollmentAssignmentAiEnabled: true,
+      weeklyTrainingDiscipleCountTeachingEfficiencyEnabled: true,
+      weeklyTrainingParentTemporaryGuidanceEnabled: true,
+      techniqueTeachingSelectionEnabled: true,
+      originalTechniqueLifecycleEnabled: true,
+    },
+    originalTechniqueLifecycle: {
+      evaluationPolicyVersion: ORIGINAL_TECHNIQUE_LIFECYCLE_EVALUATION_POLICY,
+      researchThresholds: {
+        derivedTechnique: 180,
+        compositeTechnique: 320,
+        fullOriginalTechnique: 550,
+      },
+      generation: {
+        baseSuccessPercent: 50,
+        minimumSuccessPercent: 20,
+        maximumSuccessPercent: 80,
+        failureResearchRetentionPercent: 80,
+        regenerationCooldownWeeks: 24,
+        initialMasteryHundredthsMinimum: 1000,
+        initialMasteryHundredthsMaximum: 2500,
+        maximumPositiveSuccessAdjustmentPoints: 30,
+        maximumNegativeSuccessAdjustmentPoints: 30,
+      },
+    },
+  };
 }
 
 export function bindAcceptedProductionSprint3RunSession(
