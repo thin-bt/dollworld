@@ -5,9 +5,11 @@ owner: Role2
 workstream: UI 15 Dev Viewer
 source-issue: #2
 semantic-authority: existing DEV-VIEWER-002 contract/current master
+visual-blueprint: `_handoff-artifacts/mocks/15_dev_viewer_mock_v01.html`
+visual-blueprint-created-commit: `f861b592b40e94cc89e6a297a4f6472924f37c74`
 
 ## Objective
-Complete screen 15 as direct UI work: inspect the current `/dev-viewer`, create/revise a browser-reviewable HTML mock from the established visual direction, then use that exact mock revision as the implementation blueprint. Do not wait for a user approval phrase and do not invent product/API semantics.
+Complete screen 15 as direct UI work using the now-published browser-reviewable HTML mock as the exact layout/hierarchy blueprint. Do not wait for a user approval phrase and do not invent product/API semantics.
 
 ## Required presentation
 - Preserve information order: Simulation controls -> People -> Mock Battle Candidates.
@@ -19,10 +21,11 @@ Complete screen 15 as direct UI work: inspect the current `/dev-viewer`, create/
 - Reuse current shared shell/components where practical; do not fork a parallel design system.
 
 ## Mock/handoff contract
-1. Reuse any existing screen-15 mock/reference before creating a duplicate. If no current reviewable HTML mock exists, create `15_dev_viewer_mock_v01.html` in the established UI mock location.
-2. Record the exact mock filename/revision/path in the terminal result and in any Cursor continuation instruction.
-3. The mock is a visual/layout blueprint, not approval paperwork. Once coherent, proceed directly to safe implementation.
+1. Visual/layout blueprint is exactly `_handoff-artifacts/mocks/15_dev_viewer_mock_v01.html` as introduced by commit `f861b592b40e94cc89e6a297a4f6472924f37c74`.
+2. Record that mock path/revision in terminal result and any continuation instruction.
+3. The mock is implementation blueprint, not approval paperwork. Proceed directly to safe implementation.
 4. Preserve current API/DTO/test contracts and DEV-VIEWER-002 semantics. If a mock field is unsupported by current data, omit/secondary-display it rather than fabricate it.
+5. Sample names/values inside the mock are presentation placeholders only; production must render contract-backed live values.
 
 ## Verification
 - Focused Dev Viewer tests pass.
