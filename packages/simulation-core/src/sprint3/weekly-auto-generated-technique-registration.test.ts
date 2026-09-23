@@ -196,7 +196,8 @@ describe("S03-010 weekly auto generated-technique registration", () => {
       if (histories.length > 0) {
         history = histories[0];
         overlay =
-          registered.generatedTechniqueCatalogOverlay ?? createEmptyGeneratedTechniqueCatalogOverlay();
+          registered.generatedTechniqueCatalogOverlay ??
+          createEmptyGeneratedTechniqueCatalogOverlay();
         break;
       }
     }
