@@ -3,11 +3,12 @@
 status: READY
 owner: Role2
 workstream: UI 13 Events / 14 System Validation
-visual-blueprint: `13-14_events_validation_mock_v01.html`
+visual-blueprint: `_handoff-artifacts/mocks/13-14_events_validation_mock_v01.html`
+visual-blueprint-commit: `db4c890f89f3c6b021a6704d239d526a720ca3ca`
 authority: current master + established UI wireframe/intent
 
 ## Objective
-Implement the browser-reviewable Events and System Validation redesign against current master. The mock is the visual/layout blueprint, not approval paperwork. Preserve current product semantics and proactively fix obvious hierarchy, density, spacing, readability, responsive and navigation defects.
+Implement the browser-reviewable Events and System Validation redesign against current master. The canonical mock above is the visual/layout blueprint, not approval paperwork. Preserve current product semantics and proactively fix obvious hierarchy, density, spacing, readability, responsive and navigation defects.
 
 ## Required presentation
 ### 13 Events
@@ -33,7 +34,7 @@ Implement the browser-reviewable Events and System Validation redesign against c
 ## Verification
 1. Focused tests for touched Events/Validation UI/contracts pass.
 2. web typecheck and production build pass.
-3. Start the real web app and browser-compare Events and System Validation against `13-14_events_validation_mock_v01.html`.
+3. Start the real web app and browser-compare Events and System Validation against `_handoff-artifacts/mocks/13-14_events_validation_mock_v01.html` at blueprint commit `db4c890f89f3c6b021a6704d239d526a720ca3ca`.
 4. Compare both desktop and narrow widths.
 5. Material hierarchy/layout/readability/state-display divergence is FIX_REQUIRED and must be corrected before terminal PASS unless canonical semantics require the divergence; document only genuine semantic exceptions.
 6. Terminal evidence must record exact tested product SHA, commands, routes, widths and exact mock revision/path used as blueprint in `_handoff-artifacts/results/UI-EVENTS-VALIDATION-MOCK-V01-20260923-R2/result.md`.
