@@ -7,6 +7,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   isOriginalTechniqueLifecycleEnabled,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   type Sprint1RunSession,
 } from "@shared-world/simulation-core";
 import { afterEach, describe, expect, it } from "vitest";
@@ -149,6 +150,13 @@ describe("Sprint3 ordinary session activation (production start boundary)", () =
 
     const atStart = runtimeFromStore(app, sessionId);
     expect(atStart.context.sprint3Config).toBeDefined();
+    expect(atStart.context.sprint3Config!.configVersion).toBe(
+      SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
+    );
+    expect(
+      atStart.context.sprint3Config!.mentorshipFeatures.generatedTechniqueRegistrationEnabled,
+    ).toBe(true);
+    expect(atStart.context.sprint3Config!.generatedTechniqueMaterialization).toBeDefined();
     expect(isOriginalTechniqueLifecycleEnabled(atStart.context.sprint3Config!)).toBe(true);
     expect(atStart.runtimeState.mentorshipEntrypointRuntime).toBeDefined();
     expect(atStart.runtimeState.originalTechniqueLifecycleRuntime).toBeDefined();
@@ -183,5 +191,11 @@ describe("Sprint3 ordinary session activation (production start boundary)", () =
         beforeResearch ||
       afterOtl.foundingHistories.length !== otl.foundingHistories.length;
     expect(otlTouched).toBe(true);
+    const newFoundings = afterOtl.foundingHistories.length - otl.foundingHistories.length;
+    if (newFoundings > 0) {
+      expect(
+        after.runtimeState.generatedTechniqueCatalogOverlay?.definitions.length ?? 0,
+      ).toBeGreaterThan(0);
+    }
   }, 120_000);
 });

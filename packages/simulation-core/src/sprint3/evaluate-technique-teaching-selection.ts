@@ -8,6 +8,7 @@ import { teacherCanTeach } from "../sprint1/technique-teacher.js";
 import { failure, success } from "../validation.js";
 import type { ValidationIssue, ValidationResult } from "../validation.js";
 import {
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   TECHNIQUE_TEACHING_SELECTION_EVALUATION_POLICY,
@@ -38,6 +39,7 @@ function pushReason(reasons: string[], code: string): void {
 const TECHNIQUE_TEACHING_SELECTION_CONFIG_VERSIONS = new Set<string>([
   SPRINT3_CONFIG_VERSION_TECHNIQUE_TEACHING_SELECTION,
   SPRINT3_CONFIG_VERSION_ORIGINAL_TECHNIQUE_LIFECYCLE,
+  SPRINT3_CONFIG_VERSION_GENERATED_TECHNIQUE_REGISTRATION,
 ]);
 
 export function isTechniqueTeachingSelectionEnabled(config: Sprint3Config): boolean {
