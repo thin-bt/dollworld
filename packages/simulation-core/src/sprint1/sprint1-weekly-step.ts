@@ -51,6 +51,7 @@ import { validateWorldYearStartRuntimeState } from "./world-year-start-runtime-s
 import { validateTrainingProcessorRuntimeState } from "./training-processor-runtime-state.js";
 import { processOriginalTechniqueLifecycleWeek } from "../sprint3/process-original-technique-lifecycle-week.js";
 import { processOriginalTechniqueLossWeek } from "../sprint3/process-original-technique-loss-week.js";
+import { processWeeklyGeneratedTechniqueRegistrationFromOtlWeek } from "../sprint3/process-weekly-generated-technique-registration-from-otl-week.js";
 import { applyExplicitWeeklyTeachOutcomesToWorldState } from "../sprint3/apply-explicit-weekly-teach-outcomes-to-world-state.js";
 import { processExplicitWeeklyTeachWeek } from "../sprint3/process-explicit-weekly-teach-week.js";
 import { processTechniqueTeachingSelectionWeek } from "../sprint3/process-technique-teaching-selection-week.js";
@@ -786,6 +787,30 @@ function executeSprint1WeeklyTransitionDraft(
       return failure(prefixIssues(otlWeek.issues, "/originalTechniqueLifecycleWeek"));
     }
     working.originalTechniqueLifecycleRuntime = otlWeek.value.runtimeState;
+
+    const generatedTechniqueRegistrationWeek =
+      processWeeklyGeneratedTechniqueRegistrationFromOtlWeek({
+        ...(session.context.sprint3Config === undefined
+          ? {}
+          : { sprint3Config: session.context.sprint3Config }),
+        techniqueCatalog: session.context.techniqueCatalog,
+        originalTechniqueLifecycleRuntime: working.originalTechniqueLifecycleRuntime,
+        ...(working.generatedTechniqueCatalogOverlay === undefined
+          ? {}
+          : { generatedTechniqueCatalogOverlay: working.generatedTechniqueCatalogOverlay }),
+      });
+    if (!generatedTechniqueRegistrationWeek.ok) {
+      return failure(
+        prefixIssues(
+          generatedTechniqueRegistrationWeek.issues,
+          "/weeklyGeneratedTechniqueRegistrationFromOtl",
+        ),
+      );
+    }
+    if (generatedTechniqueRegistrationWeek.value.generatedTechniqueCatalogOverlay !== undefined) {
+      working.generatedTechniqueCatalogOverlay =
+        generatedTechniqueRegistrationWeek.value.generatedTechniqueCatalogOverlay;
+    }
 
     const otlLossWeek = processOriginalTechniqueLossWeek({
       absoluteWeek: working.worldState.worldDate.absoluteWeek,
