@@ -176,11 +176,15 @@ function runOtlThenRegistration(runSeed: number) {
       runtimeState: seededOtlRuntime(runSeed),
     }),
   );
+  const runtimeState = otlWeek.runtimeState;
+  if (runtimeState === undefined) {
+    throw new Error("expected OTL runtime state after weekly processing");
+  }
   const registered = expectOk(
     processWeeklyGeneratedTechniqueRegistrationFromOtlWeek({
       sprint3Config: config100,
       techniqueCatalog: baseCatalog,
-      originalTechniqueLifecycleRuntime: otlWeek.runtimeState,
+      originalTechniqueLifecycleRuntime: runtimeState,
     }),
   );
   return { otlWeek, registered };
@@ -232,13 +236,14 @@ describe("S03-010 weekly auto generated-technique registration", () => {
       const { otlWeek, registered } = runOtlThenRegistration(runSeed);
       if ((registered.generatedTechniqueCatalogOverlay?.definitions.length ?? 0) > 0) {
         otlRuntime = otlWeek.runtimeState;
+        expect(otlRuntime).toBeDefined();
         const overlay = registered.generatedTechniqueCatalogOverlay;
         const replay = expectOk(
           processWeeklyGeneratedTechniqueRegistrationFromOtlWeek({
             sprint3Config: config100,
             techniqueCatalog: baseCatalog,
-            originalTechniqueLifecycleRuntime: otlRuntime,
-            generatedTechniqueCatalogOverlay: overlay,
+            originalTechniqueLifecycleRuntime: otlRuntime!,
+            ...(overlay === undefined ? {} : { generatedTechniqueCatalogOverlay: overlay }),
           }),
         );
         expect(replay.generatedTechniqueCatalogOverlay?.definitions).toHaveLength(1);
@@ -268,11 +273,13 @@ describe("S03-010 weekly auto generated-technique registration", () => {
         },
       }),
     );
+    const runtimeState = otlWeek.runtimeState;
+    expect(runtimeState).toBeDefined();
     const registered = expectOk(
       processWeeklyGeneratedTechniqueRegistrationFromOtlWeek({
         sprint3Config: config100,
         techniqueCatalog: baseCatalog,
-        originalTechniqueLifecycleRuntime: otlWeek.runtimeState,
+        originalTechniqueLifecycleRuntime: runtimeState!,
       }),
     );
     expect(registered.generatedTechniqueCatalogOverlay).toBeUndefined();
@@ -294,11 +301,13 @@ describe("S03-010 weekly auto generated-technique registration", () => {
 
   it("WAR-006 registration disabled config is a no-op", () => {
     const { otlWeek } = runOtlThenRegistration(200);
+    const runtimeState = otlWeek.runtimeState;
+    expect(runtimeState).toBeDefined();
     const registered = expectOk(
       processWeeklyGeneratedTechniqueRegistrationFromOtlWeek({
         sprint3Config: config090,
         techniqueCatalog: baseCatalog,
-        originalTechniqueLifecycleRuntime: otlWeek.runtimeState,
+        originalTechniqueLifecycleRuntime: runtimeState!,
       }),
     );
     expect(registered.generatedTechniqueCatalogOverlay).toBeUndefined();
