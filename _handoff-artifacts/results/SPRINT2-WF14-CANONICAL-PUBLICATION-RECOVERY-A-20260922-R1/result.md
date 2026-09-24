@@ -5,67 +5,49 @@ terminal: SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS
 verificationOutcome: PASS
 resultClass: CANONICAL_PUBLICATION_RECOVERY
 lane: A
-updatedAt: 2026-09-22T20:02:00+09:00
+updatedAt: 2026-09-25T07:20:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 predecessor: SPRINT2-WF14-TOURNAMENT-DISPLAY-NAME-A-20260922-R1
-origin-master-at-pickup: b6498808beb03b834eb9f02347281acb6a78b403
+origin-master-at-pickup: 725746b99a94ea147f4969f3452b00f69da6fb1e
 publication-commit: 134d27ef5da53f73aea91fde57ddc7411cde35c0
-readback-tip: 134d27ef5da53f73aea91fde57ddc7411cde35c0
+readback-tip: 725746b99a94ea147f4969f3452b00f69da6fb1e
 unpublished-product-delta: none
-pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
-production-change: YES (published)
+pickup: ACTIVE_DIFFERENT_TASK / SDK_EXECUTOR / CURSOR-START-001
+production-change: NO (already on canonical master; this run re-readback + verify only)
 documentation-change: NO
 
 ## Summary
 
-Published the verified predecessor WF-14 tournament display-name product delta to canonical `thin-bt/dollworld` `master`, then fetched and read back `origin/master` to prove the publication commit is tip and ancestor. Focused post-publication verification passed on published bytes. Sprint2 **CLOSED** not assigned. No Cursor B2 control files read or written.
+Fresh-read confirmed the predecessor WF-14 tournament display-name product delta is **already published** on canonical `thin-bt/dollworld` `master` at commit `134d27ef`. Fetched `origin/master` @ `725746b9`, proved `134d27e` is an ancestor of tip, verified all predecessor paths on readback, and ran focused post-publication checks on a detached worktree at `origin/master` (**7/7** vitest, typechecks, web build). No additional push required. Sprint2 **CLOSED** not assigned. No Cursor B2 control files read or written.
 
-## Publication
+## Publication (canonical state)
 
 | Item | Value |
 |------|--------|
-| Pre-publish `origin/master` | `b6498808beb03b834eb9f02347281acb6a78b403` |
-| Publication commit | `134d27ef5da53f73aea91fde57ddc7411cde35c0` |
-| Push ref | `master -> master` (`b649880..134d27e`) |
-| Readback `origin/master` @ terminal | `134d27ef5da53f73aea91fde57ddc7411cde35c0` |
-| `merge-base --is-ancestor` publication → tip | **YES** |
+| Publication commit (historical push) | `134d27ef5da53f73aea91fde57ddc7411cde35c0` |
+| Readback `origin/master` @ terminal | `725746b99a94ea147f4969f3452b00f69da6fb1e` |
+| `merge-base --is-ancestor` `134d27e` → tip | **YES** |
+| `merge-base --is-ancestor` predecessor pickup `8ec56cd` → tip | **YES** |
+| New push this run | **none** (delta already present) |
 
-Predecessor delta was local-only (uncommitted on pickup worktree atop historical `8ec56cd`); after fast-forward to `b649880`, committed **15 paths / +212 −15** matching predecessor `SPRINT2-WF14-TOURNAMENT-DISPLAY-NAME-A-20260922-R1` scope only. Unrelated local deletion of `sprint3-completed-master-intake-outcome-semantic-invariant.test.ts` was **not** published.
+Publication message on canonical master: `fix(sprint2): publish WF-14 tournament display names to canonical master`.
 
-## Readback evidence (GitHub canonical master)
+## Readback evidence (GitHub canonical master @ `725746b9`)
 
-- `packages/simulation-core/src/sprint2/tournament-display-name.ts` present on `origin/master` with `resolveTournamentDisplayName` and `normal:F` → `春風杯` mapping.
-- `apps/web/src/server/ui009/competition-tournament-display-name.test.ts` present on `origin/master`.
-- Publication commit message: `fix(sprint2): publish WF-14 tournament display names to canonical master`.
+- `packages/simulation-core/src/sprint2/tournament-display-name.ts` — `resolveTournamentDisplayName` present.
+- `packages/simulation-core/src/sprint2/sprint2-tournament-display-name.test.ts` — present.
+- `apps/web/src/server/ui009/competition-tournament-display-name.test.ts` — present.
+- `apps/web/src/client/competition/competition-schedule-matrix.tsx` — present.
+- All other predecessor paths from `SPRINT2-WF14-TOURNAMENT-DISPLAY-NAME-A-20260922-R1` remain on `origin/master`.
 
-## Changed paths (published)
-
-| Path | Delta |
-|------|--------|
-| `packages/simulation-core/src/sprint2/tournament-display-name.ts` | **New** |
-| `packages/simulation-core/src/sprint2/sprint2-tournament-display-name.test.ts` | **New** |
-| `packages/simulation-core/src/sprint2/types.ts` | `seriesKey` on read-model entry |
-| `packages/simulation-core/src/sprint2/tournament-schedule-read-model.ts` | Project `seriesKey` |
-| `packages/simulation-core/src/index.ts` | Export resolver |
-| `apps/web/src/server/ui009/competition-schedule-overview.ts` | Schedule projection |
-| `apps/web/src/server/ui009/map-competition-view.ts` | Active tournament display name |
-| `apps/web/src/server/ui009/competition-engine.ts` | Idle pre-start preview |
-| `apps/web/src/server/ui009/competition-wireframe-observation.ts` | History summary |
-| `apps/web/src/server/ui009/types.ts` | View contract |
-| `apps/web/src/server/ui009/competition-tournament-display-name.test.ts` | **New** |
-| `apps/web/src/server/ui009.competition.test.ts` | Non-ID name assertion |
-| `apps/web/src/client/competition/ui009-views.ts` | Client types |
-| `apps/web/src/client/competition/CompetitionPage.tsx` | Detail + result rendering |
-| `apps/web/src/client/competition/competition-schedule-matrix.tsx` | Schedule cell labels |
-
-## Verification (post-publication @ `134d27e`)
+## Verification (published bytes @ worktree `725746b9`)
 
 | Check | Result |
 |-------|--------|
-| Inbox PREPARED + instruction + status fresh-read | **PASS** |
-| A ACTIVE lock (CURSOR-START-001) | **PASS** |
+| Inbox PREPARED + instruction + Sprint2/Sprint3 status fresh-read | **PASS** |
+| A ACTIVE lock before work (CURSOR-START-001) | **PASS** |
 | `npm run build -w @shared-world/simulation-core` | **PASS** |
 | Focused `vitest run` (4 files) | **PASS** — **7/7** |
 | `npm run typecheck -w @shared-world/simulation-core` | **PASS** |
@@ -73,8 +55,10 @@ Predecessor delta was local-only (uncommitted on pickup worktree atop historical
 | `npm run build -w @shared-world/web` | **PASS** |
 | Full root `npm run check` | **NOT RUN** (separate release-gate task) |
 
+Worktree: `_handoff-artifacts/control-tmp/wf14-readback-verify-wt-20260925` @ detached `725746b9`.
+
 ```powershell
-cd D:\xampp\htdocs\dollworld
+cd D:\xampp\htdocs\dollworld\_handoff-artifacts\control-tmp\wf14-readback-verify-wt-20260925
 npm run build -w @shared-world/simulation-core
 npx vitest run `
   packages/simulation-core/src/sprint2/sprint2-tournament-display-name.test.ts `
@@ -86,11 +70,6 @@ npm run typecheck -w @shared-world/web
 npm run build -w @shared-world/web
 ```
 
-## Workspace hygiene
-
-- Root control defect `_handoff-artifacts/.tmp.driveupload/` moved to `_handoff-artifacts/control-tmp/.tmp.driveupload-migrated-20260922/` (same run).
-- Conflicting untracked handoff mirrors backed up under `_handoff-artifacts/control-tmp/wf14-publish-untracked-backup-20260922/` before fast-forward to canonical master.
-
 ## Terminal
 
-**SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS** — WF-14 tournament display-name bytes live on GitHub canonical master @ `134d27e`; readback and focused verification confirm publication complete; no remaining unpublished predecessor product delta.
+**SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS** — WF-14 tournament display-name bytes live on GitHub canonical master; fresh readback @ `725746b9` and focused verification confirm publication complete; no remaining unpublished predecessor product delta.
