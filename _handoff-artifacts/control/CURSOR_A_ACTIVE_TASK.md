@@ -4,13 +4,12 @@ state: IDLE
 lane: A
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-25T07:20:00+09:00
-pickup: (none)
+updatedAt: 2026-09-25T08:40:00+09:00
+pickup: SDK_EXECUTOR / CURSOR-START-001
 branch: master
 control-authority: GitHub
 last-completed-task: SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1
 last-result-path: _handoff-artifacts/results/SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1/result.md
-last-terminal: SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
