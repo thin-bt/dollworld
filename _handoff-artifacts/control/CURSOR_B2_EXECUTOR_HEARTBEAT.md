@@ -1,18 +1,18 @@
 # Cursor B2 SDK executor heartbeat
 executor: cursor-sdk-local
-status: IDLE
+status: INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-25T03:52:57+09:00
-lastPollResult: INVOKED
+lastPollAt: 2026-09-25T04:37:28+09:00
+lastPollResult: INVOKING
 lastInvokedTaskKey: UI-PAGE-MOCK-CURRENT-SCREENSHOTS-B2-20260922-R1
-lastInvokedAt: 2026-09-25T03:47:20+09:00
-lastAgentRunId: run-38b00a29-9cde-4dd5-9833-8a7ae2206d7b
-lastError: githubPublish:NO_LOCAL_TERMINAL
-pid: 27924
-phase: 
-activeTaskKey: 
+lastInvokedAt: 2026-09-25T04:37:28+09:00
+lastAgentRunId: 
+lastError: 
+pid: 35112
+phase: INVOKING
+activeTaskKey: UI-PAGE-MOCK-CURRENT-SCREENSHOTS-B2-20260922-R1
 elapsedSeconds: 
-processAlive: 
+processAlive: true
 memoryRssMb: 
 childPid: 
 childObserved: 
