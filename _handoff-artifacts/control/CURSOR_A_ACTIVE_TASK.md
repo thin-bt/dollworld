@@ -1,17 +1,16 @@
 # Cursor A Active Task
 
-state: ACTIVE
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1
-mode: BROWSER_ACCEPTANCE_FIX_IF_REQUIRED
-updatedAt: 2026-09-25T05:30:00+09:00
-pickup: RECOVERY_SAME_TASK_ACTIVE / SDK_EXECUTOR / CURSOR-START-001 / verification-resume-r32
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-25T07:20:00+09:00
+pickup: (none)
 branch: master
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1/instruction.md
 control-authority: GitHub
-last-completed-task: UI-BATTLE-SHARED-MOCK-V03-20260923-R2
-last-result-path: _handoff-artifacts/results/UI-BATTLE-SHARED-MOCK-V03-20260923-R2/result.md
-recovery-note: r32 — vitest fixture probe then fixed-seed Chrome e2e; terminal result.md
+last-completed-task: SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1
+last-result-path: _handoff-artifacts/results/SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1/result.md
+last-terminal: SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
