@@ -3,7 +3,7 @@
 state: REOPENED_FIX_REQUIRED
 sprint: Sprint3
 control-authority: GitHub
-updatedAt: 2026-09-23
+updatedAt: 2026-09-24
 previous-state: CLOSED
 reopen-trigger: CURRENT_MASTER_WEB_BUILD_FAILURE
 reopen-trigger-status: SUPERSEDED_BY_TERMINAL_EVIDENCE
@@ -40,4 +40,5 @@ Sprint3 was reopened when **current master** was reported failing web production
 - **S03-010 production activation (terminal):** ordinary web Sprint3 sessions now bind `createSprint3Balance100ConfigInput()` and production-bound weekly steps validate generated-technique registration/materialization; exact-lineage gate is canonical @ **`37d6ed4`**.
 - **S03-010 browser residual:** dedicated long-run real-browser OTL founding → generated-technique registration → battle catalog consumption evidence is not established by the production-binding task; do not relabel Person Detail browser evidence as this slice.
 - **S03-006 ordinary-flow residual:** no dedicated real-browser ordinary weekly `train_stat` evidence with live family-derived `parent_temporary_guidance`; see `ROLE1-S03-006-ORDINARY-FLOW-ACCEPTANCE-RESIDUAL-20260923-R14`.
-- Do not return Sprint3 to **CLOSED** until PM/control assigns formal closure with independently proven applicable current-master gates and UI acceptance.
+- **Transmission/lineage Person Detail product/UI residual:** `SPRINT3-TRANSMISSION-LINEAGE-PERSON-DETAIL-UI-20260924-R1` remains a canonical READY obligation with no terminal implementation/browser result. `PROJECT_ROADMAP.md` keeps `流派・系譜` in Sprint3 stable primary scope. This residual was reconciled into the binding status after `ROLE3-S03-CLOSURE-STATUS-OMISSION-GAP-20260924-R31`; absence from earlier status revisions never implied closure or cancellation.
+- Do not return Sprint3 to **CLOSED** until PM/control assigns formal closure with independently proven applicable current-master gates and UI acceptance, including resolution or explicit canonical supersession of all three residuals above.
