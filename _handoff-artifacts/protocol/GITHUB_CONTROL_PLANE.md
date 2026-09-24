@@ -15,7 +15,6 @@ authority: GitHub `thin-bt/dollworld` / `master`
 8. Workspace-preservation is mandatory. Never run `git stash -u`, `git stash --include-untracked`, `git clean -fd`, `git clean -fdx`, or any equivalent command that removes untracked files from the working tree unless the exact affected paths have first been proven disposable and the command is explicitly scoped so that `_handoff-artifacts/tools/**`, local executor launchers, and other persistent operator tools are excluded.
 9. Before any merge/rebase/publication recovery that needs a stash, enumerate untracked paths first. If any persistent operator/control file is untracked, preserve it in place or use a tracked-only stash. A broad untracked stash is a control defect.
 10. If a stash operation makes a persistent local tool disappear, recovery is immediate and same-run: restore only the affected persistent paths from the stash, verify their local presence, leave the stash intact unless separately authorized, and record the incident. Do not require the user to restore it manually.
-11. `_handoff-artifacts/specs/**` and `_handoff-artifacts/tools/**` are persistent project assets. Do not delete, purge, archive away, stash out, or omit them merely because they are untracked or because a task commit also changes implementation files. When a task legitimately creates or updates files in either subtree, include those task-relevant files in the same task commit unless the current task explicitly forbids committing them or they are proven disposable generated scratch. Broad cleanup must treat both subtrees as preservation boundaries.
 
 ## Canonical path map
 
@@ -24,6 +23,8 @@ authority: GitHub `thin-bt/dollworld` / `master`
 - sprint status: `_handoff-artifacts/control/SPRINT2_STATUS.md` (and equivalent future sprint status files)
 - task instructions: `_handoff-artifacts/tasks/<task-key>/instruction.md`
 - task results: `_handoff-artifacts/results/<task-key>/result.md`
+- executor Active (diagnostic): `_handoff-artifacts/control/CURSOR_A_ACTIVE_TASK.md`, `_handoff-artifacts/control/CURSOR_B2_ACTIVE_TASK.md`
+- executor heartbeat (diagnostic): `_handoff-artifacts/control/CURSOR_A_EXECUTOR_HEARTBEAT.md`, `_handoff-artifacts/control/CURSOR_B2_EXECUTOR_HEARTBEAT.md`
 
 ## Execution-state contract
 
@@ -31,6 +32,8 @@ Cursor execution lanes A/B2 use canonical GitHub inbox state for dispatch:
 `IDLE -> PREPARED -> TERMINAL -> IDLE`.
 
 While the compatibility executor is still in use, transient ACTIVE claim/execution state may be held in executor-local / Drive compatibility state. It is not a second source of authority. A terminal GitHub result must bind the exact task-key and evidence.
+
+The SDK executor must also mirror Active + heartbeat into the GitHub-readable control paths above on each invoke transition (`INVOKING` / invoke-complete / invoke-error). PM/Role1 may use those diagnostic files as fresh pickup evidence. Absence of a fresh matching heartbeat with `INVOKING` / `AGENT_PROMPT_RUNNING` (or Active `ACTIVE` for the same task-key) means the PREPARED task is still treated as unclaimed for dispatch overwrite decisions. Inbox files remain the only assignment authority; diagnostic Active/heartbeat never authorize overwriting a PREPARED inbox by themselves.
 
 Role1/Role2/Role3 are direct-execution automation roles. They have no canonical ROLE*_INBOX queue and must not wait on one. Historical ROLE*_INBOX files are retired and removed from the live control directory.
 
@@ -48,5 +51,4 @@ The bridge itself must be removed once GitHub polling/materialization is operati
 - The project root `_handoff-artifacts/` is for canonical top-level structure only. Do not create transient `.tmp-*`, stash/asides, verification worktrees, publish scratch, merge scratch, or recovery scratch directly under it.
 - All transient local/Drive scratch must live under `_handoff-artifacts/control-tmp/` (or an explicitly task-scoped descendant). Temporary artifacts must be cleaned up or archived after use; creating another root-level temp directory is a control defect that must be corrected in the same run.
 - Historical recovery bundles and obsolete verification sandboxes belong under `_handoff-artifacts/audit/archive/`, not at project root. Moving them is organizational only and does not make them canonical authority.
-- `_handoff-artifacts/tools/**` is persistent operator tooling, not transient scratch. It must never be removed, stashed out of the working tree, archived, or mirrored away by broad cleanup/recovery commands. Task-relevant additions/changes should be committed with the task.
-- `_handoff-artifacts/specs/**` is persistent project specification/mirror material, not root scratch. Broad cleanup/recovery must not delete or stash it away. Task-relevant additions/changes should be committed with the task. A `specs/current` refresh may remove an individual obsolete mirror file only when `SPEC_SYNC.md` proves that exact file is no longer part of the authoritative mirror scope; this narrow mirror refresh exception never authorizes deleting the subtree or unrelated spec/proposal files.
+- `_handoff-artifacts/tools/**` is persistent operator tooling, not transient scratch. It must never be removed, stashed out of the working tree, archived, or mirrored away by broad cleanup/recovery commands.
