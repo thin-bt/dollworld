@@ -2,13 +2,13 @@
 executor: cursor-sdk-local
 status: IDLE
 pollInterval: 5m
-lastPollAt: 2026-09-25T11:09:53+09:00
+lastPollAt: 2026-09-25T12:34:46+09:00
 lastPollResult: INVOKED_GITHUB_PUBLISHED
-lastInvokedTaskKey: SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1
-lastInvokedAt: 2026-09-25T11:02:20+09:00
-lastAgentRunId: run-5bb066bb-f01c-4837-b57e-9ad5b5aa3ac0
+lastInvokedTaskKey: SPRINT3-TRANSMISSION-LINEAGE-PERSON-DETAIL-UI-20260924-R1
+lastInvokedAt: 2026-09-25T11:53:42+09:00
+lastAgentRunId: run-7889dbed-1115-4094-9efe-0894d41f6ccd
 lastError: 
-pid: 53756
+pid: 18328
 phase: 
 activeTaskKey: 
 elapsedSeconds: 
