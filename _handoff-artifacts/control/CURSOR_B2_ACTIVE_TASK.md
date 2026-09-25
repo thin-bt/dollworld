@@ -1,14 +1,15 @@
 # Cursor B2 Active Task
 
-state: IDLE
+state: ACTIVE
 lane: B2
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-25T18:15:00+09:00
-pickup: (none)
-instruction-path: (none)
+task-key: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
+mode: BROWSER_ACCEPTANCE_FIX_IF_REQUIRED
+updatedAt: 2026-09-25T20:45:00+09:00
+pickup: RECOVERY_SAME_TASK_ACTIVE
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/instruction.md
 control-authority: GitHub
-result-path: (none)
+result-path: _handoff-artifacts/results/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/result.md
+recovery-phase: bounded-verification-run-1
 last-completed: UI-PAGE-MOCK-CURRENT-SCREENSHOTS-B2-20260922-R1
 last-result-path: _handoff-artifacts/results/UI-PAGE-MOCK-CURRENT-SCREENSHOTS-B2-20260922-R1/result.md
 
