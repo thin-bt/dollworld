@@ -4,12 +4,12 @@ state: IDLE
 lane: B2
 task-key:
 mode:
-updatedAt: 2026-09-26T03:48:00+09:00
+updatedAt: 2026-09-26T05:00:00+09:00
 pickup:
 verification-attempt:
 instruction-path:
 control-authority: GitHub
-result-path:
+result-path: _handoff-artifacts/results/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/result.md
 recovery-phase: terminal-published
 executor: Cursor-B2-SDK
 last-completed-task-key: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
