@@ -1,14 +1,14 @@
 # Cursor A Active Task
 
-state: ACTIVE
+state: IDLE
 lane: A
-task-key: SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1
-mode: BROWSER_ACCEPTANCE_FIX_IF_REQUIRED
-updatedAt: 2026-09-26T02:45:00+09:00
-pickup: SDK_EXECUTOR / CURSOR-START-001 / RECOVERY_SAME_TASK_ACTIVE / R50_EVIDENCE_RUN
+task-key:
+mode:
+updatedAt: 2026-09-26T04:10:00+09:00
+pickup:
 branch: master
 control-authority: GitHub
-instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1/instruction.md
+instruction-path:
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
