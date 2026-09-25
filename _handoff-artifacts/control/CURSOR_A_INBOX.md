@@ -1,15 +1,16 @@
 # Cursor A Inbox
-state: PREPARED
+state: IDLE
 lane: A
-task-key: SPRINT3-TRANSMISSION-LINEAGE-PERSON-DETAIL-UI-20260924-R1
-mode: PRODUCT_UI_IMPLEMENTATION
-updatedAt: 2026-09-25T11:53:00+09:00
-instruction-path: _handoff-artifacts/tasks/SPRINT3-TRANSMISSION-LINEAGE-PERSON-DETAIL-UI-20260924-R1/instruction.md
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-25T12:33:59+09:00
+last-consumed-task-key: SPRINT3-TRANSMISSION-LINEAGE-PERSON-DETAIL-UI-20260924-R1
+last-terminal: SPRINT3_TRANSMISSION_LINEAGE_PERSON_DETAIL_UI_IMPLEMENTED_BROWSER_RESIDUAL
+last-result-path: _handoff-artifacts/results/SPRINT3-TRANSMISSION-LINEAGE-PERSON-DETAIL-UI-20260924-R1/result.md
 control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
-sprint: Sprint3
-priority: DEADLINE_RECOVERY
+sprint: Sprint2
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
