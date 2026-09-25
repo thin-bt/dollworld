@@ -2,13 +2,13 @@
 executor: cursor-sdk-local
 status: IDLE
 pollInterval: 5m
-lastPollAt: 2026-09-25T16:34:14+09:00
+lastPollAt: 2026-09-25T17:24:26+09:00
 lastPollResult: INVOKED
 lastInvokedTaskKey: UI-PAGE-MOCK-CURRENT-SCREENSHOTS-B2-20260922-R1
-lastInvokedAt: 2026-09-25T16:29:54+09:00
-lastAgentRunId: run-5b849d59-fe06-4002-81bf-0cdb510c6a57
+lastInvokedAt: 2026-09-25T17:19:58+09:00
+lastAgentRunId: run-4c712cfd-b9de-4b9c-b550-43fc53b612ec
 lastError: githubPublish:NO_LOCAL_TERMINAL
-pid: 27756
+pid: 22068
 phase: 
 activeTaskKey: 
 elapsedSeconds: 
