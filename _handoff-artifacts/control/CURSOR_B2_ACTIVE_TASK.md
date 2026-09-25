@@ -1,19 +1,17 @@
 # Cursor B2 Active Task
 
-state: IDLE
+state: ACTIVE
 lane: B2
-task-key:
-mode:
-updatedAt: 2026-09-26T05:00:00+09:00
-pickup:
-verification-attempt:
-instruction-path:
+task-key: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
+mode: BROWSER_ACCEPTANCE_FIX_IF_REQUIRED
+updatedAt: 2026-09-26T05:05:00+09:00
+pickup: PREPARED
+verification-attempt: bounded-run-3-post-finalize-replay-fix
+instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/instruction.md
 control-authority: GitHub
 result-path: _handoff-artifacts/results/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/result.md
-recovery-phase: terminal-published
+recovery-phase: in-progress
 executor: Cursor-B2-SDK
-last-completed-task-key: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
-last-result-class: FIX_REQUIRED
 
 Rules:
 - Cursor B2 writes ACTIVE lock before B2 verification work.

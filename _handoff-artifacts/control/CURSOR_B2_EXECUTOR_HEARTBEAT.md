@@ -1,14 +1,14 @@
 # Cursor B2 SDK executor heartbeat
 executor: cursor-sdk-local
-status: INVOKING
+status: RECOVERY_INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-26T05:03:59+09:00
-lastPollResult: INVOKING
+lastPollAt: 2026-09-26T05:54:00+09:00
+lastPollResult: RECOVERY_INVOKING
 lastInvokedTaskKey: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
-lastInvokedAt: 2026-09-26T05:03:59+09:00
+lastInvokedAt: 2026-09-26T05:54:00+09:00
 lastAgentRunId: 
 lastError: 
-pid: 17736
+pid: 42104
 phase: INVOKING
 activeTaskKey: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
 elapsedSeconds: 
