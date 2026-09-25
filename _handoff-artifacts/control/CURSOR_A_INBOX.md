@@ -3,7 +3,7 @@ state: IDLE
 lane: A
 task-key: (none)
 mode: (none)
-updatedAt: 2026-09-25T08:43:42+09:00
+updatedAt: 2026-09-25T09:18:32+09:00
 last-consumed-task-key: SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1
 last-terminal: SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS
 last-result-path: _handoff-artifacts/results/SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1/result.md

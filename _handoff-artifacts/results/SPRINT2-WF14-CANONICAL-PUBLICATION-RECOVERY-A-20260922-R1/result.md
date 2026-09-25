@@ -5,44 +5,44 @@ terminal: SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS
 verificationOutcome: PASS
 resultClass: CANONICAL_PUBLICATION_RECOVERY
 lane: A
-updatedAt: 2026-09-25T08:40:00+09:00
+updatedAt: 2026-09-25T09:18:00+09:00
 control-authority: GitHub
 canonical-repository: thin-bt/dollworld
 canonical-branch: master
 predecessor: SPRINT2-WF14-TOURNAMENT-DISPLAY-NAME-A-20260922-R1
-origin-master-at-pickup: 471eccdf42099452007b4038da301fddfc12e381
+origin-master-at-pickup: 75a000391f20a427488aa5b0eddd00b771d6bd8f
 publication-commit: 134d27ef5da53f73aea91fde57ddc7411cde35c0
-readback-tip: 471eccdf42099452007b4038da301fddfc12e381
+readback-tip: 75a000391f20a427488aa5b0eddd00b771d6bd8f
 unpublished-product-delta: none
-pickup: ACTIVE_DIFFERENT_TASK / SDK_EXECUTOR / CURSOR-START-001
+pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
 production-change: NO (already on canonical master; this run re-readback + verify only)
 documentation-change: NO
 
 ## Summary
 
-Fresh-read confirmed the predecessor WF-14 tournament display-name product delta is **already published** on canonical `thin-bt/dollworld` `master` at commit `134d27ef`. Fetched `origin/master` @ `471eccdf`, proved `134d27e` is an ancestor of tip, verified all predecessor paths on readback, and ran focused post-publication checks on a detached worktree at `origin/master` (**7/7** vitest, typechecks, web build). No additional push required. Sprint2 **CLOSED** not assigned. No Cursor B2 control files read or written.
+Fresh `git fetch origin master` @ **`75a00039`** confirms the predecessor WF-14 tournament display-name product delta remains **published** on canonical `thin-bt/dollworld` `master` at commit **`134d27ef`**. Proved **`134d27e`** and predecessor pickup **`8ec56cd`** are ancestors of tip, verified all predecessor paths on readback, and ran focused post-publication checks on detached worktree @ **`75a00039`** (**7/7** vitest, typechecks, web build **PASS**). No additional push required. Sprint2 **CLOSED** not assigned. No Cursor B2 control files read or written.
 
 ## Publication (canonical state)
 
 | Item | Value |
 |------|--------|
 | Publication commit (historical push) | `134d27ef5da53f73aea91fde57ddc7411cde35c0` |
-| Readback `origin/master` @ terminal | `471eccdf42099452007b4038da301fddfc12e381` |
+| Readback `origin/master` @ terminal | `75a000391f20a427488aa5b0eddd00b771d6bd8f` |
 | `merge-base --is-ancestor` `134d27e` → tip | **YES** |
 | `merge-base --is-ancestor` predecessor pickup `8ec56cd` → tip | **YES** |
 | New push this run | **none** (delta already present) |
 
 Publication message on canonical master: `fix(sprint2): publish WF-14 tournament display names to canonical master`.
 
-## Readback evidence (GitHub canonical master @ `471eccdf`)
+## Readback evidence (GitHub canonical master @ `75a00039`)
 
-- `packages/simulation-core/src/sprint2/tournament-display-name.ts` — `resolveTournamentDisplayName` present.
+- `packages/simulation-core/src/sprint2/tournament-display-name.ts` — `resolveTournamentDisplayName` present (blob `6c8b6a99…`).
 - `packages/simulation-core/src/sprint2/sprint2-tournament-display-name.test.ts` — present.
-- `apps/web/src/server/ui009/competition-tournament-display-name.test.ts` — present.
-- `apps/web/src/client/competition/competition-schedule-matrix.tsx` — present.
+- `apps/web/src/server/ui009/competition-tournament-display-name.test.ts` — present (blob `d6b84dee…`).
+- `apps/web/src/client/competition/competition-schedule-matrix.tsx` — present (blob `48424741…`).
 - All other predecessor paths from `SPRINT2-WF14-TOURNAMENT-DISPLAY-NAME-A-20260922-R1` remain on `origin/master`.
 
-## Verification (published bytes @ worktree `471eccdf`)
+## Verification (published bytes @ worktree `75a00039`)
 
 | Check | Result |
 |-------|--------|
@@ -55,7 +55,7 @@ Publication message on canonical master: `fix(sprint2): publish WF-14 tournament
 | `npm run build -w @shared-world/web` | **PASS** |
 | Full root `npm run check` | **NOT RUN** (separate release-gate task) |
 
-Worktree: `_handoff-artifacts/control-tmp/wf14-readback-verify-wt-20260925-r2` @ detached `471eccdf`.
+Worktree: `_handoff-artifacts/control-tmp/wf14-readback-verify-wt-20260925-r2` @ detached `75a00039`.
 
 ```powershell
 cd D:\xampp\htdocs\dollworld\_handoff-artifacts\control-tmp\wf14-readback-verify-wt-20260925-r2
@@ -72,4 +72,4 @@ npm run build -w @shared-world/web
 
 ## Terminal
 
-**SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS** — WF-14 tournament display-name bytes live on GitHub canonical master; fresh readback @ `471eccdf` and focused verification confirm publication complete; no remaining unpublished predecessor product delta.
+**SPRINT2_WF14_CANONICAL_PUBLICATION_RECOVERY_A_PASS** — WF-14 tournament display-name bytes live on GitHub canonical master; fresh readback @ `75a00039` and focused verification confirm publication complete; no remaining unpublished predecessor product delta.
