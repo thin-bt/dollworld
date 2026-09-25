@@ -2,13 +2,13 @@
 executor: cursor-sdk-local
 status: RECOVERY_INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-25T17:19:56+09:00
+lastPollAt: 2026-09-25T18:09:58+09:00
 lastPollResult: RECOVERY_INVOKING
 lastInvokedTaskKey: SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1
-lastInvokedAt: 2026-09-25T17:19:56+09:00
+lastInvokedAt: 2026-09-25T18:09:58+09:00
 lastAgentRunId: 
 lastError: 
-pid: 22068
+pid: 47556
 phase: INVOKING
 activeTaskKey: SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1
 elapsedSeconds: 
