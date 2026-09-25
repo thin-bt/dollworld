@@ -1,14 +1,14 @@
 # Cursor A SDK executor heartbeat
 executor: cursor-sdk-local
-status: INVOKING
+status: RECOVERY_INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-25T15:39:52+09:00
-lastPollResult: INVOKING
+lastPollAt: 2026-09-25T17:19:56+09:00
+lastPollResult: RECOVERY_INVOKING
 lastInvokedTaskKey: SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1
-lastInvokedAt: 2026-09-25T15:39:52+09:00
+lastInvokedAt: 2026-09-25T17:19:56+09:00
 lastAgentRunId: 
 lastError: 
-pid: 39636
+pid: 22068
 phase: INVOKING
 activeTaskKey: SPRINT3-S03-006-ORDINARY-PARENT-GUIDANCE-BROWSER-A-20260923-R1
 elapsedSeconds: 
