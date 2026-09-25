@@ -1,18 +1,18 @@
 # Cursor A SDK executor heartbeat
 executor: cursor-sdk-local
-status: IDLE
+status: INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-25T08:44:47+09:00
-lastPollResult: INVOKED_GITHUB_PUBLISHED
+lastPollAt: 2026-09-25T09:07:16+09:00
+lastPollResult: INVOKING
 lastInvokedTaskKey: SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1
-lastInvokedAt: 2026-09-25T08:32:49+09:00
-lastAgentRunId: run-20cfef8f-5e45-4ad1-a1ee-191b6014f3ce
+lastInvokedAt: 2026-09-25T09:07:16+09:00
+lastAgentRunId: 
 lastError: 
-pid: 54968
-phase: 
-activeTaskKey: 
+pid: 57060
+phase: INVOKING
+activeTaskKey: SPRINT2-WF14-CANONICAL-PUBLICATION-RECOVERY-A-20260922-R1
 elapsedSeconds: 
-processAlive: 
+processAlive: true
 memoryRssMb: 
 childPid: 
 childObserved: 
