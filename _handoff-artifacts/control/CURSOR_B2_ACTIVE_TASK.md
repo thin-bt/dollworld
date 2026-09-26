@@ -4,7 +4,7 @@ state: ACTIVE
 lane: B2
 task-key: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
 mode: BROWSER_ACCEPTANCE_FIX_IF_REQUIRED
-updatedAt: 2026-09-27T03:35:00+09:00
+updatedAt: 2026-09-27T04:25:00+09:00
 pickup: RECOVERY_SAME_TASK_ACTIVE
 verification-attempt: bounded-run-3-sdk-mock-battle-probe-pass-browser-e2e
 instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/instruction.md
