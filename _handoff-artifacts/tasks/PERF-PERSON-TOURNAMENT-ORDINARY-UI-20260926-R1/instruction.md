@@ -56,3 +56,34 @@ Use one fixed representative current-master snapshot and record:
 - Tournament: `N` stored battle records, `Q` participants, `M` round-robin pairs, `S` schedule entries, history-summary count; round-robin projection call count; annual-schedule/playable-slot build counts; display-name lookup/person-row visits.
 - For each named ordinary operation: route wall time plus stage timings (projection/ranking/history/serialization), response bytes; cold >= 1 and warm >= 20 runs with p50/p95. Browser/network/render measurements remain required by the parent task.
 - Re-run the identical snapshot/counters after the measured dominant repair. PASS requires semantic output equality except timing/diagnostic fields, deterministic state/RNG equality, production build/start, and the parent ordinary-browser regression. A lower payload is not a valid optimization if achieved by omitting previously available data.
+
+
+## Role2 UI/client source evidence and implementation-ready repair — 2026-09-27 00:56 JST
+
+Fresh-read master confirms the client-side request amplification is still present and gives a safe first repair independent of server-side indexing work.
+
+### Person Detail client evidence
+- `apps/web/src/client/person-detail/PersonDetailPage.tsx` performs the selected person's full `loadPersonDetail(personId)`, then deduplicates `formalMasterPersonIds + formalDisciplePersonIds` and executes `Promise.all(relatedPersonIds.map(loadPersonDetail))` only to consume each related response's `displayName`.
+- Therefore, for `R` unique related ids, a successful ordinary Person Detail open issues exactly `1 + R` full UI-005 requests. The parent/server evidence above establishes that each of those full-detail requests repeats expensive person/relationship/event projection work; the related requests do not need those payload fields in this page.
+- Do not replace this with repeated UI-004 list-page requests: the requirement is a snapshot/revision-bound minimal identity projection, not another heavyweight projection.
+
+### Person Detail required repair
+1. Keep exactly one full UI-005 request for the selected person and preserve its complete detail/stat/training/history semantics and existing failure behavior.
+2. Add/use one minimal batch identity read for the deduplicated related ids, returning only the identity needed by this surface (at minimum `personId + displayName`) and binding the result to the same session/snapshot revision so names cannot be stale relative to the selected detail. Preserve deterministic/canonical ordering and missing-person/failure visibility.
+3. Request-count gate: `R=0 => 1 full detail + 0 identity batch`; `R>0 => 1 full detail + <=1 identity batch`; related-name full UI-005 calls must be `0`.
+4. Add a client regression with multiple master/disciple ids that asserts the exact request pattern and rendered names, including duplicate related ids and a failed/missing identity case consistent with current visible fallback semantics.
+
+### Tournament client evidence
+- `apps/web/src/client/competition/CompetitionPage.tsx` defines `refresh` with dependencies `[props.fetchImpl, rankingViewYear, scheduleViewYear]`. Every refresh first awaits `loadUiSession()`, then awaits `loadCompetitionState()` with the selected schedule/ranking years.
+- Consequently changing only schedule year or ranking year recreates `refresh` and causes a redundant session GET before the required competition projection GET. This is independent of whether server projection work is later optimized.
+- The overview/participants tab switch, selecting an already-loaded schedule entry, and returning to the schedule currently mutate local React state only; preserve their zero-network behavior.
+- Participant comparison already renders from `entry.participantLinks`; do not introduce per-participant detail fetches. Ranking, round-robin matrix/history, bracket, promotion/rank history and series-history data must remain available exactly as today.
+
+### Tournament required repair
+1. Separate session bootstrap/token acquisition from year-scoped competition projection refresh. Initial mount remains `session GET = 1, competition GET = 1`.
+2. Schedule-year-only and ranking-year-only changes must become `session GET = 0, competition GET = 1`; preserve current CSRF token/revision semantics for step mutation. If a mutation/session-replacement path requires a new session, refresh it only on that actual invalidation path.
+3. Preserve `overview <-> participants`, loaded selection, and back-to-schedule at `0` network requests.
+4. Add fetch-spy regression tests for initial mount, each year change, tab round-trip, loaded selection/back, and one step mutation; assert no new per-participant/person-detail requests.
+
+### Browser / payload measurement gate
+On one fixed representative current-master snapshot, capture before and after for Person Detail with `R>1` and Tournament initial load/detail/participants/ranking-year/schedule-year transitions: request URL/count, per-response and total transferred bytes, route wall time, browser navigation/action wall time, and main-thread/render trace. Use cold >=1 and warm >=20 samples for p50/p95 where execution permits. The expected request-count reductions above are acceptance facts, but elapsed-time root-cause claims still require the measured attribution required by the parent task. Compare semantic response/render output before/after; no field/data removal is an optimization.
