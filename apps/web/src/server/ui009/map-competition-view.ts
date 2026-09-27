@@ -262,9 +262,20 @@ function knockoutBracketFromState(
   }
 }
 
+let roundRobinProjectionCallCount = 0;
+
+export function resetCompetitionProjectionCountersForTest(): void {
+  roundRobinProjectionCallCount = 0;
+}
+
+export function competitionProjectionCountersForTest(): { roundRobinProjectionCalls: number } {
+  return { roundRobinProjectionCalls: roundRobinProjectionCallCount };
+}
+
 function roundRobinProgressFromState(
   state: CompetitionPersistedState,
 ): CompetitionRoundRobinProgressView | null {
+  roundRobinProjectionCallCount += 1;
   try {
     const projected = projectRoundRobinProgress({
       bracketDefinition: state.bracketDefinition as unknown as TournamentBracketDefinition,
