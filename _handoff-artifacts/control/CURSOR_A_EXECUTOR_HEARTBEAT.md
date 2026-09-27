@@ -2,13 +2,13 @@
 executor: cursor-sdk-local
 status: IDLE
 pollInterval: 5m
-lastPollAt: 2026-09-27T18:28:08+09:00
+lastPollAt: 2026-09-27T19:20:50+09:00
 lastPollResult: INVOKED
 lastInvokedTaskKey: PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1
-lastInvokedAt: 2026-09-27T18:17:02+09:00
-lastAgentRunId: run-b056b0ea-c064-4ab2-87be-83d94571e88f
+lastInvokedAt: 2026-09-27T19:07:02+09:00
+lastAgentRunId: run-eb05b1f0-47e4-40bb-a3f7-f2cd943ed74d
 lastError: githubPublish:NO_LOCAL_TERMINAL
-pid: 38464
+pid: 35952
 phase: 
 activeTaskKey: 
 elapsedSeconds: 
