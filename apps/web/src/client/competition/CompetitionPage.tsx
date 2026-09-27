@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadUiSession } from "../session-client.js";
 import type { FetchLike } from "../session-client.js";
 import { AnnualRankingTable } from "./AnnualRankingTable.js";
@@ -556,7 +556,9 @@ export function CompetitionPage(props: CompetitionPageProps) {
   const [scheduleViewYear, setScheduleViewYear] = useState<number | undefined>(undefined);
   const [rankingViewYear, setRankingViewYear] = useState<number | undefined>(undefined);
 
-  const refresh = useCallback(async () => {
+  const projectionRequestId = useRef(0);
+
+  const bootstrapSession = useCallback(async () => {
     setLoadStatus((current) => (current === "ready" ? "ready" : "loading"));
     setLoadError(null);
     const fetchOpts = props.fetchImpl !== undefined ? { fetchImpl: props.fetchImpl } : {};
@@ -572,6 +574,16 @@ export function CompetitionPage(props: CompetitionPageProps) {
     }
     setCsrfToken(session.csrfToken);
     setUiRevision(session.uiRevision);
+  }, [props.fetchImpl]);
+
+  const refreshProjection = useCallback(async () => {
+    if (csrfToken === null) {
+      return;
+    }
+    const requestId = ++projectionRequestId.current;
+    setLoadStatus((current) => (current === "ready" ? "ready" : "loading"));
+    setLoadError(null);
+    const fetchOpts = props.fetchImpl !== undefined ? { fetchImpl: props.fetchImpl } : {};
     const loadOpts = { ...fetchOpts };
     if (scheduleViewYear !== undefined) {
       Object.assign(loadOpts, { scheduleYear: scheduleViewYear });
@@ -580,6 +592,9 @@ export function CompetitionPage(props: CompetitionPageProps) {
       Object.assign(loadOpts, { rankingYear: rankingViewYear });
     }
     const page = await loadCompetitionState(loadOpts);
+    if (requestId !== projectionRequestId.current) {
+      return;
+    }
     if (page.kind === "failure") {
       setLoadStatus("error");
       setLoadError(page.message || "大会情報の読み込みに失敗しました。");
@@ -589,11 +604,15 @@ export function CompetitionPage(props: CompetitionPageProps) {
     setSelectedKey((prev) => prev ?? defaultSelectedKey(page.data));
     setUiRevision(page.uiRevision);
     setLoadStatus("ready");
-  }, [props.fetchImpl, rankingViewYear, scheduleViewYear]);
+  }, [csrfToken, props.fetchImpl, rankingViewYear, scheduleViewYear]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    void bootstrapSession();
+  }, [bootstrapSession]);
+
+  useEffect(() => {
+    void refreshProjection();
+  }, [refreshProjection]);
 
   useEffect(() => {
     if (view === null) {
@@ -663,7 +682,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
       >
         <p>{loadError ?? "大会情報を読み込めませんでした。"}</p>
         <p>
-          <button type="button" onClick={() => void refresh()}>
+          <button type="button" onClick={() => void bootstrapSession()}>
             再読み込み
           </button>
         </p>
