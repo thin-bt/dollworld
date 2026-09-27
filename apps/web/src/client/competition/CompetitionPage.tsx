@@ -554,7 +554,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
   const [detailPane, setDetailPane] = useState<"overview" | "participants">("overview");
   const [scheduleFocus, setScheduleFocus] = useState(true);
   const [scheduleViewYear, setScheduleViewYear] = useState<number | undefined>(undefined);
-  const [rankingViewYear, setRankingViewYear] = useState<number | undefined>(undefined);
+  const [rankingViewYear, setRankingViewYear] = useState<number | undefined>(undefined);\n  const [sessionGeneration, setSessionGeneration] = useState(0);
 
   const projectionRequestId = useRef(0);
 
@@ -604,7 +604,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
     setSelectedKey((prev) => prev ?? defaultSelectedKey(page.data));
     setUiRevision(page.uiRevision);
     setLoadStatus("ready");
-  }, [csrfToken, props.fetchImpl, rankingViewYear, scheduleViewYear]);
+  }, [csrfToken, props.fetchImpl, rankingViewYear, scheduleViewYear, sessionGeneration]);
 
   useEffect(() => {
     void bootstrapSession();
@@ -657,7 +657,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
     if (result.data.competition.scheduleOverview.activeSelectionKey !== null) {
       setSelectedKey(result.data.competition.scheduleOverview.activeSelectionKey);
     }
-  }, [actionPending, csrfToken, props.fetchImpl, uiRevision]);
+  }, [actionPending, bootstrapSession, csrfToken, props.fetchImpl, uiRevision]);
 
   const canStep =
     view !== null &&
