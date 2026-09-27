@@ -99,4 +99,33 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     });
     expect(simulationStatus).toBe(200);
   });
+  test("year navigation reloads only the competition projection", async ({ page, context }) => {
+    test.setTimeout(120_000);
+    await bootstrapAcceptedCompetitionSession(page, context);
+
+    let sessionGets = 0;
+    let competitionGets = 0;
+    page.on("request", (request) => {
+      if (request.method() !== "GET") return;
+      const pathname = new URL(request.url()).pathname;
+      if (pathname === "/api/s1_5/session") sessionGets += 1;
+      if (pathname === "/api/s1_5/competition") competitionGets += 1;
+    });
+
+    await page.goto("/competition");
+    await expect(page.getByTestId("competition-load-status")).toHaveCount(0, { timeout: 60_000 });
+    const sessionBaseline = sessionGets;
+    const competitionBaseline = competitionGets;
+
+    const yearButton = page
+      .getByTestId("competition-schedule-year-nav")
+      .getByRole("button")
+      .filter({ hasNot: page.locator(":disabled") })
+      .first();
+    await expect(yearButton).toBeEnabled();
+    await yearButton.click();
+    await expect.poll(() => competitionGets - competitionBaseline, { timeout: 60_000 }).toBe(1);
+    expect(sessionGets - sessionBaseline).toBe(0);
+  });
+
 });
