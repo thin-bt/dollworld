@@ -204,7 +204,7 @@ function plannedPreviewParticipantIds(worldSession: Sprint1RunSession): readonly
 function scheduleOverviewForSession(
   worldSession: Sprint1RunSession | null,
   store: CompetitionSessionStore,
-  options?: { viewWorldYear?: number },
+  options?: { viewWorldYear?: number; activeParticipantIds?: readonly string[] },
 ): CompetitionProgressView["scheduleOverview"] {
   if (worldSession === null) {
     return emptyScheduleOverview();
@@ -218,7 +218,12 @@ function scheduleOverviewForSession(
     displayName: displayNameForPersonIdInSession(worldSession, personId),
   }));
   const activeLinks =
-    persisted === null ? [] : participantLinksFromIds(persisted, activeParticipantIds(persisted));
+    persisted === null
+      ? []
+      : participantLinksFromIds(
+          persisted,
+          options?.activeParticipantIds ?? activeParticipantIds(persisted),
+        );
   const scheduleOptions: {
     viewWorldYear?: number;
     rosterSession: Sprint1RunSession;
@@ -493,13 +498,12 @@ export function mapCompetitionProgressView(
     roundRobinProgress,
     knockoutBracket,
     bracketFormatKind: bracketFormatKind(state),
-    scheduleOverview: scheduleOverviewForSession(
-      worldSession,
-      store,
-      options?.scheduleViewYear !== undefined
+    scheduleOverview: scheduleOverviewForSession(worldSession, store, {
+      ...(options?.scheduleViewYear !== undefined
         ? { viewWorldYear: options.scheduleViewYear }
-        : undefined,
-    ),
+        : {}),
+      activeParticipantIds: participantIds,
+    }),
     wireframeObservation: buildWireframeObservation({
       store,
       participantIds,
