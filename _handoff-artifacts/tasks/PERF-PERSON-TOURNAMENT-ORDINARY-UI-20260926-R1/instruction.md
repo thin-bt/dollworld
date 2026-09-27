@@ -102,3 +102,25 @@ Fresh source adds a concrete tournament person-lookup amplification candidate. T
 Implementation order after measurement: (1) eliminate the duplicate persisted round-robin projection by passing the already-computed projection/participant ids into schedule mapping; (2) construct one request/snapshot-bound `personId -> Person/displayName` index and reuse it across round-robin name enrichment, participant-link enrichment, ranking rows, last-match/champion labels and rank-history enrichment; (3) only consider cross-request caching if request-scoped reuse remains insufficient. The request-scoped index must be built from the exact isolated/world session used by the projection and must never mix worldSession with persisted isolatedSession. No cross-revision stale names/person data.
 
 Acceptance counters for this delta: capture `personIndexBuilds`, `personIndexRowsVisited`, `linearPersonLookupCalls`, `linearPersonRowsVisited`, `roundRobinNameResolutions`, `participantLinkPersonLookups`, and `rankHistoryNameResolutions` on the same fixed snapshot before/after. A request-scoped repair should reduce repeated linear scans without changing any emitted participant/ranking/history names, ordering, stats/aptitudes, fallback `不明` behavior, lifecycle state, deterministic state/RNG, or serialized schema. Differential-deep-compare the full competition view before/after except diagnostic/timing fields.
+
+
+## Role2 fresh client delta — 2026-09-27 18:56 JST
+
+Fresh-read master blobs: `PersonDetailPage.tsx=af3af444227a9ee2ad127f5c6eaf8ad6b44b97bd`, `fetch-ui005.ts=a139db83f8ec9a0aa0c7870695589b31755cf082`, `CompetitionPage.tsx=7a47889d1b9aaaef618f78c15c8087868248d91f`. This is source evidence, not an elapsed-time performance claim.
+
+### Person Detail exact client request evidence
+- Selected person performs one `loadPersonDetail(personId)` GET. After success the page deduplicates `formalMasterPersonIds + formalDisciplePersonIds`, then `Promise.all(relatedPersonIds.map(loadPersonDetail))`.
+- `fetch-ui005.ts` proves every one of those calls is the accepted full `${API_PREFIX}/people/:personId` PersonDetailView GET; the related path consumes only `data.displayName`.
+- Therefore for R unique related ids, a successful open issues exactly `1+R` full UI-005 GETs. This is a deterministic request-amplification fact independent of browser timing.
+- Existing cancellation prevents an old effect from committing related names after personId/fetchImpl changes; the replacement batch identity read must preserve that cancellation/latest-page behavior.
+
+### Person Detail implementation gate
+Implement one revision/snapshot-bound minimal identity batch for deduplicated related ids. Acceptance: R=0 => full-detail=1, identity-batch=0; R>0 => full-detail=1, identity-batch<=1, related full-detail=0. Selected detail must render with identical complete data and existing error semantics. Batch identity failure/missing rows must preserve current visible fallback semantics and must not turn an already-successful selected detail into page error. Add regression for duplicate ids, partial/missing identity, batch transport failure, and A->B navigation where delayed A identity success/failure cannot mutate B.
+
+### Tournament client implementation gate
+Keep session bootstrap/token acquisition independent from year-scoped competition projection refresh. Initial mount: session GET=1, competition GET=1. Schedule-year-only and ranking-year-only changes: session GET=0, competition GET=1. Overview/participants tab switch, selecting an already-loaded schedule entry, and back-to-schedule: network=0. Preserve participant rendering from existing `entry.participantLinks`; add no per-participant Person Detail requests. Preserve step mutation semantics and reuse returned competition projection without compensating GET when current behavior already supplies it.
+
+Add latest-request-wins protection for overlapping year refreshes: if Y1 starts, Y2 starts, Y2 resolves, then delayed Y1 success or failure must not overwrite current view, selected key, uiRevision, csrf/session token, load status, or load error. Cover both stale success and stale failure in fetch-spy regression.
+
+### Measurement still required
+On a fixed representative ordinary dataset, capture before/after request URL/count and transferred bytes for Person Detail R>1 and tournament initial/schedule-year/ranking-year/detail/participants transitions, plus route/action wall time and browser main-thread/render trace. Cold >=1 and warm >=20 p50/p95 remain required before claiming elapsed-time improvement. Do not infer timing from the deterministic request-count reduction.
