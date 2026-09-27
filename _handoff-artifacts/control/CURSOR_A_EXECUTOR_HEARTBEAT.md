@@ -1,18 +1,18 @@
 # Cursor A SDK executor heartbeat
 executor: cursor-sdk-local
-status: IDLE
+status: INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-27T12:56:36+09:00
-lastPollResult: INVOKED
+lastPollAt: 2026-09-27T13:34:24+09:00
+lastPollResult: INVOKING
 lastInvokedTaskKey: PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1
-lastInvokedAt: 2026-09-27T12:44:24+09:00
-lastAgentRunId: run-9491972d-8d08-4d0e-b620-b751b34ad364
-lastError: githubPublish:NO_LOCAL_TERMINAL
-pid: 17576
-phase: 
-activeTaskKey: 
+lastInvokedAt: 2026-09-27T13:34:24+09:00
+lastAgentRunId: 
+lastError: 
+pid: 500
+phase: INVOKING
+activeTaskKey: PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1
 elapsedSeconds: 
-processAlive: 
+processAlive: true
 memoryRssMb: 
 childPid: 
 childObserved: 
