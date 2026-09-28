@@ -30,3 +30,10 @@ state: BLOCKED_CAPABILITY / FIX_REQUIRED
 Fresh current-master source was read and the exact repair was prepared: one revision-bound minimal identity batch for deduplicated formal master/disciple ids, preserving the selected UI-005 full detail request and id fallback for missing/failed related identities. Direct GitHub product-file publication was then attempted twice: first on default master, then on an isolated Role1 branch created from fresh master. Both product-file update calls were rejected by the connected GitHub write safety gate before any product bytes were changed.
 
 Exact blocked capability: GitHub connector product-file update for `apps/web/src/server/ui005/routes-person-detail.ts` is denied by the tool safety gate in this execution environment. This is not an A-lane blocker and A was not retried. No Person Detail implementation SHA, build/start, browser timing, or request-count PASS is claimed from this run. The isolated branch contains no product changes.
+
+
+## Role1 capability recheck — 2026-09-28 15:57 JST
+
+state: BLOCKED_CAPABILITY / FIX_REQUIRED
+
+Fresh master was re-read and a direct product write was attempted once against `apps/web/src/server/ui005/routes-person-detail.ts` to add the revision-bound minimal identity batch. The connected GitHub `update_file` operation was blocked by the OpenAI write safety check before repository bytes changed. Per the task instruction, A was not retried and no publication/control churn was used as product progress. No product SHA, build/start, browser measurements, or request-count PASS is claimed. The missing capability remains: permission for this execution environment to publish product-file changes; without product bytes, executable build/browser verification cannot begin here.
