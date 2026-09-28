@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FetchLike } from "../dev-viewer/fetch-ui004.js";
 import { loadPersonDetail } from "./fetch-ui005.js";
+import { loadPersonIdentities } from "./fetch-person-identities.js";
 import { PersonDetailViewPanel } from "./PersonDetailView.js";
 import type { PersonDetailView } from "./ui005-views.js";
 
@@ -54,28 +55,17 @@ export function PersonDetailPage(props: PersonDetailPageProps) {
       if (relatedPersonIds.length === 0) {
         return;
       }
-      const nameEntries = await Promise.all(
-        relatedPersonIds.map(async (relatedId) => {
-          const relatedResult = await loadPersonDetail(
-            props.fetchImpl !== undefined
-              ? { personId: relatedId, fetchImpl: props.fetchImpl }
-              : { personId: relatedId },
-          );
-          if (relatedResult.kind !== "success") {
-            return null;
-          }
-          const name = relatedResult.data.displayName;
-          return typeof name === "string" && name.length > 0 ? ([relatedId, name] as const) : null;
-        }),
+      const identities = await loadPersonIdentities(
+        props.fetchImpl !== undefined
+          ? { personIds: relatedPersonIds, uiRevision: result.uiRevision, fetchImpl: props.fetchImpl }
+          : { personIds: relatedPersonIds, uiRevision: result.uiRevision },
       );
-      if (cancelled) {
+      if (cancelled || identities.kind !== "success" || identities.uiRevision !== result.uiRevision) {
         return;
       }
       const names = new Map<string, string>();
-      for (const entry of nameEntries) {
-        if (entry !== null) {
-          names.set(entry[0], entry[1]);
-        }
+      for (const item of identities.items) {
+        if (item.displayName.length > 0) names.set(item.personId, item.displayName);
       }
       setPersonNameById(names);
     })();
