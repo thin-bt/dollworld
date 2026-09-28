@@ -79,3 +79,19 @@ Fresh canonical master is 20 commits ahead of Person Detail product SHA `1cf2428
 New executable evidence now exists on current master: GitHub Actions run 36439421779 completed SUCCESS for `675fb53d147bc23544afb31f59212fbd65060d2f`. The workflow gate requires successful repository typecheck, UI009 targeted tests, production builds for `@shared-world/simulation-core` and `@shared-world/web`, Chrome availability, UI009 Chrome acceptance, and the full configured `npm run e2e:chrome` suite. This supersedes the earlier statement that no build/browser CI existed for a current lineage containing the Person Detail repair.
 
 This does **not** establish the requested Person Detail same-representative-data before/after request bytes or cold/warm >=20 p50/p95, because the current workflow does not collect those measurements. No unmeasured optimization is applied. Full P0 remains FIX_REQUIRED pending those performance measurements and the explicitly required complete tournament/ordinary acceptance proof.
+
+
+## Role2 ordinary tournament battle/ranking browser closure — 2026-09-29
+
+state: PARTIAL / FIX_REQUIRED
+product-lineage-sha: 6933d9e9ce2acee82a3e136bba6f49777971b926
+verified-predecessor: 675fb53d147bc23544afb31f59212fbd65060d2f
+
+Fresh current lineage retained the published CompetitionPage projection fencing and the exact UI009 request-count/session-recovery regressions. Role2 extended the existing real-browser ordinary-flow acceptance rather than redoing those tests: after a due tournament is reached from weekly progression and one real tournament match is played, the browser must expose the persisted match link, open the real competition match/battle presentation, return to the tournament with that persisted match still visible, open the Ranking UI successfully, and return to the same tournament history. This closes an evidence gap in the existing full-product flow, which previously stopped at the competition result/participants and did not traverse persisted battle detail plus Ranking.
+
+Published regression commit: `6933d9e9ce2acee82a3e136bba6f49777971b926`.
+Updated test: `tests/e2e/s2-full-product-browser-closure.spec.ts`.
+
+No Person Detail source, tournament server/projection source, A lane, or B2 S03-010 control state was edited.
+
+Executable status at publication: no GitHub Actions run was yet attached to `6933d9e9...`, so this new browser assertion is not claimed PASS in this entry. The predecessor `675fb53d...` remains independently green in run 36439421779 for typecheck, targeted UI009, production builds, Chrome UI009 and configured e2e:chrome. Full P0 remains FIX_REQUIRED until the new ordinary-flow regression executes green and same-representative-data tournament request bytes plus cold/warm >=20 p50/p95 are captured. No unmeasured client optimization was applied.
