@@ -53,3 +53,17 @@ Product commits: 57d77fa826c296922a4b540774a5cc8d8cd12ae8, 29e8203f241278b1f2a3b
 Regression source: apps/web/src/client/person-detail/person-detail-request-count.test.ts covers R=0 no batch, R>0 duplicate ids with exactly one minimal batch/no related full-detail URL, and missing identity fallback data.
 
 Remaining: this environment has GitHub read/write but no dollworld Node/browser checkout and the product SHA has no attached CI status, so production build/start, executable tests, same-data browser before/after bytes, and cold/warm >=20 p50/p95 are not claimed. Tournament and full ordinary-flow acceptance also remain required.
+
+
+## Role3 persisted display-name index — 2026-09-28
+
+state: PARTIAL / FIX_REQUIRED
+product-sha: 70945f97ec2231f62734b81b16a6441c4903a0a0
+format-followup-sha: cdd0c2999d3c97685c18e7cef769d482ac977544
+fresh-master-observed: 3945584aa69d786562890f8006e1407cd494c81a
+
+Implemented on canonical master: persisted tournament mapping now builds one request-scoped `personId -> displayName` Map from the exact isolated persisted session and reuses that resolver for current/historical ranking rows, round-robin history/matrix, knockout projection, participant display names, last-match labels, and champion label. Missing/empty names preserve the existing `不明` fallback. This is request-scoped only; no cross-revision cache was introduced. The earlier round-robin projection reuse at `0fdcbc9aeb44c0bf07532ea624a703349e085dd2` remains present on current master.
+
+Evidence: product commit `70945f97ec2231f62734b81b16a6441c4903a0a0`; formatting-only follow-up `cdd0c2999d3c97685c18e7cef769d482ac977544`; production source `apps/web/src/server/ui009/map-competition-view.ts`. The commit replaces repeated isolated-session linear display-name scans on these persisted projection surfaces with the shared request-local indexed resolver without changing emitted ordering/schema or persistence/ranking semantics.
+
+Remaining acceptance is unchanged: this connector execution surface does not expose the repository checkout/Node/browser process needed for production build/start, same representative-data route/browser before/after timing/payload, cold/warm >=20 p50/p95, or full ordinary weekly -> schedule -> participants -> tournament -> battle -> persistence -> ranking -> UI acceptance. Schedule playable-slot/history scan repair is intentionally not applied here because the P0 instruction requires measured cost before that optimization and executable timing evidence is unavailable in this surface. Full PASS remains forbidden.
