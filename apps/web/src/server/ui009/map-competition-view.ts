@@ -55,6 +55,15 @@ function isolatedSessionFromState(state: CompetitionPersistedState): Sprint1RunS
   return raw as unknown as Sprint1RunSession;
 }
 
+function requestDisplayNameResolver(state: CompetitionPersistedState): (personId: string) => string {
+  const session = isolatedSessionFromState(state);
+  if (session === null) return () => "不明";
+  const names = new Map(session.runtimeState.worldState.persons.map(
+    (person) => [person.personId, person.displayName.length > 0 ? person.displayName : "不明"] as const,
+  ));
+  return (personId) => names.get(personId) ?? "不明";
+}
+
 function displayNameInIsolatedState(state: CompetitionPersistedState, personId: string): string {
   const session = isolatedSessionFromState(state);
   if (session === null) {
@@ -66,11 +75,12 @@ function displayNameInIsolatedState(state: CompetitionPersistedState, personId: 
 function mapRankingRow(
   facts: AnnualRankingDisplayFacts,
   state: CompetitionPersistedState,
+  resolveName: (personId: string) => string,
 ): CompetitionRankingRowView {
   const rankLabel = rankBandPlayerLabel(facts.currentRank) ?? facts.currentRank;
   return {
     personId: facts.personId,
-    displayName: displayNameInIsolatedState(state, facts.personId),
+    displayName: resolveName(facts.personId),
     displayOrder: facts.displayOrder,
     annualRank: facts.annualRank,
     yearlyCumulativeEarnings: facts.yearlyCumulativeEarnings,
@@ -107,13 +117,14 @@ function rankingRowsForSelectedYear(input: {
   rankingFacts: readonly AnnualRankingDisplayFacts[];
   selectedRankingYear: number;
   currentWorldYear: number;
+  resolveName: (personId: string) => string;
 }): CompetitionProgressView["rankingRows"] {
-  const { state, rankingFacts, selectedRankingYear, currentWorldYear } = input;
+  const { state, rankingFacts, selectedRankingYear, currentWorldYear, resolveName } = input;
   if (state === null || selectedRankingYear === currentWorldYear) {
     if (state === null) {
       return [];
     }
-    return rankingFacts.map((row) => mapRankingRow(row, state));
+    return rankingFacts.map((row) => mapRankingRow(row, state, resolveName));
   }
   const historyStore = annualRankingHistoryStoreFromState(state);
   const entry = historyStore.entries.find((row) => row.worldYear === selectedRankingYear);
@@ -124,7 +135,7 @@ function rankingRowsForSelectedYear(input: {
     const rankLabel = rankBandPlayerLabel(row.currentRank) ?? row.currentRank;
     return {
       personId: row.personId,
-      displayName: displayNameInIsolatedState(state, row.personId),
+      displayName: resolveName(row.personId),
       displayOrder: row.displayOrder,
       annualRank: row.annualRank,
       yearlyCumulativeEarnings: row.yearlyCumulativeEarnings,
@@ -246,6 +257,7 @@ function scheduleOverviewForSession(
 
 function knockoutBracketFromState(
   state: CompetitionPersistedState,
+  resolveName: (personId: string) => string,
 ): ReturnType<typeof projectKnockoutBracketProgressView> {
   try {
     return projectKnockoutBracketProgressView({
@@ -255,7 +267,7 @@ function knockoutBracketFromState(
       storedRecords: state.storedRecords as unknown as readonly StoredBattleResultRecord[],
       slotBindings: (state.slotBindings ??
         []) as unknown as import("@shared-world/simulation-core").TournamentSlotMatchBinding[],
-      displayNameForPersonId: (personId) => displayNameInIsolatedState(state, personId),
+      displayNameForPersonId: resolveName,
     });
   } catch {
     return null;
@@ -274,6 +286,7 @@ export function competitionProjectionCountersForTest(): { roundRobinProjectionCa
 
 function roundRobinProgressFromState(
   state: CompetitionPersistedState,
+  resolveName: (personId: string) => string = requestDisplayNameResolver(state),
 ): CompetitionRoundRobinProgressView | null {
   roundRobinProjectionCallCount += 1;
   try {
@@ -283,18 +296,18 @@ function roundRobinProgressFromState(
     });
     const mapHistoryRow = (row: RoundRobinMatchHistoryRow) => ({
       ...row,
-      participantADisplayName: displayNameInIsolatedState(state, row.participantAId),
-      participantBDisplayName: displayNameInIsolatedState(state, row.participantBId),
+      participantADisplayName: resolveName( row.participantAId),
+      participantBDisplayName: resolveName( row.participantBId),
     });
     const mapMatrixRow = (row: RoundRobinParticipantMatrixRow) => ({
       personId: row.personId,
-      displayName: displayNameInIsolatedState(state, row.personId),
+      displayName: resolveName( row.personId),
       wins: row.wins,
       losses: row.losses,
       played: row.played,
       cells: row.cells.map((cell) => ({
         ...cell,
-        opponentDisplayName: displayNameInIsolatedState(state, cell.opponentPersonId),
+        opponentDisplayName: resolveName( cell.opponentPersonId),
       })),
     });
     return {
@@ -443,16 +456,17 @@ export function mapCompetitionProgressView(
     };
   }
 
+  const resolveName = requestDisplayNameResolver(state);
   const finalResult = state.finalResult as { winnerPersonId?: string; resultHash?: string } | null;
-  const roundRobinProgress = roundRobinProgressFromState(state);
-  const knockoutBracket = knockoutBracketFromState(state);
+  const roundRobinProgress = roundRobinProgressFromState(state, resolveName);
+  const knockoutBracket = knockoutBracketFromState(state, resolveName);
   const lifecyclePhase = effectiveLifecyclePhase(state, roundRobinProgress);
   const presentAsFinished = lifecyclePhase === "finished";
   const participantIds = roundRobinProgress?.participantIds ?? [
     state.participantAId,
     state.participantBId,
   ];
-  const participantDisplayNames = participantIds.map((id) => displayNameInIsolatedState(state, id));
+  const participantDisplayNames = participantIds.map((id) => resolveName( id));
   const kindLabel = tournamentKindPlayerLabel(state.tournamentKind);
   const rankLabel = rankBandPlayerLabel(state.targetRank);
 
@@ -490,6 +504,7 @@ export function mapCompetitionProgressView(
       rankingFacts,
       selectedRankingYear,
       currentWorldYear,
+      resolveName,
     }),
     tournamentKindLabel: kindLabel,
     targetRankLabel: rankLabel,
@@ -499,12 +514,12 @@ export function mapCompetitionProgressView(
       state.lastMatch === null
         ? null
         : {
-            winnerDisplayName: displayNameInIsolatedState(state, state.lastMatch.winnerPersonId),
-            loserDisplayName: displayNameInIsolatedState(state, state.lastMatch.loserPersonId),
+            winnerDisplayName: resolveName( state.lastMatch.winnerPersonId),
+            loserDisplayName: resolveName( state.lastMatch.loserPersonId),
           },
     championDisplayName:
       presentAsFinished && finalResult?.winnerPersonId !== undefined
-        ? displayNameInIsolatedState(state, finalResult.winnerPersonId)
+        ? resolveName( finalResult.winnerPersonId)
         : null,
     roundRobinProgress,
     knockoutBracket,
