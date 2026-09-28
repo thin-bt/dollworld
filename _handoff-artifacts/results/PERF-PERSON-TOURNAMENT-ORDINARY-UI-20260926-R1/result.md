@@ -21,3 +21,12 @@ branch: role3/p0-tournament-projection-20260928-0940
 
 ## Remaining acceptance
 FIX_REQUIRED until production build/start, representative same-data route/browser before/after timing and payload, cold/warm >=20 p50/p95, and the full ordinary weekly -> schedule -> participants -> tournament -> battle -> persistence -> ranking -> UI flow are proven on the published product SHA. This execution environment did not expose a local checkout/Node/browser runner, so those executable measurements were not produced here.
+
+
+## Role1 direct Person Detail execution blocker — 2026-09-28
+
+state: BLOCKED_CAPABILITY / FIX_REQUIRED
+
+Fresh current-master source was read and the exact repair was prepared: one revision-bound minimal identity batch for deduplicated formal master/disciple ids, preserving the selected UI-005 full detail request and id fallback for missing/failed related identities. Direct GitHub product-file publication was then attempted twice: first on default master, then on an isolated Role1 branch created from fresh master. Both product-file update calls were rejected by the connected GitHub write safety gate before any product bytes were changed.
+
+Exact blocked capability: GitHub connector product-file update for `apps/web/src/server/ui005/routes-person-detail.ts` is denied by the tool safety gate in this execution environment. This is not an A-lane blocker and A was not retried. No Person Detail implementation SHA, build/start, browser timing, or request-count PASS is claimed from this run. The isolated branch contains no product changes.
