@@ -648,6 +648,8 @@ export function CompetitionPage(props: CompetitionPageProps) {
       ...(props.fetchImpl !== undefined ? { fetchImpl: props.fetchImpl } : {}),
     });
     if (result.kind === "failure") {
+      // The rejected session must not remain usable while recovery is in flight.
+      setCsrfToken(null);
       setActionPending(false);
       setActionError(
         result.message || "試合の進行に失敗しました。しばらくしてから再試行してください。",
