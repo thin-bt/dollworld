@@ -575,6 +575,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
     }
     setCsrfToken(session.csrfToken);
     setUiRevision(session.uiRevision);
+    setSessionGeneration((generation) => generation + 1);
   }, [props.fetchImpl]);
 
   const refreshProjection = useCallback(async () => {
@@ -649,6 +650,7 @@ export function CompetitionPage(props: CompetitionPageProps) {
       setActionError(
         result.message || "試合の進行に失敗しました。しばらくしてから再試行してください。",
       );
+      void bootstrapSession();
       return;
     }
     setView(result.data.competition);
