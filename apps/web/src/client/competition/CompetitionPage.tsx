@@ -554,7 +554,8 @@ export function CompetitionPage(props: CompetitionPageProps) {
   const [detailPane, setDetailPane] = useState<"overview" | "participants">("overview");
   const [scheduleFocus, setScheduleFocus] = useState(true);
   const [scheduleViewYear, setScheduleViewYear] = useState<number | undefined>(undefined);
-  const [rankingViewYear, setRankingViewYear] = useState<number | undefined>(undefined);\n  const [sessionGeneration, setSessionGeneration] = useState(0);
+  const [rankingViewYear, setRankingViewYear] = useState<number | undefined>(undefined);
+  const [sessionGeneration, setSessionGeneration] = useState(0);
 
   const projectionRequestId = useRef(0);
 
