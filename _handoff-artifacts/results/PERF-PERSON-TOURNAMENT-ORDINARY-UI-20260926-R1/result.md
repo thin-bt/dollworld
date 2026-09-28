@@ -37,3 +37,19 @@ Exact blocked capability: GitHub connector product-file update for `apps/web/src
 state: BLOCKED_CAPABILITY / FIX_REQUIRED
 
 Fresh master was re-read and a direct product write was attempted once against `apps/web/src/server/ui005/routes-person-detail.ts` to add the revision-bound minimal identity batch. The connected GitHub `update_file` operation was blocked by the OpenAI write safety check before repository bytes changed. Per the task instruction, A was not retried and no publication/control churn was used as product progress. No product SHA, build/start, browser measurements, or request-count PASS is claimed. The missing capability remains: permission for this execution environment to publish product-file changes; without product bytes, executable build/browser verification cannot begin here.
+
+
+## Role1 Person Detail product repair — 2026-09-28 17:48 JST
+
+state: PARTIAL / FIX_REQUIRED
+product-sha: 1cf2428ed5d169f7019b38116f6a26201189df6c
+
+Earlier Role1 publication-blocker notes are superseded: product writes succeeded.
+
+Implemented: revision-bound minimal identity batch for formal master/disciple display names; selected Person Detail remains one full UI-005 request; R>0 uses one deduplicated identity batch and zero related full-detail requests; R=0 uses no identity batch. Missing identities remain absent from the name map so existing personId fallback stays visible. Full UI-005 detail projection and validation semantics are unchanged.
+
+Product commits: 57d77fa826c296922a4b540774a5cc8d8cd12ae8, 29e8203f241278b1f2a3bbc924516af7855fefd1, b9acf3fc3399a42e6f6d3f92081bd1ed3efd0e2f, 675325917d50d63c81e6cc0db9398b6a287fcf10, 865396f7a21e74c1fdb2ff1484b409bb8763a8a0, 1cf2428ed5d169f7019b38116f6a26201189df6c.
+
+Regression source: apps/web/src/client/person-detail/person-detail-request-count.test.ts covers R=0 no batch, R>0 duplicate ids with exactly one minimal batch/no related full-detail URL, and missing identity fallback data.
+
+Remaining: this environment has GitHub read/write but no dollworld Node/browser checkout and the product SHA has no attached CI status, so production build/start, executable tests, same-data browser before/after bytes, and cold/warm >=20 p50/p95 are not claimed. Tournament and full ordinary-flow acceptance also remain required.
