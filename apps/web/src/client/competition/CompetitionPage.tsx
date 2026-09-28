@@ -648,6 +648,8 @@ export function CompetitionPage(props: CompetitionPageProps) {
       ...(props.fetchImpl !== undefined ? { fetchImpl: props.fetchImpl } : {}),
     });
     if (result.kind === "failure") {
+      // Invalidate any projection started after the mutation began but before rejection arrived.
+      projectionRequestId.current += 1;
       // The rejected session must not remain usable while recovery is in flight.
       setCsrfToken(null);
       setActionPending(false);
