@@ -67,3 +67,15 @@ Implemented on canonical master: persisted tournament mapping now builds one req
 Evidence: product commit `70945f97ec2231f62734b81b16a6441c4903a0a0`; formatting-only follow-up `cdd0c2999d3c97685c18e7cef769d482ac977544`; production source `apps/web/src/server/ui009/map-competition-view.ts`. The commit replaces repeated isolated-session linear display-name scans on these persisted projection surfaces with the shared request-local indexed resolver without changing emitted ordering/schema or persistence/ranking semantics.
 
 Remaining acceptance is unchanged: this connector execution surface does not expose the repository checkout/Node/browser process needed for production build/start, same representative-data route/browser before/after timing/payload, cold/warm >=20 p50/p95, or full ordinary weekly -> schedule -> participants -> tournament -> battle -> persistence -> ranking -> UI acceptance. Schedule playable-slot/history scan repair is intentionally not applied here because the P0 instruction requires measured cost before that optimization and executable timing evidence is unavailable in this surface. Full PASS remains forbidden.
+
+
+## Role1 verification advance — 2026-09-28 23:55 JST
+
+state: PARTIAL / FIX_REQUIRED
+verified-lineage-sha: 675fb53d147bc23544afb31f59212fbd65060d2f
+
+Fresh canonical master is 20 commits ahead of Person Detail product SHA `1cf2428ed5d169f7019b38116f6a26201189df6c` with that SHA as the merge base. The compare contains no changes to the Person Detail production/request-count files, so the published N+1 repair remains in this current lineage.
+
+New executable evidence now exists on current master: GitHub Actions run 36439421779 completed SUCCESS for `675fb53d147bc23544afb31f59212fbd65060d2f`. The workflow gate requires successful repository typecheck, UI009 targeted tests, production builds for `@shared-world/simulation-core` and `@shared-world/web`, Chrome availability, UI009 Chrome acceptance, and the full configured `npm run e2e:chrome` suite. This supersedes the earlier statement that no build/browser CI existed for a current lineage containing the Person Detail repair.
+
+This does **not** establish the requested Person Detail same-representative-data before/after request bytes or cold/warm >=20 p50/p95, because the current workflow does not collect those measurements. No unmeasured optimization is applied. Full P0 remains FIX_REQUIRED pending those performance measurements and the explicitly required complete tournament/ordinary acceptance proof.
