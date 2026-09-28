@@ -128,4 +128,101 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     expect(sessionGets - sessionBaseline).toBe(0);
   });
 
+  test("ranking year navigation reloads only the competition projection", async ({ page, context }) => {
+    test.setTimeout(120_000);
+    await bootstrapAcceptedCompetitionSession(page, context);
+
+    let sessionGets = 0;
+    let competitionGets = 0;
+    page.on("request", (request) => {
+      if (request.method() !== "GET") return;
+      const pathname = new URL(request.url()).pathname;
+      if (pathname === "/api/s1_5/session") sessionGets += 1;
+      if (pathname === "/api/s1_5/competition") competitionGets += 1;
+    });
+
+    await page.goto("/competition");
+    const step = page.getByTestId("competition-step-cta");
+    await expect(step).toBeEnabled({ timeout: 60_000 });
+    await step.click();
+    await expect(page.getByTestId("competition-ranking-section")).toBeVisible({ timeout: 60_000 });
+
+    const sessionBaseline = sessionGets;
+    const competitionBaseline = competitionGets;
+    const selectedYear = page
+      .getByTestId("competition-ranking-year-option")
+      .filter({ has: page.locator('[aria-pressed="true"]') });
+    const selectedValue = await selectedYear.first().getAttribute("data-year");
+    const yearButton = page
+      .getByTestId("competition-ranking-year-option")
+      .filter({ hasNot: page.locator(":disabled") })
+      .filter({ hasNot: page.locator('[aria-pressed="true"]') })
+      .first();
+    await expect(yearButton).toBeEnabled();
+    expect(await yearButton.getAttribute("data-year")).not.toBe(selectedValue);
+    await yearButton.click();
+
+    await expect.poll(() => competitionGets - competitionBaseline, { timeout: 60_000 }).toBe(1);
+    expect(sessionGets - sessionBaseline).toBe(0);
+  });
+
+  test("rejected competition mutation invalidates the session and reacquires once with visible failure", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    await bootstrapAcceptedCompetitionSession(page, context);
+
+    let sessionGets = 0;
+    let competitionGets = 0;
+    let rejectedSteps = 0;
+    page.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (request.method() === "GET" && pathname === "/api/s1_5/session") sessionGets += 1;
+      if (request.method() === "GET" && pathname === "/api/s1_5/competition") competitionGets += 1;
+    });
+    await page.route("**/api/s1_5/competition/step", async (route) => {
+      if (rejectedSteps === 0) {
+        rejectedSteps += 1;
+        await route.fulfill({
+          status: 409,
+          contentType: "application/json",
+          body: JSON.stringify({
+            apiSchemaVersion: "0.2.0",
+            ok: false,
+            error: { code: "STALE_UI_REVISION", message: "forced stale session regression" },
+            uiRevision: 0,
+            isUpdating: false,
+            refreshRequired: true,
+          }),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.goto("/competition");
+    const step = page.getByTestId("competition-step-cta");
+    await expect(step).toBeEnabled({ timeout: 60_000 });
+    const sessionBaseline = sessionGets;
+    const competitionBaseline = competitionGets;
+
+    await step.click();
+    await expect(page.getByTestId("competition-action-error")).toContainText(
+      "forced stale session regression",
+    );
+    await expect.poll(() => sessionGets - sessionBaseline, { timeout: 60_000 }).toBe(1);
+    await expect.poll(() => competitionGets - competitionBaseline, { timeout: 60_000 }).toBe(1);
+
+    const retry = page.getByTestId("competition-action-error").getByRole("button", {
+      name: "再試行",
+    });
+    await expect(retry).toBeEnabled();
+    await retry.click();
+    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({
+      timeout: 60_000,
+    });
+    expect(rejectedSteps).toBe(1);
+  });
+
 });
