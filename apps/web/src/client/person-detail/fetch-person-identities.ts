@@ -65,3 +65,16 @@ export function loadPersonIdentities(input: {
     };
   })();
 }
+
+
+export async function loadRelatedPersonNames(input: {
+  personIds: readonly string[];
+  uiRevision: number;
+  fetchImpl?: FetchLike;
+}): Promise<ReadonlyMap<string, string>> {
+  const ids = Array.from(new Set(input.personIds));
+  if (ids.length === 0) return new Map();
+  const result = await loadPersonIdentities({ ...input, personIds: ids });
+  if (result.kind !== "success" || result.uiRevision !== input.uiRevision) return new Map();
+  return new Map(result.items.filter((item) => item.displayName.length > 0).map((item) => [item.personId, item.displayName]));
+}
