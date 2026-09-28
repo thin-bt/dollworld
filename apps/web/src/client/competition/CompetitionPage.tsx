@@ -639,6 +639,8 @@ export function CompetitionPage(props: CompetitionPageProps) {
     }
     setActionPending(true);
     setActionError(null);
+    // A pending year projection must never overwrite a newer mutation result.
+    projectionRequestId.current += 1;
     const result = await postCompetitionStep({
       csrfToken,
       expectedUiRevision: uiRevision,
