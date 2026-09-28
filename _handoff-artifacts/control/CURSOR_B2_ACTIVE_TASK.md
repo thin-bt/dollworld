@@ -4,12 +4,12 @@ state: ACTIVE
 lane: B2
 task-key: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
 mode: BROWSER_ACCEPTANCE_FIX_IF_REQUIRED
-updatedAt: 2026-09-28T13:29:00+09:00
+updatedAt: 2026-09-28T15:08:00+09:00
 pickup: RECOVERY_SAME_TASK_ACTIVE
 instruction-path: _handoff-artifacts/tasks/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/instruction.md
 control-authority: GitHub
 result-path: _handoff-artifacts/results/SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1/result.md
-progress: r18-sdk-recovery — bounded-run-4 mock-battle probe re-verified PASS; awaiting in-flight browser e2e (pid 39092)
+progress: r20-sdk-recovery — mock-battle probe PASS (r19); starting bounded-run-4 browser e2e (pinned seed 1 / week 182)
 
 Rules:
 - Cursor B2 writes ACTIVE lock before B2 verification work.
