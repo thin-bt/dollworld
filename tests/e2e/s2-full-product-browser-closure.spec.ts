@@ -85,6 +85,22 @@ test.describe("Sprint2 full product browser closure", () => {
     await expect(page.getByTestId("competition-round-robin-history")).toBeVisible();
     await expect(page.getByTestId("competition-match-result")).toBeVisible();
 
+    const persistedMatch = page.getByTestId("competition-history-match-link").first();
+    await expect(persistedMatch).toBeVisible();
+    await persistedMatch.click();
+    await expect(page.getByTestId("competition-match-page")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("competition-match-id")).toBeVisible();
+    await page.getByTestId("competition-match-back").click();
+    await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("competition-history-match-link").first()).toBeVisible();
+
+    await page.locator('[data-menu-item="ランキング"]').click();
+    await expect(page).toHaveURL(/\/ranking$/);
+    await expect(page.getByTestId("ranking-page")).toBeVisible();
+    await expect(page.getByTestId("ranking-ranking-section")).toBeVisible({ timeout: 60_000 });
+    await page.locator('[data-menu-item="大会"]').click();
+    await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({ timeout: 60_000 });
+
     await page.getByTestId("competition-detail-tab-participants").click();
     const participantRows = page.getByTestId("competition-participants").locator("tbody tr");
     expect(await participantRows.count()).toBeGreaterThan(2);
