@@ -19,6 +19,8 @@ import {
 } from "../ui004/list-get-common.js";
 import { buildPersonDetailView, PERSON_ID_LEXICAL } from "./build-person-detail.js";
 
+export const PERSON_IDENTITY_BATCH_PATH = "/api/s1_5/people/identities";
+
 export type PersonDetailRouteDeps = {
   store: SessionStore;
   processKeys: ProcessSecurityContext;
@@ -163,6 +165,108 @@ export async function handleGetPersonDetail(
       serializeEnvelope(
         buildSuccessEnvelope({
           data: built.value,
+          uiRevision: rev.uiRevision,
+          isUpdating: rev.isUpdating,
+        }),
+      ),
+    );
+  } catch {
+    sendInternal(reply, deps.processKeys, session, deps.hooks);
+  }
+}
+
+
+export async function handleGetPersonIdentities(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  deps: PersonDetailRouteDeps,
+): Promise<void> {
+  const session = loadSession(request, reply, deps);
+  if (session === null) return;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(request.url, "http://ui.local");
+  } catch {
+    sendInvalid(reply, session, "query is invalid");
+    return;
+  }
+  const allowed = new Set(["ids", "uiRevision"]);
+  for (const key of parsed.searchParams.keys()) {
+    if (!allowed.has(key)) {
+      sendInvalid(reply, session, "query parameter is not allowed");
+      return;
+    }
+  }
+  const idsValues = parsed.searchParams.getAll("ids");
+  const revisionValues = parsed.searchParams.getAll("uiRevision");
+  if (idsValues.length !== 1 || revisionValues.length !== 1) {
+    sendInvalid(reply, session, "ids and uiRevision are required exactly once");
+    return;
+  }
+  const ids = idsValues[0]!.split(",");
+  if (
+    ids.length === 0 ||
+    ids.length > 256 ||
+    ids.some((id) => !PERSON_ID_LEXICAL.test(id)) ||
+    new Set(ids).size !== ids.length
+  ) {
+    sendInvalid(reply, session, "ids are invalid");
+    return;
+  }
+  const requestedRevision = Number(revisionValues[0]);
+  if (!Number.isSafeInteger(requestedRevision) || requestedRevision < 0) {
+    sendInvalid(reply, session, "uiRevision is invalid");
+    return;
+  }
+
+  const fixed = fixReadSnapshot(session);
+  if (fixed.committedLifecycle !== "ready") {
+    sendNotStarted(reply, session);
+    return;
+  }
+  if (fixed.worldEngineRuntime === null) {
+    sendInternal(reply, deps.processKeys, session, deps.hooks);
+    return;
+  }
+  if (requestedRevision !== fixed.uiRevision) {
+    const rev = deriveEnvelopeRevision(session);
+    sendApiJson(
+      reply,
+      409,
+      serializeEnvelope(
+        buildFailureEnvelope({
+          error: {
+            code: "STALE_UI_REVISION",
+            message: "ui revision is stale",
+            commitState: "none",
+          },
+          uiRevision: rev.uiRevision,
+          isUpdating: rev.isUpdating,
+          refreshRequired: true,
+        }),
+      ),
+    );
+    return;
+  }
+
+  try {
+    const wanted = new Set(ids);
+    const byId = new Map<string, string>();
+    for (const person of fixed.worldEngineRuntime.runtimeState.worldState.persons) {
+      if (wanted.has(person.personId)) byId.set(person.personId, person.displayName);
+    }
+    const items = ids.flatMap((personId) => {
+      const displayName = byId.get(personId);
+      return displayName === undefined ? [] : [{ personId, displayName }];
+    });
+    const rev = deriveEnvelopeRevision(session);
+    sendApiJson(
+      reply,
+      200,
+      serializeEnvelope(
+        buildSuccessEnvelope({
+          data: { items },
           uiRevision: rev.uiRevision,
           isUpdating: rev.isUpdating,
         }),
