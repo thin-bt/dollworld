@@ -89,6 +89,10 @@ export async function handleGetPersonDetail(
   if (session === null) {
     return;
   }
+  if (request.params.personId === "identities") {
+    await handleGetPersonIdentities(request, reply, deps);
+    return;
+  }
 
   // §5A.3 path/query syntax before snapshot
   if (requestHasExtraQuery(request.url)) {
