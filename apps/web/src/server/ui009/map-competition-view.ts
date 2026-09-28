@@ -296,18 +296,18 @@ function roundRobinProgressFromState(
     });
     const mapHistoryRow = (row: RoundRobinMatchHistoryRow) => ({
       ...row,
-      participantADisplayName: resolveName( row.participantAId),
-      participantBDisplayName: resolveName( row.participantBId),
+      participantADisplayName: resolveName(row.participantAId),
+      participantBDisplayName: resolveName(row.participantBId),
     });
     const mapMatrixRow = (row: RoundRobinParticipantMatrixRow) => ({
       personId: row.personId,
-      displayName: resolveName( row.personId),
+      displayName: resolveName(row.personId),
       wins: row.wins,
       losses: row.losses,
       played: row.played,
       cells: row.cells.map((cell) => ({
         ...cell,
-        opponentDisplayName: resolveName( cell.opponentPersonId),
+        opponentDisplayName: resolveName(cell.opponentPersonId),
       })),
     });
     return {
@@ -466,7 +466,7 @@ export function mapCompetitionProgressView(
     state.participantAId,
     state.participantBId,
   ];
-  const participantDisplayNames = participantIds.map((id) => resolveName( id));
+  const participantDisplayNames = participantIds.map((id) => resolveName(id));
   const kindLabel = tournamentKindPlayerLabel(state.tournamentKind);
   const rankLabel = rankBandPlayerLabel(state.targetRank);
 
@@ -514,12 +514,12 @@ export function mapCompetitionProgressView(
       state.lastMatch === null
         ? null
         : {
-            winnerDisplayName: resolveName( state.lastMatch.winnerPersonId),
-            loserDisplayName: resolveName( state.lastMatch.loserPersonId),
+            winnerDisplayName: resolveName(state.lastMatch.winnerPersonId),
+            loserDisplayName: resolveName(state.lastMatch.loserPersonId),
           },
     championDisplayName:
       presentAsFinished && finalResult?.winnerPersonId !== undefined
-        ? resolveName( finalResult.winnerPersonId)
+        ? resolveName(finalResult.winnerPersonId)
         : null,
     roundRobinProgress,
     knockoutBracket,
