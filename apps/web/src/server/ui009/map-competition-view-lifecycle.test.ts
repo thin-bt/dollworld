@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mapCompetitionProgressView } from "./map-competition-view.js";
+import {
+  competitionProjectionCountersForTest,
+  mapCompetitionProgressView,
+  resetCompetitionProjectionCountersForTest,
+} from "./map-competition-view.js";
 import {
   COMPETITION_STORE_SCHEMA_VERSION,
   type CompetitionPersistedState,
@@ -47,6 +51,20 @@ function falseFinishedRoundRobinStore(): CompetitionSessionStore {
 }
 
 describe("mapCompetitionProgressView lifecycle coherence", () => {
+  it("reuses the persisted round-robin projection for schedule active participants", () => {
+    resetCompetitionProjectionCountersForTest();
+    const worldSession = {
+      runtimeState: {
+        worldState: {
+          worldDate: { year: 1, month: 1, weekOfMonth: 1, absoluteWeek: 1 },
+          persons: [],
+        },
+      },
+    } as never;
+    mapCompetitionProgressView(falseFinishedRoundRobinStore(), [], worldSession);
+    expect(competitionProjectionCountersForTest().roundRobinProjectionCalls).toBe(1);
+  });
+
   it("does not expose round-robin finished/champion when progress matrix is empty", () => {
     const view = mapCompetitionProgressView(falseFinishedRoundRobinStore(), [], null);
     expect(view.lifecyclePhase).toBe("awaiting_match");
