@@ -38,6 +38,8 @@ Role1 / Role2 / Role3 automation runs MUST score the PM once per completed Role 
 
 Each Role independently scores the most recent PM behavior it can directly establish from fresh live controls, PM automation state, and the transitions relevant to that Role. Do not infer hidden PM work. If evidence for a dimension is unavailable, score only the observable behavior and state the missing evidence compactly.
 
+The score is a bounded oversight sidecar under `QUEUE-ROLE-WORK-ISOLATION-001`, not a shared-P0 investigation assignment. Reuse the compact controls already obtained during the Role's own run/terminal relay; do not run shared CI, reread unchanged other-Role evidence, or fetch a global P0 result solely to make the score fuller. On a concrete low-score/failover suspicion, only `QUEUE-PM-FAILOVER-001` authorizes the additional targeted confirmation scan. An unavailable dimension is reported as limited evidence rather than expanded into repeated substantive research.
+
 Score is 0-100, five dimensions worth 20 points each:
 1. `dispatch` — known safe forward work was identified and actually dispatched/read back instead of merely named;
 2. `parallelism` — independent Role/Cursor work was not unnecessarily serialized and idle lanes were exhausted under `QUEUE-PARALLEL-FLOW-001` / `QUEUE-FAIRNESS-001`;
