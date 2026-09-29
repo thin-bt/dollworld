@@ -1,16 +1,21 @@
 # Cursor A Active Task
 
-state: ACTIVE
+state: IDLE
 lane: A
-task-key: PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1
-mode: IMPLEMENT_PROFILE_FIX_VERIFY
-updatedAt: 2026-09-29T12:02:00+09:00
-pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
+task-key: (none)
+mode: (none)
+updatedAt: 2026-09-29T12:10:00+09:00
+pickup: (none)
+startedAt: (none)
 branch: master
+HEAD: a90ac02c200fff19b94691e8e0da5d2fd08c47aa
+completedAt: 2026-09-29T12:10:00+09:00
+last-completed-task: PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1
+last-result-path: _handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1/result.md
+last-terminal: PERF_PERSON_TOURNAMENT_ORDINARY_UI_MEASURED_REPAIR_VERIFIED
+terminal: (none)
+instruction-path: (none)
 control-authority: GitHub
-instruction-path: _handoff-artifacts/tasks/PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1/instruction.md
-last-completed-task:
-last-result-path:
 
 Rules:
 - Cursor A writes ACTIVE lock before handoff-artifact work for an A task.
