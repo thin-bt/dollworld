@@ -110,6 +110,8 @@ If intervening changes are proven not to alter the task's accepted authority, ow
 A stale expected HEAD caused only by accepted status/docs/control movement must not leave a valid task permanently PREPARED-but-unstartable when the rebind is uniquely provable.
 
 ## CURSOR-RECOVERY-001 — interrupted/stale ACTIVE recovery
+A Cursor-owned same-task IDLE/terminal label is not independently accepted completion when the canonical task result remains PARTIAL/old, no matching new evidence SHA exists, or heartbeat reports publication failure (for example `githubPublish:NO_LOCAL_TERMINAL`). The PM and each bounded Role relay must classify this as `TERMINAL_PUBLICATION_MISMATCH`, retain the task identity and existing valid evidence, and route same-task result/terminal publication recovery to the capable executor under `QUEUE-BLOCKER-ROUTE-001`. Do not count such a label as PASS or issue conflicting new work merely because Active is IDLE; do not overwrite Cursor-owned Active on behalf of PM. Re-read Inbox, Active, heartbeat and result together, and only consume terminal once a matching canonical result is published and verified.
+
 An ACTIVE record is not a permanent deadlock after a process interruption. On startup, when this lane already has an ACTIVE task, Cursor first reconciles that same task identity against its canonical instruction, Inbox provenance, branch/HEAD, worktree/index, existing evidence, and commit/result state.
 - If the active task is safely resumable, resume the same task without creating a different task or a second ACTIVE identity.
 - If required outputs/checkpoint already exist and only final control closure was interrupted, Cursor verifies them and completes its own final result/IDLE transition.
