@@ -131,5 +131,7 @@ Shared templates/schemas are referenced rather than copied unless a frozen snaps
 Cursor A = critical-path production. Cursor B2 = optional isolated/non-conflicting secondary work. Role1 = independent milestone acceptance/bounded preflight. Role2 = forward implementation readiness. Role3 = trailing determinism/regression/FI/long-run verification.
 No lane is kept busy for utilization alone.
 
+These defaults do not override an explicit current task's distinct workstream ownership. Role-specific production implementation/evidence ownership and separation of shared P0 gates follow `QUEUE-ROLE-WORK-ISOLATION-001`; `QUEUE-PM-FAILOVER-001` preserves cross-Role control recovery without transferring the other Role's substantive product work.
+
 ## CORE-HISTORY-001 — legacy
 Superseded/archived protocols are historical evidence only. They do not override current root, this core, or the current Rule ID owner.
