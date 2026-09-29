@@ -2,13 +2,13 @@
 executor: cursor-sdk-local
 status: RECOVERY_INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-30T02:17:45+09:00
+lastPollAt: 2026-09-30T03:07:46+09:00
 lastPollResult: RECOVERY_INVOKING
 lastInvokedTaskKey: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
-lastInvokedAt: 2026-09-30T02:17:45+09:00
+lastInvokedAt: 2026-09-30T03:07:46+09:00
 lastAgentRunId: 
 lastError: 
-pid: 25884
+pid: 48832
 phase: INVOKING
 activeTaskKey: SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1
 elapsedSeconds: 
