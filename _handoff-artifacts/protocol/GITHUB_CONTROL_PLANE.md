@@ -21,6 +21,7 @@ authority: GitHub `thin-bt/dollworld` / `master`
 - protocol: `_handoff-artifacts/protocol/`
 - lane state: `_handoff-artifacts/control/`
 - sprint status: `_handoff-artifacts/control/SPRINT2_STATUS.md` (and equivalent future sprint status files)
+- direct Role assignment pointer: `_handoff-artifacts/control/ROLE_ASSIGNMENTS.md` (`QUEUE-ROLE-WORK-ISOLATION-001`)
 - task instructions: `_handoff-artifacts/tasks/<task-key>/instruction.md`
 - task results: `_handoff-artifacts/results/<task-key>/result.md`
 - executor Active (diagnostic): `_handoff-artifacts/control/CURSOR_A_ACTIVE_TASK.md`, `_handoff-artifacts/control/CURSOR_B2_ACTIVE_TASK.md`
