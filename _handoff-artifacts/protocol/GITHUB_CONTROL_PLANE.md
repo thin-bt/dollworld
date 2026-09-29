@@ -37,6 +37,8 @@ The SDK executor must also mirror Active + heartbeat into the GitHub-readable co
 
 Role1/Role2/Role3 are direct-execution automation roles. They have no canonical ROLE*_INBOX queue and must not wait on one. Historical ROLE*_INBOX files are retired and removed from the live control directory.
 
+During the GitHub control-plane migration, legacy Drive `ROLE*_CURRENT/OUTBOX` and `PM_EXECUTOR` references in older queue/handoff prose do not constitute a second live assignment source and do not authorize a Role to wait on a retired Inbox. Direct Role execution follows its currently authorized distinct workstream and GitHub task/result evidence, while distributed PM health/score/terminal-relay and fenced failover remain active under `QUEUE-ROLE-WORK-ISOLATION-001` and their indexed owner rules. If a required failover selector/control is not available on its documented canonical surface, classify and repair the exact control-path discrepancy; do not infer PM authority, fabricate a lease, or replace substantive work with repeated checks. This migration statement does not itself transfer PM write authority to every Role.
+
 PREPARED must include task-key, lane, sprint, mode, authority ref, and exact instruction path.
 TERMINAL must include result class and evidence references.
 
