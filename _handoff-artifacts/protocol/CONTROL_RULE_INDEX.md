@@ -42,6 +42,7 @@ If two files contain competing versions of the same rule, the owner listed here 
 - `QUEUE-RECONCILE-001` — generation mismatch must resolve explicitly
 - `QUEUE-AUTONOMY-001` — PM generations vs autonomous auxiliary work
 - `QUEUE-PARALLEL-FLOW-001` — dependency-DAG parallel Role dispatch / fan-out-fan-in / no same-item ping-pong
+- `QUEUE-ROLE-WORK-ISOLATION-001` — distinct Role substantive workstreams / distributed oversight without duplicate shared-P0 execution
 - `QUEUE-EXTERNAL-REQUEST-001` — external dollworld thread -> PM request intake / dispatch boundary
 - `QUEUE-BLOCKER-001` — blocker owner/action/resume requirements
 - `QUEUE-USER-DECISION-PREFLIGHT-001` — canonical spec/history authority check before user-decision wait/escalation
