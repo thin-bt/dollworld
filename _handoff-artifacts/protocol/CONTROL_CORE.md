@@ -128,10 +128,7 @@ Frozen spec-package/acceptance/Rxx/audit snapshots are retained unless explicit 
 Shared templates/schemas are referenced rather than copied unless a frozen snapshot is required. Evidence is minimal and unique; do not create redundant complete loose+archive copies for convenience.
 
 ## CORE-LANES-001 — lane roles
-Cursor A = critical-path production. Cursor B2 = optional isolated/non-conflicting secondary work. Role1 = independent milestone acceptance/bounded preflight. Role2 = forward implementation readiness. Role3 = trailing determinism/regression/FI/long-run verification.
-No lane is kept busy for utilization alone.
-
-These defaults do not override an explicit current task's distinct workstream ownership. Role-specific production implementation/evidence ownership and separation of shared P0 gates follow `QUEUE-ROLE-WORK-ISOLATION-001`; `QUEUE-PM-FAILOVER-001` preserves cross-Role control recovery without transferring the other Role's substantive product work.
+Cursor A = critical-path production. Cursor B2 = optional isolated/non-conflicting secondary work. Role1 / Role2 / Role3 are distinct, dynamically assignable execution lanes, not permanent product-domain, Sprint, or implementation-versus-review departments. Their scope for each run comes from the latest valid assignment under `QUEUE-ROLE-WORK-ISOLATION-001`, applicable audit independence, and live ownership/collision controls; any past specialization or sample P0 ownership is non-binding after reassignment. All Roles retain their bounded distributed oversight and fenced PM failover under the indexed owner rules. No lane is kept busy for utilization alone.
 
 ## CORE-HISTORY-001 — legacy
 Superseded/archived protocols are historical evidence only. They do not override current root, this core, or the current Rule ID owner.
