@@ -38,6 +38,16 @@ Fast-path targets are diagnostic thresholds, not correctness deadlines: `NO_ACTI
 
 After at least 3 recent samples exist for the same actor and run class, PM may use the latest 5 samples for bounded performance diagnosis. Treat repeated same-control rereads, exception reads without a trigger, repeated terminal-generation reevaluation, full Activity/history mining, broad evidence rereads, or duplicated rule-resolution work as suspected waste. Safe optimization means removing/reordering those redundant reads while preserving audit entry rules, monotonic/readback fencing, PM fixed-point closure, failover fencing, and independent acceptance. Performance diagnosis itself must not become a mandatory blocker for development.
 
+## QUEUE-GITHUB-WRITE-RECOVERY-001 — bounded GitHub write recovery before blocker
+When a scoped GitHub canonical write is rejected or fails before a repository mutation is confirmed, the actor must not immediately classify the repository, branch, or task as unwritable. In the same run, while staying inside the authorized write boundary:
+1. fresh-read the target file or canonical control and obtain its current blob SHA / identity;
+2. retry the intended mutation as the smallest semantically complete bounded diff using that fresh identity;
+3. if the original write form remains rejected and an equivalent authorized GitHub write path is available, perform one bounded alternate-path attempt without broadening scope or bypassing ownership/approval rules;
+4. read back any successful mutation and record the resulting commit SHA before claiming progress;
+5. classify a write blocker only when the exact scoped mutation still cannot be published after the bounded recovery attempts, or when no authorized alternate path exists. Record the exact rejected operation and next executable recovery action.
+
+A prior generic "write safety" rejection, stale blob conflict, one failed create/update call, or an earlier run's failure is not by itself evidence that GitHub writes are globally unavailable. Do not stop a Role/PM loop, abandon independent safe work, or report a persistent repository-wide blocker from such evidence alone. This rule does not authorize repeated unbounded retries, ownership-boundary violations, force overwrites, branch-protection bypass, or mutation of another lane's live claim.
+
 ## QUEUE-PM-DRAIN-001 — PM internal-action drain before report/idle
 Every active PM run, including a user-triggered `k` / `ｋ` run and the scheduled PM automation, must reach a bounded **internal fixed point** before it may report idle/waiting or end normally. The execution order is mandatory: **READ live controls -> CLASSIFY mandatory transitions -> APPLY all safe PM-owned mutations -> READ BACK every mutated control -> RE-SCAN for newly exposed mandatory transitions -> repeat until one complete pass produces no additional safe PM action -> REPORT**. User-visible reporting is forbidden before this fixed point.
 
