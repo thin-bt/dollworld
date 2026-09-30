@@ -110,7 +110,7 @@ export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps)
         現在: <strong>{overview.worldTimeLabel}</strong>
       </p>
       <div className="competition-schedule-scroll" data-testid="competition-annual-schedule">
-        <table className="competition-schedule-table">
+        <table className="competition-schedule-table" aria-label={`${overview.worldYear}年 大会日程表`}>
           <thead>
             <tr>
               <th scope="col" className="competition-schedule-row-label">
