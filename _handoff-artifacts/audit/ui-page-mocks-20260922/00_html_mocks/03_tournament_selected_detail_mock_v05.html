@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dollworld Tournament Selected Detail Mock v05</title>
+<style>
+:root{font-family:system-ui,sans-serif;color-scheme:dark;color:#edf0f4;background:#11161d}*{box-sizing:border-box}body{margin:0;background:#11161d}.shell{max-width:1180px;margin:auto;padding:24px}.meta{color:#b6c2d1;font-size:13px}.hero,.panel{background:#1b232d;border:1px solid #46566a;border-radius:10px;padding:18px}.hero{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start}.badge{display:inline-block;border:1px solid #697b8d;border-radius:999px;padding:3px 8px;font-size:12px}.state{font-weight:700;margin-top:8px}.cta{background:#d6ad66;border:1px solid #d6ad66;color:#11161d;border-radius:7px;padding:10px 14px;font-weight:700}.tabs{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}.tabs button{background:#263443;border:1px solid #56677a;color:#edf0f4;border-radius:7px;padding:8px 12px}.tabs button[aria-selected=true]{border-color:#d6ad66}.panel h2{margin-top:0}.note{margin-top:14px;border-left:3px solid #d6ad66;background:#263443;padding:10px 12px}.mapping{margin-top:18px;border-top:1px solid #435164;padding-top:12px}@media(max-width:600px){.shell{padding:12px}.hero{grid-template-columns:1fr}.cta{width:100%}.tabs button{flex:1}}</style></head>
+<body><main class="shell"><h1>大会 — 選択中大会</h1><div class="meta">Review mock v05 · selected-detail hierarchy only</div>
+<section class="hero"><div><span class="badge">4月 第2週 · B級</span><h2>B級 総合大会</h2><div class="state">進行可能</div><div class="meta">選択した大会の状態・進行情報をここに集約する。productionに存在しない値は追加しない。</div></div><button class="cta">次の試合へ進む</button></section>
+<nav class="tabs" aria-label="大会情報"><button aria-selected="true">詳細</button><button>参加者</button><button>結果</button></nav>
+<section class="panel"><h2>大会詳細</h2><p>既存productionの選択大会詳細を表示する領域。タブ切替・参加者リンク・結果表示の既存データ意味論を維持する。</p><div class="note">進行CTAは選択大会heroの近傍に1個だけ置く。footerとの二重配置は禁止。mutation、revision、CSRF、pending/error、canStepの既存契約は変更しない。</div>
+<div class="mapping"><b>Production mapping</b><div class="meta"><code>apps/web/src/client/competition/CompetitionPage.tsx</code> のselected tournament detail + existing single step CTA。年間日程は <code>02_tournament_schedule_mock_v04.html</code> が管轄。</div></div></section>
+</main></body></html>
