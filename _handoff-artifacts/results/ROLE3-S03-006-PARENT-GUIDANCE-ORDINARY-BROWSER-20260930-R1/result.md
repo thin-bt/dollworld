@@ -107,3 +107,32 @@ Hard failures:
 Current canonical status already proves the residual is acceptance evidence, not a request to reopen the consumed tournament server work. The predecessor records spec-to-source closure for live enrollment/family parent identity -> persisted mentorship relation kind -> `applyTrainStat` teacher-factor selection. Therefore the next execution should implement/execute the ordinary-flow harness above rather than redesign parent-guidance semantics unless execution exposes a mismatch.
 
 next-action: when browser execution is intentionally resumed, implement this contract in a Role3-owned Sprint3 ordinary-flow browser spec and execute it against current production lineage. Until then continue GPT-only source/test review for fixture determinism and observable value fields without routing to Cursor.
+
+## GPT-only deterministic regression matrix — 2026-10-01
+
+This matrix narrows execution so a resumed browser run cannot pass on labels alone.
+
+| Phase | Preconditions | Ordinary action | Required persisted assertion | Forbidden result |
+|---|---|---|---|---|
+| PTG select | eligible child; live biological parent; no applicable formal master | normal intake/selection | relation=parent_temporary_guidance; teacherId=biologicalParentId | direct relation injection or synthetic teacher |
+| PTG week | prior PTG state; captured pre-stat | exactly one train_stat week | one stat-growth mutation; teacher factor contributes exactly once; reload is stable | second mutation or double teacher-factor counterfactual |
+| replacement | same child; formal master becomes applicable through ordinary product state | next normal selection/reconciliation point | active relation/teacher becomes formal master; old PTG no longer contributes | PTG remains an effective concurrent teacher |
+| formal week | replacement persisted | exactly one train_stat week | formal teacher factor exactly once; former PTG contribution=0 | formal+PTG combined contribution |
+| explicit teach | active teacher; explicit-teach path legal at tested boundary | explicit teach plus permitted weekly progression | teach effect remains distinguishable from the single train_stat teacher contribution | teach causes train_stat teacher contribution to execute twice |
+| disciple efficiency | observable disciple-count efficiency input | one train_stat week | disciple efficiency and selected teacher factor each occupy their own single factor role | either factor is duplicated by the other |
+
+### Identity and event-key assertions
+
+For every measured weekly mutation, capture a composite identity of child/person id + absolute week + target stat + ordinary action/step identity. Evidence is invalid if two stat-growth mutations share that identity. Replacement must be proven by persisted relation/teacher identity before the post-replacement week; a UI label change after the mutation is insufficient.
+
+### Arithmetic assertions
+
+Record observedDelta = postValue - preValue, expectedSingle using the production factor breakdown, and an explicit expectedDouble counterfactual where the selected teacher contribution is duplicated. Require observedDelta == expectedSingle and observedDelta != expectedDouble. For replacement, recompute expectedSingle with the formal teacher factor and zero PTG contribution. Disciple-count efficiency is retained as its independent production input; do not fold it into teacher-factor evidence.
+
+### Fixture strategy
+
+Prefer one continuous persisted-world scenario from PTG selection through formal replacement so cessation is demonstrated rather than inferred across unrelated seeds. If deterministic setup cannot make a formal master applicable without bypassing ordinary flow, use bounded seed/preset discovery only to select the world; after selection, all relation transitions and weekly actions must occur through production paths. Preserve the selected seed/preset in evidence so the run is reproducible.
+
+### Execution stop conditions
+
+Stop and classify as product/spec mismatch rather than weakening assertions when: formal applicability is reached but PTG remains effective; the factor breakdown cannot distinguish teacher and disciple-count contributions; explicit teach and weekly train_stat share an indistinguishable duplicate mutation; or reload changes an already-applied week. These are diagnostic failures, not acceptable fixture variance.
