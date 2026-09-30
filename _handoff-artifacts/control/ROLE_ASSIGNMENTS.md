@@ -33,14 +33,12 @@ evidence-path: _handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-202
 
 ## Role3
 assignment-id: 20260929-P0-01-R3
-state: MEASURED_REPAIR_VERIFIED
-executor-task: PERF-TOURNAMENT-SERVER-PROJECTION-MEASURE-20260930-A1
-executor-terminal: PERF_TOURNAMENT_SERVER_PROJECTION_MEASURED_REPAIR_VERIFIED
+state: NEXT_WORK_ACTIVE
 owner: Role3
-scope: tournament server/projection.
-next-action: Measure remaining dominant schedule/history/ranking/projection/serialization cost with same-data timing/counters; preserve published round-robin reuse and name index, repair only measured cause with regression. If runner absent create exact executable handoff rather than repeat static source inspection.
-write-boundary: tournament server/projection and own evidence; no Person Detail/CompetitionPage client source.
-evidence-path: _handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1/role3.md
+scope: Sprint3 ordinary-user acceptance residual for parent temporary guidance in weekly training. Previous tournament server/projection task is consumed and must not be repeated.
+next-action: Close the remaining ordinary-flow evidence gap recorded in SPRINT3_STATUS.md and ROLE1-S03-006-ORDINARY-FLOW-ACCEPTANCE-RESIDUAL-20260923-R14: use the production browser flow to demonstrate an eligible child with a live biological parent, parent_temporary_guidance selection, one ordinary train_stat week with the expected teacher-factor effect, correct cessation/replacement when a formal master applies, and no double application with explicit teach or disciple-count efficiency. If no browser-capable executor is free, prepare the exact executable browser acceptance spec/harness inside the Role3 write boundary and route it once; do not spend the run re-reading completed Role3 server work or reporting idle.
+write-boundary: Sprint3 parent-temporary-guidance ordinary-flow acceptance test/harness and Role3 evidence only; do not modify Role1 Person Detail measurement source or Role2 competition/UI correction source.
+evidence-path: _handoff-artifacts/results/ROLE3-S03-006-PARENT-GUIDANCE-ORDINARY-BROWSER-20260930-R1/result.md
 
 ## Integration / oversight
 PM or properly fenced surrogate integrates scoped role evidence into _handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1/result.md, owns shared acceptance and routes executor work without overriding live A/B2 claims. All Roles retain compact distributed PM score/health/terminal relay and fenced failover. Current assignment identity must be re-read on each execution boundary. Parent COMPLETE is consumed and must not be reopened by these scoped followups. Scoped followups remain open independently until their own evidence is satisfied or explicitly superseded.
