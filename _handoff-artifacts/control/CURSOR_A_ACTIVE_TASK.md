@@ -1,20 +1,20 @@
 # Cursor A Active Task
 
-state: IDLE
+state: ACTIVE
 lane: A
-task-key: (none)
-mode: (none)
-updatedAt: 2026-09-30T14:12:00+09:00
-pickup: (none)
-startedAt: (none)
+task-key: PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2
+mode: BROWSER_MEASUREMENT_ACCEPTANCE
+updatedAt: 2026-09-30T17:20:00+09:00
+pickup: ACTIVE_IDLE / SDK_EXECUTOR / CURSOR-START-001
+startedAt: 2026-09-30T17:20:00+09:00
 branch: master
 HEAD: a90ac02c200fff19b94691e8e0da5d2fd08c47aa
-completedAt: 2026-09-30T14:12:00+09:00
+completedAt: (none)
 last-completed-task: PERF-TOURNAMENT-SERVER-PROJECTION-MEASURE-20260930-A1
 last-result-path: _handoff-artifacts/results/PERF-TOURNAMENT-SERVER-PROJECTION-MEASURE-20260930-A1/result.md
-last-terminal: PERF_TOURNAMENT_SERVER_PROJECTION_MEASURED_REPAIR_VERIFIED
+last-terminal: (none)
 terminal: (none)
-instruction-path: (none)
+instruction-path: _handoff-artifacts/tasks/PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2/instruction.md
 control-authority: GitHub
 
 Rules:

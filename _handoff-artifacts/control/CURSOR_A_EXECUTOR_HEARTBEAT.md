@@ -1,14 +1,14 @@
 # Cursor A SDK executor heartbeat
 executor: cursor-sdk-local
-status: INVOKING
+status: RECOVERY_INVOKING
 pollInterval: 5m
-lastPollAt: 2026-09-30T17:18:04+09:00
-lastPollResult: INVOKING
+lastPollAt: 2026-09-30T18:08:05+09:00
+lastPollResult: RECOVERY_INVOKING
 lastInvokedTaskKey: PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2
-lastInvokedAt: 2026-09-30T17:18:04+09:00
+lastInvokedAt: 2026-09-30T18:08:05+09:00
 lastAgentRunId: 
 lastError: 
-pid: 61020
+pid: 67000
 phase: INVOKING
 activeTaskKey: PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2
 elapsedSeconds: 
