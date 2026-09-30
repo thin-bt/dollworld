@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dollworld 11-12 模擬戦・戦闘結果 mock v03</title>
+<style>
+:root{
+  --dw-bg:#121412;--dw-bg-2:#101210;--dw-panel:#202320;--dw-panel-2:#272b27;
+  --dw-line:#3a4039;--dw-text:#ece9df;--dw-muted:#aaa99f;--dw-accent:#c7a46a;
+  --dw-accent-2:#7fa087;--dw-danger:#c97a6a;--dw-focus:#e0c38b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  background:radial-gradient(circle at 30% -10%,rgba(199,164,106,.1),transparent 35%),
+             linear-gradient(180deg,#151715,var(--dw-bg-2));
+  color:var(--dw-text);
+  font-family:system-ui,-apple-system,"Segoe UI","Yu Gothic",sans-serif;
+  line-height:1.5;
+}
+a{color:var(--dw-accent)}
+button,select{font:inherit;color:inherit}
+button{border:1px solid #4b5148;border-radius:9px;padding:10px 14px;background:#2b302b;cursor:pointer}
+select{background:#181b18;border:1px solid #41473f;border-radius:8px;padding:8px 10px}
+.dw-shell{max-width:min(1440px,100%);margin:0 auto;min-height:100vh}
+.dw-header{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px 24px;background:rgba(22,24,23,.95);border-bottom:1px solid var(--dw-line)
+}
+.dw-brand h1{margin:0;font-size:17px;letter-spacing:.08em}
+.dw-session{color:var(--dw-muted);font-size:13px;margin:0}
+.dw-nav{display:flex;gap:8px;flex-wrap:wrap}
+.dw-nav a{display:inline-block;color:var(--dw-muted);text-decoration:none;padding:8px 12px;border-radius:8px}
+.dw-nav a:hover,.dw-nav a.active{color:var(--dw-text);background:var(--dw-panel-2)}
+.dw-main{padding:24px;max-width:100%}
+.dw-card{
+  background:linear-gradient(180deg,rgba(39,43,39,.97),rgba(30,33,30,.97));
+  border:1px solid var(--dw-line);border-radius:14px;box-shadow:0 14px 30px rgba(0,0,0,.24);
+  padding:22px;
+}
+.dw-card + .dw-card{margin-top:18px}
+.dw-eyebrow{color:var(--dw-accent);font-size:12px;letter-spacing:.14em}
+.dw-lead,.dw-sub{color:var(--dw-muted)}
+.dw-section{margin-top:18px}.dw-section h3{margin:0 0 10px}
+.dw-participant-selectors{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.dw-fighter{padding:16px;border:1px solid #3d433c;border-radius:11px;background:rgba(0,0,0,.12)}
+.dw-fighter-side-a{border-color:rgba(127,160,135,.45);background:linear-gradient(180deg,rgba(90,143,98,.1),rgba(0,0,0,.12)),rgba(0,0,0,.08)}
+.dw-fighter-side-b{border-color:rgba(199,164,106,.42);background:linear-gradient(180deg,rgba(199,164,106,.08),rgba(0,0,0,.12)),rgba(0,0,0,.08)}
+.dw-fighter label{display:block;margin-bottom:8px;color:var(--dw-muted);font-size:12px}
+.dw-fighter-side-a label{color:var(--dw-accent-2);font-weight:600}
+.dw-fighter-side-b label{color:var(--dw-accent);font-weight:600}
+.dw-fighter h4{margin:0 0 8px}.dw-fighter select{width:100%}
+.dw-btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.dw-btnrow-center{justify-content:center}
+.dw-btn-primary{background:var(--dw-accent);color:#171713;border-color:var(--dw-accent);font-weight:700}
+.dw-profile-compare{
+  margin-top:12px;padding:18px 18px 16px;border:1px solid #4a5248;border-radius:13px;
+  background:linear-gradient(180deg,rgba(39,43,39,.55),rgba(22,25,22,.72)),rgba(0,0,0,.12)
+}
+.dw-compare-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #3d433c}
+.dw-compare-title{margin:0;font-size:16px}.dw-compare-vs{margin:0;color:var(--dw-muted)}
+.dw-compare-table{width:100%;border-collapse:collapse;font-size:13px}
+.dw-compare-table th,.dw-compare-table td{padding:10px 14px;text-align:center;border:1px solid #3d433c}
+.dw-compare-table th:first-child,.dw-compare-table td:first-child{text-align:left;color:var(--dw-muted);background:rgba(0,0,0,.15)}
+.dw-compare-table thead th[data-side="a"]{background:rgba(90,143,98,.18);color:var(--dw-accent-2)}
+.dw-compare-table thead th[data-side="b"]{background:rgba(199,164,106,.14);color:var(--dw-accent)}
+.dw-winner-banner{margin:8px 0 4px;font-size:28px;font-weight:700;color:var(--dw-accent);text-align:center}
+.dw-mock-result{text-align:center}
+.dw-result-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.dw-result-summary div{padding:10px 12px;border:1px solid #343934;border-radius:10px;background:rgba(0,0,0,.1)}
+.dw-result-summary dt{font-size:12px;color:var(--dw-muted)}.dw-result-summary dd{margin:3px 0 0}
+.dw-versus{display:grid;grid-template-columns:1fr 70px 1fr;gap:12px;align-items:start}
+.dw-vs{align-self:center;text-align:center;color:var(--dw-accent);font-weight:800}
+.dw-battle-status{margin:16px 0}.dw-battle-status-name{margin:0 0 10px;font-size:16px;font-weight:600}
+.dw-resource{margin-bottom:8px}.dw-resource-label{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;font-size:12px;color:var(--dw-muted)}
+.dw-resource-track{height:8px;border-radius:999px;background:rgba(0,0,0,.35);overflow:hidden;border:1px solid #3d433c}
+.dw-resource-fill{height:100%;background:linear-gradient(90deg,#5a8f62,#8fbf6a)}
+.dw-battle-range-banner{text-align:center;margin:8px 0 12px;color:var(--dw-muted);font-size:13px}
+.dw-combat-log{margin:0;padding:0;border-top:1px solid #343934}
+.dw-combat-turn{margin:0;padding:10px 0 4px;border-bottom:1px solid #3d433c}
+.dw-combat-turn-header{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:6px;font-size:14px}
+.dw-combat-turn-range{color:var(--dw-muted);font-size:13px}
+.dw-combat-turn-actions{list-style:none;margin:0;padding:0}
+.dw-combat-row{display:grid;grid-template-columns:2.25rem 1fr;gap:8px 12px;padding:6px 0;border-bottom:1px solid #2e332e}
+.dw-combat-seq{color:var(--dw-muted);font-size:12px;text-align:right;padding-top:2px}
+.dw-log-header{display:flex;gap:12px;align-items:baseline;margin-bottom:8px;flex-wrap:wrap}
+.dw-combat-order{font-size:12px;color:var(--dw-accent-2)}
+.dw-combat-action,.dw-combat-range-chip{color:var(--dw-muted);font-size:13px}
+.dw-badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #41473f;background:rgba(0,0,0,.12);font-size:12px}
+.dw-combat-effects p{margin:2px 0 0;font-size:13px}
+.dw-dev{margin-top:16px;padding-top:12px;border-top:1px dashed #4a5048;color:var(--dw-muted);font-size:12px}
+.dw-context{margin-bottom:16px;padding:12px 14px;border:1px solid #3d433c;border-radius:10px;background:rgba(0,0,0,.08)}
+.dw-context strong{color:var(--dw-accent)}
+.dw-context{margin-bottom:16px;padding:12px 14px;border:1px solid #3d433c;border-radius:10px;background:rgba(0,0,0,.08)}
+.dw-context strong{color:var(--dw-accent)}
+.dw-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.dw-tabs a{padding:8px 12px;border:1px solid #41473f;border-radius:8px;text-decoration:none}
+.dw-tabs a.active{background:var(--dw-panel-2);color:var(--dw-text)}
+@media(max-width:760px){
+  .dw-main{padding:12px}.dw-participant-selectors,.dw-versus{grid-template-columns:1fr}
+  .dw-vs{padding:4px}.dw-result-summary{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="dw-shell">
+  <header class="dw-header">
+    <div class="dw-brand"><h1>Dollworld</h1><p class="dw-session">204年 6月 第2週</p></div>
+    <nav class="dw-nav"><a href="#">ホーム</a><a href="#">大会</a><a href="#">人物</a><a class="active" href="#">模擬戦</a></nav>
+  </header>
+  <main class="dw-main">
+    <div class="dw-tabs"><a class="active" href="#setup">11 模擬戦</a><a href="#result">12 戦闘結果 / 詳細ログ</a></div>
+
+    <section class="dw-card" id="setup">
+      <p class="dw-eyebrow">確認専用</p>
+      <h2>確認専用模擬戦</h2>
+      <p class="dw-lead">正史の世界とイベントは変更されません。観察・確認専用の模擬実行です。</p>
+      <p class="dw-sub">選択した参加者の適性・能力・習得技は、下の比較サマリーで確認できます。</p>
+
+      <div class="dw-participant-selectors">
+        <div class="dw-fighter dw-fighter-side-a">
+          <label>参加者 A</label><h4>アオイ</h4>
+          <select><option>アオイ · 22歳 · 現役</option></select>
+        </div>
+        <div class="dw-fighter dw-fighter-side-b">
+          <label>参加者 B</label><h4>レン</h4>
+          <select><option>レン · 24歳 · 現役</option></select>
+        </div>
+      </div>
+
+      <section class="dw-section">
+        <div class="dw-profile-compare">
+          <div class="dw-compare-head"><h4 class="dw-compare-title">戦闘プロファイル比較</h4><p class="dw-compare-vs">アオイ　VS　レン</p></div>
+          <table class="dw-compare-table">
+            <thead><tr><th>項目</th><th data-side="a">アオイ</th><th data-side="b">レン</th></tr></thead>
+            <tbody>
+              <tr><th>現在段位</th><td>S</td><td>S</td></tr>
+              <tr><th>剣技適性</th><td>82</td><td>54</td></tr>
+              <tr><th>格闘適性</th><td>48</td><td>79</td></tr>
+              <tr><th>skill</th><td>74</td><td>71</td></tr>
+              <tr><th>speed</th><td>68</td><td>75</td></tr>
+              <tr><th>習得技</th><td>袈裟斬り、返し斬り</td><td>掌打、踏み込み</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="dw-btnrow dw-btnrow-center">
+        <button class="dw-btn-primary">模擬戦を開始</button>
+        <button>同じseedで再現</button>
+        <button>最新結果</button>
+      </div>
+
+      <section class="dw-section dw-mock-result">
+        <h3>模擬戦結果</h3>
+        <p class="dw-winner-banner">アオイ</p>
+        <p class="dw-lead">アオイがレンに判定で勝利しました。</p>
+        <dl class="dw-result-summary">
+          <div><dt>勝者</dt><dd>アオイ</dd></div><div><dt>敗者</dt><dd>レン</dd></div>
+          <div><dt>終了理由</dt><dd>規定ターン終了</dd></div><div><dt>判定</dt><dd>アオイ優勢</dd></div>
+        </dl>
+        <div class="dw-versus dw-battle-status">
+          <div class="dw-fighter"><p class="dw-battle-status-name">アオイ</p><div class="dw-resource"><div class="dw-resource-label"><span>耐久</span><span>62 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:62%"></div></div></div><div class="dw-resource"><div class="dw-resource-label"><span>精神力</span><span>71 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:71%"></div></div></div></div>
+          <div class="dw-vs">VS</div>
+          <div class="dw-fighter"><p class="dw-battle-status-name">レン</p><div class="dw-resource"><div class="dw-resource-label"><span>耐久</span><span>45 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:45%"></div></div></div><div class="dw-resource"><div class="dw-resource-label"><span>精神力</span><span>54 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:54%"></div></div></div></div>
+        </div>
+        <p><a href="#result">詳細ログを見る</a></p>
+      </section>
+    </section>
+
+    <section class="dw-card" id="result">
+      <p><a href="#setup">← 模擬戦選択へ</a></p>
+      <h2>模擬戦結果 / 詳細ログ</h2>
+
+      <section class="dw-section dw-battle-start-profiles">
+        <h3>試合開始時の戦闘プロフィール比較</h3>
+        <div class="dw-profile-compare">
+          <div class="dw-compare-head"><h4 class="dw-compare-title">戦闘プロファイル比較</h4><p class="dw-compare-vs">アオイ　VS　レン</p></div>
+          <table class="dw-compare-table">
+            <thead><tr><th>項目</th><th data-side="a">アオイ</th><th data-side="b">レン</th></tr></thead>
+            <tbody>
+              <tr><th>剣技適性</th><td>82</td><td>54</td></tr>
+              <tr><th>格闘適性</th><td>48</td><td>79</td></tr>
+              <tr><th>習得技</th><td>袈裟斬り、返し斬り</td><td>掌打、踏み込み</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="dw-battle-range-banner">開始間合い 中距離 · 終了時 近距離</p>
+
+      <div class="dw-mock-result">
+        <p class="dw-winner-banner">アオイ</p>
+        <p class="dw-lead">アオイがレンに判定で勝利しました。</p>
+      </div>
+      <dl class="dw-result-summary dw-dl">
+        <div><dt>勝者</dt><dd>アオイ</dd></div><div><dt>敗者</dt><dd>レン</dd></div>
+        <div><dt>終了理由</dt><dd>規定ターン終了</dd></div><div><dt>判定</dt><dd>アオイ優勢</dd></div>
+        <div><dt>ログ件数</dt><dd>4</dd></div>
+      </dl>
+
+      <div class="dw-versus dw-battle-status">
+        <div class="dw-fighter"><p class="dw-battle-status-name">アオイ</p><div class="dw-resource"><div class="dw-resource-label"><span>耐久</span><span>62 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:62%"></div></div></div><div class="dw-resource"><div class="dw-resource-label"><span>精神力</span><span>71 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:71%"></div></div></div></div>
+        <div class="dw-vs">VS</div>
+        <div class="dw-fighter"><p class="dw-battle-status-name">レン</p><div class="dw-resource"><div class="dw-resource-label"><span>耐久</span><span>45 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:45%"></div></div></div><div class="dw-resource"><div class="dw-resource-label"><span>精神力</span><span>54 / 100</span></div><div class="dw-resource-track"><div class="dw-resource-fill" style="width:54%"></div></div></div></div>
+      </div>
+
+      <section class="dw-section">
+        <h3>戦闘経過</h3>
+        <p class="dw-sub">全 4 件</p>
+        <div class="dw-combat-log">
+          <section class="dw-combat-turn">
+            <header class="dw-combat-turn-header"><strong>ターン 1</strong><span class="dw-combat-turn-range">間合い 中距離 → 近距離</span></header>
+            <ol class="dw-combat-turn-actions">
+              <li class="dw-combat-row"><div class="dw-combat-seq">1</div><div><header class="dw-log-header"><span class="dw-combat-order">先手</span><strong>レン</strong><span class="dw-combat-action">踏み込み</span><span class="dw-combat-range-chip">中距離</span><span class="dw-badge">成功</span></header><div class="dw-combat-effects"><p>間合い 中距離 → 近距離</p><p>精神力 80 → 78</p></div></div></li>
+              <li class="dw-combat-row"><div class="dw-combat-seq">2</div><div><header class="dw-log-header"><strong>アオイ</strong><span class="dw-combat-action">袈裟斬り</span><span class="dw-combat-range-chip">近距離</span><span class="dw-badge">命中</span></header><div class="dw-combat-effects"><p>レンに18ダメージ</p><p>レン 耐久 100 → 82</p></div></div></li>
+            </ol>
+          </section>
+          <section class="dw-combat-turn">
+            <header class="dw-combat-turn-header"><strong>ターン 2</strong><span class="dw-combat-turn-range">間合い 近距離</span></header>
+            <ol class="dw-combat-turn-actions">
+              <li class="dw-combat-row"><div class="dw-combat-seq">3</div><div><header class="dw-log-header"><strong>レン</strong><span class="dw-combat-action">掌打</span><span class="dw-combat-range-chip">近距離</span><span class="dw-badge">ガード</span></header><div class="dw-combat-effects"><p>アオイに6ダメージ（ガード軽減）</p></div></div></li>
+              <li class="dw-combat-row"><div class="dw-combat-seq">4</div><div><header class="dw-log-header"><strong>アオイ</strong><span class="dw-combat-action">返し斬り</span><span class="dw-combat-range-chip">近距離</span><span class="dw-badge">回避</span></header><div class="dw-combat-effects"><p>レンが回避。ダメージなし</p></div></div></li>
+            </ol>
+          </section>
+        </div>
+      </section>
+
+      <div class="dw-btnrow"><button>次のログを読み込む</button></div>
+      <details class="dw-dev"><summary>開発・再現情報</summary><p>matchId / battleSeed / finalRngState / simulationId / hash 類</p></details>
+    </section>
+
+    <section class="dw-card">
+      <p class="dw-eyebrow">大会戦での共用確認</p>
+      <h2>大会コンテキストだけを外側に追加</h2>
+      <div class="dw-context"><strong>Sランク 通常大会・準決勝</strong><p class="dw-sub">大会詳細へ戻る / 対戦表へ戻る / Match ID</p></div>
+      <p class="dw-sub">上記の勝敗表示、参加者状態、戦闘経過、詳細ログは模擬戦と同じ見た目・同じ共有presentationを使う想定です。大会専用の別戦闘UIは作りません。</p>
+    </section>
+  </main>
+</div>
+</body>
+</html>
