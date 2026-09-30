@@ -136,3 +136,11 @@ Reference v03 was fresh-read from the required `00_html_mocks` path. A/B2 remain
 ## Write-path diagnostic — 2026-09-30
 
 Minimal `update_file` probe: append-only evidence note to isolate GitHub write-path behavior. No product/source ownership change.
+
+## GitHub write-path isolation — 2026-09-30
+
+Fresh probes disproved a repository-wide or production-path write block:
+- append-only evidence update succeeded: commit `e9d987462c5b57b9b22e2c45fe95785a515b8b0d`;
+- direct production client update to `apps/web/src/client/competition/competition-schedule-matrix.tsx` succeeded: commit `5be46f93630c1b6e0447394069b99325bf97fc88`.
+
+Conclusion: do not treat prior write-safety rejection as a persistent GitHub permission/master-protection failure. Retry the concrete scoped mutation with fresh blob SHA and minimal bounded diff; only record a blocker when the actual tool returns a rejection for that exact mutation.
