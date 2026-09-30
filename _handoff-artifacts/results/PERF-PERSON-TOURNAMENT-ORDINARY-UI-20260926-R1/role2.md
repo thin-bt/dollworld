@@ -92,3 +92,11 @@ Record:
 Only if a client-side cost is measured as dominant may Role2 repair it. Re-run the identical dataset and append before/after evidence. Otherwise leave product source unchanged and report the measured result.
 
 Full P0 PASS remains forbidden until the parent acceptance is proven.
+
+
+## Lane route check — 2026-09-30 17:51 JST
+
+- Cursor A: not available for Role2. A Inbox is PREPARED for `PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2`; executor heartbeat is INVOKING that task.
+- Cursor B2: not available for Role2. Active task is `SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1`.
+- Result: no free browser-capable lane this run. Preserve the executable CompetitionPage measurement handoff above and retry dispatch only after a lane becomes free.
+- No shared result or out-of-boundary product source changed.
