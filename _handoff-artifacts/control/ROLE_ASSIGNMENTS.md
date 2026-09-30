@@ -16,6 +16,7 @@ executor-task: PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2
 owner: Role1
 scope: Person Detail measurement/acceptance; previously published minimal related-name batch repair 1cf2428ed5d169f7019b38116f6a26201189df6c is consumed.
 next-action: Complete representative-data browser before/after request count, response bytes and >=20 cold/warm p50/p95; if runner inaccessible, produce an exact runnable measurement harness/CI handoff and route once, then advance a separate safe scoped evidence delta. Do not repeat historical repair or generic CI/P0 status.
+anti-idle-rule: A rejected GitHub write, missing browser runner in the Role runtime, unchanged generation, or an already-published handoff is NOT a complete block and MUST NOT disable/pause the Role1 loop. After one failed direct write, do not repeat the same write attempt as the run's main work. Preserve the exact patch/evidence in the canonical routable task/evidence surface when possible, route once to a capable executor, and continue a distinct safe Role1 test/acceptance delta. Re-reading the same acceptance gap without a new artifact, test, measurement, recovery action, or routed executable delta is NO_PROGRESS and must be escalated by PM.
 write-boundary: Person Detail tests, measurement and own evidence; no other Role's source.
 evidence-path: _handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1/role1.md
 
