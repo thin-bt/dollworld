@@ -105,6 +105,15 @@ Sprint scope に user-facing application / UI が含まれる、または Sprint
 - required flow は実際のユーザー入口から開始し、Sprint authority が要求する状態変化・永続化・画面反映まで確認する。
 - UI 非対象 Sprint では N/A と根拠を completion evidence に明記する。
 
+### 3.1 実プレイ機能確認 / UI視覚確認は別ゲート
+user-facing game/application の completion では、production build成功、CI PASS、unit/integration test PASS、API regression PASS、Playwright等の自動ブラウザシナリオPASSだけを、機能完成・通常プレイ完成・UI完成の証拠として扱ってはならない。これらは各テスト対象の技術証跡であり、product completionを単独では証明しない。
+
+ゲーム機能については、同一 completion snapshot の production app を通常のユーザー入口から起動し、Sprint authority / Roadmap が要求する対象機能を実際のユーザー操作経路でプレイして、少なくとも入力・状態遷移・ゲーム結果・永続化・再表示を仕様と照合する実プレイ acceptance を必須とする。固定seed直注入、内部API直呼び、hidden/manual bypass、テスト専用step、限定された自動シナリオだけでは、この実プレイ acceptance を代替できない。自動化を併用してもよいが、実際の通常操作面と対象機能の仕様照合を evidence に明記する。
+
+UI/UX が対象またはユーザーに表示される変更を含む場合、機能 acceptance とは別に current production UI の視覚 acceptance を必須とする。実画面でレイアウト、情報階層、文字・余白、可読性、操作状態、overflow/clipping、対象となる狭幅/レスポンシブ表示、画面間整合、accepted wire/mock/reference との fidelity を確認し、必要な screenshot/visual evidence を残す。DOM/test-id の存在、クリック成功、Playwright PASSだけで視覚 acceptance をPASSにしてはならない。
+
+PM/Role/Cursor は、上記の実プレイ機能確認またはUI視覚確認が欠ける状態を「主要機能完成」「通常プレイ確認済み」「UI完成」「残件は性能のみ」等と報告してはならない。未確認は未確認として material completion gap に残し、修正・再確認を継続する。
+
 既に同一SHAで有効なrequired verify PASSがあり、その後product/spec/config tracked bytesが変わっていなければ、operational evidence output path / archive / control-file整備だけを理由にfull verifyを再実行しない。ただし上記 clean clone / production build / startup / ordinary real user-facing acceptance の必須証跡が未実施・欠落・無効なら、その欠落は operational-only ではなく completion blocker である。
 
 ### 4. 最終verify合格条件
