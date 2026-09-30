@@ -100,3 +100,27 @@ Full P0 PASS remains forbidden until the parent acceptance is proven.
 - Cursor B2: not available for Role2. Active task is `SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1`.
 - Result: no free browser-capable lane this run. Preserve the executable CompetitionPage measurement handoff above and retry dispatch only after a lane becomes free.
 - No shared result or out-of-boundary product source changed.
+
+
+## UI correction delta — 2026-09-30 19:54 JST
+
+Canonical Role2 state is now `UI_CORRECTION_ACTIVE`. Fresh-read approved/current tournament reference:
+`_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/02-05_tournament_schedule_detail_participants_results_mock_v03.html`
+(blob `a77cf2c69604a4fe2a3c3f9b9d76eb51f0f2ad78`).
+
+Fresh-read production:
+- `apps/web/src/client/competition/competition-schedule-matrix.tsx` blob `48424741a4718cf4ee7654befd3760a567ebd30f`
+- `apps/web/src/client/competition/CompetitionPage.tsx` blob `cd926db28fb1c56909bc7e90b265f15b026c39ee`
+- `apps/web/src/client/presentation.css` blob `541bfaf3a6eb97f7d2ed5b00fb582f9fb800893d`
+
+Highest-impact concrete mismatch identified: the approved reference presents annual tournaments as readable event cards (timing badge, tournament name, lifecycle/participant summary, clear selected/playable emphasis and a "詳細を見る" action), while production still renders a dense 48-week x category matrix with tiny marker cells. At narrow width production therefore depends on horizontal table scrolling and hides tournament identity behind compact cells, diverging from the reference hierarchy.
+
+A scoped production patch was prepared to replace only the schedule presentation with a responsive event-card grid while preserving the existing `CompetitionScheduleOverview.entries`, selection keys, year navigation, lifecycle labels, participant-count labels, `competition-schedule-cell` test hook and `onSelect` behavior. No server/projection or Person Detail semantics are involved. The direct GitHub update of `competition-schedule-matrix.tsx` was rejected by the write safety gate before repository mutation, so the production patch is not claimed as applied.
+
+Required browser acceptance after the patch lands:
+- desktop 1440x1000: annual cards read in reference hierarchy; selected/playable state is immediately distinguishable; detail selection still opens the same entry;
+- narrow 390x844: cards collapse to one column without horizontal page overflow; tournament name/timing/lifecycle remain readable; year navigation remains operable;
+- existing detail/participants/step behavior remains unchanged;
+- explicitly compare residuals against mock v03 after screenshots; do not mark the tournament screen complete until that review is recorded.
+
+Routing check: Cursor A remains ACTIVE on `PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2`; Cursor B2 remains ACTIVE on `SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1`. Neither live claim was displaced. The exact UI correction is therefore retained in Role2 evidence for the first free capable lane rather than overwriting another owner's task.
