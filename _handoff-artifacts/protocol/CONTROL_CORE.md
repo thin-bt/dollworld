@@ -68,6 +68,19 @@ PM/control and all lanes must not silently replace or weaken such requirements. 
 
 A later task that does not restate an earlier acceptance requirement does not cancel it. If the requirement has not yet been evidenced, it remains unfinished work and must stay visible in current control state. It may not be used as grounds for READY, CLOSED, NO_WORK, or ending the development loop.
 
+### UI mock / reference publication rule
+For dollworld UI correction work, a mock or wireframe is a **reference used to correct the production UI**, not the product deliverable itself. Creating, refining, restoring, or measuring a mock never by itself completes UI work.
+
+Any newly created or revised reviewable HTML mock/reference MUST be published in the user-review canonical folder:
+
+`_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/`
+
+before the run may report the mock/reference as produced, current, reviewable, or complete. A copy existing only in an internal task/result/mocks/Drive location does not satisfy this publication requirement. Publication requires readback of the canonical review-folder file. Historical/internal copies may remain, but the review-folder copy is the user-facing reference surface.
+
+For each published mock/reference, the owning UI lane must identify the production screen(s) it governs and continue the product loop: **compare production UI -> implement concrete mismatch -> real-browser verify desktop and narrow viewport -> record residual differences -> continue**. If a mock is revised because the reference itself was wrong, publish the revised version first, then use that version for production correction. Do not wait merely because the user has not manually reviewed an ordinary iteration; request user input only when a genuine design/product choice cannot be derived from current authority.
+
+A UI lane must not claim material progress solely from moving/copying an old mock into the review folder. Existing historical mocks may be republished to repair discoverability, but that action is control/artifact repair rather than product UI progress.
+
 ### Capability / route verification guard
 PM, Role, Cursor, automation, and GPT-side control work MUST NOT infer that an action, connector, storage path, tool capability, or next-step route is unavailable merely because the current actor has not yet used it, one attempted interface failed, or the capability is not visible in the actor's immediate working context.
 
