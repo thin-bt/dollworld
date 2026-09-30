@@ -136,3 +136,24 @@ Prefer one continuous persisted-world scenario from PTG selection through formal
 ### Execution stop conditions
 
 Stop and classify as product/spec mismatch rather than weakening assertions when: formal applicability is reached but PTG remains effective; the factor breakdown cannot distinguish teacher and disciple-count contributions; explicit teach and weekly train_stat share an indistinguishable duplicate mutation; or reload changes an already-applied week. These are diagnostic failures, not acceptable fixture variance.
+
+
+## GPT-only executable oracle contract — 2026-10-01
+
+The resumed Role3 browser harness must derive PASS from captured production values, not labels. For each measured train_stat step emit one oracle row with: productSha, world/seed, childId, biologicalParentId, relationBefore, teacherIdBefore, absoluteWeek, targetStat, preValue, postValue, factorBreakdown.teacherFactor, factorBreakdown.discipleCountFactor, expectedSingle, expectedTeacherDuplicated, mutationIdentity, reloadValue. mutationIdentity is childId + absoluteWeek + targetStat + ordinary action identity and must be unique.
+
+PTG row preconditions: relationBefore=parent_temporary_guidance, teacherIdBefore=biologicalParentId, no applicable formal master. Require observedDelta=postValue-preValue=expectedSingle and observedDelta!=expectedTeacherDuplicated; reloadValue=postValue.
+
+Replacement row must be captured before the post-replacement stat mutation. Require the persisted active mentorship for the same child to contain exactly one effective teacher relation, the formal relation; no effective parent_temporary_guidance entry may remain. The subsequent train_stat oracle row must use the formal teacher factor once and assign zero contribution to the former PTG factor. This proves cessation semantically rather than from changed UI text.
+
+Explicit-teach negative control: retain the explicit-teach effect/event identity separately from the train_stat mutationIdentity. A legal teach at the tested boundary must not create a second stat-growth mutation with the train_stat identity and must not cause teacherFactor to be multiplied twice.
+
+Disciple-efficiency negative control: capture discipleCountFactor independently from teacherFactor. Compute expectedSingle with each production factor in its own slot, then construct a duplicated-factor counterfactual for each. PASS requires observedDelta to equal the production single-application result and differ from both duplication counterfactuals whenever rounding makes them distinguishable. If rounding collapses a counterfactual to the same numeric delta, that row is insufficient evidence; select another target stat/week/fixture rather than infer non-duplication.
+
+### Deterministic fixture search bounds
+
+Fixture discovery may vary seed/preset only before the accepted scenario starts. Once PTG selection is captured, freeze productSha, world/seed and childId through replacement and all negative controls. Prefer a child whose biological parent can become a formal master through ordinary state transition; this keeps teacher identity constant across PTG -> formal replacement and isolates relation semantics. If no such case is found in the bounded discovery set, record EVIDENCE_GAP rather than injecting mentorship state.
+
+### Machine verdict
+
+PASS only if PTG selection, PTG train_stat oracle, persisted formal replacement, post-replacement train_stat oracle, explicit-teach negative control, disciple-efficiency negative control, and reload stability all pass on the same product lineage. Missing observable values => EVIDENCE_GAP. Arithmetic/identity mismatch => PRODUCT_OR_SPEC_MISMATCH. Interrupted execution => EXECUTION_INCOMPLETE. Unit/helper evidence may diagnose a mismatch but cannot upgrade any of these verdicts to browser PASS.
