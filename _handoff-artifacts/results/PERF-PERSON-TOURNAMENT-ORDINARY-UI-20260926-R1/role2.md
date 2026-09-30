@@ -124,3 +124,12 @@ Required browser acceptance after the patch lands:
 - explicitly compare residuals against mock v03 after screenshots; do not mark the tournament screen complete until that review is recorded.
 
 Routing check: Cursor A remains ACTIVE on `PERF-PERSON-DETAIL-BROWSER-MEASURE-20260930-A2`; Cursor B2 remains ACTIVE on `SPRINT3-S03-010-LONG-RUN-OTL-BROWSER-ACCEPTANCE-20260924-R1`. Neither live claim was displaced. The exact UI correction is therefore retained in Role2 evidence for the first free capable lane rather than overwriting another owner's task.
+
+
+## UI correction patch published — 2026-09-30 20:59 JST
+
+Direct production update was rejected before mutation. The exact schedule-card production correction, second selected-detail hierarchy correction, desktop/narrow browser harness, expected artifacts and collision-safe routing fence are now canonical at:
+`_handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1/role2-ui-correction-20260930.patch.md`
+(commit `675316471d132f55ec6d1ecd062a3ffb208ceb58`).
+
+Reference v03 was fresh-read from the required `00_html_mocks` path. A/B2 remain occupied by their live Role1/Role3 claims, so no ownership was displaced.
