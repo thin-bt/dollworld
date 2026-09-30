@@ -21,11 +21,13 @@ evidence-path: _handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-202
 
 ## Role2
 assignment-id: 20260929-P0-01-R2
-state: RUNNER_HANDOFF_READY
+state: UI_CORRECTION_ACTIVE
 owner: Role2
-scope: CompetitionPage client and ordinary tournament browser.
-next-action: Produce same-data schedule/detail/participants/ranking request counts, bytes and >=20 cold/warm p50/p95; reuse published ordinary-flow regression 6933d9e9ce2acee82a3e136bba6f49777971b926. Repair only measured client cost; when runner absent publish exact executable handoff, not status-only report.
-write-boundary: tournament client/browser tests and own evidence; no Person Detail/server-projection source.
+scope: mock/reference-driven UI correction for production screens. The mock is a reference, not the deliverable.
+goal: Make the actual production UI conform to the intended layout, hierarchy, interactions and visual quality expressed by the approved/current mocks and wireframes. Do not stop at mock creation, screenshot generation, measurement-only work, or describing differences.
+next-action: Compare current production UI against the current mock/reference set screen-by-screen; implement the highest-impact concrete UI mismatches in production; verify in real browser at desktop and narrow viewport; repeat until the compared screen is materially aligned. Preserve existing product behavior/data semantics while correcting presentation. Use performance/network measurement only when it directly helps resolve a UI defect; it is not the primary Role2 objective.
+completion-rule: A screen is not complete because a mock exists. Completion requires production implementation + browser verification + explicit remaining-difference review. Continue to the next screen/reference while authorized scope remains.
+write-boundary: client presentation/components/styles/browser tests and Role2 evidence; do not modify Person Detail/server-projection semantics owned elsewhere unless a UI defect proves an owner-boundary issue, then route once.
 evidence-path: _handoff-artifacts/results/PERF-PERSON-TOURNAMENT-ORDINARY-UI-20260926-R1/role2.md
 
 ## Role3
