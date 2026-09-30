@@ -133,3 +133,6 @@ Direct production update was rejected before mutation. The exact schedule-card p
 (commit `675316471d132f55ec6d1ecd062a3ffb208ceb58`).
 
 Reference v03 was fresh-read from the required `00_html_mocks` path. A/B2 remain occupied by their live Role1/Role3 claims, so no ownership was displaced.
+## Write-path diagnostic — 2026-09-30
+
+Minimal `update_file` probe: append-only evidence note to isolate GitHub write-path behavior. No product/source ownership change.
