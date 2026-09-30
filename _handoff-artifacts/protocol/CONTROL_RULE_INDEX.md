@@ -63,6 +63,7 @@ If two files contain competing versions of the same rule, the owner listed here 
 - `QUEUE-CAPABILITY-DISCOVERY-001` — connector capability discovery before declaring tool/capability blocker
 - `QUEUE-READ-COMPLETENESS-001` — pagination/truncation-safe complete reads before absence conclusions
 - `QUEUE-TRANSIENT-FAILURE-001` — retryable connector/provider failure handling
+- `QUEUE-GITHUB-WRITE-RECOVERY-001` — bounded fresh-identity retry / alternate authorized write path before GitHub write blocker classification
 - `QUEUE-CONTROL-RECOVERY-001` — stable-ID fixed-control mechanical self-recovery
 - `QUEUE-DISPATCH-SAFETY-001` — idempotent lane publication / live-command overwrite guard
 - `QUEUE-SCHEDULE-INDEPENDENCE-001` — scheduler jitter/overlap-safe generation semantics
