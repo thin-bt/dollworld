@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dollworld Tournament Results v06</title>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;margin:0;background:#f6f6f3;color:#20201d}main{max-width:1180px;margin:auto;padding:24px}.hero,.panel{background:#fff;border:1px solid #d8d8d0;border-radius:12px;padding:20px;margin-bottom:16px}.kicker,.muted{color:#666;font-size:.9rem}.winner{font-size:2rem;font-weight:800;margin:.2em 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:520px}th,td{padding:9px;border-bottom:1px solid #ddd;text-align:left}.matrix{min-width:680px}.match{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eee}@media(max-width:700px){main{padding:12px}.grid{grid-template-columns:1fr}.winner{font-size:1.6rem}.match{display:block}}
+</style></head><body><main>
+<p class="kicker">ROLE2 REVIEW MOCK v06 · production target: CompetitionPage.tsx result sections · uses existing view data only</p>
+<section class="hero"><div class="kicker">S級 総合大会 — 大会結果</div><div class="winner">優勝　アルト</div><div class="muted">終了 · 12月第4週</div></section>
+<div class="grid">
+<section class="panel"><h2>最新試合</h2><div class="match"><strong>アルト</strong><span>勝者</span></div><div class="match"><span>ベル</span><span>敗者</span></div></section>
+<section class="panel"><h2>総当たり戦績</h2><div class="table-wrap"><table><thead><tr><th>選手</th><th>勝</th><th>敗</th><th>試合</th></tr></thead><tbody><tr><td>アルト</td><td>3</td><td>0</td><td>3</td></tr><tr><td>ベル</td><td>2</td><td>1</td><td>3</td></tr></tbody></table></div></section>
+</div>
+<section class="panel"><h2>対戦マトリクス</h2><div class="table-wrap"><table class="matrix"><thead><tr><th>選手</th><th>アルト</th><th>ベル</th><th>シエル</th></tr></thead><tbody><tr><th>アルト</th><td>—</td><td>勝</td><td>勝</td></tr><tr><th>ベル</th><td>敗</td><td>—</td><td>勝</td></tr></tbody></table></div></section>
+<section class="panel"><h2>結果表示契約</h2><p>finished + championDisplayName では優勝heroを第一情報とする。round_robin_complete では「全試合終了／順位・優勝者はまだ確定していません」を維持する。既存の roundRobinProgress、knockoutBracket、tournamentSeriesHistory、promotionResults、personRankHistory を二次情報として表示し、新規API値を要求しない。</p><p>狭幅ではsectionを1列化し、横スクロールは個別table/matrix wrapper内だけに限定する。人物・match detailへの既存リンク、test id、mutation/network契約を保持する。</p></section>
+</main></body></html>
