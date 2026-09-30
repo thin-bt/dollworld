@@ -9,6 +9,10 @@ control-authority: GitHub
 required-repository: thin-bt/dollworld
 required-branch: master
 sprint: Sprint3
+recovery-generation: 20260930-184347-JST
+recovery-requested-at: 2026-09-30T18:43:47+09:00
+recovery-reason: EXECUTOR_HEARTBEAT_STALE
+recovery-mode: SAME_TASK_RECONCILE_ONLY
 pickup-requirements:
 - fresh-read GitHub canonical instruction
 - claim ACTIVE before changes
