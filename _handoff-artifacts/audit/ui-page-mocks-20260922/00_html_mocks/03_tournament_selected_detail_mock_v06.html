@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dollworld Tournament Selected Detail Mock v06</title>
+<style>
+:root{font-family:system-ui,sans-serif;color-scheme:dark;color:#edf0f4;background:#11161d}*{box-sizing:border-box}body{margin:0}.shell{max-width:1180px;margin:auto;padding:24px}.meta{color:#b6c2d1;font-size:13px}.hero,.panel{background:#1b232d;border:1px solid #46566a;border-radius:10px;padding:18px}.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.badge{display:inline-block;border:1px solid #697b8d;border-radius:999px;padding:3px 8px;font-size:12px}.identity h2{font-size:28px;margin:8px 0}.progress{font-weight:700;margin:8px 0}.latest{background:#222d39;border:1px solid #46566a;border-radius:9px;padding:14px}.latest h3{margin-top:0}.tabs{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}.tabs button,.secondary{background:#263443;border:1px solid #56677a;color:#edf0f4;border-radius:7px;padding:8px 12px}.tabs button[aria-selected=true]{border-color:#d6ad66}.panel h2{margin-top:0}.guidance{border-left:3px solid #d6ad66;background:#263443;padding:11px 12px;margin:14px 0}.manual{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.hint{color:#b6c2d1;font-size:13px}.mapping{margin-top:18px;border-top:1px solid #435164;padding-top:12px}.mapping table{width:100%;border-collapse:collapse}.mapping th,.mapping td{padding:8px;border-bottom:1px solid #364252;text-align:left;vertical-align:top}@media(max-width:600px){.shell{padding:12px}.hero{grid-template-columns:1fr}.tabs button{flex:1}.manual .secondary{width:100%}}
+</style></head><body><main class="shell">
+<h1>大会 — 選択中大会</h1><div class="meta">Review mock v06 · production-aligned detail hierarchy</div>
+<section class="hero">
+<div class="identity"><span class="badge">4月 第2週 · B級</span><h2>B級 総合大会</h2><div class="progress">進行中 · 3 / 7試合消化</div><div class="meta">選択大会のidentity・状態・進捗を最初に読む。productionに存在しない値は追加しない。</div></div>
+<div class="latest"><h3>最新試合</h3><b>Aria vs Bram</b><p>Aria 勝利 / 判定</p><button class="secondary">試合詳細 / 戦闘ログ</button></div>
+</section>
+<nav class="tabs" aria-label="大会情報"><button aria-selected="true">詳細</button><button>参加者</button><button>結果</button></nav>
+<section class="panel"><h2>大会詳細</h2><p>既存の大会詳細・参加者・結果データ意味論を維持する。長い表や履歴より、選択大会identity・進捗・最新試合を先に見せる。</p>
+<div class="guidance"><b>通常進行</b><br>「シミュレーション」画面で週を進めると、予定週の大会が自動で進行・確定します。</div>
+<div class="manual"><button class="secondary">次の試合を進める</button><span class="hint">手動操作は自動進行の補助。週進行で進まない場合のみ使用する。</span></div>
+<div class="mapping"><b>Screen → production mapping / residual</b><table><thead><tr><th>Production target</th><th>Keep</th><th>Residual to close</th></tr></thead><tbody><tr><td><code>apps/web/src/client/competition/CompetitionPage.tsx</code> selected detail + <code>competition-actions</code></td><td>tabs / lifecycle / canStep / pending-error / single step mutation / auto-progression semantics</td><td>production footerに分散する自動進行説明とmanual stepを、detail文脈内では「通常進行 → 補助手動操作」の順で見せる。manual stepをhero primary CTAへ昇格させない。</td></tr></tbody></table></div>
+</section></main></body></html>
