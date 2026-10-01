@@ -154,3 +154,27 @@ Important source-level defect in the present test boundary: `person-detail-reque
 ### Completion gate
 
 Role1 browser/network acceptance is complete only when raw artifacts prove all four >=20 populations, computed p50/p95 under the percentile rule above, body-byte distributions, and the normal after-side R>0 exact request contract, and targeted tests cover the regression matrix. Server-projection timing or helper-only unit tests cannot substitute for these gates.
+
+
+## GPT-only source/test delta — async loader rejection containment (2026-10-01)
+
+Fresh master review of `PersonDetailPage.tsx`, `fetch-ui005.ts`, `fetch-person-identities.ts`, and the current tests identifies one acceptance invariant that must be explicit at the page boundary: **neither the selected-detail loader nor the related-identity loader may reject out of the page effect for an expected fetch/body-read failure**. The page launches an un-awaited async IIFE and has no outer catch, so a loader rejection becomes an unhandled async rejection rather than a rendered/fallback state.
+
+This is not merely a loader-unit concern. Add the following deterministic page-level cases using the existing `fetchImpl` seam; no production test hook is required:
+
+| case | deterministic fetch sequence | page-level required result | request invariant |
+| --- | --- | --- | --- |
+| selected detail fetch rejects | selected GET throws | existing Person Detail error state; no identity request; no unhandled rejection | selected=1, identity=0 |
+| selected detail body read rejects | selected GET returns status 200; `text()` rejects | same existing error state; no identity request; no unhandled rejection | selected=1, identity=0 |
+| identity fetch rejects after successful detail | selected detail succeeds with R>0; identity GET throws | selected detail remains success; related links retain personId fallback; no unhandled rejection | selected=1, identity=1, related-full-detail=0 |
+| identity body read rejects after successful detail | selected detail succeeds with R>0; identity GET returns status 200; `text()` rejects | same fallback behavior; no unhandled rejection | selected=1, identity=1, related-full-detail=0 |
+
+Current source already normalizes the two `fetchImpl(...)` rejection cases inside the loaders. It does **not** normalize either `response.text()` rejection: both awaits are outside the loader try/catch. Therefore the smallest product repair, if implementation is authorized later, is to include body acquisition in the same transport-failure normalization in each loader. Do not add retry, extra requests, or a page-wide swallow catch as the primary repair; those would weaken the request-count contract or hide unrelated programming errors.
+
+### Test-design constraint
+
+The present `person-detail.test.tsx` uses `renderToStaticMarkup` for view/shell assertions and directly unit-tests `loadPersonDetail`; static rendering cannot execute `PersonDetailPage`'s `useEffect`. The page-level cases above therefore require a DOM/effect-capable React test environment (or the existing browser harness), mounting `PersonDetailPage` itself and awaiting the visible terminal state. Merely adding another static-render assertion does not close this gap.
+
+### Acceptance relationship to the 80-sample measurement
+
+These deterministic failure cases are regression gates, not members of the normal successful R>0 performance populations. The >=80 before/after cold/warm samples remain success-path measurements. Failure-path samples must not be mixed into their p50/p95 or body-byte distributions.
