@@ -1,6 +1,6 @@
 # ROLE3-S03-006-PARENT-GUIDANCE-ORDINARY-BROWSER-20260930-R1
 
-state: GPT_ONLY_ACCEPTANCE_SPEC_READY
+state: GPT_ONLY_ACCEPTANCE_SPEC_RECONCILED
 assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 sprint: Sprint3
@@ -157,3 +157,25 @@ Fixture discovery may vary seed/preset only before the accepted scenario starts.
 ### Machine verdict
 
 PASS only if PTG selection, PTG train_stat oracle, persisted formal replacement, post-replacement train_stat oracle, explicit-teach negative control, disciple-efficiency negative control, and reload stability all pass on the same product lineage. Missing observable values => EVIDENCE_GAP. Arithmetic/identity mismatch => PRODUCT_OR_SPEC_MISMATCH. Interrupted execution => EXECUTION_INCOMPLETE. Unit/helper evidence may diagnose a mismatch but cannot upgrade any of these verdicts to browser PASS.
+
+
+## GPT-only canonical reconciliation — PTG-017 reachability correction (2026-10-03)
+
+This section supersedes the earlier Scenario C, continuous same-child replacement fixture strategy, replacement oracle, and Machine verdict wherever they require an ordinary completed PTG child to become a persisted formal replacement merely because the parent later becomes formal-master-qualified.
+
+Canonical PTG-017 establishes that this same-child rematerialization is not an ordinary reachable transition. Acceptance is therefore split into independent production-reachable lanes:
+
+1. **PTG-014A — initial ordinary PTG weekly.** Consume the persisted initial ordinary PTG state directly. Require one native `weekly_train_stat` application, PTG teacher factor exactly once, formal contribution zero, count-0 disciple factor exactly once, and reload/persisted-state stability.
+2. **PTG-015 — independent first-formal enrollment.** Use a separate child whose first ordinary enrollment directly yields `parent_master_disciple`. Explicit teach must not duplicate mentorship/cardinality or cause the subsequent weekly teacher contribution to execute twice.
+3. **PTG-016 — legal disciple-count contrast.** Counts must arise from legal persisted mentorship transitions through production entrypoints. Direct sidecar/count mutation is forbidden as acceptance evidence. If the required controlled contrast cannot be source-proven/reached, verdict is `NOT_REACHABLE`, not PASS.
+4. **Synthetic adapter replacement.** A manually injected second pending boundary after completed PTG may test replacement/cardinality mechanics only and must be labelled `SYNTHETIC_ADAPTER_REPLACEMENT`. It cannot satisfy an ordinary-flow acceptance lane.
+
+### Reconciled arithmetic admissibility
+
+For every weekly oracle row, recompute native production units and production flooring for `EXPECTED_SINGLE`, `PTG_DOUBLE`, `FORMAL_LEAK`, and `DISCIPLE_DOUBLE` as relevant. PASS evidence is admissible only when `EXPECTED_SINGLE` differs from each guarded counterfactual after production flooring. Otherwise classify `FIXTURE_INSUFFICIENT` and select another legal target/week/base/remainder.
+
+### Reconciled machine verdict
+
+Browser PASS no longer requires same-child PTG -> formal replacement. PASS requires the production-reachable PTG-014A and PTG-015 lanes plus the applicable negative controls/reload stability. PTG-016 must PASS when a legal controlled contrast is reachable; a source-proven `NOT_REACHABLE` result is a specification/evidence outcome and must not be replaced by synthetic count mutation. Any synthetic replacement result remains diagnostic only.
+
+This reconciliation does not claim browser execution. It makes the canonical acceptance specification consistent with PTG-014 and PTG-017 while Cursor execution remains intentionally paused.
