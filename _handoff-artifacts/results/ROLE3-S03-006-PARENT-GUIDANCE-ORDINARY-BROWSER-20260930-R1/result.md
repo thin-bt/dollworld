@@ -47,7 +47,7 @@ FAIL if the test seeds the relation directly or calls a helper that bypasses enr
 
 Evidence must include the ordinary action request/step identity and before/after values, not only UI text saying a parent is guiding.
 
-## Scenario C — formal master replaces temporary parent guidance
+## Scenario C — [SUPERSEDED BY PTG-017] same-child formal replacement diagnostic only
 
 Starting from a valid parent-guidance child:
 1. Make a formal master applicable using the ordinary product flow.
@@ -91,7 +91,7 @@ For each scenario retain:
 
 ## Acceptance
 
-PASS requires A+B+C+D+E on one current product lineage, with no test-only direct relation injection. A helper/unit PASS may support diagnosis but cannot replace ordinary-flow evidence.
+PASS is governed by the reconciled machine verdict below: PTG-014A and PTG-015 must use production-reachable independent lineages; PTG-016 must use a legal controlled contrast when reachable. Legacy A+B+C+D+E same-child continuity is superseded by PTG-017.
 
 Hard failures:
 - selected parent id is not the persisted biological parent;
@@ -131,7 +131,7 @@ Record observedDelta = postValue - preValue, expectedSingle using the production
 
 ### Fixture strategy
 
-Prefer one continuous persisted-world scenario from PTG selection through formal replacement so cessation is demonstrated rather than inferred across unrelated seeds. If deterministic setup cannot make a formal master applicable without bypassing ordinary flow, use bounded seed/preset discovery only to select the world; after selection, all relation transitions and weekly actions must occur through production paths. Preserve the selected seed/preset in evidence so the run is reproducible.
+SUPERSEDED by PTG-017: do not require one continuous PTG-to-formal same-child scenario. Use the persisted initial ordinary PTG lineage for PTG-014A and a separate independently reachable first-formal lineage for PTG-015. If deterministic setup cannot make a formal master applicable without bypassing ordinary flow, use bounded seed/preset discovery only to select the world; after selection, all relation transitions and weekly actions must occur through production paths. Preserve the selected seed/preset in evidence so the run is reproducible.
 
 ### Execution stop conditions
 
@@ -156,7 +156,7 @@ Fixture discovery may vary seed/preset only before the accepted scenario starts.
 
 ### Machine verdict
 
-PASS only if PTG selection, PTG train_stat oracle, persisted formal replacement, post-replacement train_stat oracle, explicit-teach negative control, disciple-efficiency negative control, and reload stability all pass on the same product lineage. Missing observable values => EVIDENCE_GAP. Arithmetic/identity mismatch => PRODUCT_OR_SPEC_MISMATCH. Interrupted execution => EXECUTION_INCOMPLETE. Unit/helper evidence may diagnose a mismatch but cannot upgrade any of these verdicts to browser PASS.
+SUPERSEDED by the reconciled machine verdict below. Same-child persisted formal replacement is not an ordinary-flow PASS prerequisite. Missing observable values => EVIDENCE_GAP. Arithmetic/identity mismatch => PRODUCT_OR_SPEC_MISMATCH. Interrupted execution => EXECUTION_INCOMPLETE. Unit/helper evidence may diagnose a mismatch but cannot upgrade these verdicts to browser PASS.
 
 
 ## GPT-only canonical reconciliation — PTG-017 reachability correction (2026-10-03)
