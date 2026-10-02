@@ -134,3 +134,31 @@ If PD-HARNESS-09 or PD-HARNESS-10 fails, discard the affected before/after compa
 Evidence header for each side must therefore include at minimum: `projectName`, `browserType`, `browserVersion`, `playwrightVersion`, and the already-required `serverInstanceId`. These are environment provenance fields, not performance metrics.
 
 This closes a reproducibility gap without changing the shared Playwright config or overlapping Role3 cross-browser acceptance.
+
+
+## Measurement clock and terminal-state contract
+
+Fresh reconciliation of the A2 plan found one remaining reproducibility gap: the document fixes request classification, browser/server provenance, and accepted-sample counts, but does not yet define the wall-time clock boundary precisely enough for two independent harness implementations to produce comparable latency samples. A Playwright `page.goto()` duration, a `load` event duration, and the time until related identities are committed are not equivalent for Person Detail because identity loading is an asynchronous page effect.
+
+Use one monotonic browser-side clock contract for every before/after latency observation. Do not substitute navigation timing or server request duration.
+
+### Exact clock gates
+
+| id | check | required result |
+|---|---|---|
+| PD-CLOCK-01 | clock source | `performance.now()` in the page's browser context; never `Date.now()` or host wall clock |
+| PD-CLOCK-02 | t0 | immediately before the harness initiates the Person Detail navigation/open action for that `openId` |
+| PD-CLOCK-03 | R=0 terminal t1 | first observation after selected-detail success has committed the required Person Detail terminal UI |
+| PD-CLOCK-04 | R>0 terminal t1 | first observation after selected-detail success **and** the matching-revision identity outcome has committed names/fallbacks for that open; merely receiving the identity HTTP response is insufficient |
+| PD-CLOCK-05 | sample latency | `t1 - t0`; record raw milliseconds without rounding before percentile calculation |
+| PD-CLOCK-06 | navigation event isolation | `domcontentloaded`, `load`, network-idle, and individual API response durations may be retained as diagnostics but must not replace t1 |
+| PD-CLOCK-07 | failure/timeout | no t1 means no accepted latency sample; preserve the attempt with `acceptedSampleIndex=null` and explicit `failurePhase` |
+| PD-CLOCK-08 | stale A->B | A and B have independent t0/t1 keyed by `openId`; an A completion observed after B starts can never close B's clock |
+
+For R>0, the terminal assertion must be derived from the same fixture used to calculate R, so the harness knows the expected final related-name/fallback state before opening the page. A generic selector such as “Person Detail container visible” is not a terminal condition.
+
+### Percentile reproducibility
+
+After exactly 20 accepted raw latencies exist for a declared population, sort ascending and use nearest-rank indexing: `rank = ceil(p * N)` with 1-based rank. Therefore for N=20, p50 is sorted item 10 and p95 is sorted item 19. Do not interpolate. Persist all 20 raw values alongside the reported p50/p95 so the aggregate is independently recomputable.
+
+These clock gates apply symmetrically to before and after. They do not alter PD-PAGE deterministic interception cases and do not overlap Role2 UI/mock or Role3 Sprint3 acceptance.
