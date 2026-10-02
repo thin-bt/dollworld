@@ -112,3 +112,25 @@ For the 80-sample performance measurement, do **not** rely on the root config's 
 If PD-HARNESS-01..06 fails, discard that side population rather than filtering the unexpected observations after percentile calculation.
 
 This is a harness/test-design correction only. It does not require changing the shared root Playwright configuration and must not alter unrelated Sprint3 browser acceptance.
+
+
+## Browser binary/version symmetry guard
+
+Fresh review of `playwright.config.ts` and root `package.json` shows that A2's canonical `chrome` project uses `channel: "chrome"` while `@playwright/test` is pinned to `1.55.0`. The Playwright package version therefore does **not** pin the branded Chrome binary used by the measurement. A host Chrome update between the before and after side can create a browser-version confound even when `--project=chrome` is identical.
+
+Do not replace the accepted `chrome` project with bundled Chromium solely for A2. Instead, make browser identity part of the measurement preflight/evidence and reject asymmetric sides.
+
+### Additional exact preflight gates
+
+| id | check | required result |
+|---|---|---|
+| PD-HARNESS-07 | Playwright package identity | both sides report `@playwright/test=1.55.0` from the checked-out lock/package state |
+| PD-HARNESS-08 | browser identity | record `browser.browserType().name()`, `browser.version()`, and the selected project name before sample 1 |
+| PD-HARNESS-09 | before/after browser symmetry | project name, browser type, and full `browser.version()` string are byte-for-byte equal |
+| PD-HARNESS-10 | browser drift during a side | the browser version recorded for accepted sample 1 and accepted sample 20 is identical |
+
+If PD-HARNESS-09 or PD-HARNESS-10 fails, discard the affected before/after comparison. Do not normalize, statistically adjust, or merge observations across browser versions.
+
+Evidence header for each side must therefore include at minimum: `projectName`, `browserType`, `browserVersion`, `playwrightVersion`, and the already-required `serverInstanceId`. These are environment provenance fields, not performance metrics.
+
+This closes a reproducibility gap without changing the shared Playwright config or overlapping Role3 cross-browser acceptance.
