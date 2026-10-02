@@ -184,3 +184,19 @@ The evidence header must contain terminalTimeoutMs and maxAttemptsPerSide in add
 A harness-invalidating event (for example PD-HARNESS-09 browser mismatch or server identity drift) discards the entire affected side and is not counted as an application failure. Application/network/data failures inside an otherwise valid harness remain recorded attempts. This distinction prevents silent cherry-picking and accidental pollution of latency percentiles.
 
 PD-SAMPLE-01..08 apply only to the real production-data performance population. They do not change the deterministic intercepted PD-PAGE/PD-LOAD cases.
+
+
+## Fixed A2 execution budget
+
+A2 no longer leaves the PD-SAMPLE numeric budget to the implementing harness. The root Playwright configuration on master fixes the surrounding test envelope at `timeout=360000`, `expect.timeout=15000`, `retries=0`, and `workers=1`. For this A2 measurement, use the following values unchanged on both before and after sides.
+
+| id | check | required result |
+|---|---|---|
+| PD-BUDGET-01 | accepted target | `acceptedTargetPerSide=20`; stop the side immediately when accepted sample 20 is persisted |
+| PD-BUDGET-02 | terminal timeout | `terminalTimeoutMs=12000`, measured from the PD-CLOCK-02 t0; navigation, selected-detail completion, and (when R>0) matching-revision identity terminal commit are all inside this one budget |
+| PD-BUDGET-03 | attempt cap | `maxAttemptsPerSide=24`; attempt 24 ending with fewer than 20 accepted samples makes the side invalid for p50/p95 reporting |
+| PD-BUDGET-04 | no adaptive extension | do not raise 12000ms or 24 attempts after collection begins and do not replace accepted slow/outlier samples |
+| PD-BUDGET-05 | outer timeout classification | the Playwright test-level timeout is a harness boundary, not an application timeout; if it fires before the harness records the 12000ms terminal result, classify the side as harness-invalid rather than synthesizing a PD-SAMPLE timeout row |
+| PD-BUDGET-06 | evidence header | persist `acceptedTargetPerSide=20`, `terminalTimeoutMs=12000`, and `maxAttemptsPerSide=24` before sample 1, together with the already-required browser/server provenance |
+
+Runtime-fit proof: `24 * 12000 = 288000ms`, leaving `72000ms` inside the root `360000ms` test envelope for setup, assertions, bookkeeping, and evidence serialization. The 12000ms terminal budget is intentionally explicit and must not be implemented by inheriting the root `expect.timeout=15000` value. These fixed values supersede only the sentence above that previously allowed the implementing harness to choose the exact numeric timeout and attempt cap; all PD-SAMPLE-01..08 semantics remain in force.
