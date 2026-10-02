@@ -62,3 +62,18 @@ The 80-sample harness may reuse the same request classifier, but it must run aga
 Preferred for A2: Playwright route interception because Playwright is already canonical and exercises the real page effect.
 
 Alternative only if a broader test-infrastructure change is independently approved: add a DOM-capable Vitest environment and a React mount library. Do not add those dependencies merely to satisfy this task when the existing browser lane can prove the contract.
+
+## Loader boundary prerequisite discovered by fresh source review
+
+The page-level matrix above assumes malformed selected-detail payloads are rejected by `loadPersonDetail`. Current master does not yet guarantee that: `isPersonDetailView` in `fetch-ui005.ts` checks only the exact 27 top-level keys and does not validate their runtime value types. `PersonDetailPage` immediately spreads `formalMasterPersonIds` and `formalDisciplePersonIds`, so an exact-key payload with either field non-array can escape the loader and throw inside the async effect.
+
+Before treating PD-PAGE-01..08 as sufficient page-level acceptance, add this deterministic loader gate (not part of the 80-sample performance population):
+
+| id | mutated selected-detail field | required loader result | forbidden downstream behavior |
+|---|---|---|---|
+| PD-LOAD-01 | `formalMasterPersonIds: null` | `failure/data_shape` | identity request; async-effect exception |
+| PD-LOAD-02 | `formalDisciplePersonIds: {}` | `failure/data_shape` | identity request; async-effect exception |
+| PD-LOAD-03 | `formalMasterPersonIds: [123]` | `failure/data_shape` | malformed identity query |
+| PD-LOAD-04 | `displayName: 42` | `failure/data_shape` | malformed value rendered as success |
+
+Repair boundary: strengthen `isPersonDetailView` (or a dedicated decoder it calls) so the runtime checks match the declared `PersonDetailView` contract. Do not paper over malformed success data in `PersonDetailPage` with `?? []` or casts. The array fields must be arrays of strings; scalar/null fields must match their declared primitive/nullability; numeric maps must be records whose values are numbers; array/object container fields must at minimum enforce their declared container shape. This is a deterministic correctness gate, not a percentile sample.
