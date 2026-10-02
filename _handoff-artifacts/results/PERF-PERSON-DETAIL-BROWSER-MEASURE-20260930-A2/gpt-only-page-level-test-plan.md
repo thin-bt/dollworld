@@ -200,3 +200,51 @@ A2 no longer leaves the PD-SAMPLE numeric budget to the implementing harness. Th
 | PD-BUDGET-06 | evidence header | persist `acceptedTargetPerSide=20`, `terminalTimeoutMs=12000`, and `maxAttemptsPerSide=24` before sample 1, together with the already-required browser/server provenance |
 
 Runtime-fit proof: `24 * 12000 = 288000ms`, leaving `72000ms` inside the root `360000ms` test envelope for setup, assertions, bookkeeping, and evidence serialization. The 12000ms terminal budget is intentionally explicit and must not be implemented by inheriting the root `expect.timeout=15000` value. These fixed values supersede only the sentence above that previously allowed the implementing harness to choose the exact numeric timeout and attempt cap; all PD-SAMPLE-01..08 semantics remain in force.
+
+
+## Machine-checkable A2 evidence acceptance contract
+
+The fixed budget above is only useful if a reviewer can distinguish a complete population from a partial or harness-invalid run without interpreting prose. Persist the following fields and enforce these gates for each before/after side.
+
+| id | check | required result |
+|---|---|---|
+| PD-EVIDENCE-01 | side status | exactly one of `complete`, `insufficient-samples`, or `harness-invalid` |
+| PD-EVIDENCE-02 | attempt ledger | persist every attempted open in order with `openId`, `attempt`, `acceptedSampleIndex`, `failurePhase`, and `elapsedMs`; failed attempts are not omitted |
+| PD-EVIDENCE-03 | accepted indexing | accepted rows have contiguous `acceptedSampleIndex=1..20`; non-accepted rows use null |
+| PD-EVIDENCE-04 | terminal stop | once accepted sample 20 is persisted, no later attempt may exist for that side |
+| PD-EVIDENCE-05 | insufficient population | after attempt 24, fewer than 20 accepted samples requires `sideStatus=insufficient-samples` and p50/p95 fields must be absent/null |
+| PD-EVIDENCE-06 | harness invalidation | a predeclared harness-invalidating gate requires `sideStatus=harness-invalid` plus a non-empty machine-readable reason; do not relabel it as an application timeout |
+| PD-EVIDENCE-07 | percentile inputs | a complete side persists the 20 raw accepted latency values and a sorted copy; no failed-attempt elapsed value enters the percentile population |
+| PD-EVIDENCE-08 | percentile recomputation | for N=20, reported p50 equals sorted item 10 and p95 equals sorted item 19 (1-based), with no interpolation |
+| PD-EVIDENCE-09 | paired-budget identity | before and after headers must both equal `acceptedTargetPerSide=20`, `terminalTimeoutMs=12000`, `maxAttemptsPerSide=24`; mismatch invalidates the comparison |
+| PD-EVIDENCE-10 | comparison gate | a before/after performance conclusion is allowed only when both sides are `complete`; otherwise report the blocking side status and no comparative percentile verdict |
+
+Minimum machine-readable side shape:
+
+```json
+{
+  "side": "before|after",
+  "sideStatus": "complete|insufficient-samples|harness-invalid",
+  "harnessInvalidReason": null,
+  "acceptedTargetPerSide": 20,
+  "terminalTimeoutMs": 12000,
+  "maxAttemptsPerSide": 24,
+  "attemptCount": 0,
+  "acceptedCount": 0,
+  "attempts": [
+    {
+      "openId": "string",
+      "attempt": 1,
+      "acceptedSampleIndex": null,
+      "failurePhase": null,
+      "elapsedMs": 0
+    }
+  ],
+  "acceptedLatencyMsRaw": [],
+  "acceptedLatencyMsSorted": [],
+  "p50Ms": null,
+  "p95Ms": null
+}
+```
+
+For `complete`, `acceptedCount` and both latency arrays must equal 20 and p50/p95 must be present. For either non-complete status, comparative percentile fields must not be presented as a valid result. `attemptCount` must equal the number of persisted attempt rows, making omission of failed attempts mechanically detectable.
