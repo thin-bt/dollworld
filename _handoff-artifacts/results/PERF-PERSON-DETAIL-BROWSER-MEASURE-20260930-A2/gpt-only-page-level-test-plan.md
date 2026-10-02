@@ -162,3 +162,25 @@ For R>0, the terminal assertion must be derived from the same fixture used to ca
 After exactly 20 accepted raw latencies exist for a declared population, sort ascending and use nearest-rank indexing: `rank = ceil(p * N)` with 1-based rank. Therefore for N=20, p50 is sorted item 10 and p95 is sorted item 19. Do not interpolate. Persist all 20 raw values alongside the reported p50/p95 so the aggregate is independently recomputable.
 
 These clock gates apply symmetrically to before and after. They do not alter PD-PAGE deterministic interception cases and do not overlap Role2 UI/mock or Role3 Sprint3 acceptance.
+
+
+## Attempt budget, timeout, and retry contract
+
+The clock contract above excludes failed attempts from accepted latency samples, but that alone is insufficient: silently retrying slow or failed opens until 20 successes can bias the population. A2 therefore requires a fixed attempt policy declared before collection.
+
+| id | check | required result |
+|---|---|---|
+| PD-SAMPLE-01 | target population | exactly 20 accepted samples per declared before/after side |
+| PD-SAMPLE-02 | attempt numbering | every open is persisted with monotonically increasing attempt; accepted rows additionally receive acceptedSampleIndex=1..20 |
+| PD-SAMPLE-03 | retry semantics | a failed/timed-out attempt is never overwritten or reused; any later attempt is a new openId and new attempt |
+| PD-SAMPLE-04 | timeout symmetry | one explicit terminal timeout value is declared in the evidence header before sample 1 and is byte-for-byte identical before vs after |
+| PD-SAMPLE-05 | timeout start | timeout budget starts at the same t0 defined by PD-CLOCK-02; navigation and identity wait are inside that single budget |
+| PD-SAMPLE-06 | timeout result | preserve the raw attempt with acceptedSampleIndex=null, failurePhase=timeout, elapsed raw milliseconds, and request-classifier counts observed before timeout |
+| PD-SAMPLE-07 | attempt cap | declare a finite maxAttemptsPerSide before collection; reaching it without 20 accepted samples fails that side rather than extending the cap after seeing results |
+| PD-SAMPLE-08 | no selective rerun | accepted samples are never discarded/replaced because they are statistical outliers, slow, or inconvenient; only a predeclared harness-invalidating gate may invalidate the whole side |
+
+The evidence header must contain terminalTimeoutMs and maxAttemptsPerSide in addition to existing browser/server provenance. Exact numeric values may be chosen by the implementing harness from existing suite/runtime constraints, but they must be fixed before sample 1 and held constant across the paired before/after measurement.
+
+A harness-invalidating event (for example PD-HARNESS-09 browser mismatch or server identity drift) discards the entire affected side and is not counted as an application failure. Application/network/data failures inside an otherwise valid harness remain recorded attempts. This distinction prevents silent cherry-picking and accidental pollution of latency percentiles.
+
+PD-SAMPLE-01..08 apply only to the real production-data performance population. They do not change the deterministic intercepted PD-PAGE/PD-LOAD cases.
