@@ -1,103 +1,105 @@
 # PTG-014 executable weekly regression contract
 
-state: GPT_ONLY_EXECUTABLE_TEST_PLAN_READY
+state: GPT_ONLY_EXECUTABLE_TEST_PLAN_RECONCILED
 assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
-scope: post-replacement parent_master_disciple weekly train_stat and negative controls
+scope: reachable PTG weekly train_stat plus independently reachable formal controls
 source-lineage: thin-bt/dollworld master
-depends-on: PTG-013-regression-plan.md
+depends-on: PTG-017-ordinary-flow-reachability-correction.md
+supersedes: PTG-014 assumptions that consume PTG-013 synthetic second intake as ordinary-flow evidence
 
 ## Purpose
 
-PTG-013 closes the persistence/replacement gap. PTG-014 must prove that the *returned* state after that replacement drives the normal formal-master weekly path exactly once. It must not rebuild a fresh world, replace the parent, or infer replacement only from teacher identity.
+PTG-017 proves that a completed initial parent-temporary-guidance enrollment is not ordinarily rematerialized merely because the same parent later becomes formal-master-qualified. This contract therefore separates three evidence lineages:
+- PTG-014A: persisted initial ordinary PTG state;
+- PTG-015/016: independently reachable first-formal-enrollment state;
+- synthetic PTG -> formal second intake: replacement/cardinality adapter regression only.
 
-## Preconditions
+No acceptance case may relabel the synthetic second intake as ordinary-flow evidence.
 
-Consume PTG-013 boundary-2 returned runtimeState and weeklyTrainingSidecars directly.
+## PTG-014A ordinary PTG weekly fixture
 
-Before the weekly action assert all of:
-- child id = child_enrollment_ptg013;
-- selected teacher id = parent_ptg013;
-- exactly one mentorship exists for the child;
-- relation kind = parent_master_disciple;
-- zero parent_temporary_guidance relations remain for the child;
-- parent sidecar discipleCount = 1;
-- weekly teacherFactorKey resolves through the normal Sprint1 formal path, not parentTemporaryGuidanceFactorTenThousandths.
+Consume the runtimeState and weeklyTrainingSidecars returned by PTG-017 Week N directly. Do not rebuild the world, replace the parent, inject a second pending enrollment, or rewrite mentorship/sidecar fields.
 
-A failure of any precondition is a replacement failure; do not continue and reinterpret the weekly result as PASS.
+Before the weekly action require:
+- exactly one completed enrollment outcome for the child;
+- exactly one mentorship for the child;
+- relation kind = parent_temporary_guidance;
+- selected teacher = biological parent;
+- zero formal parent_master_disciple relations for the child;
+- parent sidecar discipleCount = 0;
+- no second pending enrollment for the child.
 
-## PTG-014 action
+If any precondition fails, classify the fixture as PRECONDITION_FAILED; do not continue and reinterpret another lineage as PASS evidence.
 
-Schedule exactly one train_stat action for one uncapped target stat in the next legal week. Preserve the PTG-013 child/parent/runtime/sidecars. Choose fixture values with a non-zero pre-action remainder (recommended 999 milliPoints) so carry is exercised.
+## PTG-014A action and oracle
 
-Capture before:
-- surface stat;
-- statGrowthRemainder;
-- fatigue/injury/motivation inputs;
-- growthPotential/age/currentValue factors;
-- resolved teacherFactor;
-- resolved discipleCountFactor;
-- rngFactor.
+Schedule exactly one legal train_stat action for one uncapped target stat in the next legal week. Capture the production inputs required to recompute the native stat-growth result, including the resolved PTG teacher factor, resolved disciple-count factor, pre-action remainder, and RNG factor.
 
-Run one weekly-training mutation.
+Filter native stat-growth evidence by child + week + targetStat + reason=weekly_train_stat and require:
+1. exactly one matching application;
+2. native appliedMilliPoints equals production recomputation;
+3. teacher contribution resolves to parentTemporaryGuidanceFactorTenThousandths exactly once;
+4. no formal teacher-factor contribution is present;
+5. disciple-count contribution resolves from discipleCount=0 exactly once;
+6. after the action, mentorship cardinality/relation and parent discipleCount remain unchanged.
 
-## Primary assertions
+Surface-stat delta alone is not the exactly-once oracle.
 
-Filter stat-growth evidence by child + week + targetStat + reason=weekly_train_stat.
+## Arithmetic admissibility guard
 
-Require:
-1. exactly one matching stat-growth application;
-2. its native appliedMilliPoints equals the production recomputation from the nine factor slots;
-3. teacherFactor equals the formal teacherFactorKey result and differs from the PTG factor for this fixture;
-4. discipleCountFactor equals the factor for discipleCount=1 and occupies its own slot;
-5. no second matching stat-growth application exists.
+Using the same captured base and unchanged non-target factors, compute production-flooring counterfactuals:
+- EXPECTED_SINGLE: PTG factor once + count-0 disciple factor once;
+- PTG_DOUBLE: apply the PTG factor one additional time;
+- FORMAL_LEAK: add/substitute the formal teacher contribution according to the production slot semantics being guarded;
+- DISCIPLE_DOUBLE: apply the resolved disciple factor one additional time.
 
-Surface-stat change is not the exactly-once oracle.
+A fixture may provide PASS evidence only when EXPECTED_SINGLE differs from every relevant counterfactual after production flooring. Otherwise classify FIXTURE_INSUFFICIENT and choose another legal target/week/base/remainder. Never weaken the assertion to surface-stat equality.
 
-## Counterfactual fixture-admissibility guard
+Prefer an uncapped stat (before <= 98) and a non-zero remainder so cap/flooring cannot hide the multiplier defect.
 
-Using the same base and all unchanged factors, calculate three counterfactual native results with production flooring semantics:
-- PTG_LEAK: replace formal teacherFactor with parentTemporaryGuidanceFactorTenThousandths;
-- TEACHER_DOUBLE: apply the formal teacherFactor one extra time;
-- DISCIPLE_DOUBLE: apply discipleCountFactor one extra time.
+## PTG-015 independently reachable formal explicit-teach control
 
-The fixture is admissible for PASS evidence only if expectedSingle differs from all three counterfactual results. If any are equal after flooring, mark FIXTURE_INSUFFICIENT and choose another target stat/week/base/remainder; do not weaken the assertion.
+PTG-015 must start from a separate child whose first ordinary enrollment directly produces parent_master_disciple. Source-prove the fixture through the normal live enrollment entrypoint; do not derive it by completing PTG and injecting a second pending boundary.
 
-## Carry/cap consistency
+Before explicit teach require:
+- exactly one completed enrollment outcome;
+- exactly one parent_master_disciple mentorship;
+- zero parent_temporary_guidance relations;
+- teacher is the biological parent;
+- parent discipleCount matches the persisted formal-enrollment result.
 
-Let accumulated = remainderBefore + appliedMilliPoints.
-Require surfaceGain = min(floor(accumulated / 1000), 100 - before), after = before + surfaceGain, and remainderAfter = accumulated % 1000, subject to the production cap/remainder rule if the implementation explicitly clears remainder at cap.
-
-Prefer before <= 98 so cap behavior cannot mask the multiplier test.
-
-## PTG-015 explicit-teach negative control
-
-From the same post-replacement lineage, execute one legal explicit-teach operation separately from PTG-014.
-
-Assert mentorship relation/cardinality and parent discipleCount are unchanged by the teach operation itself. Then execute one train_stat action and require exactly one matching stat-growth application. Explicit teach may affect its own technique/teaching evidence according to product rules, but must not create a duplicate weekly stat-growth teacher contribution.
-
-Do not use an explicit-teach event as proof of weekly teacher-factor application.
+Execute one legal explicit-teach operation. Require that the teach operation itself does not duplicate mentorship, alter mentorship cardinality, or increment discipleCount again. Then execute one legal train_stat action and require exactly one native weekly stat-growth application. Explicit-teach evidence is not proof of weekly teacher-factor application.
 
 ## PTG-016 disciple-efficiency isolation
 
-Keep child, parent, relation kind, teacherFactorKey, target stat, and all non-disciple factors fixed. Change only the legal disciple-count fixture so the resolved discipleCountFactor differs.
+Use independently reachable formal-enrollment fixtures only. The compared disciple counts must be consequences of legal persisted mentorship transitions through production entrypoints; acceptance evidence must not directly edit discipleCount or mentorship sidecars.
 
-Require teacherFactor unchanged and exactly one discipleCountFactor slot in the native recomputation. Reject a fixture if the changed disciple factor floors to the same appliedMilliPoints; choose values that distinguish the counterfactual.
+Hold child-relevant training inputs, relation kind, teacher-factor key, target stat, and other non-disciple factors fixed as far as the production fixture permits. Require:
+- resolved teacher factor is unchanged between compared cases;
+- resolved disciple-count factor differs;
+- exactly one disciple-count slot participates in each native recomputation;
+- resulting native appliedMilliPoints are distinguishable after production flooring.
+
+If no source-proven ordinary fixture can legally produce the required disciple-count contrast while preserving the comparison invariants, classify PTG-016 as NOT_REACHABLE. Do not manufacture a PASS by mutating sidecar counts.
+
+## Synthetic adapter regression
+
+A manually injected second pending boundary after completed PTG may still verify replacement/cardinality adapter behavior. Label this evidence SYNTHETIC_ADAPTER_REPLACEMENT. It may prove replacement mechanics, but it may not satisfy PTG-014A, PTG-015, PTG-016, or any ordinary-flow acceptance row.
 
 ## Acceptance matrix
 
-| Case | relation | teacher slot | disciple slot | cardinality/side effect | PASS evidence |
+| Case | fixture source | relation | weekly teacher slot | disciple slot | PASS evidence |
 |---|---|---|---|---|---|
-| PTG-013 boundary 1 | parent_temporary_guidance | PTG factor | independent | mentorship=1; parent count=0 | persisted relation |
-| PTG-013 boundary 2 | parent_master_disciple | formal key | independent | mentorship=1; old PTG=0; parent count=1 | returned runtime+sidecar |
-| PTG-014 weekly | parent_master_disciple | formal exactly once | count=1 factor exactly once | unchanged | one native stat-growth application |
-| PTG-015 explicit teach | unchanged | weekly slot not duplicated | unchanged | unchanged by teach | teach evidence separated from train_stat |
-| PTG-016 efficiency | unchanged | fixed | only changed dimension | controlled fixture | native result distinguishes disciple counterfactual |
+| PTG-014A | PTG-017 initial ordinary PTG persisted state | parent_temporary_guidance | PTG exactly once; formal leak=0 | count=0 exactly once | one native weekly application + counterfactual distinction |
+| PTG-015 | independent first ordinary formal enrollment | parent_master_disciple | formal path exactly once in subsequent weekly action | persisted formal count | explicit teach does not duplicate weekly contribution/cardinality |
+| PTG-016 | independent legal formal mentorship fixtures | parent_master_disciple | fixed across comparison | only intended differing factor | native result distinguishes legal count contrast |
+| synthetic replacement | manually injected second pending after completed PTG | replacement target | not acceptance evidence | not acceptance evidence | adapter/cardinality regression only |
 
 ## Implementation order
 
-1. Implement PTG-013 continuity first.
-2. Add PTG-014 using PTG-013 returned state, preferably in the same test file/helper lineage.
-3. Add the counterfactual admissibility helper so an arithmetically weak fixture cannot PASS.
-4. Add PTG-015 and PTG-016 as separate controls.
-5. Only after source tests pass should ordinary-flow acceptance mirror these invariants.
+1. Reuse PTG-017 initial ordinary PTG returned state for PTG-014A.
+2. Add the native-unit counterfactual admissibility helper.
+3. Construct/source-prove an independent first-formal fixture for PTG-015.
+4. Attempt PTG-016 only through legal production transitions; emit NOT_REACHABLE when the required contrast cannot be constructed.
+5. Keep synthetic replacement coverage separately labelled and out of ordinary-flow acceptance.
