@@ -77,3 +77,38 @@ Before treating PD-PAGE-01..08 as sufficient page-level acceptance, add this det
 | PD-LOAD-04 | `displayName: 42` | `failure/data_shape` | malformed value rendered as success |
 
 Repair boundary: strengthen `isPersonDetailView` (or a dedicated decoder it calls) so the runtime checks match the declared `PersonDetailView` contract. Do not paper over malformed success data in `PersonDetailPage` with `?? []` or casts. The array fields must be arrays of strings; scalar/null fields must match their declared primitive/nullability; numeric maps must be records whose values are numbers; array/object container fields must at minimum enforce their declared container shape. This is a deterministic correctness gate, not a percentile sample.
+
+
+## Playwright invocation and server-lifecycle guard
+
+Fresh review of the canonical root `playwright.config.ts` exposes two execution hazards that must be controlled explicitly for A2.
+
+1. The root config defines both `chrome` and `edge` projects. Running the A2 spec without a project selector executes every case twice and can accidentally turn a 20-sample population into 40 observations or mix browser engines in one percentile.
+2. The root config sets `webServer.reuseExistingServer: !process.env.CI`. A normal local invocation may therefore attach to an already-running port 8787 process instead of creating the clean side-level production-server instance required by the measurement contract.
+
+### Required invocation contract
+
+For deterministic `PD-PAGE-*` regression, use exactly one named browser project per evidence run. Chrome is the canonical A2 browser unless a separate cross-browser check is explicitly requested:
+
+```text
+npx playwright test <A2-spec-path> --project=chrome
+```
+
+Do not aggregate Chrome and Edge observations into one result.
+
+For the 80-sample performance measurement, do **not** rely on the root config's default local `reuseExistingServer` behavior. The harness must own the production-server lifecycle for each before/after side, or use a dedicated A2 Playwright config whose webServer policy guarantees the same lifecycle. Before accepting sample 1, record the side's `serverInstanceId`; all 20 accepted samples in that side must retain that value.
+
+### Exact harness preflight gates
+
+| id | check | required result |
+|---|---|---|
+| PD-HARNESS-01 | selected Playwright projects | exactly one: `chrome` |
+| PD-HARNESS-02 | browser engine in all accepted samples | Chromium/Chrome only; no Edge sample mixed |
+| PD-HARNESS-03 | server at side start | harness-created clean production instance, not an inherited port-8787 process |
+| PD-HARNESS-04 | server identity during one side | exactly one `serverInstanceId` across all 20 accepted samples |
+| PD-HARNESS-05 | before/after symmetry | same project, viewport, production start command, seed/week/person fixture, classifier version, and lifecycle version |
+| PD-HARNESS-06 | observed sample count | 20 accepted observations per declared side/population; project fan-out must not multiply it |
+
+If PD-HARNESS-01..06 fails, discard that side population rather than filtering the unexpected observations after percentile calculation.
+
+This is a harness/test-design correction only. It does not require changing the shared root Playwright configuration and must not alter unrelated Sprint3 browser acceptance.
