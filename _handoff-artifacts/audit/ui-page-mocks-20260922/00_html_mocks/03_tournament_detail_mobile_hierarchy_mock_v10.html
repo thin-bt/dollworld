@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tournament detail mobile hierarchy v10</title>
+<style>
+:root{font-family:system-ui;color-scheme:dark}*{box-sizing:border-box}body{margin:auto;max-width:1080px;padding:24px;background:#11161d;color:#edf0f4}a{color:inherit}.lead,.muted{color:#b8c4d2}.frame{max-width:720px;margin:20px auto;border:1px solid #46566a;border-radius:12px;background:#1b232d;overflow:hidden}.tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #46566a;background:#151c24;position:sticky;top:0}.tabs button{padding:12px;border:0;border-bottom:3px solid transparent;background:transparent;color:#b8c4d2}.tabs .active{color:#fff;border-bottom-color:#d6ad66;font-weight:700}.body{padding:18px}.eyebrow{font-size:12px;color:#b8c4d2;margin:0 0 5px}.identity h2{margin:0 0 6px}.meta{margin:0;color:#c7d0dc}.status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.metric{padding:10px;border:1px solid #364252;border-radius:8px}.metric b{display:block;font-size:18px}.guide{border-left:3px solid #d6ad66;background:#263443;padding:11px;margin:16px 0}.section{margin-top:22px;padding-top:18px;border-top:1px solid #364252}.section h3{margin:0 0 10px}.match{display:flex;justify-content:space-between;gap:12px}.action{margin-top:22px;padding-top:16px;border-top:1px solid #46566a}.action button{padding:10px 14px;background:#263443;color:#edf0f4;border:1px solid #65768a;border-radius:7px}.map{overflow:auto;margin-top:28px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #364252;text-align:left;vertical-align:top}@media(max-width:760px){body{padding:10px}.frame{margin:0}.body{padding:14px}.status{grid-template-columns:1fr 1fr}.status .wide{grid-column:1/-1}.match{display:block}.action button{width:100%}}@media(max-width:420px){.status{grid-template-columns:1fr}}
+</style></head><body>
+<h1>大会詳細 mobile information hierarchy v10</h1>
+<p class="lead">Production target: <code>CompetitionPage.tsx / TournamentDetailPanel overview</code>. v09のselection/action契約を維持しつつ、mobileで「大会identity → 現在地 → 観察結果 → 補助手動操作」の順を崩さない。</p>
+<main class="frame" aria-label="大会詳細 mock">
+<nav class="tabs" aria-label="大会詳細タブ"><button class="active">大会詳細</button><button>参加者</button></nav>
+<div class="body">
+<header class="identity"><p class="eyebrow">選択中の大会</p><h2>B級 総合大会</h2><p class="meta">4月第2週 · B級 · 通常大会 · 進行中</p></header>
+<div class="status" aria-label="大会進行状況"><div class="metric"><span class="muted">進行</span><b>3 / 7</b><span>試合</span></div><div class="metric"><span class="muted">参加</span><b>4名</b><span>確定</span></div><div class="metric wide"><span class="muted">状態</span><b>試合待ち</b><span>次戦を待機中</span></div></div>
+<p class="guide">通常は「シミュレーション」で週を進めると、大会も自動で進行します。</p>
+<section class="section"><h3>最新試合</h3><div class="match"><strong>勝者　アルド</strong><span>敗者　ミナ</span></div><p class="muted">直近の観察結果を大会identityの直後に置く。</p></section>
+<section class="section"><h3>総当たり戦績</h3><p class="muted">既存の戦績表・対戦マトリクス・履歴をこの位置から継続表示。データ構造は変更しない。</p></section>
+<section class="action"><p class="eyebrow">補助操作</p><button>次の試合を進める</button><p class="muted">週進行が主経路。手動stepをhero化しない。</p></section>
+</div></main>
+<section class="map"><h2>Screen → production mapping / residual</h2><table>
+<tr><th>Mock region</th><th>Production source</th><th>Exact patch plan / residual</th></tr>
+<tr><td>Tabs</td><td><code>competition-detail-tabs</code> / overview + participants</td><td>既存role/tab/aria-selected/testidを維持。≤760pxでdetail上端にsticky化する場合もDOM順は変更しない。</td></tr>
+<tr><td>Identity</td><td><code>entry.tournamentDisplayName</code>, timing/rank/kind/lifecycle labels</td><td>既存h3/metaをheader grouping。新API不要。参加人数は既存participantCountLabelのみ。</td></tr>
+<tr><td>Status summary</td><td><code>view.roundRobinProgress</code>, <code>phaseLabel(view.lifecyclePhase)</code></td><td>進行中のみcompact summaryを追加。既存戦績表を置換せず上位summaryとして表示。</td></tr>
+<tr><td>Latest match</td><td><code>view.lastMatchPlayerLabels</code></td><td>既存section/testidを維持。mobileでは勝者を先に読み、敗者を折返し可能にする。</td></tr>
+<tr><td>Observation body</td><td>round-robin / knockout / annual ranking / history</td><td>既存描画順・データを維持。横長tableには既存overflow container方針を適用し、情報をcardへ複製しない。</td></tr>
+<tr><td>Manual action</td><td>page-level <code>competition-actions</code> + existing <code>canStep</code></td><td>v09契約維持。DOM移動は必須にせず、mobileで全幅button＋「補助操作」視覚階層を付与。</td></tr>
+<tr><td>Residual</td><td>productionとの差</td><td>header grouping、進行summary、≤760px spacing/sticky tabs/full-width action CSS。fetch/session/lifecycle/mutation/test semanticsは変更しない。</td></tr>
+</table></section></body></html>
