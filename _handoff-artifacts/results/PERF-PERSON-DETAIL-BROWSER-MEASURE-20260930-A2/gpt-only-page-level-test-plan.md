@@ -270,3 +270,23 @@ The evidence shape above is accepted only when the following predicates pass. Va
 Validator evaluation order is PD-VALIDATE-01 through PD-VALIDATE-10. Preserve all rejection codes that apply rather than stopping after the first one, except when malformed evidence makes a later predicate impossible to evaluate; in that case record that later predicate as `not-evaluable`, not PASS.
 
 The validator is observational only. In particular, it must not convert an application/network/data failure into `harness-invalid`, and it must not convert a harness provenance failure into an application timeout. The source attempt ledger remains immutable evidence.
+
+
+## Population-unit reconciliation for the 80-open A2 requirement
+
+The assignment's 80 successful opens are four independent statistical populations, not two 20-sample side populations. For this section, `population = (side, mode)`, where side is `before|after` and mode is `cold|warm`. This section narrows the ambiguous “per side” wording in PD-BUDGET / PD-EVIDENCE / PD-VALIDATE; it does not change their timeout, attempt, percentile, or fail-closed semantics.
+
+| id | deterministic requirement | rejection code |
+|---|---|---|
+| PD-POP-01 | collect exactly four populations: `before/cold`, `before/warm`, `after/cold`, `after/warm`; each population independently targets 20 accepted opens | `population-set-invalid` |
+| PD-POP-02 | apply `terminalTimeoutMs=12000` and `maxAttempts=24` independently to each population; attempt and accepted indices restart at 1 for every population | `population-budget-invalid` |
+| PD-POP-03 | never pool cold and warm latency arrays or use surplus accepted rows from one population to satisfy another; each complete population has exactly 20 percentile inputs | `population-mixing` |
+| PD-POP-04 | comparative percentile verdicts are mode-matched only: `before/cold -> after/cold` and `before/warm -> after/warm`; cross-mode comparison is inadmissible | `cross-mode-comparison` |
+| PD-POP-05 | A2 measurement is complete only when all four population validators PASS with status `complete`; therefore the complete run contains exactly 80 accepted opens | `a2-population-incomplete` |
+| PD-POP-06 | warm-up/setup activity is outside the attempt ledger and percentile population; cold-state prerequisites must be restored before every cold attempt, while warm attempts must use the predeclared warm-state procedure consistently on before/after | `mode-precondition-invalid` |
+
+Machine-readable evidence must therefore identify both `side` and `mode` for every population. The names `acceptedTargetPerSide` and `maxAttemptsPerSide` in the earlier minimum shape are retained for compatibility, but their validation scope is one `(side, mode)` population; new harness code should additionally emit `mode` and may expose aliases `acceptedTargetPerPopulation=20` and `maxAttemptsPerPopulation=24` when they are value-identical.
+
+Runtime-fit is also population-scoped: `24 * 12000 = 288000ms` fits one population inside one root `360000ms` Playwright test envelope. It is not evidence that all four populations fit inside a single 360-second test. Use separate population-level test envelopes (or an equivalent outer orchestration that preserves the same independent timeout boundary); do not increase the fixed 12000ms terminal budget or 24-attempt cap to compensate for orchestration.
+
+Validation order is now PD-POP-01..06 before applying PD-VALIDATE-01..10 independently to each population. A population-shape failure may make downstream predicates `not-evaluable`; it must never be repaired by merging another population.
