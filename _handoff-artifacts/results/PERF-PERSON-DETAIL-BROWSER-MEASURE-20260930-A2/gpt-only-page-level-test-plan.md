@@ -290,3 +290,23 @@ Machine-readable evidence must therefore identify both `side` and `mode` for eve
 Runtime-fit is also population-scoped: `24 * 12000 = 288000ms` fits one population inside one root `360000ms` Playwright test envelope. It is not evidence that all four populations fit inside a single 360-second test. Use separate population-level test envelopes (or an equivalent outer orchestration that preserves the same independent timeout boundary); do not increase the fixed 12000ms terminal budget or 24-attempt cap to compensate for orchestration.
 
 Validation order is now PD-POP-01..06 before applying PD-VALIDATE-01..10 independently to each population. A population-shape failure may make downstream predicates `not-evaluable`; it must never be repaired by merging another population.
+
+
+## Cold/warm mode execution contract
+
+PD-POP makes cold and warm separate populations, but those labels are not evidence unless the harness creates the cache state deterministically. Use the following mode contract so before/after cannot silently measure different browser states.
+
+| id | deterministic requirement | rejection code |
+|---|---|---|
+| PD-MODE-01 | every cold attempt starts in a newly-created browser context with no prior navigation by that context to the Dollworld origin; create the page only after the context exists and close the context after the attempt | `cold-context-not-fresh` |
+| PD-MODE-02 | do not prime a cold attempt with a setup navigation to the measured Person Detail URL; authentication/setup that would touch the Dollworld origin is forbidden unless the identical prerequisite is explicitly recorded and proven not to fetch measured Person Detail resources | `cold-precondition-contaminated` |
+| PD-MODE-03 | every warm attempt uses a newly-created browser context, performs exactly one unmeasured successful priming open of the same fixed Person Detail fixture, then performs exactly one measured open in that same context; close the context after the measured attempt | `warm-prime-invalid` |
+| PD-MODE-04 | a warm priming open must reach the same terminal-success classifier used for accepted measured opens; a failed/timed-out prime invalidates that attempt before measurement and must not be retried inside the same context | `warm-prime-not-terminal` |
+| PD-MODE-05 | the priming open is setup only: it has no `acceptedSampleIndex`, contributes no latency/byte value, and cannot satisfy the 20 accepted target; persist `primeTerminalStatus` and `primeElapsedMs` separately for auditability | `warm-prime-counted` |
+| PD-MODE-06 | before/after use byte-identical mode procedure: same context options, fixture, navigation method, terminal classifier, and prime count; browser context reuse across accepted samples is forbidden for both modes | `mode-procedure-asymmetric` |
+| PD-MODE-07 | application state must not be manually injected, copied, or restored between contexts (cookies, local/session storage, Cache Storage, IndexedDB, service-worker state); any non-empty `storageState` or equivalent preseed invalidates the population unless it is a separately approved fixed prerequisite applied identically to all four populations | `state-preseed-invalid` |
+| PD-MODE-08 | record `contextOrdinal`, `mode`, `primeCount`, and `storageStatePreseeded` for every attempt; for a valid run, contextOrdinal is unique per attempt, cold primeCount=0, warm primeCount=1, and storageStatePreseeded=false | `mode-provenance-invalid` |
+
+This contract defines **warm as one same-context priming open**, not as reuse of an arbitrary long-lived context. That bounds history-dependent cache effects and makes sample 1 comparable with sample 20. It also defines **cold at browser-context scope**; it does not claim to flush the operating-system disk cache, DNS cache, server process cache, or kernel cache. Those host/server effects are controlled by the existing before/after symmetry and server-lifecycle provenance, not by relabeling them as browser coldness.
+
+Validation order is `PD-POP-01..06 -> PD-MODE-01..08 -> PD-VALIDATE-01..10` for each population. A mode failure makes that population `harness-invalid`; do not consume the measured open as an accepted sample and do not repair it by clearing storage after the fact.
