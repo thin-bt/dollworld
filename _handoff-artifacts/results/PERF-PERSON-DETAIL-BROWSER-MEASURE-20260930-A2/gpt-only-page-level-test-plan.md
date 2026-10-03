@@ -248,3 +248,25 @@ Minimum machine-readable side shape:
 ```
 
 For `complete`, `acceptedCount` and both latency arrays must equal 20 and p50/p95 must be present. For either non-complete status, comparative percentile fields must not be presented as a valid result. `attemptCount` must equal the number of persisted attempt rows, making omission of failed attempts mechanically detectable.
+
+
+## Deterministic A2 evidence validator
+
+The evidence shape above is accepted only when the following predicates pass. Validation is fail-closed: the validator must not delete rows, renumber attempts, discard outliers, extend a budget, or otherwise repair evidence to obtain PASS.
+
+| id | deterministic predicate | rejection code |
+|---|---|---|
+| PD-VALIDATE-01 | `attemptCount === attempts.length`; attempts are numbered exactly `1..attemptCount`; every non-empty `openId` is unique within the side | `ledger-shape-invalid` |
+| PD-VALIDATE-02 | `acceptedCount` equals rows with non-null `acceptedSampleIndex`; those indices are exactly `1..acceptedCount`, with no gap/duplicate; `0 <= acceptedCount <= 20` and `attemptCount <= 24` | `accepted-index-invalid` |
+| PD-VALIDATE-03 | if accepted index 20 exists, it is the final persisted attempt; no attempt may follow it | `post-terminal-attempt` |
+| PD-VALIDATE-04 | every accepted row has a finite non-negative `elapsedMs < 12000` and no `failurePhase`; every non-accepted row has null accepted index and is excluded from percentile input | `accepted-row-invalid` |
+| PD-VALIDATE-05 | `acceptedLatencyMsRaw` equals accepted-row elapsed values in accepted-index order, value-for-value; a complete side therefore has exactly 20 values | `raw-population-mismatch` |
+| PD-VALIDATE-06 | `acceptedLatencyMsSorted` equals a numeric ascending sort of the raw array, preserving duplicates; for a complete side `p50Ms === sorted[9]` and `p95Ms === sorted[18]` | `percentile-recompute-mismatch` |
+| PD-VALIDATE-07 | `complete` requires acceptedCount=20, both arrays length 20, valid p50/p95, and no harness-invalid reason; `insufficient-samples` requires attemptCount=24, acceptedCount<20, null/absent p50/p95; `harness-invalid` requires a non-empty machine-readable reason and null/absent p50/p95 | `side-status-inconsistent` |
+| PD-VALIDATE-08 | header values are exactly 20 / 12000 / 24 and all required PD-HARNESS provenance fields are present; before and after provenance/budget fields required to be identical by the paired contract must match | `provenance-or-budget-mismatch` |
+| PD-VALIDATE-09 | timeout observer overhead may make a failed attempt's recorded elapsedMs >=12000; this never increases `terminalTimeoutMs` and never makes that row accepted | `timeout-budget-reinterpreted` |
+| PD-VALIDATE-10 | comparative verdict is permitted only when both side validators PASS and both statuses are `complete`; otherwise emit no faster/slower/equivalent percentile verdict | `comparison-not-admissible` |
+
+Validator evaluation order is PD-VALIDATE-01 through PD-VALIDATE-10. Preserve all rejection codes that apply rather than stopping after the first one, except when malformed evidence makes a later predicate impossible to evaluate; in that case record that later predicate as `not-evaluable`, not PASS.
+
+The validator is observational only. In particular, it must not convert an application/network/data failure into `harness-invalid`, and it must not convert a harness provenance failure into an application timeout. The source attempt ledger remains immutable evidence.
