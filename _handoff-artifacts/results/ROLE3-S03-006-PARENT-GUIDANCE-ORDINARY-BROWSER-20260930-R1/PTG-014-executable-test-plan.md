@@ -5,7 +5,7 @@ assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 scope: reachable PTG weekly train_stat plus independently reachable formal controls
 source-lineage: thin-bt/dollworld master
-depends-on: PTG-017-ordinary-flow-reachability-correction.md
+depends-on: PTG-017-ordinary-flow-reachability-correction.md; PTG-018-fixture-provenance-and-verdict-contract.md
 supersedes: PTG-014 assumptions that consume PTG-013 synthetic second intake as ordinary-flow evidence
 
 ## Purpose
@@ -16,6 +16,12 @@ PTG-017 proves that a completed initial parent-temporary-guidance enrollment is 
 - synthetic PTG -> formal second intake: replacement/cardinality adapter regression only.
 
 No acceptance case may relabel the synthetic second intake as ordinary-flow evidence.
+
+## Normative acceptance authority
+
+PTG-018 is normative for fixture provenance, native-evidence sufficiency, arithmetic admissibility, and final verdict classification. PTG-014 lane-specific assertions may strengthen PTG-018, but must not weaken or bypass its provenance gate or native-evidence requirements.
+
+Classify the final result using this precedence: PRECONDITION_FAILED -> NOT_REACHABLE -> FIXTURE_INSUFFICIENT -> PRODUCT_OR_SPEC_MISMATCH -> PASS. A source-proven, arithmetically distinguishable fixture that reaches the production path and exposes a contract mismatch must not be downgraded to FIXTURE_INSUFFICIENT.
 
 ## PTG-014A ordinary PTG weekly fixture
 
