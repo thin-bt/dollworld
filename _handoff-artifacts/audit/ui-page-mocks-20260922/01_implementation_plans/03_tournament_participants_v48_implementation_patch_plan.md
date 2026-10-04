@@ -1,14 +1,16 @@
 # Tournament participants v48 — production patch plan
 
-Status: GPT-only preparation complete; Cursor execution intentionally paused; production patch unapplied.
+Status: production implementation present on `master`; structural Playwright coverage present; multi-width browser verification still unobserved. Cursor remains intentionally paused.
 
 ## Authority
 - Repository/branch: `thin-bt/dollworld` / `master`
 - Production JSX: `apps/web/src/client/competition/CompetitionPage.tsx`
 - Production CSS: `apps/web/src/client/presentation.css`
 - Review mock: `_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/03_tournament_participants_accessible_responsive_mock_v48.html`
-- Reconciled production JSX blob: `cd926db28fb1c56909bc7e90b265f15b026c39ee`
-- Reconciled production CSS blob: `541bfaf3a6eb97f7d2ed5b00fb582f9fb800893d`
+- Implemented production commit: `c29f27e8e97250b35eb8976c6635529965589934`
+- Current production JSX blob: `09e2737500cc074a47ded5d6a47070cb6e54afff`
+- Current production CSS blob: `2573e1da48ffff8b26608c068004a7b74d72cd70`
+- Current Playwright spec blob: `88b1debd95205b03da932aeb922b8afee96e9e44`
 
 ## Patch boundary
 Change only the participants presentation inside `TournamentDetailPanel` in `apps/web/src/client/competition/CompetitionPage.tsx` plus participant-specific selectors in `apps/web/src/client/presentation.css`. Do not change API, view-model, fetch/session, lifecycle, routing, mutation, tournament selection, or progression behavior.
@@ -117,6 +119,22 @@ Do not assert responsive CSS geometry in jsdom. Cover geometry in browser verifi
 | ~360px | compact 2-column cards | long name wraps; no viewport overflow; all values remain present |
 
 At every width also verify: all-missing-value row, participant link navigation, empty state, tab switching, and `日程表に戻る`.
+
+## Implementation reconciliation (2026-10-04)
+
+Fresh master inspection confirms that commit `c29f27e8e97250b35eb8976c6635529965589934` implements the declared v48 boundary in exactly three files:
+
+- `apps/web/src/client/competition/CompetitionPage.tsx`
+- `apps/web/src/client/presentation.css`
+- `tests/e2e/s2-ui009-round-robin-competition.spec.ts`
+
+Confirmed in JSX: participant-only body modifier, conditional scroll help, one focusable region, table caption, row-header semantics, mobile labels using existing label functions, preserved fallbacks/testids, and unchanged person href construction.
+
+Confirmed in CSS: one desktop scroll owner, visible desktop focus outline, single-DOM card conversion at 760px, 3-to-2-column change at 520px, compact spacing at 360px, long-value wrapping, and a 44px detail-link target. Rules are participant-scoped; no global `.data-table` behavior was changed.
+
+Confirmed in Playwright source: TABLE identity, wrapper tabindex/role/description, caption, per-row `th[scope="row"]`, participant count, and detail-link shape are asserted.
+
+Not yet evidenced by GitHub: no combined status checks and no pull-request workflow runs were returned for the implementation commit. No successful execution result for the modified Playwright spec and no 1280/760/520/360px screenshot or browser-measurement evidence was observed. Therefore implementation is present, but the completion gate below remains open for runtime/browser verification.
 
 ## Completion gate
 Completion requires:
