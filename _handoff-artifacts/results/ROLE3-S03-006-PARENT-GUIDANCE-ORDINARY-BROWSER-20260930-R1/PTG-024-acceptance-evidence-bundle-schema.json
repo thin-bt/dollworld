@@ -1,0 +1,505 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/thin-bt/dollworld/PTG-024-acceptance-evidence-bundle-schema.json",
+  "title": "PTG acceptance evidence bundle",
+  "description": "Machine-checkable structural contract for immutable PTG-019 attempts and PTG-023 lane summaries. Semantic arithmetic recomputation remains mandatory outside JSON Schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaId", "authorityBlobs", "attempts", "laneSummaries"],
+  "properties": {
+    "schemaId": { "const": "PTG-024" },
+    "authorityBlobs": { "$ref": "#/$defs/authorityBlobs" },
+    "attempts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/attempt" }
+    },
+    "laneSummaries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/laneSummary" }
+    }
+  },
+  "$defs": {
+    "sha40": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "enum": ["PTG-014A", "PTG-015", "PTG-016"]
+    },
+    "verdict": {
+      "enum": [
+        "PRECONDITION_FAILED",
+        "NOT_REACHABLE",
+        "FIXTURE_INSUFFICIENT",
+        "PRODUCT_OR_SPEC_MISMATCH",
+        "PASS"
+      ]
+    },
+    "assertionId": {
+      "enum": [
+        "A14-PROV-01",
+        "A14-ARITH-01",
+        "A14-NATIVE-01",
+        "A14-PERSIST-01",
+        "A14-ARITH-02",
+        "A14-REL-01",
+        "A14-ARITH-03",
+        "A14-DISC-01",
+        "A15-PROV-01",
+        "A15-TEACH-01",
+        "A15-WEEKLY-01",
+        "A16-PROV-01",
+        "A16-ISO-01",
+        "A16-NATIVE-01"
+      ]
+    },
+    "authorityBlobs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["PTG-019", "PTG-022", "PTG-023"],
+      "properties": {
+        "PTG-019": { "const": "335ae01aee100bb4e235ed7075db7b5f36e0a4b8" },
+        "PTG-022": { "const": "bd2f655e86b172947da3775f8f760bd1f1d08b43" },
+        "PTG-023": { "const": "00a44f188e11d0fbcd5a4202b9111cdb29ff50d6" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productionEntrypoint",
+        "fixtureSourceReference",
+        "relationKind",
+        "selectedTeacherId",
+        "biologicalParentId",
+        "completedEnrollmentOutcomeCount",
+        "mentorshipCount",
+        "formalRelationCount",
+        "temporaryGuidanceRelationCount",
+        "persistedDiscipleCount",
+        "syntheticAdapterReplacement"
+      ],
+      "properties": {
+        "productionEntrypoint": { "$ref": "#/$defs/nonEmptyString" },
+        "fixtureSourceReference": { "$ref": "#/$defs/nonEmptyString" },
+        "relationKind": {
+          "enum": ["parent_temporary_guidance", "parent_master_disciple"]
+        },
+        "selectedTeacherId": { "$ref": "#/$defs/nonEmptyString" },
+        "biologicalParentId": { "$ref": "#/$defs/nonEmptyString" },
+        "completedEnrollmentOutcomeCount": { "type": "integer", "minimum": 0 },
+        "mentorshipCount": { "type": "integer", "minimum": 0 },
+        "formalRelationCount": { "type": "integer", "minimum": 0 },
+        "temporaryGuidanceRelationCount": { "type": "integer", "minimum": 0 },
+        "persistedDiscipleCount": { "type": "integer", "minimum": 0 },
+        "syntheticAdapterReplacement": { "type": "boolean" }
+      }
+    },
+    "nativeArithmetic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preActionNativeBase",
+        "preActionRemainder",
+        "resolvedTeacherFactorKey",
+        "resolvedTeacherFactorValue",
+        "resolvedDiscipleFactorValue",
+        "productionInputs",
+        "EXPECTED_SINGLE",
+        "observedAppliedMilliPoints",
+        "distinguishableFromAllRelevantCounterfactuals"
+      ],
+      "properties": {
+        "preActionNativeBase": { "type": "number" },
+        "preActionRemainder": { "type": "number" },
+        "resolvedTeacherFactorKey": { "$ref": "#/$defs/nonEmptyString" },
+        "resolvedTeacherFactorValue": { "type": "number" },
+        "resolvedDiscipleFactorValue": { "type": "number" },
+        "productionInputs": { "type": "object" },
+        "EXPECTED_SINGLE": { "type": "number" },
+        "PTG_DOUBLE": { "type": "number" },
+        "FORMAL_LEAK": { "type": "number" },
+        "DISCIPLE_DOUBLE": { "type": "number" },
+        "observedAppliedMilliPoints": { "type": "number" },
+        "distinguishableFromAllRelevantCounterfactuals": { "type": "boolean" }
+      }
+    },
+    "applicationAndPersistence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "matchingNativeApplicationCount",
+        "nativeApplicationReason",
+        "nativeApplicationChildId",
+        "nativeApplicationWeekIdentity",
+        "nativeApplicationTargetStat",
+        "postActionMentorshipCount",
+        "postActionRelationKind",
+        "postActionPersistedDiscipleCount",
+        "reloadMatchingApplicationCount",
+        "reloadMentorshipCount",
+        "reloadPersistedDiscipleCount"
+      ],
+      "properties": {
+        "matchingNativeApplicationCount": { "type": "integer", "minimum": 0 },
+        "nativeApplicationReason": { "const": "weekly_train_stat" },
+        "nativeApplicationChildId": { "$ref": "#/$defs/nonEmptyString" },
+        "nativeApplicationWeekIdentity": { "$ref": "#/$defs/nonEmptyString" },
+        "nativeApplicationTargetStat": { "$ref": "#/$defs/nonEmptyString" },
+        "postActionMentorshipCount": { "type": "integer", "minimum": 0 },
+        "postActionRelationKind": {
+          "enum": ["parent_temporary_guidance", "parent_master_disciple"]
+        },
+        "postActionPersistedDiscipleCount": { "type": "integer", "minimum": 0 },
+        "reloadMatchingApplicationCount": { "type": "integer", "minimum": 0 },
+        "reloadMentorshipCount": { "type": "integer", "minimum": 0 },
+        "reloadPersistedDiscipleCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "explicitTeachEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "explicitTeachMentorshipCountBefore",
+        "explicitTeachMentorshipCountAfter",
+        "explicitTeachDiscipleCountBefore",
+        "explicitTeachDiscipleCountAfter"
+      ],
+      "properties": {
+        "explicitTeachMentorshipCountBefore": { "type": "integer", "minimum": 0 },
+        "explicitTeachMentorshipCountAfter": { "type": "integer", "minimum": 0 },
+        "explicitTeachDiscipleCountBefore": { "type": "integer", "minimum": 0 },
+        "explicitTeachDiscipleCountAfter": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "comparisonEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparisonAttemptId",
+        "teacherFactorUnchanged",
+        "guardedNonDiscipleInputsUnchanged",
+        "persistedDiscipleFactorDiffers"
+      ],
+      "properties": {
+        "comparisonAttemptId": { "$ref": "#/$defs/nonEmptyString" },
+        "teacherFactorUnchanged": { "type": "boolean" },
+        "guardedNonDiscipleInputsUnchanged": { "type": "boolean" },
+        "persistedDiscipleFactorDiffers": { "type": "boolean" }
+      }
+    },
+    "verdictRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verdict", "verdictReason", "failedAssertionIds", "sourceEvidenceReferences"],
+      "properties": {
+        "verdict": { "$ref": "#/$defs/verdict" },
+        "verdictReason": { "$ref": "#/$defs/nonEmptyString" },
+        "failedAssertionIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/assertionId" }
+        },
+        "sourceEvidenceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assignmentGeneration",
+        "assignmentId",
+        "lane",
+        "scenarioId",
+        "assertionIds",
+        "attemptId",
+        "productSha",
+        "evidenceCapturedAt",
+        "childId",
+        "weekIdentity",
+        "actionOrRequestId",
+        "provenance",
+        "verdictRecord"
+      ],
+      "properties": {
+        "assignmentGeneration": { "const": "20260929-P0-01" },
+        "assignmentId": { "const": "20260929-P0-01-R3" },
+        "lane": { "$ref": "#/$defs/lane" },
+        "scenarioId": {
+          "enum": [
+            "PTG-014A-S1",
+            "PTG-014A-S2",
+            "PTG-014A-S3",
+            "PTG-015-S1",
+            "PTG-015-S2",
+            "PTG-016-S1",
+            "ADAPTER-S1"
+          ]
+        },
+        "assertionIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/assertionId" }
+        },
+        "attemptId": { "$ref": "#/$defs/nonEmptyString" },
+        "productSha": { "$ref": "#/$defs/sha40" },
+        "evidenceCapturedAt": { "type": "string", "format": "date-time" },
+        "childId": { "$ref": "#/$defs/nonEmptyString" },
+        "weekIdentity": { "$ref": "#/$defs/nonEmptyString" },
+        "actionOrRequestId": { "$ref": "#/$defs/nonEmptyString" },
+        "targetStat": { "$ref": "#/$defs/nonEmptyString" },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "nativeArithmetic": { "$ref": "#/$defs/nativeArithmetic" },
+        "applicationAndPersistence": { "$ref": "#/$defs/applicationAndPersistence" },
+        "explicitTeachEvidence": { "$ref": "#/$defs/explicitTeachEvidence" },
+        "comparisonEvidence": { "$ref": "#/$defs/comparisonEvidence" },
+        "verdictRecord": { "$ref": "#/$defs/verdictRecord" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "lane": { "const": "PTG-014A" } }, "required": ["lane"] },
+          "then": {
+            "properties": {
+              "scenarioId": { "enum": ["PTG-014A-S1", "PTG-014A-S2", "PTG-014A-S3", "ADAPTER-S1"] },
+              "assertionIds": { "items": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-015" } }, "required": ["lane"] },
+          "then": {
+            "properties": {
+              "scenarioId": { "enum": ["PTG-015-S1", "PTG-015-S2"] },
+              "assertionIds": { "items": { "enum": ["A15-PROV-01", "A15-TEACH-01", "A15-WEEKLY-01"] } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-016" } }, "required": ["lane"] },
+          "then": {
+            "properties": {
+              "scenarioId": { "const": "PTG-016-S1" },
+              "assertionIds": { "items": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "scenarioId": { "const": "ADAPTER-S1" } }, "required": ["scenarioId"] },
+          "then": { "properties": { "provenance": { "properties": { "syntheticAdapterReplacement": { "const": true } } }, "verdictRecord": { "properties": { "verdict": { "not": { "const": "PASS" } } } } } }
+        },
+        {
+          "if": { "properties": { "scenarioId": { "enum": ["PTG-014A-S1", "PTG-014A-S2", "PTG-014A-S3", "PTG-015-S2", "PTG-016-S1"] } }, "required": ["scenarioId"] },
+          "then": {
+            "if": { "properties": { "verdictRecord": { "properties": { "verdict": { "const": "PASS" } }, "required": ["verdict"] } }, "required": ["verdictRecord"] },
+            "then": {
+              "required": ["targetStat", "nativeArithmetic", "applicationAndPersistence"],
+              "properties": {
+                "provenance": { "properties": { "syntheticAdapterReplacement": { "const": false } } },
+                "nativeArithmetic": { "properties": { "distinguishableFromAllRelevantCounterfactuals": { "const": true }, "observedAppliedMilliPoints": { "type": "number" } } },
+                "applicationAndPersistence": { "properties": { "matchingNativeApplicationCount": { "const": 1 }, "reloadMatchingApplicationCount": { "const": 1 } } }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "scenarioId": { "const": "PTG-015-S1" }, "verdictRecord": { "properties": { "verdict": { "const": "PASS" } }, "required": ["verdict"] } }, "required": ["scenarioId", "verdictRecord"] },
+          "then": { "required": ["explicitTeachEvidence"], "properties": { "provenance": { "properties": { "syntheticAdapterReplacement": { "const": false } } } } }
+        },
+        {
+          "if": { "properties": { "scenarioId": { "const": "PTG-016-S1" }, "verdictRecord": { "properties": { "verdict": { "const": "PASS" } }, "required": ["verdict"] } }, "required": ["scenarioId", "verdictRecord"] },
+          "then": { "required": ["comparisonEvidence"], "properties": { "comparisonEvidence": { "properties": { "teacherFactorUnchanged": { "const": true }, "guardedNonDiscipleInputsUnchanged": { "const": true }, "persistedDiscipleFactorDiffers": { "const": true } } } } }
+        },
+        {
+          "if": { "properties": { "verdictRecord": { "properties": { "verdict": { "const": "FIXTURE_INSUFFICIENT" } }, "required": ["verdict"] } }, "required": ["verdictRecord"] },
+          "then": { "required": ["nativeArithmetic"], "properties": { "nativeArithmetic": { "properties": { "distinguishableFromAllRelevantCounterfactuals": { "const": false } } } } }
+        }
+      ]
+    },
+    "invalidCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attemptId", "reason"],
+      "properties": {
+        "attemptId": { "$ref": "#/$defs/nonEmptyString" },
+        "reason": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "terminalBlocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assertionId", "verdict", "attemptIds"],
+      "properties": {
+        "assertionId": { "$ref": "#/$defs/assertionId" },
+        "verdict": { "enum": ["PRECONDITION_FAILED", "NOT_REACHABLE", "FIXTURE_INSUFFICIENT"] },
+        "attemptIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "closureMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "A14-PROV-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A14-ARITH-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A14-NATIVE-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A14-PERSIST-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A14-ARITH-02": { "$ref": "#/$defs/nonEmptyString" },
+        "A14-REL-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A14-ARITH-03": { "$ref": "#/$defs/nonEmptyString" },
+        "A14-DISC-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A15-PROV-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A15-TEACH-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A15-WEEKLY-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A16-PROV-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A16-ISO-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A16-NATIVE-01": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "laneSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assignmentGeneration",
+        "assignmentId",
+        "lane",
+        "currentProductSha",
+        "laneState",
+        "requiredAssertionIds",
+        "closureByAssertion",
+        "openAssertionIds",
+        "candidateAttemptIds",
+        "invalidCandidates",
+        "syntheticNonCandidateAttemptIds",
+        "mismatchAttemptIds",
+        "terminalBlockers",
+        "canonicalAuthorityBlobs",
+        "generatedAt",
+        "sourceEvidenceReferences"
+      ],
+      "properties": {
+        "assignmentGeneration": { "const": "20260929-P0-01" },
+        "assignmentId": { "const": "20260929-P0-01-R3" },
+        "lane": { "$ref": "#/$defs/lane" },
+        "currentProductSha": { "$ref": "#/$defs/sha40" },
+        "laneState": { "enum": ["OPEN", "FINAL"] },
+        "finalVerdict": { "$ref": "#/$defs/verdict" },
+        "requiredAssertionIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/assertionId" }
+        },
+        "closureByAssertion": { "$ref": "#/$defs/closureMap" },
+        "openAssertionIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/assertionId" }
+        },
+        "candidateAttemptIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "invalidCandidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/invalidCandidate" }
+        },
+        "syntheticNonCandidateAttemptIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "mismatchAttemptIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "terminalBlockers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/terminalBlocker" }
+        },
+        "canonicalAuthorityBlobs": { "$ref": "#/$defs/authorityBlobs" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "sourceEvidenceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "laneState": { "const": "OPEN" } }, "required": ["laneState"] },
+          "then": { "not": { "required": ["finalVerdict"] } }
+        },
+        {
+          "if": { "properties": { "laneState": { "const": "FINAL" } }, "required": ["laneState"] },
+          "then": { "required": ["finalVerdict"] }
+        },
+        {
+          "if": { "properties": { "finalVerdict": { "const": "PASS" } }, "required": ["finalVerdict"] },
+          "then": { "properties": { "openAssertionIds": { "maxItems": 0 }, "mismatchAttemptIds": { "maxItems": 0 } } }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-014A" } }, "required": ["lane"] },
+          "then": {
+            "properties": {
+              "requiredAssertionIds": { "const": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] },
+              "openAssertionIds": { "items": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-015" } }, "required": ["lane"] },
+          "then": {
+            "properties": {
+              "requiredAssertionIds": { "const": ["A15-PROV-01", "A15-TEACH-01", "A15-WEEKLY-01"] },
+              "openAssertionIds": { "items": { "enum": ["A15-PROV-01", "A15-TEACH-01", "A15-WEEKLY-01"] } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-016" } }, "required": ["lane"] },
+          "then": {
+            "properties": {
+              "requiredAssertionIds": { "const": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] },
+              "openAssertionIds": { "items": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-014A" }, "finalVerdict": { "const": "PASS" } }, "required": ["lane", "finalVerdict"] },
+          "then": { "properties": { "closureByAssertion": { "required": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] } } }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-015" }, "finalVerdict": { "const": "PASS" } }, "required": ["lane", "finalVerdict"] },
+          "then": { "properties": { "closureByAssertion": { "required": ["A15-PROV-01", "A15-TEACH-01", "A15-WEEKLY-01"] } } }
+        },
+        {
+          "if": { "properties": { "lane": { "const": "PTG-016" }, "finalVerdict": { "const": "PASS" } }, "required": ["lane", "finalVerdict"] },
+          "then": { "properties": { "closureByAssertion": { "required": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] } } }
+        }
+      ],
+      "x-semanticChecks": [
+        "Every closureAttemptId resolves to a same-lane, same-product PASS attempt that closes the mapped assertion.",
+        "candidateAttemptIds is the complete preserved same-lane, same-product candidate set.",
+        "A valid same-product PRODUCT_OR_SPEC_MISMATCH candidate forbids lane PASS.",
+        "EXPECTED_SINGLE equality and counterfactual distinction use production flooring and cap semantics.",
+        "Historical attempt records are immutable and are not relabeled by lane aggregation."
+      ]
+    }
+  }
+}
