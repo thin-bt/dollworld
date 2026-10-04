@@ -1,5 +1,4 @@
 diff --git a/tests/e2e/s2-ui009-round-robin-competition.spec.ts b/tests/e2e/s2-ui009-round-robin-competition.spec.ts
-index ecdfddf..CORRECTED 100644
 --- a/tests/e2e/s2-ui009-round-robin-competition.spec.ts
 +++ b/tests/e2e/s2-ui009-round-robin-competition.spec.ts
 @@ -149,10 +149,10 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
