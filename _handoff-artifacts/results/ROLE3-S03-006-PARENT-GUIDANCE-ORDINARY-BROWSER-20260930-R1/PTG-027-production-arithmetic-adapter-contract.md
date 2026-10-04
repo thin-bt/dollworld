@@ -1,6 +1,6 @@
 # PTG-027 production arithmetic adapter contract
 
-state: GPT_ONLY_SOURCE_RECONCILIATION_READY
+state: GPT_ONLY_SOURCE_RECONCILIATION_CORRECTED
 assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 scope: Sprint3 PTG evidence-validator production arithmetic adapter
@@ -134,11 +134,21 @@ All counterfactuals start from the captured production input and keep `B`, remai
 | `EXPECTED_SINGLE` | Use the ordinary nine-slot vector unchanged. |
 | `PTG_DOUBLE` | Append one additional factor equal to the captured PTG `teacherFactor`. |
 | `FORMAL_LEAK` | Append one additional factor equal to `formalLeakFactorValue`; do not replace the PTG teacher slot. |
-| `DISCIPLE_DOUBLE` | Append one additional factor equal to the captured `discipleCountFactor`. |
+| `DISCIPLE_DOUBLE` | Append one additional factor equal to the captured `discipleCountFactor`; for PTG-014A count zero this is the neutral factor `10000` and is algebraically identical to `EXPECTED_SINGLE`. |
 
 Each transformed vector is passed to the same shared one-floor production helper/multiplication primitive. An appended factor also appends one `10000` scale divisor; multiplying a numerator without extending the denominator is forbidden.
 
 For PTG-014A the ordinary teacher slot must be the PTG factor and the ordinary disciple slot must be the count-zero factor `10000`. `formalLeakFactorValue` must be source-proven from the formal teacher factor that the scenario guards against; the validator must not infer it from a display label.
+
+### Neutral-factor correction
+
+Appending the count-zero disciple factor cannot distinguish a double application:
+
+`floor(N * 10000 / (D * 10000)) = floor(N / D)`
+
+This identity holds for every legal base and every other factor. It is not a fixture-dependent flooring collision. Therefore `DISCIPLE_DOUBLE` for the PTG-014A count-zero fixture must equal `EXPECTED_SINGLE`; that equality is not `SEM_COUNTERFACTUAL_COLLISION` and cannot close the current `A14-ARITH-03` inequality assertion.
+
+Exactly-once disciple-factor arithmetic must instead be tested with a source-proven non-neutral disciple factor, such as a legal PTG-016 formal fixture in the `9200`, `8200`, `7000`, `5500`, or `4000` bracket. Until the affected upstream contracts are reconciled, PTG-014A-S3 / `A14-ARITH-03` remains specification-blocked and must not be reported PASS.
 
 ## Cap and fixture admissibility
 
@@ -155,7 +165,7 @@ Use these deterministic semantic failures before ordinary observed/expected mism
 1. missing, non-integral, negative-zero, unsafe, or contradictory arithmetic input -> `SEM_NATIVE_ARITHMETIC_INPUT_INVALID`;
 2. production shared helper failure -> validator internal/configuration failure and CLI exit 2, unless the failure was caused by evidence-domain input already classified above;
 3. capped fixture -> `SEM_FIXTURE_INSUFFICIENT`;
-4. any required raw counterfactual equals `EXPECTED_SINGLE` -> `SEM_COUNTERFACTUAL_COLLISION`;
+4. any counterfactual required to be distinguishable equals `EXPECTED_SINGLE` -> `SEM_COUNTERFACTUAL_COLLISION`; the count-zero `DISCIPLE_DOUBLE` identity is excluded and instead exposes the upstream specification contradiction;
 5. recorded counterfactual differs from recomputed value -> `SEM_COUNTERFACTUAL_RECOMPUTE_MISMATCH`;
 6. `observedAppliedMilliPoints !== EXPECTED_SINGLE` -> `SEM_OBSERVED_EXPECTED_MISMATCH`.
 
@@ -170,7 +180,7 @@ The implementation gate must add tests that prove:
 3. PTG selection resolves `7500` from the validated Sprint3 default while formal relations retain the Sprint1 teacher-key factor;
 4. disciple count zero resolves `10000`, and representative positive bracket boundaries match production;
 5. the fixed one-floor regression `base=500`, factors `[6500, 9000, 11500]` remains `336`;
-6. all three appended-factor counterfactuals use one final floor and a matching extra denominator scale;
+6. PTG_DOUBLE and FORMAL_LEAK use one final floor and a matching extra denominator scale, while count-zero DISCIPLE_DOUBLE is proven exactly equal to EXPECTED_SINGLE;
 7. a deliberately capped fixture is classified insufficient even when its raw event gain is arithmetically correct;
 8. unsafe integers, negative zero, missing factor members, and top-level/`productionInputs` contradictions fail closed;
 9. all PTG-025 V01-V06, S01-S13, and M01-M20 vectors still return their pinned class and first code twice byte-identically.
