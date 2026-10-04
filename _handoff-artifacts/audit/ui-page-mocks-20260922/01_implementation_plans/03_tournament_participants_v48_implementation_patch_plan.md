@@ -1,6 +1,6 @@
 # Tournament participants v48 — production patch plan
 
-Status: production implementation and mobile visible-focus correction present on `master`; structural Playwright coverage present; dedicated multi-width focus/overflow Playwright patch prepared but unapplied. Cursor remains intentionally paused.
+Status: production implementation, mobile focus correction, and multi-width mobile Playwright assertions present on `master`; dedicated 1280px desktop scroll-owner Playwright patch prepared but unapplied. Cursor remains intentionally paused.
 
 ## Authority
 - Repository/branch: `thin-bt/dollworld` / `master`
@@ -154,7 +154,16 @@ Review patch:
 
 The patch adds a dedicated Playwright case at 760px, 520px, and 360px. At every width it focuses the participant region, asserts that computed `outline-style` is not `none`, requires an outline width of at least 2px, and verifies that the document viewport has no horizontal overflow.
 
-Base test blob used for preparation: `2b5c9ef6e595e6771607ff977795dba2b15c3979`. Status: reviewable and canonical, but unapplied to the production test file. A passing execution result is still required before closing browser verification.
+Base test blob used for preparation: `2b5c9ef6e595e6771607ff977795dba2b15c3979`. Production status: applied by commit `4bc127657972944165c748a747b79e54cb5c3f18`; current test blob `2098b5ea45773835e25cc1f7a11610f8e5dd5228` contains the 760/520/360px assertions. GitHub returned no status checks or workflow runs, so a passing execution result remains unobserved.
+
+## Prepared desktop scroll-owner assertion
+
+Review patch:
+`_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/03_tournament_participants_v48_desktop_scroll_playwright.patch`
+
+The patch adds the missing 1280px desktop acceptance case. It verifies that the participant wrapper has a real horizontal scroll range, the outer participant body keeps `overflow-x: visible`, focus remains visible, ArrowRight changes the wrapper's `scrollLeft`, and neither the document viewport nor `window.scrollX` moves.
+
+Base test blob used for preparation: `2098b5ea45773835e25cc1f7a11610f8e5dd5228`. Status: reviewable and canonical, but unapplied to the production test file. A passing execution result is still required.
 
 ## Completion gate
 Completion requires:
