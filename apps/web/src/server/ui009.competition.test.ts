@@ -440,6 +440,18 @@ describe("UI-009 competition progression", () => {
       started.uiRevision,
     );
     expect(stepped.competition.participantIds.length).toBeGreaterThan(2);
+    const activeScheduleEntry = (
+      stepped.competition.scheduleOverview as {
+        entries: Array<{
+          isActiveCompetition: boolean;
+          participantLinks: unknown[];
+        }>;
+      }
+    ).entries.find((entry) => entry.isActiveCompetition);
+    expect(activeScheduleEntry).toBeDefined();
+    expect(activeScheduleEntry!.participantLinks).toHaveLength(
+      stepped.competition.participantIds.length,
+    );
     expect(stepped.competition.roundRobinProgress).not.toBeNull();
     expect(["awaiting_match", "round_robin_complete", "finished"]).toContain(
       stepped.competition.lifecyclePhase,

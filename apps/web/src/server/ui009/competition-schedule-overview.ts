@@ -200,14 +200,14 @@ export function buildCompetitionScheduleOverview(
     }
 
     let participantLinks: readonly CompetitionParticipantLinkView[] = [];
-    if (isPlayable) {
-      participantLinks = enrichParticipantLinks(rosterSession, participantRosterForPlayable);
-    } else if (isActiveCompetition) {
+    if (isActiveCompetition) {
       participantLinks = enrichParticipantLinks(
         rosterSession,
         participantRosterForActive,
         persisted?.competitiveRecordByPersonId,
       );
+    } else if (isPlayable) {
+      participantLinks = enrichParticipantLinks(rosterSession, participantRosterForPlayable);
     }
 
     const temporalState = isPast ? "past" : isCurrentWeek ? "current" : "future";
