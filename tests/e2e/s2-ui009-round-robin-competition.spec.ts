@@ -57,8 +57,20 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     await expect(page.getByTestId("competition-round-robin-history")).toBeVisible();
 
     // Regression for the original two-person placeholder: the accepted participant plan must expose >2.
-    await page.getByTestId("competition-detail-tab-participants").click();
+    const overviewTab = page.getByTestId("competition-detail-tab-overview");
+    const participantsTab = page.getByTestId("competition-detail-tab-participants");
+    await expect(overviewTab).toHaveAttribute("aria-controls", "competition-detail-panel-overview");
+    await expect(participantsTab).toHaveAttribute(
+      "aria-controls",
+      "competition-detail-panel-participants",
+    );
+    await participantsTab.click();
     const participants = page.getByTestId("competition-participants");
+    await expect(participants).toHaveAttribute("role", "tabpanel");
+    await expect(participants).toHaveAttribute(
+      "aria-labelledby",
+      "competition-detail-tab-participants-control",
+    );
     const participantTable = page.getByTestId("competition-participant-comparison");
     const participantScroll = participants.locator(".competition-participant-scroll");
     await expect(participantTable).toHaveJSProperty("tagName", "TABLE");
@@ -78,7 +90,13 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
       "href",
       /^\/people\/.+/,
     );
-    await page.getByTestId("competition-detail-tab-overview").click();
+    await overviewTab.click();
+    const overviewPanel = page.getByTestId("competition-detail-overview");
+    await expect(overviewPanel).toHaveAttribute("role", "tabpanel");
+    await expect(overviewPanel).toHaveAttribute(
+      "aria-labelledby",
+      "competition-detail-tab-overview-control",
+    );
 
     const historyRows = page.getByTestId("competition-round-robin-history").locator("tbody tr");
     const matchesTotal = await historyRows.count();
@@ -116,6 +134,81 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
       return response.status;
     });
     expect(simulationStatus).toBe(200);
+  });
+
+  test("provides automatic keyboard activation for the tournament detail tabs", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    let sessionGets = 0;
+    let competitionGets = 0;
+    let competitionSteps = 0;
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (request.method() === "GET" && url.pathname === "/api/s1_5/session") {
+        sessionGets += 1;
+      }
+      if (request.method() === "GET" && url.pathname === "/api/s2/competition") {
+        competitionGets += 1;
+      }
+      if (request.method() === "POST" && url.pathname === "/api/s2/competition/step") {
+        competitionSteps += 1;
+      }
+    });
+
+    await bootstrapAcceptedCompetitionSession(page, context);
+    await page.goto("/competition");
+    await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
+      timeout: 60_000,
+    });
+    const step = page.getByTestId("competition-step-cta");
+    await expect(step).toBeEnabled({ timeout: 60_000 });
+    await step.click();
+    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({
+      timeout: 60_000,
+    });
+
+    const tablist = page.getByRole("tablist", { name: "大会詳細タブ" });
+    const overviewTab = page.getByTestId("competition-detail-tab-overview");
+    const participantsTab = page.getByTestId("competition-detail-tab-participants");
+    const overviewPanel = page.getByTestId("competition-detail-overview");
+    const participantsPanel = page.getByTestId("competition-participants");
+    await expect(tablist).toBeVisible();
+    await expect(overviewTab).toHaveAttribute("id", "competition-detail-tab-overview-control");
+    await expect(participantsTab).toHaveAttribute(
+      "id",
+      "competition-detail-tab-participants-control",
+    );
+    await expect(overviewTab).toHaveAttribute("aria-selected", "true");
+    await expect(overviewTab).toHaveAttribute("tabindex", "0");
+    await expect(participantsTab).toHaveAttribute("aria-selected", "false");
+    await expect(participantsTab).toHaveAttribute("tabindex", "-1");
+    await expect(overviewPanel).toBeVisible();
+    await expect(participantsPanel).toBeHidden();
+
+    const requestBaseline = { sessionGets, competitionGets, competitionSteps };
+    await overviewTab.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(participantsTab).toBeFocused();
+    await expect(participantsTab).toHaveAttribute("aria-selected", "true");
+    await expect(participantsTab).toHaveAttribute("tabindex", "0");
+    await expect(overviewTab).toHaveAttribute("tabindex", "-1");
+    await expect(participantsPanel).toBeVisible();
+    await expect(overviewPanel).toBeHidden();
+
+    await page.keyboard.press("ArrowRight");
+    await expect(overviewTab).toBeFocused();
+    await page.keyboard.press("ArrowLeft");
+    await expect(participantsTab).toBeFocused();
+    await page.keyboard.press("Home");
+    await expect(overviewTab).toBeFocused();
+    await page.keyboard.press("End");
+    await expect(participantsTab).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(participantsPanel.locator(".competition-participant-scroll")).toBeFocused();
+
+    expect({ sessionGets, competitionGets, competitionSteps }).toEqual(requestBaseline);
   });
 
   test("keeps participant focus visible without viewport overflow at mobile widths", async ({
