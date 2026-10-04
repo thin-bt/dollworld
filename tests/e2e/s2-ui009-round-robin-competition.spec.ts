@@ -149,10 +149,10 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
       if (request.method() === "GET" && url.pathname === "/api/s1_5/session") {
         sessionGets += 1;
       }
-      if (request.method() === "GET" && url.pathname === "/api/s2/competition") {
+      if (request.method() === "GET" && url.pathname === "/api/s1_5/competition") {
         competitionGets += 1;
       }
-      if (request.method() === "POST" && url.pathname === "/api/s2/competition/step") {
+      if (request.method() === "POST" && url.pathname === "/api/s1_5/competition/step") {
         competitionSteps += 1;
       }
     });
