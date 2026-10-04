@@ -1,6 +1,6 @@
 # Tournament detail tabs accessibility implementation plan
 
-Status: **IMPLEMENTED_AND_TEST_CODE_PRESENT / REQUEST_COUNTER_CORRECTION_UNAPPLIED / EXECUTION_EVIDENCE_PENDING**
+Status: **IMPLEMENTED_AND_TEST_CODE_PRESENT / EXECUTION_EVIDENCE_PENDING**
 
 Repository: `thin-bt/dollworld`  
 Target branch: `master`  
@@ -27,9 +27,11 @@ Prepared correction artifact:
 - apply-ready artifact revision commit: `9bf1b0c6f797f230c17fa8d885aa15660650280a`
 - current artifact blob: `d66537614d05cde5a4160862f89533fa847bbbe8`
 - validation: the invalid placeholder `index ...CORRECTED` header was removed; the current production test blob contains exactly one matching GET line and one matching POST line for this two-line hunk
-- production application status: **UNAPPLIED**
+- production application commit: `2b8341c6100303f9b10cc189a80caceb0375a40d`
+- resulting Playwright blob: `925c8a9c985f74c22314c559cd60bf555bd358c8`
+- production application status: **APPLIED**
 
-The correction changes only the two monitored paths to `/api/s1_5/competition` and `/api/s1_5/competition/step`. Until that patch is applied and executed, do not treat the no-request condition as verified runtime evidence.
+The correction changes only the two monitored paths to `/api/s1_5/competition` and `/api/s1_5/competition/step`. The intended bytes are now present on `master`; executed browser evidence is still unobserved, so do not report runtime PASS.
 
 ## Purpose
 
@@ -205,4 +207,4 @@ Production completion requires all of the following:
 - 1280/760/520/360 browser validation is recorded;
 - no competition API request is caused by tab-only navigation.
 
-The JSX implementation and test code are present, but the request-counter correction is not yet applied and no executed browser evidence has been observed. Report the status as **IMPLEMENTED_AND_TEST_CODE_PRESENT / REQUEST_COUNTER_CORRECTION_UNAPPLIED / EXECUTION_EVIDENCE_PENDING**.
+The JSX implementation and corrected test code are present on `master`, but no executed browser evidence has been observed. Report the status as **IMPLEMENTED_AND_TEST_CODE_PRESENT / EXECUTION_EVIDENCE_PENDING**.
