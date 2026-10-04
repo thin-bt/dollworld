@@ -1981,6 +1981,26 @@ table.data-table {
   white-space: nowrap;
 }
 
+.competition-participants-body {
+  overflow-x: visible;
+}
+
+.competition-participant-scroll {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.competition-participant-scroll:focus-visible {
+  outline: 3px solid var(--dw-focus);
+  outline-offset: 3px;
+}
+
+.competition-participant-mobile-label {
+  display: none;
+}
+
 .competition-ranking-year {
   display: flex;
   flex-wrap: wrap;
@@ -2072,5 +2092,94 @@ table.data-table {
 
   table.data-table {
     font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .competition-participant-scroll {
+    overflow: visible;
+  }
+
+  .competition-participant-scroll:focus-visible {
+    outline: none;
+  }
+
+  .competition-participant-table,
+  .competition-participant-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .competition-participant-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .competition-participant-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.65rem;
+    border: 1px solid var(--dw-line);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .competition-participant-table td,
+  .competition-participant-table th {
+    min-width: 0;
+    padding: 0.35rem;
+    border-top: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .competition-participant-table tbody th[scope="row"] {
+    white-space: normal;
+  }
+
+  .competition-participant-table .competition-participant-person,
+  .competition-participant-table .competition-participant-detail {
+    grid-column: 1 / -1;
+  }
+
+  .competition-participant-mobile-label {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--dw-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .competition-participant-detail a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .competition-participant-table tbody tr {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 360px) {
+  .competition-participant-table tbody tr {
+    gap: 0.35rem;
+    padding: 0.45rem;
+  }
+
+  .competition-participant-table td,
+  .competition-participant-table th {
+    padding: 0.25rem;
   }
 }

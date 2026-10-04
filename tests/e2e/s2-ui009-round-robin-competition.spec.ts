@@ -58,8 +58,26 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
 
     // Regression for the original two-person placeholder: the accepted participant plan must expose >2.
     await page.getByTestId("competition-detail-tab-participants").click();
-    const participantRows = page.getByTestId("competition-participants").locator("tbody tr");
+    const participants = page.getByTestId("competition-participants");
+    const participantTable = page.getByTestId("competition-participant-comparison");
+    const participantScroll = participants.locator(".competition-participant-scroll");
+    await expect(participantTable).toHaveJSProperty("tagName", "TABLE");
+    await expect(participantScroll).toHaveAttribute("tabindex", "0");
+    await expect(participantScroll).toHaveAttribute("role", "region");
+    await expect(participantScroll).toHaveAttribute(
+      "aria-describedby",
+      "competition-participant-scroll-help",
+    );
+    await expect(participantTable.locator("caption")).toHaveText("大会参加者の能力・適性比較");
+    const participantRows = participantTable.locator("tbody tr");
     expect(await participantRows.count()).toBeGreaterThan(2);
+    await expect(participantRows.locator("th[scope='row']")).toHaveCount(
+      await participantRows.count(),
+    );
+    await expect(participantRows.first().locator("td:last-child a")).toHaveAttribute(
+      "href",
+      /^\/people\/.+/,
+    );
     await page.getByTestId("competition-detail-tab-overview").click();
 
     const historyRows = page.getByTestId("competition-round-robin-history").locator("tbody tr");
@@ -128,7 +146,10 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     expect(sessionGets - sessionBaseline).toBe(0);
   });
 
-  test("ranking year navigation reloads only the competition projection", async ({ page, context }) => {
+  test("ranking year navigation reloads only the competition projection", async ({
+    page,
+    context,
+  }) => {
     test.setTimeout(120_000);
     await bootstrapAcceptedCompetitionSession(page, context);
 
@@ -224,5 +245,4 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     });
     expect(rejectedSteps).toBe(1);
   });
-
 });

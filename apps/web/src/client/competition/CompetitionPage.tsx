@@ -473,60 +473,109 @@ function TournamentDetailPanel(props: {
           ) : null}
         </div>
       ) : (
-        <div className="competition-detail-body" data-testid="competition-participants">
+        <div
+          className="competition-detail-body competition-participants-body"
+          data-testid="competition-participants"
+        >
           {canShowParticipants ? (
-            <table
-              className="data-table competition-participant-table"
-              data-testid="competition-participant-comparison"
-            >
-              <thead>
-                <tr>
-                  <th>選手</th>
-                  <th>ランク</th>
-                  <th>年齢</th>
-                  <th>公式戦</th>
-                  {STAT_KEYS.map((key) => (
-                    <th key={key}>{statLabel(key)}</th>
-                  ))}
-                  {APTITUDE_KEYS.map((key) => (
-                    <th key={key}>{aptitudeLabel(key)}</th>
-                  ))}
-                  <th>詳細</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entry.participantLinks.map((link) => (
-                  <tr
-                    key={link.personId}
-                    data-testid={`competition-participant-row-${link.personId}`}
-                  >
-                    <td>{link.displayName}</td>
-                    <td>{link.currentRankLabel ?? "—"}</td>
-                    <td>{link.ageLabel ?? "—"}</td>
-                    <td>{link.officialRecordLabel ?? "—"}</td>
-                    {STAT_KEYS.map((key) => (
-                      <td
-                        key={key}
-                        data-testid={`competition-participant-stat-${key}-${link.personId}`}
+            <>
+              <p id="competition-participant-scroll-help" className="dw-visually-hidden">
+                表は横方向にスクロールできます。
+              </p>
+              <div
+                className="competition-participant-scroll"
+                tabIndex={0}
+                role="region"
+                aria-label="参加者比較表"
+                aria-describedby="competition-participant-scroll-help"
+              >
+                <table
+                  className="data-table competition-participant-table"
+                  data-testid="competition-participant-comparison"
+                >
+                  <caption className="dw-visually-hidden">大会参加者の能力・適性比較</caption>
+                  <thead>
+                    <tr>
+                      <th>選手</th>
+                      <th>ランク</th>
+                      <th>年齢</th>
+                      <th>公式戦</th>
+                      {STAT_KEYS.map((key) => (
+                        <th key={key}>{statLabel(key)}</th>
+                      ))}
+                      {APTITUDE_KEYS.map((key) => (
+                        <th key={key}>{aptitudeLabel(key)}</th>
+                      ))}
+                      <th>詳細</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {entry.participantLinks.map((link) => (
+                      <tr
+                        key={link.personId}
+                        data-testid={`competition-participant-row-${link.personId}`}
                       >
-                        {link.stats?.[key] ?? "—"}
-                      </td>
+                        <th scope="row" className="competition-participant-person">
+                          {link.displayName}
+                        </th>
+                        <td>
+                          <span className="competition-participant-mobile-label" aria-hidden="true">
+                            ランク
+                          </span>
+                          {link.currentRankLabel ?? "—"}
+                        </td>
+                        <td>
+                          <span className="competition-participant-mobile-label" aria-hidden="true">
+                            年齢
+                          </span>
+                          {link.ageLabel ?? "—"}
+                        </td>
+                        <td>
+                          <span className="competition-participant-mobile-label" aria-hidden="true">
+                            公式戦
+                          </span>
+                          {link.officialRecordLabel ?? "—"}
+                        </td>
+                        {STAT_KEYS.map((key) => (
+                          <td
+                            key={key}
+                            data-testid={`competition-participant-stat-${key}-${link.personId}`}
+                          >
+                            <span
+                              className="competition-participant-mobile-label"
+                              aria-hidden="true"
+                            >
+                              {statLabel(key)}
+                            </span>
+                            {link.stats?.[key] ?? "—"}
+                          </td>
+                        ))}
+                        {APTITUDE_KEYS.map((key) => (
+                          <td
+                            key={key}
+                            data-testid={`competition-participant-aptitude-${key}-${link.personId}`}
+                          >
+                            <span
+                              className="competition-participant-mobile-label"
+                              aria-hidden="true"
+                            >
+                              {aptitudeLabel(key)}
+                            </span>
+                            {link.aptitudes?.[key] ?? "—"}
+                          </td>
+                        ))}
+                        <td className="competition-participant-detail">
+                          <span className="competition-participant-mobile-label" aria-hidden="true">
+                            詳細
+                          </span>
+                          <a href={`/people/${encodeURIComponent(link.personId)}`}>人物詳細</a>
+                        </td>
+                      </tr>
                     ))}
-                    {APTITUDE_KEYS.map((key) => (
-                      <td
-                        key={key}
-                        data-testid={`competition-participant-aptitude-${key}-${link.personId}`}
-                      >
-                        {link.aptitudes?.[key] ?? "—"}
-                      </td>
-                    ))}
-                    <td>
-                      <a href={`/people/${encodeURIComponent(link.personId)}`}>人物詳細</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  </tbody>
+                </table>
+              </div>
+            </>
           ) : (
             <p className="competition-schedule-empty">参加者情報はまだありません。</p>
           )}
