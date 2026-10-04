@@ -1,57 +1,129 @@
 # Tournament participants v48 — production patch plan
 
-Status: GPT-only preparation; Cursor execution intentionally paused.
+Status: GPT-only preparation complete; Cursor execution intentionally paused; production patch unapplied.
 
 ## Authority
-- Production: `apps/web/src/client/competition/CompetitionPage.tsx`
+- Repository/branch: `thin-bt/dollworld` / `master`
+- Production JSX: `apps/web/src/client/competition/CompetitionPage.tsx`
+- Production CSS: `apps/web/src/client/presentation.css`
 - Review mock: `_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/03_tournament_participants_accessible_responsive_mock_v48.html`
+- Reconciled production JSX blob: `cd926db28fb1c56909bc7e90b265f15b026c39ee`
+- Reconciled production CSS blob: `541bfaf3a6eb97f7d2ed5b00fb582f9fb800893d`
 
 ## Patch boundary
 Change only the participants presentation inside `TournamentDetailPanel` in `apps/web/src/client/competition/CompetitionPage.tsx` plus participant-specific selectors in `apps/web/src/client/presentation.css`. Do not change API, view-model, fetch/session, lifecycle, routing, mutation, tournament selection, or progression behavior.
 
 Fresh production reconciliation: `presentation.css` currently gives `.competition-detail-body` its own `overflow-x: auto`, while `.competition-participant-table td, th` force `white-space: nowrap`. The v48 design requires one scroll owner on desktop and card wrapping on mobile, so the implementation must neutralize the outer body overflow only for the participants pane and move desktop horizontal overflow to the new focusable wrapper. Do not leave nested horizontal scroll regions.
 
+## Fixed class and id contract
+Use these exact names so JSX, CSS, tests, and browser verification do not diverge:
+
+- participants body modifier: `competition-participants-body`
+- focusable scroll owner: `competition-participant-scroll`
+- scroll instruction id: `competition-participant-scroll-help`
+- mobile label: `competition-participant-mobile-label`
+- participant name cell: `competition-participant-person`
+- participant detail cell: `competition-participant-detail`
+
+Do not introduce alternate aliases during implementation.
+
 ## JSX patch
 1. Keep `canShowParticipants` and the current empty state unchanged.
-2. Keep the comparison TABLE as the element carrying `data-testid="competition-participant-comparison"`.
-3. When participants exist, add a visually-hidden scroll instruction and wrap the existing table in a focusable overflow region using `tabIndex={0}`, `role="region"`, `aria-label="参加者比較表"`, and `aria-describedby` pointing to that instruction.
-4. Add a visually-hidden caption: `大会参加者の能力・適性比較`.
-5. Change only the participant-name cell from `td` to `th scope="row"`; preserve the row testid.
-6. Add mobile labels to rank, age, official record, each BaseStat6 value, and each Aptitude3 value. Generate stat/aptitude labels with existing `statLabel(key)` / `aptitudeLabel(key)`; do not duplicate label dictionaries.
-7. Preserve the person detail href exactly as `/people/${encodeURIComponent(link.personId)}`.
-8. Preserve all `?? "—"` fallbacks and all existing row/stat/aptitude testids.
+2. Add `competition-participants-body` to the existing participants body only. Keep `data-testid="competition-participants"` on that body.
+3. When participants exist, render `<p id="competition-participant-scroll-help" className="dw-visually-hidden">表は横方向にスクロールできます。</p>`.
+4. Wrap the existing table in `<div className="competition-participant-scroll" tabIndex={0} role="region" aria-label="参加者比較表" aria-describedby="competition-participant-scroll-help">`.
+5. Keep the comparison TABLE as the element carrying `data-testid="competition-participant-comparison"`.
+6. Add `<caption className="dw-visually-hidden">大会参加者の能力・適性比較</caption>` as the table's first child.
+7. Change only the participant-name cell from `td` to `th scope="row" className="competition-participant-person"`; preserve the row testid.
+8. Add `<span className="competition-participant-mobile-label" aria-hidden="true">…</span>` before each displayed value in rank, age, official record, each BaseStat6 cell, each Aptitude3 cell, and detail. Use labels `ランク`, `年齢`, `公式戦`, `statLabel(key)`, `aptitudeLabel(key)`, and `詳細`; do not duplicate stat/aptitude dictionaries.
+9. Add `competition-participant-detail` only to the final detail cell.
+10. Preserve the person detail href exactly as `/people/${encodeURIComponent(link.personId)}`.
+11. Preserve all `?? "—"` fallbacks and all existing row/stat/aptitude testids.
+
+The empty state must not render the scroll instruction, wrapper, caption, or a placeholder table.
 
 ## Responsive CSS contract
-Add participant-scoped classes rather than changing global `.data-table` behavior. Recommended mapping: participants body modifier (for example `competition-participants-body`), wrapper `competition-participant-scroll`, visually-hidden helper using the project's existing sr-only utility if one exists (otherwise a participant-local equivalent), per-cell `competition-participant-mobile-label`, person cell modifier, and detail cell modifier.
+All new rules must be participant-scoped. Do not change global `.data-table` behavior.
 
-- Desktop: retain the 14-column comparison table; horizontal overflow belongs to the focusable wrapper, not `.competition-detail-body` and not the viewport. Override the participants body to `overflow-x: visible` while leaving overview/ranking/knockout overflow behavior untouched.
-- Desktop table may keep nowrap values; the wrapper owns overflow and must expose a visible `:focus`/`:focus-visible` indicator.
-- <=760px: use the same table DOM as cards, three value columns; set the participant wrapper to `overflow: visible`, hide only the visual table header, allow participant cells to wrap (`white-space: normal; min-width: 0; overflow-wrap: anywhere`), and expose per-cell mobile labels.
-- <=520px: two value columns; person and detail cells span the full card width.
-- <=360px: reduce spacing only; do not remove labels or values.
-- Long participant names must wrap without forcing viewport overflow.
-- Person-detail action must provide at least a 44px mobile target.
-- Focusable desktop overflow region must have a visible focus indicator.
+### Desktop
+- `.competition-participants-body { overflow-x: visible; }`
+- `.competition-participant-scroll` is the only horizontal scroll owner: `max-width:100%; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch;`.
+- Give the wrapper a visible `:focus-visible` outline using `var(--dw-focus)`.
+- Keep the existing 14-column table and nowrap values.
+- `.competition-participant-mobile-label { display:none; }`
+
+### 761px and wider
+- TABLE semantics and the current one-row-per-participant layout remain visually unchanged.
+- The page viewport and `.competition-detail-body` must not become additional horizontal scroll owners.
+
+### 760px and narrower
+- Use the same TABLE DOM; do not render a second mobile list.
+- The wrapper changes to `overflow:visible` and does not retain a redundant focus ring when no longer scrollable.
+- Visually hide the table header while keeping it in the accessibility tree; do not use `display:none`.
+- Set table and tbody to block layout and each tbody row to a three-column grid.
+- Override participant cells locally to `white-space:normal; min-width:0; overflow-wrap:anywhere;`.
+- Show `.competition-participant-mobile-label` as a muted block label above its value.
+- Name and detail cells span all columns.
+- Each row is a bordered card with spacing matching the v48 mock.
+
+### 520px and narrower
+- Each participant row becomes a two-column grid.
+- Name and detail remain explicit `grid-column:1 / -1`.
+
+### 360px and narrower
+- Reduce gap and cell padding only.
+- Do not remove labels, values, the detail link, or missing-value markers.
+
+### Interaction sizing
+- The person-detail link must be an inline-flex target with `min-height:44px`, aligned center.
+- Long participant names must wrap without viewport overflow.
 
 ## Preserve exactly
 `entry.participantLinks`; `STAT_KEYS`; `APTITUDE_KEYS`; `statLabel()`; `aptitudeLabel()`; `competition-participant-comparison`; row/stat/aptitude testids; `canShowParticipants`; empty-state text `参加者情報はまだありません。`; existing detail tabs; `日程表に戻る` callback and placement.
 
 ## Production CSS reconciliation guard
-- Current canonical CSS blob at reconciliation: `541bfaf3a6eb97f7d2ed5b00fb582f9fb800893d`.
 - Existing global `.competition-detail-body, ... { overflow-x: auto; }` must continue serving non-participant detail content.
 - Existing `.competition-participant-table td, .competition-participant-table th { white-space: nowrap; }` must be overridden only inside the <=760px participant-card media rule; do not remove it globally.
 - No global `.data-table`, ranking, knockout, history, or schedule responsive behavior should change as a side effect.
+- Do not use `display:contents` on table rows or cells.
 
 ## Accessibility semantics guard
-- The production tab buttons currently expose `role="tab"` and `aria-selected`, but there is no corresponding `role="tabpanel"` / `aria-controls` relationship. Do **not** broaden the v48 participant patch to repair the entire tab widget incidentally; keep that as a separate accessibility task so this presentation patch stays reviewable.
-- The new participant scroll region must have a stable instruction id unique within `TournamentDetailPanel`; the visually-hidden instruction must be present only when the participant table is rendered.
-- Prefer the existing `.dw-visually-hidden` utility already present in canonical `presentation.css`; do not add a second sr-only implementation unless production structure makes reuse impossible.
-- Keep the TABLE caption inside the table and visually hidden. The wrapper's accessible name describes the scroll region; the caption describes the table, avoiding one element carrying both responsibilities.
-- Mobile card styling must not use `display: contents` on rows/cells because that can weaken table semantics in accessibility trees. Use explicit grid/block layout while retaining the single TABLE DOM.
+- The production tab buttons currently expose `role="tab"` and `aria-selected`, but there is no corresponding `role="tabpanel"` / `aria-controls` relationship. Do not broaden this participant patch to repair the entire tab widget incidentally; track that separately.
+- The scroll instruction id is unique within `TournamentDetailPanel` and is present only with the participant table.
+- Reuse canonical `.dw-visually-hidden`; do not add another sr-only utility.
+- Keep the caption inside the table. The wrapper names the scroll region; the caption names the table.
+- Mobile styling retains one TABLE DOM and must not use `display:contents`.
 
-## Acceptance
-- Existing competition tests pass without changing their behavioral contract.
-- Browser review at >=1280px, 760px, 520px, and ~360px.
-- Verify long-name wrapping, all-missing-value row, keyboard focus/scroll behavior, participant detail links, empty state, tab switching, and back-to-schedule behavior.
-- No duplicate mobile participant DOM.
-- Completion requires production JSX/CSS implementation and browser/test verification; mock reproduction alone is not completion.
+## Test update contract
+Extend the existing competition page test at the current participant comparison scenario; do not replace behavioral fixtures.
+
+Required structural assertions:
+- `competition-participant-comparison` resolves to `TABLE`.
+- `competition-participant-scroll` has `tabindex="0"`, `role="region"`, and `aria-describedby="competition-participant-scroll-help"`.
+- The table contains caption text `大会参加者の能力・適性比較`.
+- The first cell of every participant row is `TH[scope="row"]`.
+- Existing row/stat/aptitude testids still resolve to the same participant values, including `—`.
+- The detail href still encodes `personId`.
+- With `canShowParticipants=false`, only the existing empty-state text is rendered and the comparison table/scroll help are absent.
+
+Do not assert responsive CSS geometry in jsdom. Cover geometry in browser verification.
+
+## Browser verification matrix
+| Width | Expected layout | Required checks |
+|---|---|---|
+| >=1280px | 14-column table in one focusable horizontal scroll region | keyboard focus visible; wrapper scrolls; no nested/viewport horizontal scroll |
+| 760px | 3-column cards | header visually hidden but accessible; labels visible; name/detail full width |
+| 520px | 2-column cards | no clipped Japanese labels; detail target >=44px |
+| ~360px | compact 2-column cards | long name wraps; no viewport overflow; all values remain present |
+
+At every width also verify: all-missing-value row, participant link navigation, empty state, tab switching, and `日程表に戻る`.
+
+## Completion gate
+Completion requires:
+1. production JSX implementation;
+2. participant-scoped CSS implementation;
+3. existing competition tests plus the structural assertions above;
+4. browser verification at all four widths;
+5. read-back or diff review proving only the declared boundary changed.
+
+Mock reproduction or this plan alone is reviewable preparation, not completed implementation.
