@@ -42,6 +42,13 @@ Add participant-scoped classes rather than changing global `.data-table` behavio
 - Existing `.competition-participant-table td, .competition-participant-table th { white-space: nowrap; }` must be overridden only inside the <=760px participant-card media rule; do not remove it globally.
 - No global `.data-table`, ranking, knockout, history, or schedule responsive behavior should change as a side effect.
 
+## Accessibility semantics guard
+- The production tab buttons currently expose `role="tab"` and `aria-selected`, but there is no corresponding `role="tabpanel"` / `aria-controls` relationship. Do **not** broaden the v48 participant patch to repair the entire tab widget incidentally; keep that as a separate accessibility task so this presentation patch stays reviewable.
+- The new participant scroll region must have a stable instruction id unique within `TournamentDetailPanel`; the visually-hidden instruction must be present only when the participant table is rendered.
+- Prefer the existing `.dw-visually-hidden` utility already present in canonical `presentation.css`; do not add a second sr-only implementation unless production structure makes reuse impossible.
+- Keep the TABLE caption inside the table and visually hidden. The wrapper's accessible name describes the scroll region; the caption describes the table, avoiding one element carrying both responsibilities.
+- Mobile card styling must not use `display: contents` on rows/cells because that can weaken table semantics in accessibility trees. Use explicit grid/block layout while retaining the single TABLE DOM.
+
 ## Acceptance
 - Existing competition tests pass without changing their behavioral contract.
 - Browser review at >=1280px, 760px, 520px, and ~360px.
