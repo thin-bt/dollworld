@@ -211,6 +211,43 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     expect({ sessionGets, competitionGets, competitionSteps }).toEqual(requestBaseline);
   });
 
+  test("keeps unavailable participants out of the tournament detail tab sequence", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    await bootstrapAcceptedCompetitionSession(page, context);
+    await page.goto("/competition");
+    await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
+      timeout: 60_000,
+    });
+
+    const unavailableTournament = page
+      .locator(
+        ".competition-schedule-cell:not(.competition-schedule-cell--playable):not(.competition-schedule-cell--active) [data-testid='competition-schedule-cell']",
+      )
+      .first();
+    await expect(unavailableTournament).toBeVisible();
+    await unavailableTournament.click();
+
+    const overviewTab = page.getByTestId("competition-detail-tab-overview");
+    const participantsTab = page.getByTestId("competition-detail-tab-participants");
+    const participantsPanel = page.getByTestId("competition-participants");
+    await expect(overviewTab).toHaveAttribute("aria-selected", "true");
+    await expect(overviewTab).toHaveAttribute("tabindex", "0");
+    await expect(participantsTab).toBeDisabled();
+    await expect(participantsTab).toHaveAttribute("tabindex", "-1");
+    await expect(participantsPanel).toBeHidden();
+
+    await overviewTab.focus();
+    for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"]) {
+      await page.keyboard.press(key);
+      await expect(overviewTab).toBeFocused();
+      await expect(overviewTab).toHaveAttribute("aria-selected", "true");
+      await expect(participantsPanel).toBeHidden();
+    }
+  });
+
   test("keeps participant focus visible without viewport overflow at mobile widths", async ({
     page,
     context,
