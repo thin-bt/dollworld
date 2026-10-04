@@ -167,6 +167,60 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     }
   });
 
+  test("keeps the desktop participant table in one keyboard-scrollable region", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await bootstrapAcceptedCompetitionSession(page, context);
+    await page.goto("/competition");
+    await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
+      timeout: 60_000,
+    });
+
+    const step = page.getByTestId("competition-step-cta");
+    await expect(step).toBeEnabled({ timeout: 60_000 });
+    await step.click();
+    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({
+      timeout: 60_000,
+    });
+    await page.getByTestId("competition-detail-tab-participants").click();
+
+    const participants = page.getByTestId("competition-participants");
+    const participantScroll = participants.locator(".competition-participant-scroll");
+    await expect(participantScroll).toBeVisible();
+
+    const scrollMetrics = await participantScroll.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(scrollMetrics.scrollWidth).toBeGreaterThan(scrollMetrics.clientWidth);
+    await expect(participants).toHaveCSS("overflow-x", "visible");
+
+    await participantScroll.focus();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(participantScroll).toBeFocused();
+    await expect(participantScroll).toHaveCSS("outline-style", "solid");
+    await participantScroll.evaluate((element) => {
+      element.scrollLeft = 0;
+    });
+    expect(await participantScroll.evaluate((element) => element.scrollLeft)).toBe(0);
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await expect
+      .poll(() => participantScroll.evaluate((element) => element.scrollLeft))
+      .toBeGreaterThan(0);
+
+    const outerScrollState = await page.evaluate(() => ({
+      viewportOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      pageScrollX: window.scrollX,
+    }));
+    expect(outerScrollState.viewportOverflow).toBeFalsy();
+    expect(outerScrollState.pageScrollX).toBe(0);
+  });
+
   test("year navigation reloads only the competition projection", async ({ page, context }) => {
     test.setTimeout(120_000);
     await bootstrapAcceptedCompetitionSession(page, context);

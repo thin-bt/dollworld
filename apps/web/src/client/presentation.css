@@ -2001,6 +2001,13 @@ table.data-table {
   display: none;
 }
 
+@media (min-width: 761px) {
+  .competition-participant-table {
+    width: max-content;
+    min-width: max(100%, 60rem);
+  }
+}
+
 .competition-ranking-year {
   display: flex;
   flex-wrap: wrap;
