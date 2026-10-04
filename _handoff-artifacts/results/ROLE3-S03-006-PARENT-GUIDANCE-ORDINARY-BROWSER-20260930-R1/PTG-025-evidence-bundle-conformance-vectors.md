@@ -71,6 +71,8 @@ Apply each mutation to the nearest valid vector.
 | S08 | PTG-015 closure map contains an A14 or A16 key | STRUCTURAL_REJECT `STR_CROSS_LANE_CLOSURE_KEY` |
 | S09 | PTG-015-S1 PASS omits `explicitTeachEvidence` | STRUCTURAL_REJECT `STR_EXPLICIT_TEACH_EVIDENCE` |
 | S10 | PTG-016-S1 PASS omits comparison evidence or any required comparison flag is false | STRUCTURAL_REJECT `STR_COMPARISON_ISOLATION` |
+| S11 | Input bytes are invalid UTF-8, truncated JSON, or have trailing non-whitespace bytes after the root value | STRUCTURAL_REJECT `STR_JSON_SYNTAX` |
+| S12 | Any JSON object contains the same member name more than once, even when both values are identical | STRUCTURAL_REJECT `STR_DUPLICATE_JSON_KEY` |
 
 ## Semantic rejection vectors
 
@@ -132,4 +134,4 @@ The vector passes only when both class and first failure code match.
 
 ## Handoff boundary
 
-When implementation resumes, encode V01-V06, S01-S10, and M01-M20 as executable validator fixtures before using PTG-024 evidence for acceptance. Schema conformance alone is insufficient: all semantic vectors must also pass. No vector in this document is product acceptance evidence, and no illustrative value may be reported as a runtime result.
+When implementation resumes, encode V01-V06, S01-S12, and M01-M20 as executable validator fixtures before using PTG-024 evidence for acceptance. Schema conformance alone is insufficient: all semantic vectors must also pass. No vector in this document is product acceptance evidence, and no illustrative value may be reported as a runtime result.
