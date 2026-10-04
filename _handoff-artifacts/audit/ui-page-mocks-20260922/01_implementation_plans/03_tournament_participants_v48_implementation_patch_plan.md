@@ -1,6 +1,6 @@
 # Tournament participants v48 — production patch plan
 
-Status: production implementation, mobile focus correction, and multi-width mobile Playwright assertions present on `master`; dedicated 1280px desktop scroll-owner Playwright patch prepared but unapplied. Cursor remains intentionally paused.
+Status: v48 production JSX/CSS plus mobile and desktop Playwright acceptance code are present on `master`; GitHub test execution evidence remains unobserved. Cursor remains intentionally paused.
 
 ## Authority
 - Repository/branch: `thin-bt/dollworld` / `master`
@@ -9,8 +9,10 @@ Status: production implementation, mobile focus correction, and multi-width mobi
 - Review mock: `_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/03_tournament_participants_accessible_responsive_mock_v48.html`
 - Implemented production commit: `c29f27e8e97250b35eb8976c6635529965589934`
 - Current production JSX blob: `09e2737500cc074a47ded5d6a47070cb6e54afff`
-- Current production CSS blob: `2573e1da48ffff8b26608c068004a7b74d72cd70`
-- Current Playwright spec blob: `88b1debd95205b03da932aeb922b8afee96e9e44`
+- Current production CSS blob: `0766da25b1c8a7c0f70afb40935682326ebcdd8a`
+- Current Playwright spec blob: `f69c86dbb2c818fca422161c91b4940543774637`
+- Mobile focus implementation/test commits: `5e777872d496dd86fa7d47c633a1adbfa31553d0`, `4bc127657972944165c748a747b79e54cb5c3f18`
+- Desktop scroll implementation/test commit: `a52735069e032c37272c19971e5d4a883164b23b`
 
 ## Patch boundary
 Change only the participants presentation inside `TournamentDetailPanel` in `apps/web/src/client/competition/CompetitionPage.tsx` plus participant-specific selectors in `apps/web/src/client/presentation.css`. Do not change API, view-model, fetch/session, lifecycle, routing, mutation, tournament selection, or progression behavior.
@@ -163,7 +165,19 @@ Review patch:
 
 The patch adds the missing 1280px desktop acceptance case. It verifies that the participant wrapper has a real horizontal scroll range, the outer participant body keeps `overflow-x: visible`, focus remains visible, ArrowRight changes the wrapper's `scrollLeft`, and neither the document viewport nor `window.scrollX` moves.
 
-Base test blob used for preparation: `2098b5ea45773835e25cc1f7a11610f8e5dd5228`. Status: reviewable and canonical, but unapplied to the production test file. A passing execution result is still required.
+Base test blob used for preparation: `2098b5ea45773835e25cc1f7a11610f8e5dd5228`. Production status: applied by commit `a52735069e032c37272c19971e5d4a883164b23b`. That commit also adds the desktop-only `width: max-content` and `min-width: max(100%, 60rem)` rule required to guarantee a real wrapper scroll range. Current test blob: `f69c86dbb2c818fca422161c91b4940543774637`. A passing execution result is still required.
+
+## Current acceptance verdict
+
+- JSX contract: present on `master`.
+- Responsive CSS contract: present on `master`, including the explicit desktop table width needed for one real horizontal scroll owner.
+- Mobile focus/viewport assertions: present in production Playwright source.
+- Desktop scroll-owner/keyboard assertions: present in production Playwright source.
+- GitHub combined statuses for the relevant implementation commits: none returned.
+- Pull-request workflow runs for the relevant implementation commits: none returned.
+- Final verdict: **IMPLEMENTED_AND_TEST_CODE_PRESENT / EXECUTION_EVIDENCE_PENDING**.
+
+No additional v49 mock or production patch is justified from the current source review. Closure requires an observed passing Playwright execution; source presence alone must not be reported as runtime PASS.
 
 ## Completion gate
 Completion requires:
