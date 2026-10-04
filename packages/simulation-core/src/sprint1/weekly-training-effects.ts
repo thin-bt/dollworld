@@ -31,6 +31,7 @@ import type { Sprint3Config } from "../sprint3/types.js";
 import { deriveInjuryStage, selectInjuryGrowthFactor } from "./injury-stage.js";
 import { deriveMaxMental } from "./max-mental.js";
 import { drawInclusiveBasisPoints, multiplyBasisPointsFloor } from "./multiply-basis-points.js";
+import { resolveWeeklyStatGrowthProjection } from "./weekly-stat-growth-projection.js";
 import { deepFreezePlainJson } from "./plain-data.js";
 import { evaluateTechniqueAcquisitionConditions } from "./technique-acquisition.js";
 import type { TechniqueLearnerContext } from "./technique-acquisition.js";
@@ -78,7 +79,6 @@ export const TECHNIQUE_MASTERY_PROGRESS_UNIT =
   "hundredths" as const satisfies TechniqueProgressUnit;
 
 const MASTERY_MAXIMUM_HUNDREDTHS = 10000;
-const MILLI_POINTS_PER_SURFACE_POINT = 1000;
 
 export type WeeklyEffectRng = {
   nextInt(minInclusive: number, maxExclusive: number): number;
@@ -434,34 +434,22 @@ export function applyTrainStat(
     rngFactor,
   };
 
-  const gain = multiplyBasisPointsFloor(config.growth.baseMilliPointsPerTraining, [
-    factorBreakdown.growthPotentialFactor,
-    factorBreakdown.ageFactor,
-    factorBreakdown.currentValueFactor,
-    factorBreakdown.teacherFactor,
-    factorBreakdown.discipleCountFactor,
-    factorBreakdown.fatigueFactor,
-    factorBreakdown.injuryFactor,
-    factorBreakdown.motivationFactor,
-    factorBreakdown.rngFactor,
-  ]);
-  if (!gain.ok) {
-    return failure(gain.issues);
-  }
-
   const remainderBefore = draft.remainderMilliPoints[targetStat];
-  const accumulated = remainderBefore + gain.value;
-  const surfaceGain = Math.min(
-    Math.floor(accumulated / MILLI_POINTS_PER_SURFACE_POINT),
-    100 - surfaceBefore,
-  );
-  const remainderAfter = accumulated % MILLI_POINTS_PER_SURFACE_POINT;
+  const projection = resolveWeeklyStatGrowthProjection({
+    baseMilliPointsPerTraining: config.growth.baseMilliPointsPerTraining,
+    surfaceBefore,
+    remainderBefore,
+    factorBreakdown,
+  });
+  if (!projection.ok) {
+    return failure(projection.issues);
+  }
   draft.abilities[targetStat] = {
     ...draft.abilities[targetStat],
-    surfaceValue: surfaceBefore + surfaceGain,
+    surfaceValue: projection.value.surfaceAfter,
   };
-  draft.remainderMilliPoints[targetStat] = remainderAfter;
-  totals.statGainMilliPoints = gain.value;
+  draft.remainderMilliPoints[targetStat] = projection.value.remainderAfter;
+  totals.statGainMilliPoints = projection.value.appliedMilliPoints;
 
   events.push(
     buildEvent(WEEKLY_TRAINING_EVENT_TYPES.statGrowthApplied, draft.personId, absoluteWeek, {
@@ -471,8 +459,8 @@ export function applyTrainStat(
       before: surfaceBefore,
       after: draft.abilities[targetStat].surfaceValue,
       remainderBefore,
-      remainderAfter,
-      appliedMilliPoints: gain.value,
+      remainderAfter: projection.value.remainderAfter,
+      appliedMilliPoints: projection.value.appliedMilliPoints,
       factorBreakdown,
     }),
   );

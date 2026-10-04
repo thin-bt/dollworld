@@ -538,6 +538,12 @@ export {
   mathematicalFloor,
   multiplyBasisPointsFloor,
 } from "./sprint1/multiply-basis-points.js";
+export { resolveWeeklyStatGrowthProjection } from "./sprint1/weekly-stat-growth-projection.js";
+export type {
+  WeeklyStatGrowthFactorBreakdown,
+  WeeklyStatGrowthProjection,
+  WeeklyStatGrowthProjectionInput,
+} from "./sprint1/weekly-stat-growth-projection.js";
 export {
   WEEKLY_ACTION_CONTEXT_SCORE_KEYS,
   WEEKLY_PLANNER_CONTEXT_KEYS,
