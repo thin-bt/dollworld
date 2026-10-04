@@ -1,0 +1,14 @@
+diff --git a/apps/web/src/client/presentation.css b/apps/web/src/client/presentation.css
+--- a/apps/web/src/client/presentation.css
++++ b/apps/web/src/client/presentation.css
+@@ -2101,10 +2101,6 @@ table.data-table {
+     overflow: visible;
+   }
+ 
+-  .competition-participant-scroll:focus-visible {
+-    outline: none;
+-  }
+-
+   .competition-participant-table,
+   .competition-participant-table tbody {
+     display: block;
