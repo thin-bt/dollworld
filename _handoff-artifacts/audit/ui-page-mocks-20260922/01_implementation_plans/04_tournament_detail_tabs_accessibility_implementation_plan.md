@@ -23,8 +23,10 @@ A fresh audit found one false-positive gap in the new no-request assertion. The 
 Prepared correction artifact:
 
 - `_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/04_tournament_detail_tabs_request_counter_correction.patch`
-- artifact commit: `60ce73fb08aebb615a1687ffab45061ef4eb03fd`
-- artifact blob: `b5a0cc22998315f63e48708da40b601aed5c70d3`
+- original artifact create commit: `60ce73fb08aebb615a1687ffab45061ef4eb03fd`
+- apply-ready artifact revision commit: `9bf1b0c6f797f230c17fa8d885aa15660650280a`
+- current artifact blob: `d66537614d05cde5a4160862f89533fa847bbbe8`
+- validation: the invalid placeholder `index ...CORRECTED` header was removed; the current production test blob contains exactly one matching GET line and one matching POST line for this two-line hunk
 - production application status: **UNAPPLIED**
 
 The correction changes only the two monitored paths to `/api/s1_5/competition` and `/api/s1_5/competition/step`. Until that patch is applied and executed, do not treat the no-request condition as verified runtime evidence.
