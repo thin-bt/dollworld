@@ -1,6 +1,6 @@
 # Tournament participants v48 — production patch plan
 
-Status: production implementation present on `master`; structural Playwright coverage present; mobile visible-focus correction prepared but unapplied; multi-width browser verification still unobserved. Cursor remains intentionally paused.
+Status: production implementation and mobile visible-focus correction present on `master`; structural Playwright coverage present; dedicated multi-width focus/overflow Playwright patch prepared but unapplied. Cursor remains intentionally paused.
 
 ## Authority
 - Repository/branch: `thin-bt/dollworld` / `master`
@@ -143,9 +143,18 @@ Fresh CSS inspection found one accessibility regression in the implementation co
 Prepared review patch:
 `_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/03_tournament_participants_v48_mobile_focus_correction.patch`
 
-The patch removes only that mobile outline suppression, allowing the existing canonical desktop focus outline to apply at every width. It does not change layout, scrolling, DOM, testids, data mapping, or behavior. Status: unapplied to production pending the normal implementation/verification path.
+The patch removes only that mobile outline suppression, allowing the existing canonical desktop focus outline to apply at every width. It does not change layout, scrolling, DOM, testids, data mapping, or behavior. Production status: applied by commit `5e777872d496dd86fa7d47c633a1adbfa31553d0`; current CSS blob `35326a00a3b1d46f26aee84baa5551b5f80d6867` no longer contains the mobile `outline:none` override.
 
 Acceptance after application: at 760px, 520px, and ~360px, keyboard focus on `.competition-participant-scroll` visibly renders the `var(--dw-focus)` outline; no viewport overflow or card-layout regression is introduced.
+
+## Prepared multi-width browser assertion
+
+Review patch:
+`_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/03_tournament_participants_v48_mobile_focus_playwright.patch`
+
+The patch adds a dedicated Playwright case at 760px, 520px, and 360px. At every width it focuses the participant region, asserts that computed `outline-style` is not `none`, requires an outline width of at least 2px, and verifies that the document viewport has no horizontal overflow.
+
+Base test blob used for preparation: `2b5c9ef6e595e6771607ff977795dba2b15c3979`. Status: reviewable and canonical, but unapplied to the production test file. A passing execution result is still required before closing browser verification.
 
 ## Completion gate
 Completion requires:
