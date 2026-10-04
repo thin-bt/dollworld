@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dollworld — 年間大会日程 accessibility mock</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#111511;--panel:#1a201b;--panel-2:#232a24;--line:#3b473d;
+  --text:#f1eee5;--muted:#aeb8af;--accent:#d0aa68;--accent-2:#f3d9a7;
+  --active:#4d765a;--past:#758078;--danger:#b76c6c;--focus:#f4c56f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{padding:clamp(12px,2.5vw,32px)}
+button{font:inherit;color:inherit}
+.shell{max-width:1280px;margin:auto}
+.page-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.page-head h1{font-size:clamp(1.35rem,3vw,2rem);margin:0}
+.page-head p{margin:.25rem 0 0;color:var(--muted)}
+.status{padding:.35rem .65rem;border:1px solid var(--line);border-radius:999px;color:var(--accent-2);white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr);gap:16px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:clamp(12px,2vw,20px);box-shadow:0 12px 34px rgba(0,0,0,.2)}
+.section-head{display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:10px}
+.section-head h2,.detail h2{margin:0;font-size:1.15rem}
+.year-nav{display:flex;gap:8px;flex-wrap:wrap}
+.btn{min-height:44px;padding:.55rem .8rem;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.marker:focus-visible,.schedule-scroll:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.time{margin:.25rem 0 .8rem;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:.5rem 0 .75rem;padding:0;list-style:none;font-size:.82rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:2px;background:var(--past)}
+.dot.now{background:var(--accent)}.dot.playable{background:var(--active)}
+.scroll-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:.5rem 0}
+.scroll-hint{margin:0;color:var(--muted);font-size:.86rem}
+.scroll-buttons{display:flex;gap:6px}
+.scroll-buttons .btn{min-height:36px;padding:.35rem .6rem;font-size:.82rem}
+.schedule-frame{position:relative;min-width:0}
+.schedule-frame::before,.schedule-frame::after{content:"";position:absolute;z-index:8;top:1px;bottom:1px;width:28px;pointer-events:none;opacity:1;transition:opacity .15s}
+.schedule-frame::before{left:1px;background:linear-gradient(90deg,rgba(17,21,17,.9),transparent)}
+.schedule-frame::after{right:1px;background:linear-gradient(-90deg,rgba(17,21,17,.9),transparent)}
+.schedule-frame.at-start::before,.schedule-frame.at-end::after{opacity:0}
+.schedule-scroll{display:block;width:100%;max-width:100%;min-width:0;overflow:auto;contain:inline-size;border:1px solid var(--line);border-radius:10px;background:var(--panel);scrollbar-gutter:stable}
+.schedule-table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-size:.72rem}
+.schedule-table caption{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.schedule-table th,.schedule-table td{border-right:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:.2rem;text-align:center}
+.month{position:sticky;top:0;z-index:4;height:30px;background:#252b24;color:var(--accent-2);font-size:.75rem}
+.week{position:sticky;top:30px;z-index:4;height:26px;min-width:27px;background:#202620;color:var(--muted);font-weight:500}
+.week.current{background:#4b4029;color:#fff3d5;box-shadow:inset 0 -2px var(--accent)}
+.row-label{position:sticky;left:0;z-index:5;min-width:56px;background:var(--panel-2);font-weight:700}
+thead .row-label{z-index:7}
+.cell{min-width:27px;height:34px;padding:2px!important;background:rgba(255,255,255,.01)}
+.cell.current{background:rgba(208,170,104,.12)}
+.marker{display:grid;place-items:center;width:100%;min-width:24px;height:28px;padding:0;border:1px solid #526154;border-radius:5px;background:#303831;cursor:pointer;color:#e9eee8;font-size:.68rem}
+.marker.past{opacity:.58}.marker.playable{border-color:#76a982;background:#35543d}.marker.selected{box-shadow:inset 0 0 0 2px var(--accent);color:#fff}
+.position{margin:.55rem 0 0;color:var(--muted);font-size:.78rem;text-align:right}
+.detail{min-height:250px}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{min-height:44px;padding:.6rem .85rem;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{border-color:var(--accent);color:var(--text)}
+.meta{color:var(--muted);line-height:1.7}
+.callout{border-left:3px solid var(--accent);background:rgba(208,170,104,.08);padding:.8rem 1rem;border-radius:0 8px 8px 0}
+.mock-note{margin-top:16px;color:var(--muted);font-size:.8rem}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+@media(max-width:560px){
+ body{padding:10px}.page-head,.section-head,.scroll-tools{align-items:stretch;flex-direction:column}
+ .status{align-self:flex-start}.panel{padding:12px}.year-nav{display:grid;grid-template-columns:repeat(3,1fr)}
+ .year-nav .btn{padding:.45rem}.scroll-buttons{display:grid;grid-template-columns:1fr 1fr}
+ .scroll-buttons .btn{min-height:44px}.row-label{min-width:48px}.detail{min-height:auto}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="page-head">
+    <div><h1>大会</h1><p>年間日程と大会詳細</p></div>
+    <span class="status">進行状態: 未開始</span>
+  </header>
+  <div class="layout">
+    <section class="panel" aria-labelledby="schedule-title">
+      <div class="section-head">
+        <div><h2 id="schedule-title">2027年 大会日程</h2><p class="time">現在: <strong>4月 第2週</strong></p></div>
+        <nav class="year-nav" aria-label="表示年">
+          <button class="btn" type="button">前年</button>
+          <button class="btn" type="button" disabled>今年</button>
+          <button class="btn" type="button">翌年</button>
+        </nav>
+      </div>
+      <ul class="legend" aria-label="日程の凡例">
+        <li><span><i class="dot" aria-hidden="true"></i>終了</span></li>
+        <li><span><i class="dot now" aria-hidden="true"></i>現在週</span></li>
+        <li><span><i class="dot playable" aria-hidden="true"></i>進行可能</span></li>
+      </ul>
+      <div class="scroll-tools">
+        <p class="scroll-hint" id="schedule-scroll-help">横にスクロールして1〜12月の日程を確認できます。キーボードでは領域にフォーカスして矢印キーを使用します。</p>
+        <div class="scroll-buttons" aria-label="日程の横移動">
+          <button class="btn" type="button" id="scroll-prev" aria-label="4週間戻る">← 4週</button>
+          <button class="btn" type="button" id="scroll-next" aria-label="4週間進む">4週 →</button>
+        </div>
+      </div>
+      <div class="schedule-frame at-start" id="schedule-frame">
+        <div class="schedule-scroll" id="schedule-scroll" tabindex="0" role="region" aria-label="2027年 大会日程表" aria-describedby="schedule-scroll-help">
+          <table class="schedule-table" id="schedule-table">
+            <caption>2027年の大会日程。行は大会区分、列は月ごとの第1週から第4週です。</caption>
+          </table>
+        </div>
+      </div>
+      <p class="position" id="scroll-position" aria-live="polite">表示範囲: 1月〜4月付近</p>
+    </section>
+    <aside class="panel detail" aria-label="大会詳細">
+      <div class="tabs" role="tablist" aria-label="大会詳細タブ">
+        <button class="tab" type="button" role="tab" aria-selected="true">大会詳細</button>
+        <button class="tab" type="button" role="tab" aria-selected="false">参加者</button>
+      </div>
+      <h2 id="detail-name">新春総合大会 F級</h2>
+      <p class="meta" id="detail-meta">1月 第2週 · F · 総合 · 終了</p>
+      <p class="callout">日程表の大会を選ぶと、ここに大会状況・試合・参加者情報が表示されます。</p>
+      <button class="btn" type="button">日程表に戻る</button>
+    </aside>
+  </div>
+  <p class="mock-note">Review mock: single semantic TABLE DOM、focus可能な単一scroll owner、sticky month/week/row headers、1280/760/520/360px対応。</p>
+</main>
+<script>
+const months=Array.from({length:12},(_,i)=>i+1);
+const rows=["F","E","D","C","B","A/S","格闘","剣","魔","昇格"];
+const events=[
+ {row:"F",week:2,label:"総",name:"新春総合大会 F級",state:"past"},
+ {row:"E",week:6,label:"総",name:"早春総合大会 E級",state:"past"},
+ {row:"D",week:10,label:"総",name:"春季総合大会 D級",state:"past"},
+ {row:"格闘",week:14,label:"格",name:"春季格闘限定 C級",state:"past"},
+ {row:"C",week:16,label:"総",name:"新緑総合大会 C級",state:"selected"},
+ {row:"B",week:17,label:"総",name:"初夏総合大会 B級",state:"playable"},
+ {row:"剣",week:22,label:"剣",name:"夏季剣技限定 C級",state:"future"},
+ {row:"A/S",week:27,label:"総",name:"盛夏総合大会 A/S",state:"future"},
+ {row:"魔",week:31,label:"魔",name:"秋季魔法限定 C級",state:"future"},
+ {row:"昇格",week:36,label:"昇",name:"秋季昇格大会",state:"future"},
+ {row:"B",week:41,label:"総",name:"晩秋総合大会 B級",state:"future"},
+ {row:"A/S",week:47,label:"総",name:"年末総合大会 A/S",state:"future"}
+];
+const currentWeek=14;
+const table=document.getElementById("schedule-table");
+let html="<thead><tr><th class='row-label month' scope='col'>帯</th>";
+for(const month of months) html+="<th class='month' scope='colgroup' colspan='4'>"+month+"月</th>";
+html+="</tr><tr><th class='row-label week' scope='col'>週</th>";
+for(let w=1;w<=48;w++) html+="<th class='week "+(w===currentWeek?"current":"")+"' scope='col' "+(w===currentWeek?"aria-current='date'":"")+">"+(((w-1)%4)+1)+"</th>";
+html+="</tr></thead><tbody>";
+for(const row of rows){
+ html+="<tr><th class='row-label' scope='row'>"+row+"</th>";
+ for(let w=1;w<=48;w++){
+  const event=events.find(item=>item.row===row&&item.week===w);
+  html+="<td class='cell "+(w===currentWeek?"current":"")+"'>";
+  if(event){
+   const classes=["marker",event.state].join(" ");
+   const month=Math.floor((w-1)/4)+1,week=((w-1)%4)+1;
+   html+="<button type='button' class='"+classes+"' data-name='"+event.name+"' data-meta='"+month+"月 第"+week+"週 · "+row+"' aria-label='"+event.name+" "+month+"月第"+week+"週'>"+event.label+"</button>";
+  }
+  html+="</td>";
+ }
+ html+="</tr>";
+}
+html+="</tbody>";table.innerHTML=html;
+const scroller=document.getElementById("schedule-scroll");
+const frame=document.getElementById("schedule-frame");
+const position=document.getElementById("scroll-position");
+function updateEdges(){
+ const max=scroller.scrollWidth-scroller.clientWidth;
+ frame.classList.toggle("at-start",scroller.scrollLeft<=2);
+ frame.classList.toggle("at-end",scroller.scrollLeft>=max-2);
+ const ratio=max<=0?0:scroller.scrollLeft/max;
+ const start=Math.min(9,Math.max(1,Math.round(ratio*9)+1));
+ position.textContent="表示範囲: "+start+"月〜"+Math.min(12,start+3)+"月付近";
+}
+document.getElementById("scroll-prev").addEventListener("click",()=>scroller.scrollBy({left:-108,behavior:"smooth"}));
+document.getElementById("scroll-next").addEventListener("click",()=>scroller.scrollBy({left:108,behavior:"smooth"}));
+scroller.addEventListener("scroll",updateEdges,{passive:true});
+new ResizeObserver(updateEdges).observe(scroller);
+table.addEventListener("click",event=>{
+ const button=event.target.closest(".marker");if(!button)return;
+ document.querySelectorAll(".marker.selected").forEach(item=>item.classList.remove("selected"));
+ button.classList.add("selected");
+ document.getElementById("detail-name").textContent=button.dataset.name;
+ document.getElementById("detail-meta").textContent=button.dataset.meta+" · 日程";
+});
+updateEdges();
+</script>
+</body>
+</html>
