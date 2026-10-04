@@ -55,12 +55,17 @@ function isolatedSessionFromState(state: CompetitionPersistedState): Sprint1RunS
   return raw as unknown as Sprint1RunSession;
 }
 
-function requestDisplayNameResolver(state: CompetitionPersistedState): (personId: string) => string {
+function requestDisplayNameResolver(
+  state: CompetitionPersistedState,
+): (personId: string) => string {
   const session = isolatedSessionFromState(state);
   if (session === null) return () => "不明";
-  const names = new Map(session.runtimeState.worldState.persons.map(
-    (person) => [person.personId, person.displayName.length > 0 ? person.displayName : "不明"] as const,
-  ));
+  const names = new Map<string, string>(
+    session.runtimeState.worldState.persons.map(
+      (person) =>
+        [person.personId, person.displayName.length > 0 ? person.displayName : "不明"] as const,
+    ),
+  );
   return (personId) => names.get(personId) ?? "不明";
 }
 
