@@ -1,6 +1,6 @@
 # Tournament participants v48 — production patch plan
 
-Status: production implementation present on `master`; structural Playwright coverage present; multi-width browser verification still unobserved. Cursor remains intentionally paused.
+Status: production implementation present on `master`; structural Playwright coverage present; mobile visible-focus correction prepared but unapplied; multi-width browser verification still unobserved. Cursor remains intentionally paused.
 
 ## Authority
 - Repository/branch: `thin-bt/dollworld` / `master`
@@ -60,7 +60,7 @@ All new rules must be participant-scoped. Do not change global `.data-table` beh
 
 ### 760px and narrower
 - Use the same TABLE DOM; do not render a second mobile list.
-- The wrapper changes to `overflow:visible` and does not retain a redundant focus ring when no longer scrollable.
+- The wrapper changes to `overflow:visible`. Because it remains `tabIndex={0}`, it must retain the visible `:focus-visible` outline at mobile widths; never suppress focus indication on a still-focusable element.
 - Visually hide the table header while keeping it in the accessibility tree; do not use `display:none`.
 - Set table and tbody to block layout and each tbody row to a three-column grid.
 - Override participant cells locally to `white-space:normal; min-width:0; overflow-wrap:anywhere;`.
@@ -135,6 +135,17 @@ Confirmed in CSS: one desktop scroll owner, visible desktop focus outline, singl
 Confirmed in Playwright source: TABLE identity, wrapper tabindex/role/description, caption, per-row `th[scope="row"]`, participant count, and detail-link shape are asserted.
 
 Not yet evidenced by GitHub: no combined status checks and no pull-request workflow runs were returned for the implementation commit. No successful execution result for the modified Playwright spec and no 1280/760/520/360px screenshot or browser-measurement evidence was observed. Therefore implementation is present, but the completion gate below remains open for runtime/browser verification.
+
+## Post-implementation focus correction
+
+Fresh CSS inspection found one accessibility regression in the implementation commit: the <=760px rule sets `.competition-participant-scroll:focus-visible { outline: none; }` while JSX keeps `tabIndex={0}` at every width. This creates a keyboard-focusable region with no visible focus indication on mobile.
+
+Prepared review patch:
+`_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/03_tournament_participants_v48_mobile_focus_correction.patch`
+
+The patch removes only that mobile outline suppression, allowing the existing canonical desktop focus outline to apply at every width. It does not change layout, scrolling, DOM, testids, data mapping, or behavior. Status: unapplied to production pending the normal implementation/verification path.
+
+Acceptance after application: at 760px, 520px, and ~360px, keyboard focus on `.competition-participant-scroll` visibly renders the `var(--dw-focus)` outline; no viewport overflow or card-layout regression is introduced.
 
 ## Completion gate
 Completion requires:
