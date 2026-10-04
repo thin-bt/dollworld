@@ -117,6 +117,56 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     });
     expect(simulationStatus).toBe(200);
   });
+
+  test("keeps participant focus visible without viewport overflow at mobile widths", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 760, height: 1000 });
+    await bootstrapAcceptedCompetitionSession(page, context);
+    await page.goto("/competition");
+    await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
+      timeout: 60_000,
+    });
+
+    const step = page.getByTestId("competition-step-cta");
+    await expect(step).toBeEnabled({ timeout: 60_000 });
+    await step.click();
+    await expect(page.getByTestId("competition-round-robin-matrix")).toBeVisible({
+      timeout: 60_000,
+    });
+    await page.getByTestId("competition-detail-tab-participants").click();
+
+    const participantScroll = page
+      .getByTestId("competition-participants")
+      .locator(".competition-participant-scroll");
+    await expect(participantScroll).toBeVisible();
+
+    for (const width of [760, 520, 360]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await participantScroll.focus();
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
+      await expect(participantScroll).toBeFocused();
+
+      const focusStyle = await participantScroll.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+        };
+      });
+      expect(focusStyle.outlineStyle, `visible focus at ${width}px`).not.toBe("none");
+      expect(focusStyle.outlineWidth, `focus width at ${width}px`).toBeGreaterThanOrEqual(2);
+
+      const viewportHasHorizontalOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      );
+      expect(viewportHasHorizontalOverflow, `viewport overflow at ${width}px`).toBeFalsy();
+    }
+  });
+
   test("year navigation reloads only the competition projection", async ({ page, context }) => {
     test.setTimeout(120_000);
     await bootstrapAcceptedCompetitionSession(page, context);
