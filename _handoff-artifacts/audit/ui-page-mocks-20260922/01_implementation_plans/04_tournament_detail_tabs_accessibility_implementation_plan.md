@@ -1,12 +1,33 @@
 # Tournament detail tabs accessibility implementation plan
 
-Status: **PROPOSED / PRODUCTION_UNAPPLIED**
+Status: **IMPLEMENTED_AND_TEST_CODE_PRESENT / REQUEST_COUNTER_CORRECTION_UNAPPLIED / EXECUTION_EVIDENCE_PENDING**
 
 Repository: `thin-bt/dollworld`  
 Target branch: `master`  
-Fresh-read base commit: `d0e0ca6bc9ad9e7f458e6d9c9caf67f241df2f5c`  
-Production JSX blob: `09e2737500cc074a47ded5d6a47070cb6e54afff`  
-Current Playwright blob: `f69c86dbb2c818fca422161c91b4940543774637`
+Original planning base commit: `d0e0ca6bc9ad9e7f458e6d9c9caf67f241df2f5c`  
+Latest production reconciliation base: `c1a2def310fe142ce7904f9044631c46c576bfbe`  
+Production JSX blob: `811f149dc7f9de1dbdf076297f53e00a3f2b7b99`  
+Current Playwright blob: `ecdfddf39fa660de9fdf09ae174c3b22433f1188`
+
+## Implementation reconciliation (2026-10-04)
+
+The planned JSX and primary Playwright coverage are now present on `master`:
+
+- production implementation commit: `da62fba01dc55425d09b98bcf61dab4b9ca8a04f`;
+- deterministic disabled-tab test commit: `c7c5f893b358b88e281f720a3a401853f7c87c32`;
+- current JSX includes stable tab/panel IDs, `aria-controls`, `role="tabpanel"`, roving tab stops, automatic Arrow/Home/End activation, the availability-reset effect, and stable hidden panels;
+- current tests cover semantics, enabled keyboard navigation, focus transfer, wrapping, participant-region Tab movement, and unavailable-participant behavior.
+
+A fresh audit found one false-positive gap in the new no-request assertion. The test listens for `/api/s2/competition` and `/api/s2/competition/step`, while production builds both URLs from `API_PREFIX = "/api/s1_5"` (shared contract blob `9253a85ea9d7c565cb0db01db3f54054706bae1e`; fetch implementation blob `e64866454182ed72a6722f95fc7ba8979b19d357`). The counters therefore remain zero even if real competition requests occur.
+
+Prepared correction artifact:
+
+- `_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/04_tournament_detail_tabs_request_counter_correction.patch`
+- artifact commit: `60ce73fb08aebb615a1687ffab45061ef4eb03fd`
+- artifact blob: `b5a0cc22998315f63e48708da40b601aed5c70d3`
+- production application status: **UNAPPLIED**
+
+The correction changes only the two monitored paths to `/api/s1_5/competition` and `/api/s1_5/competition/step`. Until that patch is applied and executed, do not treat the no-request condition as verified runtime evidence.
 
 ## Purpose
 
@@ -182,4 +203,4 @@ Production completion requires all of the following:
 - 1280/760/520/360 browser validation is recorded;
 - no competition API request is caused by tab-only navigation.
 
-This document alone is preparation, not implementation or runtime evidence. Until a production commit and executed checks are observed, report the status as **PLAN_PUBLISHED / PRODUCTION_UNAPPLIED / EXECUTION_EVIDENCE_PENDING**.
+The JSX implementation and test code are present, but the request-counter correction is not yet applied and no executed browser evidence has been observed. Report the status as **IMPLEMENTED_AND_TEST_CODE_PRESENT / REQUEST_COUNTER_CORRECTION_UNAPPLIED / EXECUTION_EVIDENCE_PENDING**.
