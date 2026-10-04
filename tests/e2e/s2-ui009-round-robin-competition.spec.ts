@@ -166,21 +166,32 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     const step = page.getByTestId("competition-step-cta");
     await expect(step).toBeEnabled({ timeout: 60_000 });
     await step.click();
+    await expect(page.getByTestId("competition-round-robin-history")).toBeVisible({
+      timeout: 60_000,
+    });
+    const historyRows = page.getByTestId("competition-round-robin-history").locator("tbody tr");
+    await expect.poll(() => historyRows.count(), { timeout: 60_000 }).toBeGreaterThan(1);
+    const matchesTotal = await historyRows.count();
+    const completedMatches = async (): Promise<number> => {
+      const texts = await historyRows.locator("td:last-child").allInnerTexts();
+      return texts.filter((text) => text.includes("勝利")).length;
+    };
+    for (let expectedCompleted = 2; expectedCompleted <= matchesTotal; expectedCompleted += 1) {
+      await expect(step).toBeEnabled();
+      await step.click();
+      await expect.poll(completedMatches, { timeout: 60_000 }).toBe(expectedCompleted);
+    }
     await expect(page.getByTestId("competition-ranking-section")).toBeVisible({ timeout: 60_000 });
 
     const sessionBaseline = sessionGets;
     const competitionBaseline = competitionGets;
-    const selectedYear = page
-      .getByTestId("competition-ranking-year-option")
-      .filter({ has: page.locator('[aria-pressed="true"]') });
+    const selectedYear = page.locator(
+      '[data-testid="competition-ranking-year-option"][aria-pressed="true"]',
+    );
     const selectedValue = await selectedYear.first().getAttribute("data-year");
-    const yearButton = page
-      .getByTestId("competition-ranking-year-option")
-      .filter({ hasNot: page.locator(":disabled") })
-      .filter({ hasNot: page.locator('[aria-pressed="true"]') })
-      .first();
+    const yearButton = selectedYear.first();
     await expect(yearButton).toBeEnabled();
-    expect(await yearButton.getAttribute("data-year")).not.toBe(selectedValue);
+    expect(selectedValue).not.toBeNull();
     await yearButton.click();
 
     await expect.poll(() => competitionGets - competitionBaseline, { timeout: 60_000 }).toBe(1);

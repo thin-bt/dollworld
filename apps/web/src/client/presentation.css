@@ -2100,10 +2100,6 @@ table.data-table {
     overflow: visible;
   }
 
-  .competition-participant-scroll:focus-visible {
-    outline: none;
-  }
-
   .competition-participant-table,
   .competition-participant-table tbody {
     display: block;
