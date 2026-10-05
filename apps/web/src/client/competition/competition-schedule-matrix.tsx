@@ -109,8 +109,20 @@ export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps)
       <p className="competition-schedule-time" data-testid="competition-world-time">
         現在: <strong>{overview.worldTimeLabel}</strong>
       </p>
-      <div className="competition-schedule-scroll" data-testid="competition-annual-schedule">
-        <table className="competition-schedule-table" aria-label={`${overview.worldYear}年 大会日程表`}>
+      <p id="competition-schedule-scroll-help" className="competition-schedule-scroll-help">
+        横にスクロールして1〜12月の日程を確認できます。
+        キーボードでは日程表にフォーカスして左右の矢印キーを使用します。
+      </p>
+      <div
+        className="competition-schedule-scroll"
+        data-testid="competition-annual-schedule"
+        tabIndex={0}
+        role="region"
+        aria-label={`${overview.worldYear}年 大会日程の横スクロール領域`}
+        aria-describedby="competition-schedule-scroll-help"
+      >
+        <table className="competition-schedule-table">
+          <caption className="dw-visually-hidden">{overview.worldYear}年 大会日程表</caption>
           <thead>
             <tr>
               <th scope="col" className="competition-schedule-row-label">
@@ -129,11 +141,24 @@ export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps)
             </tr>
             <tr>
               <th scope="col" />
-              {Array.from({ length: WEEKS_PER_YEAR }, (_, index) => (
-                <th key={index} scope="col" className="competition-schedule-week">
-                  {(index % 4) + 1}
-                </th>
-              ))}
+              {Array.from({ length: WEEKS_PER_YEAR }, (_, index) => {
+                const weekNumber = index + 1;
+                const month = Math.floor(index / 4) + 1;
+                const weekOfMonth = (index % 4) + 1;
+                const isCurrentWeek =
+                  overview.isViewingCurrentWorldYear && weekNumber === overview.currentWeekColumn;
+                return (
+                  <th
+                    key={index}
+                    scope="col"
+                    className="competition-schedule-week"
+                    aria-label={`${month}月 第${weekOfMonth}週${isCurrentWeek ? " 現在週" : ""}`}
+                    aria-current={isCurrentWeek ? "date" : undefined}
+                  >
+                    {weekOfMonth}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

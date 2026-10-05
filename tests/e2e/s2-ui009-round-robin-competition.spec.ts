@@ -351,6 +351,118 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     expect(outerScrollState.pageScrollX).toBe(0);
   });
 
+  test("keeps the annual schedule semantic and keyboard-scrollable without API traffic", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await bootstrapAcceptedCompetitionSession(page, context);
+
+    let sessionGets = 0;
+    let competitionGets = 0;
+    let competitionSteps = 0;
+    page.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (request.method() === "GET" && pathname === "/api/s1_5/session") sessionGets += 1;
+      if (request.method() === "GET" && pathname === "/api/s1_5/competition") {
+        competitionGets += 1;
+      }
+      if (request.method() === "POST" && pathname === "/api/s1_5/competition/step") {
+        competitionSteps += 1;
+      }
+    });
+
+    await page.goto("/competition");
+    await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
+      timeout: 60_000,
+    });
+
+    const schedule = page.getByTestId("competition-annual-schedule");
+    const help = page.locator("#competition-schedule-scroll-help");
+    const table = schedule.locator("table");
+    const weekHeaders = table.locator("thead tr:nth-child(2) th.competition-schedule-week");
+    const currentWeekHeader = table.locator(
+      'thead tr:nth-child(2) th.competition-schedule-week[aria-current="date"]',
+    );
+    await expect(schedule).toHaveAttribute("tabindex", "0");
+    await expect(schedule).toHaveAttribute("role", "region");
+    await expect(schedule).toHaveAttribute("aria-label", /^\d+年 大会日程の横スクロール領域$/);
+    await expect(schedule).toHaveAttribute("aria-describedby", "competition-schedule-scroll-help");
+    await expect(help).toBeVisible();
+    await expect(help).toContainText("横にスクロール");
+    await expect(help).toContainText("左右の矢印キー");
+    await expect(table).toHaveCount(1);
+    await expect(table.locator("caption")).toHaveText(/^\d+年 大会日程表$/);
+    await expect(weekHeaders).toHaveCount(48);
+    await expect(currentWeekHeader).toHaveCount(1);
+    await expect(currentWeekHeader).toHaveAttribute("aria-label", /現在週$/);
+
+    const requestBaseline = { sessionGets, competitionGets, competitionSteps };
+    const scrollMetrics = await schedule.evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(scrollMetrics.scrollWidth).toBeGreaterThan(scrollMetrics.clientWidth);
+    await schedule.focus();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(schedule).toBeFocused();
+    await expect(schedule).toHaveCSS("outline-style", "solid");
+    await schedule.evaluate((element) => {
+      element.scrollLeft = 0;
+    });
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(() => schedule.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+
+    const marker = schedule.getByTestId("competition-schedule-cell").first();
+    await marker.click();
+    await expect(marker).toHaveAttribute("aria-pressed", "true");
+    expect({ sessionGets, competitionGets, competitionSteps }).toEqual(requestBaseline);
+
+    for (const width of [760, 520, 360]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await schedule.focus();
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
+      await expect(schedule).toBeFocused();
+      const focusStyle = await schedule.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          outlineStyle: style.outlineStyle,
+          outlineWidth: Number.parseFloat(style.outlineWidth),
+        };
+      });
+      expect(focusStyle.outlineStyle, `visible schedule focus at ${width}px`).not.toBe("none");
+      expect(focusStyle.outlineWidth, `schedule focus width at ${width}px`).toBeGreaterThanOrEqual(
+        2,
+      );
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        ),
+        `viewport overflow at ${width}px`,
+      ).toBeFalsy();
+    }
+
+    const outerScrollState = await page.evaluate(() => ({
+      pageScrollX: window.scrollX,
+      viewportOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    }));
+    expect(outerScrollState.pageScrollX).toBe(0);
+    expect(outerScrollState.viewportOverflow).toBeFalsy();
+    expect({ sessionGets, competitionGets, competitionSteps }).toEqual(requestBaseline);
+
+    const yearButton = page
+      .getByTestId("competition-schedule-year-nav")
+      .locator("button:not(:disabled)")
+      .last();
+    await expect(yearButton).toBeEnabled();
+    await yearButton.click();
+    await expect(currentWeekHeader).toHaveCount(0);
+  });
+
   test("year navigation reloads only the competition projection", async ({ page, context }) => {
     test.setTimeout(120_000);
     await bootstrapAcceptedCompetitionSession(page, context);

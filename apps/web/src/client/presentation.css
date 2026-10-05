@@ -1739,6 +1739,13 @@ a.dw-person-name-link:focus-visible {
   font-size: 0.95rem;
 }
 
+.competition-schedule-scroll-help {
+  margin: 0 0 0.5rem;
+  color: var(--dw-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
 .competition-schedule-scroll {
   display: block;
   width: 100%;
@@ -1750,6 +1757,11 @@ a.dw-person-name-link:focus-visible {
   border-radius: 10px;
   background: var(--dw-panel);
   -webkit-overflow-scrolling: touch;
+}
+
+.competition-schedule-scroll:focus-visible {
+  outline: 2px solid var(--dw-accent);
+  outline-offset: 3px;
 }
 
 .competition-schedule-table {
