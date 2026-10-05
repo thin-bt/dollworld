@@ -5,8 +5,8 @@ assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 scope: Sprint3 PTG-024 structural and cross-record semantic validator conformance
 source-lineage: thin-bt/dollworld master
-base-authority: PTG-023 blob 00a44f188e11d0fbcd5a4202b9111cdb29ff50d6; PTG-024 blob 014c20f07fa0b501febaa0795a8d6e4414dd5037
-depends-on: PTG-019-acceptance-evidence-record-schema.md; PTG-022-verdict-closure-crosswalk.md; PTG-023-attempt-to-lane-verdict-aggregation.md; PTG-024-acceptance-evidence-bundle-schema.json
+base-authority: PTG-023 blob 7527581c42d8b0e59b02e9320bc41fea0bf8b847; PTG-024 blob 02113e8de2fa5399329bf2910d679dc695435daa
+depends-on: PTG-019-acceptance-evidence-record-schema.md; PTG-022-verdict-closure-crosswalk.md; PTG-023-attempt-to-lane-verdict-aggregation.md; PTG-024-acceptance-evidence-bundle-schema.json; PTG-029-neutral-factor-assertion-migration-contract.md
 
 ## Purpose
 
@@ -36,7 +36,8 @@ Additional diagnostics may follow, but the first failure code must be determinis
 Use these non-production illustrative values only for validator fixtures:
 
 - product SHA A = forty `a` characters; product SHA B = forty `b` characters;
-- PTG weekly arithmetic: EXPECTED_SINGLE=125, PTG_DOUBLE=150, FORMAL_LEAK=140, DISCIPLE_DOUBLE=135, observed=125;
+- PTG count-zero weekly arithmetic: EXPECTED_SINGLE=125, PTG_DOUBLE=150, FORMAL_LEAK=140, optional diagnostic DISCIPLE_DOUBLE=125, observed=125;
+- formal non-neutral arithmetic: resolved disciple factor=9200, EXPECTED_SINGLE=115, DISCIPLE_DOUBLE=106, observed=115;
 - exactly-once counts: action=1, reload=1;
 - PTG provenance: relation=`parent_temporary_guidance`, formal=0, temporary=1, discipleCount=0, selectedTeacherId=biologicalParentId;
 - formal provenance: relation=`parent_master_disciple`, formal=1, temporary=0;
@@ -51,7 +52,7 @@ These numbers do not define product arithmetic. A real acceptance record must us
 | V01 | No attempts; one correctly formed PTG-015 summary with all three assertions open and no `finalVerdict` | VALID; laneState remains OPEN |
 | V02 | One ADAPTER-S1 attempt with `assertionIds=[]`, synthetic=true, non-PASS attempt verdict, listed only in `syntheticNonCandidateAttemptIds` | VALID; closes no ordinary assertion |
 | V03 | One PTG-015-S1 PASS attempt with exact two assertion IDs, formal provenance, unchanged explicit-teach cardinalities | VALID attempt; PTG-015 lane remains OPEN because A15-WEEKLY-01 is open |
-| V04 | PTG-014A-S1/S2/S3 PASS attempts on SHA A with the exact 4/2/2 assertion sets and all eight closure mappings | VALID; PTG-014A FINAL/PASS |
+| V04 | PTG-014A-S1/S2/S3 PASS attempts on SHA A with the exact 4/2/1 assertion sets and all seven closure mappings | VALID; PTG-014A FINAL/PASS |
 | V05 | A FIXTURE_INSUFFICIENT S1 attempt followed by a distinguishable S1 PASS on SHA A; both included in candidate inventory, closure points to PASS | VALID; earlier attempt remains immutable and lane may close if all other assertions close |
 | V06 | Complete PASS summaries for SHA A and later SHA B stored separately; no closure crosses SHA | VALID; two independent historical product summaries |
 
@@ -65,12 +66,12 @@ Apply each mutation to the nearest valid vector.
 | S02 | ADAPTER-S1 carries any ordinary assertion ID | STRUCTURAL_REJECT `STR_SYNTHETIC_ASSERTION_SET` |
 | S03 | ADAPTER-S1 attempt verdict is PASS | STRUCTURAL_REJECT `STR_SYNTHETIC_PASS` |
 | S04 | Weekly PASS omits `nativeArithmetic`, `applicationAndPersistence`, or `targetStat` | STRUCTURAL_REJECT `STR_WEEKLY_PASS_EVIDENCE` |
-| S05 | PTG-014A-S1/S2/S3 native block omits its required PTG_DOUBLE/FORMAL_LEAK/DISCIPLE_DOUBLE field | STRUCTURAL_REJECT `STR_COUNTERFACTUAL_FIELD` |
+| S05 | PTG-014A-S1/S2 or PTG-016-S1 native block omits its required PTG_DOUBLE/FORMAL_LEAK/DISCIPLE_DOUBLE field | STRUCTURAL_REJECT `STR_COUNTERFACTUAL_FIELD` |
 | S06 | laneState=OPEN includes `finalVerdict` | STRUCTURAL_REJECT `STR_OPEN_HAS_VERDICT` |
 | S07 | FINAL/PASS has a non-empty `openAssertionIds` or `mismatchAttemptIds` | STRUCTURAL_REJECT `STR_PASS_HAS_OPEN_OR_MISMATCH` |
 | S08 | PTG-015 closure map contains an A14 or A16 key | STRUCTURAL_REJECT `STR_CROSS_LANE_CLOSURE_KEY` |
 | S09 | PTG-015-S1 PASS omits `explicitTeachEvidence` | STRUCTURAL_REJECT `STR_EXPLICIT_TEACH_EVIDENCE` |
-| S10 | PTG-016-S1 PASS omits comparison evidence or any required comparison flag is false | STRUCTURAL_REJECT `STR_COMPARISON_ISOLATION` |
+| S10 | PTG-016-S1 PASS omits comparison evidence, uses factor 10000, omits A16-ARITH-01, or any required comparison flag is false | STRUCTURAL_REJECT `STR_COMPARISON_ISOLATION` |
 | S11 | Input bytes are invalid UTF-8, truncated JSON, or have trailing non-whitespace bytes after the root value | STRUCTURAL_REJECT `STR_JSON_SYNTAX` |
 | S12 | Any JSON object contains the same member name more than once, even when both values are identical | STRUCTURAL_REJECT `STR_DUPLICATE_JSON_KEY` |
 | S13 | Any other PTG-024 schema violation not matched by S01-S10, such as a missing common identity field or forbidden extra property | STRUCTURAL_REJECT `STR_SCHEMA_VIOLATION` |
@@ -89,11 +90,11 @@ These vectors must first pass PTG-024 structure.
 | M06 | candidateAttemptIds omits a preserved same-lane, same-product ordinary attempt because its verdict is unfavorable | SEMANTIC_REJECT `SEM_CANDIDATE_INVENTORY_INCOMPLETE` |
 | M07 | same-product valid mismatch attempt exists but summary claims PASS or omits it from mismatchAttemptIds | SEMANTIC_REJECT `SEM_MISMATCH_GUARD_BYPASS` |
 | M08 | weekly PASS has observedAppliedMilliPoints != EXPECTED_SINGLE | SEMANTIC_REJECT `SEM_OBSERVED_EXPECTED_MISMATCH` |
-| M09 | weekly PASS has EXPECTED_SINGLE equal to a relevant defect counterfactual after production flooring | SEMANTIC_REJECT `SEM_COUNTERFACTUAL_COLLISION` |
+| M09 | weekly PASS has EXPECTED_SINGLE equal to a scenario-relevant defect counterfactual after production flooring; count-zero S3 diagnostic equality is not relevant | SEMANTIC_REJECT `SEM_COUNTERFACTUAL_COLLISION` |
 | M10 | ordinary parent-guidance attempt has selectedTeacherId != biologicalParentId | SEMANTIC_REJECT `SEM_PARENT_TEACHER_MISMATCH` |
 | M11 | native application child/week/target differs from attempt identity, or reason is not the captured production weekly action | SEMANTIC_REJECT `SEM_APPLICATION_IDENTITY_MISMATCH` |
 | M12 | application count or reload count is not exactly one for a weekly PASS | SEMANTIC_REJECT `SEM_NOT_EXACTLY_ONCE` |
-| M13 | PTG reload mentorship, relation, or discipleCount differs from the required post-action invariant | SEMANTIC_REJECT `SEM_RELOAD_INVARIANT_MISMATCH` |
+| M13 | PTG reload mentorship, relation, discipleCount, or resolved count-zero factor differs from the required post-action invariant | SEMANTIC_REJECT `SEM_RELOAD_INVARIANT_MISMATCH` |
 | M14 | explicit teach changes mentorship cardinality or increments discipleCount | SEMANTIC_REJECT `SEM_EXPLICIT_TEACH_DUPLICATION` |
 | M15 | PTG-016 comparison changes teacher factor or guarded non-disciple input, despite boolean claims in the record | SEMANTIC_REJECT `SEM_COMPARISON_NOT_ISOLATED` |
 | M16 | PASS has non-empty failedAssertionIds, or a non-PASS record names an assertion outside its exact scenario set | SEMANTIC_REJECT `SEM_FAILED_ASSERTION_BINDING` |
@@ -101,6 +102,19 @@ These vectors must first pass PTG-024 structure.
 | M18 | summary is FINAL/PASS but one required assertion lacks a closure mapping | SEMANTIC_REJECT `SEM_REQUIRED_ASSERTION_OPEN` |
 | M19 | all remaining assertions are terminally blocked, but final non-PASS verdict violates PTG-018 precedence | SEMANTIC_REJECT `SEM_VERDICT_PRECEDENCE` |
 | M20 | historical evidence package contains two different records for the same attemptId, indicating overwrite/relabel behavior | SEMANTIC_REJECT `SEM_IMMUTABILITY_VIOLATION` |
+
+## Neutral-factor migration vectors
+
+These six vectors supplement, rather than renumber, V01-V06, S01-S13, and M01-M20.
+
+| id | baseline/mutation | expected |
+|---|---|---|
+| ND-01 | Recompute several legal PTG-014A-S3 count-zero bases and remainders with resolved factor 10000; diagnostic DISCIPLE_DOUBLE, when present, equals EXPECTED_SINGLE in every case | VALID; A14-DISC-01 remains a resolution/persistence assertion |
+| ND-02 | A count-zero record states DISCIPLE_DOUBLE != EXPECTED_SINGLE or either recorded value differs from exact recomputation | SEMANTIC_REJECT `SEM_COUNT_ZERO_ARITHMETIC_MISMATCH` |
+| ND-03 | A migrated attempt or lane summary includes retired A14-ARITH-03 | STRUCTURAL_REJECT `STR_RETIRED_ASSERTION_ID` |
+| ND-04 | A source-proven PTG-016-S1 fixture uses persisted count 4/factor 9200, carries A16-ARITH-01, and exact recomputation gives EXPECTED_SINGLE != DISCIPLE_DOUBLE | VALID; A16-ARITH-01 may close |
+| ND-05 | A nominally non-neutral PTG-016 fixture obtains its count, factor, mentorship, relation, or sidecar state by direct edit rather than an ordinary persisted transition | SEMANTIC_REJECT `SEM_DIRECT_STATE_EDIT` |
+| ND-06 | Exhaustive ordinary fixture construction yields no legal non-neutral factor while preserving comparison invariants, and the lane records the terminal blocker without closure | VALID; final verdict is NOT_REACHABLE, never PASS |
 
 ## Deterministic failure priority
 
@@ -135,4 +149,4 @@ The vector passes only when both class and first failure code match.
 
 ## Handoff boundary
 
-When implementation resumes, encode V01-V06, S01-S13, and M01-M20 as executable validator fixtures before using PTG-024 evidence for acceptance. Schema conformance alone is insufficient: all semantic vectors must also pass. No vector in this document is product acceptance evidence, and no illustrative value may be reported as a runtime result.
+When implementation resumes, encode V01-V06, S01-S13, M01-M20, and ND-01-ND-06 as 45 executable validator fixtures before using PTG-024 evidence for acceptance. All 45 must pass twice with byte-identical normalized reports. Schema conformance alone is insufficient: all semantic and neutral-factor migration vectors must also pass. No vector in this document is product acceptance evidence, and no illustrative value may be reported as a runtime result.
