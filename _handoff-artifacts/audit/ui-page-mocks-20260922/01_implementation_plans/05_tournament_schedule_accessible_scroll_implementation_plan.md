@@ -1,6 +1,6 @@
 # Tournament annual schedule accessible-scroll implementation plan
 
-Status: **PLAN_AND_CORE_PATCH_PUBLISHED / PRODUCTION_UNAPPLIED / TEST_PATCH_PENDING / EXECUTION_EVIDENCE_PENDING**
+Status: **IMPLEMENTED_ON_MASTER / STATIC_VALIDATION_PASSED / BUNDLED_CHROMIUM_E2E_PASSED**
 
 Repository: `thin-bt/dollworld`  
 Target branch: `master`  
@@ -8,14 +8,28 @@ Fresh-read base commit: `40c3b681081f3641c4b7b1b6e0aa59faa20157c8`
 Review mock: `_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/04_tournament_schedule_accessible_scroll_mock.html`  
 Mock commit: `d316c1565cc91915e1ee887b493ea6acad7743fd`  
 Mock blob: `4b17b276307e338949d6993e6e98b45267927490`  
-Production matrix blob: `ce6d9635c30f224600fb69a06a608250e698a245`  
-Production CSS blob: `0766da25b1c8a7c0f70afb40935682326ebcdd8a`  
-Production Playwright blob: `925c8a9c985f74c22314c559cd60bf555bd358c8`  
+Pre-implementation matrix blob: `ce6d9635c30f224600fb69a06a608250e698a245`  
+Pre-implementation CSS blob: `0766da25b1c8a7c0f70afb40935682326ebcdd8a`  
+Pre-implementation Playwright blob: `925c8a9c985f74c22314c559cd60bf555bd358c8`  
+Production implementation commit: `08fdc4795a245c7ddadc0d15f96c140935e82b35`  
+Production matrix blob: `40322979c1cd6d4225fb5d76d12b4b19dfc9ba52`  
+Production CSS blob: `abb8bb82abca87087fe6ab8b530984b51fae1345`  
+Production Playwright blob: `ef82b6b80828d4c585e15ae425461961f05403b0`  
 Core patch: `_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/05_tournament_schedule_accessible_scroll_core.patch`  
 Core patch commit: `d4ff9ef40a5eb52f75eb9a962f660c4b65470ee6`  
 Core patch blob: `56f6d2aa9006892cf7833db70fa9ec7046db6099`
 
-The core patch is complete and apply-ready for the pinned matrix/CSS blobs above, but remains **unapplied to production**. Playwright test code is intentionally tracked as a separate pending patch so implementation and evidence are not conflated.
+The core patch and its focused Playwright acceptance test were applied to production on 2026-10-05. The three intended targets were read back from `master` at the production blob SHAs above.
+
+## Implementation outcome (2026-10-05)
+
+- `prettier --check`: passed for the three production targets.
+- ESLint: passed for `competition-schedule-matrix.tsx`.
+- `npm run typecheck -w @shared-world/web`: passed.
+- `npm run build -w @shared-world/web`: passed.
+- `git diff --check`: passed.
+- Focused Playwright acceptance: passed on the Playwright-bundled Chromium (`1 passed`).
+- The configured Chrome distribution was not installed in the execution environment. Installing that distribution required unavailable OS package-manager permissions; this is recorded separately from the successful bundled-Chromium result.
 
 ## Purpose
 
