@@ -20,8 +20,8 @@ This evidence records a fresh-read, machine-checked reconciliation of the migrat
 | PTG-022 verdict closure crosswalk | cec25a5f8eb6f5297562dd78f211cfa4fa31fef4 |
 | PTG-023 lane aggregation contract | 7527581c42d8b0e59b02e9320bc41fea0bf8b847 |
 | PTG-024 evidence bundle schema | 02113e8de2fa5399329bf2910d679dc695435daa |
-| PTG-025 conformance vectors | 412d94adaf22192d2747f7210882a85af601d59f |
-| PTG-026 validator contract | 2966bcc0b159cd3529f664e7206cd4d31c49fce3 |
+| PTG-025 conformance vectors | f3cf669c1bffad54b3bb87afe09935658b69887a |
+| PTG-026 validator contract | 7529685bb604062cf39cf9b1e86629c2998d530a |
 
 ## Machine-checked results
 
@@ -41,8 +41,9 @@ This evidence records a fresh-read, machine-checked reconciliation of the migrat
 7. PTG-014A-S3 requires count=0, resolved factor=10000, unchanged count and factor after action and reload, and does not require DISCIPLE_DOUBLE.
 8. PTG-016-S1 requires a non-neutral resolved factor, DISCIPLE_DOUBLE, and A16-ARITH-01.
 9. PTG-025 contains exactly 6 V, 13 S, 20 M, and 6 ND vectors: 45 total.
-10. PTG-026 pins PTG-024 blob 02113e8de2fa5399329bf2910d679dc695435daa and PTG-025 blob 412d94adaf22192d2747f7210882a85af601d59f.
+10. PTG-026 pins PTG-024 blob 02113e8de2fa5399329bf2910d679dc695435daa and PTG-025 blob f3cf669c1bffad54b3bb87afe09935658b69887a.
 11. PTG-026 requires all 45 vectors to pass twice with byte-identical normalized reports.
+12. M20 now follows the same deterministic identity priority as M01: `SEM_DUPLICATE_ATTEMPT_ID` is the first failure and differing record bytes additionally require `SEM_IMMUTABILITY_VIOLATION`.
 
 ## Validation boundary
 
