@@ -101,7 +101,9 @@ These vectors must first pass PTG-024 structure.
 | M17 | summary closure key maps to a PASS attempt whose exact scenario assertion set does not contain that key | SEMANTIC_REJECT `SEM_ASSERTION_NOT_CLOSED_BY_ATTEMPT` |
 | M18 | summary is FINAL/PASS but one required assertion lacks a closure mapping | SEMANTIC_REJECT `SEM_REQUIRED_ASSERTION_OPEN` |
 | M19 | all remaining assertions are terminally blocked, but final non-PASS verdict violates PTG-018 precedence | SEMANTIC_REJECT `SEM_VERDICT_PRECEDENCE` |
-| M20 | historical evidence package contains two different records for the same attemptId, indicating overwrite/relabel behavior | SEMANTIC_REJECT `SEM_IMMUTABILITY_VIOLATION` |
+| M20 | historical evidence package contains two different records for the same attemptId, indicating overwrite/relabel behavior | SEMANTIC_REJECT `SEM_DUPLICATE_ATTEMPT_ID`; diagnostics must also include `SEM_IMMUTABILITY_VIOLATION` |
+
+M20 is intentionally multi-diagnostic. Identity uniqueness is evaluated before record-content comparison, so its deterministic first failure is `SEM_DUPLICATE_ATTEMPT_ID`, exactly as for M01. The differing bytes additionally require `SEM_IMMUTABILITY_VIOLATION`; that secondary diagnostic must not replace the earlier identity failure as `firstFailureCode`.
 
 ## Neutral-factor migration vectors
 
