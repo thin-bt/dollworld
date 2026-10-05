@@ -5,7 +5,7 @@ assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 scope: Sprint3 PTG assertion-to-evidence closure and lane verdict derivation
 source-lineage: thin-bt/dollworld master
-base-authority: PTG-019 blob 335ae01aee100bb4e235ed7075db7b5f36e0a4b8; PTG-020 blob 3cbd6645fe925f804743f9e83e9206eaa1526165; PTG-021 blob ca7798a671d3c3124fccad7f076065e129643435
+base-authority: PTG-019 blob 335ae01aee100bb4e235ed7075db7b5f36e0a4b8; PTG-020 blob f0eec066fd78bd1a2b3ab26f4244e19d024890ac; PTG-021 blob ca7798a671d3c3124fccad7f076065e129643435
 depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-019-acceptance-evidence-record-schema.md; PTG-020-acceptance-scenario-matrix.md; PTG-021-execution-readiness-gates.md; PTG-029-neutral-factor-assertion-migration-contract.md
 
 ## Purpose
