@@ -16,7 +16,7 @@ Core patch: `_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_p
 Core patch commit: `2532a42c6794479aaae4bd6220308309354c97be`  
 Core patch blob: `e97e9a34176c3532f2a11cfbcd5d4c4e0882905a`
 
-The core patch is complete and apply-ready for the pinned matrix/CSS blobs above. Its five unified-diff hunks have matching declared and actual line counts. It remains **unapplied to production**; Playwright code is tracked as a separate pending patch.
+The prepared core patch supplied the reviewed implementation boundary. Production JSX/CSS plus the focused Playwright coverage were applied together in commit `9ac6da065728b7db5b2c0b2b9c9b5a9d0bac4126` and read back at the production blob SHAs above. The artifact remains a historical apply-ready handoff; it is no longer pending.
 
 ## Purpose
 
