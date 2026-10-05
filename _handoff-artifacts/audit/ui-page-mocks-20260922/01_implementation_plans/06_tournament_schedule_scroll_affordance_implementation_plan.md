@@ -1,13 +1,14 @@
 # Tournament annual schedule scroll-affordance implementation plan
 
-Status: **PLAN_AND_CORE_PATCH_PUBLISHED / PRODUCTION_UNAPPLIED / TEST_PATCH_PENDING / EXECUTION_EVIDENCE_PENDING**
+Status: **IMPLEMENTED_ON_MASTER / STATIC_VALIDATION_PASSED / BUNDLED_CHROMIUM_E2E_PASSED**
 
 Repository: `thin-bt/dollworld`  
 Target branch: `master`  
-Fresh-read implementation commit: `08fdc4795a245c7ddadc0d15f96c140935e82b35`  
-Production matrix blob: `40322979c1cd6d4225fb5d76d12b4b19dfc9ba52`  
-Production CSS blob: `abb8bb82abca87087fe6ab8b530984b51fae1345`  
-Production Playwright blob: `ef82b6b80828d4c585e15ae425461961f05403b0`  
+Baseline implementation commit: `08fdc4795a245c7ddadc0d15f96c140935e82b35`  
+Affordance implementation commit: `9ac6da065728b7db5b2c0b2b9c9b5a9d0bac4126`  
+Production matrix blob: `5c827f107d88d95d124a5f8e184e4a6d0d2ae45b`  
+Production CSS blob: `c21f53b368b7585e12ee0ce5a2e996720d9c8c32`  
+Production Playwright blob: `d16e6c3dbe89ebf1c941b2a265fec25f3087ba22`  
 Review mock: `_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/05_tournament_schedule_scroll_affordance_mock.html`  
 Mock commit: `f4fbd53cf2d37582f976108915699d8d7d6c7081`  
 Mock blob: `619e24bb5bdc6f8169dea6a92ba1706780a70e5d`  
@@ -208,6 +209,15 @@ Request counters must continue to observe the real production paths:
 
 Scrolling and the two affordance buttons must add zero requests. Existing year navigation remains the only action in this area expected to reload the competition projection.
 
+## Implementation evidence (2026-10-05)
+
+- Added four-week previous/next controls with boundary-disabled states and focus retention.
+- Added left/right visual overflow cues without introducing a second scroll owner.
+- Preserved native keyboard scrolling, selected tournament state, year navigation, and zero additional API requests.
+- Verified target sizes and no viewport overflow at 1280/760/520/360 widths.
+- Validation passed: Prettier, production JSX ESLint, Web typecheck, Web production build, git diff check, and the focused bundled-Chromium Playwright test (1/1).
+- The three production files were read back from current `master` with the blob SHAs recorded above.
+
 ## Completion criteria
 
 This phase is complete only when:
@@ -218,4 +228,4 @@ This phase is complete only when:
 - no unintended API request occurs;
 - marker selection and year navigation remain functional.
 
-This plan and its review mock are canonical preparation. They are not production implementation or runtime evidence.
+This plan and its review mock remain the canonical design record; the implementation and runtime evidence above are now applied on `master`.
