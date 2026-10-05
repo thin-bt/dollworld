@@ -47,13 +47,13 @@
         "A14-PERSIST-01",
         "A14-ARITH-02",
         "A14-REL-01",
-        "A14-ARITH-03",
         "A14-DISC-01",
         "A15-PROV-01",
         "A15-TEACH-01",
         "A15-WEEKLY-01",
         "A16-PROV-01",
         "A16-ISO-01",
+        "A16-ARITH-01",
         "A16-NATIVE-01"
       ]
     },
@@ -63,8 +63,8 @@
       "required": ["PTG-019", "PTG-022", "PTG-023"],
       "properties": {
         "PTG-019": { "const": "335ae01aee100bb4e235ed7075db7b5f36e0a4b8" },
-        "PTG-022": { "const": "bd2f655e86b172947da3775f8f760bd1f1d08b43" },
-        "PTG-023": { "const": "00a44f188e11d0fbcd5a4202b9111cdb29ff50d6" }
+        "PTG-022": { "const": "cec25a5f8eb6f5297562dd78f211cfa4fa31fef4" },
+        "PTG-023": { "const": "7527581c42d8b0e59b02e9320bc41fea0bf8b847" }
       }
     },
     "provenance": {
@@ -157,7 +157,9 @@
         "postActionPersistedDiscipleCount": { "type": "integer", "minimum": 0 },
         "reloadMatchingApplicationCount": { "type": "integer", "minimum": 0 },
         "reloadMentorshipCount": { "type": "integer", "minimum": 0 },
-        "reloadPersistedDiscipleCount": { "type": "integer", "minimum": 0 }
+        "reloadPersistedDiscipleCount": { "type": "integer", "minimum": 0 },
+        "postActionResolvedDiscipleFactorValue": { "type": "number" },
+        "reloadResolvedDiscipleFactorValue": { "type": "number" }
       }
     },
     "explicitTeachEvidence": {
@@ -271,7 +273,7 @@
           "then": {
             "properties": {
               "scenarioId": { "enum": ["PTG-014A-S1", "PTG-014A-S2", "PTG-014A-S3", "ADAPTER-S1"] },
-              "assertionIds": { "items": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] } }
+              "assertionIds": { "items": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-DISC-01"] } }
             }
           }
         },
@@ -289,7 +291,7 @@
           "then": {
             "properties": {
               "scenarioId": { "const": "PTG-016-S1" },
-              "assertionIds": { "items": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] } }
+              "assertionIds": { "items": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-ARITH-01", "A16-NATIVE-01"] } }
             }
           }
         },
@@ -321,9 +323,18 @@
           "if": { "properties": { "scenarioId": { "const": "PTG-014A-S3" } }, "required": ["scenarioId"] },
           "then": {
             "properties": {
-              "assertionIds": { "const": ["A14-ARITH-03", "A14-DISC-01"] },
+              "assertionIds": { "const": ["A14-DISC-01"] },
               "provenance": { "properties": { "relationKind": { "const": "parent_temporary_guidance" }, "formalRelationCount": { "const": 0 }, "temporaryGuidanceRelationCount": { "const": 1 }, "persistedDiscipleCount": { "const": 0 }, "syntheticAdapterReplacement": { "const": false } } },
-              "nativeArithmetic": { "required": ["DISCIPLE_DOUBLE"] }
+              "nativeArithmetic": { "properties": { "resolvedDiscipleFactorValue": { "const": 10000 } } },
+              "applicationAndPersistence": {
+                "required": ["postActionResolvedDiscipleFactorValue", "reloadResolvedDiscipleFactorValue"],
+                "properties": {
+                  "postActionPersistedDiscipleCount": { "const": 0 },
+                  "reloadPersistedDiscipleCount": { "const": 0 },
+                  "postActionResolvedDiscipleFactorValue": { "const": 10000 },
+                  "reloadResolvedDiscipleFactorValue": { "const": 10000 }
+                }
+              }
             }
           }
         },
@@ -349,8 +360,12 @@
           "if": { "properties": { "scenarioId": { "const": "PTG-016-S1" } }, "required": ["scenarioId"] },
           "then": {
             "properties": {
-              "assertionIds": { "const": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] },
-              "provenance": { "properties": { "relationKind": { "const": "parent_master_disciple" }, "formalRelationCount": { "const": 1 }, "temporaryGuidanceRelationCount": { "const": 0 }, "syntheticAdapterReplacement": { "const": false } } }
+              "assertionIds": { "const": ["A16-PROV-01", "A16-ISO-01", "A16-ARITH-01", "A16-NATIVE-01"] },
+              "provenance": { "properties": { "relationKind": { "const": "parent_master_disciple" }, "formalRelationCount": { "const": 1 }, "temporaryGuidanceRelationCount": { "const": 0 }, "syntheticAdapterReplacement": { "const": false } } },
+              "nativeArithmetic": {
+                "required": ["DISCIPLE_DOUBLE"],
+                "properties": { "resolvedDiscipleFactorValue": { "not": { "const": 10000 } } }
+              }
             }
           }
         },
@@ -416,13 +431,13 @@
         "A14-PERSIST-01": { "$ref": "#/$defs/nonEmptyString" },
         "A14-ARITH-02": { "$ref": "#/$defs/nonEmptyString" },
         "A14-REL-01": { "$ref": "#/$defs/nonEmptyString" },
-        "A14-ARITH-03": { "$ref": "#/$defs/nonEmptyString" },
         "A14-DISC-01": { "$ref": "#/$defs/nonEmptyString" },
         "A15-PROV-01": { "$ref": "#/$defs/nonEmptyString" },
         "A15-TEACH-01": { "$ref": "#/$defs/nonEmptyString" },
         "A15-WEEKLY-01": { "$ref": "#/$defs/nonEmptyString" },
         "A16-PROV-01": { "$ref": "#/$defs/nonEmptyString" },
         "A16-ISO-01": { "$ref": "#/$defs/nonEmptyString" },
+        "A16-ARITH-01": { "$ref": "#/$defs/nonEmptyString" },
         "A16-NATIVE-01": { "$ref": "#/$defs/nonEmptyString" }
       }
     },
@@ -514,9 +529,9 @@
           "if": { "properties": { "lane": { "const": "PTG-014A" } }, "required": ["lane"] },
           "then": {
             "properties": {
-              "requiredAssertionIds": { "const": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] },
-              "closureByAssertion": { "propertyNames": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] } },
-              "openAssertionIds": { "items": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] } }
+              "requiredAssertionIds": { "const": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-DISC-01"] },
+              "closureByAssertion": { "propertyNames": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-DISC-01"] } },
+              "openAssertionIds": { "items": { "enum": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-DISC-01"] } }
             }
           }
         },
@@ -534,15 +549,15 @@
           "if": { "properties": { "lane": { "const": "PTG-016" } }, "required": ["lane"] },
           "then": {
             "properties": {
-              "requiredAssertionIds": { "const": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] },
-              "closureByAssertion": { "propertyNames": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] } },
-              "openAssertionIds": { "items": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] } }
+              "requiredAssertionIds": { "const": ["A16-PROV-01", "A16-ISO-01", "A16-ARITH-01", "A16-NATIVE-01"] },
+              "closureByAssertion": { "propertyNames": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-ARITH-01", "A16-NATIVE-01"] } },
+              "openAssertionIds": { "items": { "enum": ["A16-PROV-01", "A16-ISO-01", "A16-ARITH-01", "A16-NATIVE-01"] } }
             }
           }
         },
         {
           "if": { "properties": { "lane": { "const": "PTG-014A" }, "finalVerdict": { "const": "PASS" } }, "required": ["lane", "finalVerdict"] },
-          "then": { "properties": { "closureByAssertion": { "required": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-ARITH-03", "A14-DISC-01"] } } }
+          "then": { "properties": { "closureByAssertion": { "required": ["A14-PROV-01", "A14-ARITH-01", "A14-NATIVE-01", "A14-PERSIST-01", "A14-ARITH-02", "A14-REL-01", "A14-DISC-01"] } } }
         },
         {
           "if": { "properties": { "lane": { "const": "PTG-015" }, "finalVerdict": { "const": "PASS" } }, "required": ["lane", "finalVerdict"] },
@@ -550,7 +565,7 @@
         },
         {
           "if": { "properties": { "lane": { "const": "PTG-016" }, "finalVerdict": { "const": "PASS" } }, "required": ["lane", "finalVerdict"] },
-          "then": { "properties": { "closureByAssertion": { "required": ["A16-PROV-01", "A16-ISO-01", "A16-NATIVE-01"] } } }
+          "then": { "properties": { "closureByAssertion": { "required": ["A16-PROV-01", "A16-ISO-01", "A16-ARITH-01", "A16-NATIVE-01"] } } }
         }
       ],
       "x-semanticChecks": [
