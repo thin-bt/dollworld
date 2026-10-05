@@ -5,8 +5,8 @@ assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 scope: Sprint3 deterministic PTG evidence-bundle validator implementation handoff
 source-lineage: thin-bt/dollworld master
-base-authority: PTG-024 blob 014c20f07fa0b501febaa0795a8d6e4414dd5037; PTG-025 blob de33d4b3517e01b465b2705cb16316662836fe19
-depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-023-attempt-to-lane-verdict-aggregation.md; PTG-024-acceptance-evidence-bundle-schema.json; PTG-025-evidence-bundle-conformance-vectors.md
+base-authority: PTG-024 blob 02113e8de2fa5399329bf2910d679dc695435daa; PTG-025 blob 412d94adaf22192d2747f7210882a85af601d59f
+depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-023-attempt-to-lane-verdict-aggregation.md; PTG-024-acceptance-evidence-bundle-schema.json; PTG-025-evidence-bundle-conformance-vectors.md; PTG-029-neutral-factor-assertion-migration-contract.md
 
 ## Purpose
 
@@ -59,7 +59,7 @@ Do not normalize, repair, coerce, or silently drop fields before PTG-024 validat
 
 ## Schema authority
 
-- Hash the exact supplied schema bytes and require blob identity `014c20f07fa0b501febaa0795a8d6e4414dd5037` through the repository handoff adapter.
+- Hash the exact supplied schema bytes and require blob identity `02113e8de2fa5399329bf2910d679dc695435daa` through the repository handoff adapter. The pre-migration blob `014c20f07fa0b501febaa0795a8d6e4414dd5037` is not admissible for new acceptance bundles.
 - Validate Draft 2020-12 semantics, including `if`/`then`, `const`, `propertyNames`, and local `$ref` resolution.
 - Disable remote `$ref` retrieval. PTG-024 contains only local references.
 - Preserve every schema diagnostic with instance JSON pointer, schema pointer, and keyword.
@@ -96,10 +96,17 @@ For weekly PASS:
 
 1. recomputed EXPECTED_SINGLE equals recorded EXPECTED_SINGLE;
 2. recomputed counterfactuals equal their recorded values;
-3. EXPECTED_SINGLE differs from every relevant counterfactual;
+3. EXPECTED_SINGLE differs from every scenario-relevant counterfactual;
 4. observedAppliedMilliPoints equals EXPECTED_SINGLE exactly.
 
 Failure order is counterfactual collision before observed/expected mismatch when both apply.
+
+Scenario relevance is normative:
+
+- PTG-014A-S1 compares PTG_DOUBLE;
+- PTG-014A-S2 compares FORMAL_LEAK;
+- PTG-014A-S3 requires count=0 and resolved factor=10000; diagnostic DISCIPLE_DOUBLE, when supplied, must equal EXPECTED_SINGLE and must not trigger collision rejection;
+- PTG-016-S1 requires a persisted non-neutral factor, A16-ARITH-01, and EXPECTED_SINGLE != DISCIPLE_DOUBLE.
 
 ## Attempt semantics
 
@@ -110,14 +117,17 @@ For ordinary attempts:
 - selected teacher must equal biological parent where the scenario requires parent guidance;
 - recorded relation/cardinality/disciple shape must match the exact scenario;
 - assertion IDs must equal the PTG-024 scenario set;
+- retired A14-ARITH-03 is structurally ineligible for migrated attempts and summaries;
 - failedAssertionIds must be empty for PASS and a subset of the scenario assertion set otherwise;
 - child/week/target/reason in native application evidence must match attempt identity;
 - weekly PASS requires application count=1 and reload count=1;
 - reload relation, mentorship, and discipleCount must preserve the required invariant;
 - explicit teach must not add mentorship or increment discipleCount;
-- PTG-016 must prove its compared attempt exists, uses the same productSha, and isolates the disciple factor.
+- PTG-014A-S3 must preserve count=0 and resolved factor=10000 before action, after action, and after reload;
+- PTG-016 must prove its compared attempt exists, uses the same productSha, isolates the disciple factor, derives the non-neutral factor through an ordinary persisted transition, and closes A16-ARITH-01 only when exact once/twice results differ.
 
 Never trust boolean claims such as `teacherFactorUnchanged` without comparing their referenced source evidence.
+Direct edits to discipleCount, factor, mentorship, relation, or sidecar state are `SEM_DIRECT_STATE_EDIT`, not legal fixture construction.
 
 ## Candidate inventory and aggregation
 
@@ -154,6 +164,12 @@ Stop phase advancement after the first failing phase, but collect all diagnostic
 
 Within one priority level, sort by diagnostic JSON pointer, then code.
 
+Map migrated neutral-factor cases deterministically:
+
+- retired A14-ARITH-03 in a new bundle -> `STR_RETIRED_ASSERTION_ID`;
+- unequal or recomputation-inconsistent count-zero DISCIPLE_DOUBLE -> `SEM_COUNT_ZERO_ARITHMETIC_MISMATCH`;
+- direct state editing used to manufacture a non-neutral comparison -> `SEM_DIRECT_STATE_EDIT`.
+
 ## Output and diagnostics
 
 Each diagnostic contains:
@@ -182,14 +198,14 @@ Exit 2 is not evidence that the product passed or failed. Print one JSON report 
 
 Before the validator may assess acceptance evidence:
 
-1. execute every PTG-025 V01-V06, S01-S13, and M01-M20 vector;
-2. require expected class and first failure code for all 39 vectors;
+1. execute every PTG-025 V01-V06, S01-S13, M01-M20, and ND-01-ND-06 vector;
+2. require expected class and first failure code for all 45 vectors;
 3. run every vector twice and require byte-identical normalized reports after excluding the outer execution timestamp;
 4. prove no network call, product mutation, or evidence rewrite occurs;
 5. record validator product SHA and canonical PTG-024/PTG-025 blobs.
 
-A validator with 38/39 vectors passing is not admissible.
+A validator with 44/45 vectors passing is not admissible.
 
 ## Handoff boundary
 
-When implementation resumes, implement the byte-safe parser, pinned-schema structural stage, semantic verifier, and aggregation derivation in that order. Do not connect the validator to acceptance reporting until all 39 conformance vectors pass. No schema-only success, illustrative arithmetic, or execution error may be reported as PTG product PASS.
+When implementation resumes, implement the byte-safe parser, pinned-schema structural stage, semantic verifier, and aggregation derivation in that order. Do not connect the validator to acceptance reporting until all 45 conformance vectors pass twice with byte-identical normalized reports. No schema-only success, illustrative arithmetic, or execution error may be reported as PTG product PASS.
