@@ -1,6 +1,6 @@
 # Tournament annual schedule scroll-affordance implementation plan
 
-Status: **PLAN_PUBLISHED / PRODUCTION_UNAPPLIED / EXECUTION_EVIDENCE_PENDING**
+Status: **PLAN_AND_CORE_PATCH_PUBLISHED / PRODUCTION_UNAPPLIED / TEST_PATCH_PENDING / EXECUTION_EVIDENCE_PENDING**
 
 Repository: `thin-bt/dollworld`  
 Target branch: `master`  
@@ -10,7 +10,12 @@ Production CSS blob: `abb8bb82abca87087fe6ab8b530984b51fae1345`
 Production Playwright blob: `ef82b6b80828d4c585e15ae425461961f05403b0`  
 Review mock: `_handoff-artifacts/audit/ui-page-mocks-20260922/00_html_mocks/05_tournament_schedule_scroll_affordance_mock.html`  
 Mock commit: `f4fbd53cf2d37582f976108915699d8d7d6c7081`  
-Mock blob: `619e24bb5bdc6f8169dea6a92ba1706780a70e5d`
+Mock blob: `619e24bb5bdc6f8169dea6a92ba1706780a70e5d`  
+Core patch: `_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/06_tournament_schedule_scroll_affordance_core.patch`  
+Core patch commit: `2532a42c6794479aaae4bd6220308309354c97be`  
+Core patch blob: `e97e9a34176c3532f2a11cfbcd5d4c4e0882905a`
+
+The core patch is complete and apply-ready for the pinned matrix/CSS blobs above. Its five unified-diff hunks have matching declared and actual line counts. It remains **unapplied to production**; Playwright code is tracked as a separate pending patch.
 
 ## Purpose
 
