@@ -6,7 +6,7 @@ assignment-id: 20260929-P0-01-R3
 scope: Sprint3 PTG assertion-to-evidence closure and lane verdict derivation
 source-lineage: thin-bt/dollworld master
 base-authority: PTG-019 blob 335ae01aee100bb4e235ed7075db7b5f36e0a4b8; PTG-020 blob 3cbd6645fe925f804743f9e83e9206eaa1526165; PTG-021 blob ca7798a671d3c3124fccad7f076065e129643435
-depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-019-acceptance-evidence-record-schema.md; PTG-020-acceptance-scenario-matrix.md; PTG-021-execution-readiness-gates.md
+depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-019-acceptance-evidence-record-schema.md; PTG-020-acceptance-scenario-matrix.md; PTG-021-execution-readiness-gates.md; PTG-029-neutral-factor-assertion-migration-contract.md
 
 ## Purpose
 
@@ -22,13 +22,13 @@ This document closes the gap between scenario design and an auditable lane verdi
 | A14-PERSIST-01 | PTG-014A-S1 | G7 | post-action and reload application counts; mentorship/relation/discipleCount before, after and reload | Reload retains one application and all required cardinalities without a second application. |
 | A14-ARITH-02 | PTG-014A-S2 | G4 | Same-fixture native inputs; EXPECTED_SINGLE; FORMAL_LEAK; production flooring/cap semantics | EXPECTED_SINGLE differs from FORMAL_LEAK before action. |
 | A14-REL-01 | PTG-014A-S2 | G6 | selected teacher/relation provenance; resolved teacher factor; observed native application | Observed weekly result equals EXPECTED_SINGLE and contains no formal-teacher contribution. |
-| A14-ARITH-03 | PTG-014A-S3 | G4 | persistedDiscipleCount=0; resolved disciple factor; EXPECTED_SINGLE; DISCIPLE_DOUBLE | EXPECTED_SINGLE differs from DISCIPLE_DOUBLE before action. |
-| A14-DISC-01 | PTG-014A-S3 | G6 | persisted count and resolved factor; observed native result; application count | The count=0 disciple-efficiency factor participates exactly once and result equals EXPECTED_SINGLE. |
+| A14-DISC-01 | PTG-014A-S3 | G7 | persistedDiscipleCount=0 and resolvedFactor=10000 before action, after action, and after reload; observed native result; application count | Count 0 resolves to neutral factor 10000, remains unchanged through reload, and the one native result equals EXPECTED_SINGLE. |
 | A15-PROV-01 | PTG-015-S1 | G1 | Separate child; first ordinary enrollment identity/outcome; persisted parent_master_disciple relation | The first ordinary enrollment directly creates the formal parent relation without injected pending state. |
 | A15-TEACH-01 | PTG-015-S1 | G6 | mentorshipCount and discipleCount immediately before/after explicit teach and after reload | Explicit teach duplicates neither mentorship nor discipleCount and the invariant persists. |
 | A15-WEEKLY-01 | PTG-015-S2 | G6 | Subsequent weekly action identity; complete native inputs/oracle; exactly-one application; reload | A separate subsequent weekly action independently equals the formal EXPECTED_SINGLE oracle and persists once. |
 | A16-PROV-01 | PTG-016-S1 | G1 | Two fixture source references; legal transition identities; no direct counter/relation/sidecar edits | Both compared states derive only from legal persisted production transitions. |
 | A16-ISO-01 | PTG-016-S1 | G4 | ComparisonAttemptId; equal teacher factor and guarded non-disciple inputs; differing persisted disciple factor | The legal pair isolates only the disciple-efficiency input under the production contract. |
+| A16-ARITH-01 | PTG-016-S1 | G4 | selected persisted non-neutral disciple factor; production native inputs; EXPECTED_SINGLE; DISCIPLE_DOUBLE under identical flooring/cap semantics | The selected factor is not 10000 and EXPECTED_SINGLE differs from DISCIPLE_DOUBLE before either weekly action is consumed. |
 | A16-NATIVE-01 | PTG-016-S1 | G6 | Both native calculations/results using identical flooring/cap semantics; exactly-one application per side | Native results distinguish the legal disciple-count contrast and each equals its expected oracle. |
 
 ## Attempt-level verdict derivation
@@ -37,7 +37,7 @@ Apply the PTG-018 precedence to each immutable attempt, stopping at the first ap
 
 1. PRECONDITION_FAILED: product identity, semantic shape, required pre-action inputs, or evidence binding is invalid or absent.
 2. NOT_REACHABLE: the required legal production transition or native evidence path genuinely cannot be reached after valid preconditions.
-3. FIXTURE_INSUFFICIENT: the source-proven legal fixture reaches the path but EXPECTED_SINGLE is indistinguishable from a guarded defect counterfactual under the same production arithmetic semantics.
+3. FIXTURE_INSUFFICIENT: for an assertion that requires arithmetic distinction, the source-proven legal fixture reaches the path but EXPECTED_SINGLE is indistinguishable from its guarded defect counterfactual under the same production arithmetic semantics.
 4. PRODUCT_OR_SPEC_MISMATCH: a valid, source-proven, distinguishable attempt reaches the production path and violates any required assertion.
 5. PASS: every mandatory assertion for the attempt closes with the required same-attempt evidence.
 
@@ -45,9 +45,9 @@ Do not continue past an earlier blocking gate merely to obtain a later or more c
 
 ## Lane closure
 
-- PTG-014A PASS requires all eight A14 assertions closed. Multiple legal attempts may be used only when each assertion retains its own immutable PTG-019 evidence record and the lane summary references every contributing attempt; evidence fields may not be spliced into a synthetic attempt.
+- PTG-014A PASS requires all seven active A14 assertions closed. Multiple legal attempts may be used only when each assertion retains its own immutable PTG-019 evidence record and the lane summary references every contributing attempt; evidence fields may not be spliced into a synthetic attempt.
 - PTG-015 PASS requires all three A15 assertions. Explicit-teach cardinality evidence cannot substitute for A15-WEEKLY-01 native weekly evidence.
-- PTG-016 PASS requires all three A16 assertions from a legally constructed matched pair. If such a pair cannot be produced without direct edits, the lane is NOT_REACHABLE, not PASS.
+- PTG-016 PASS requires all four A16 assertions from a legally constructed matched pair. If such a pair cannot be produced without direct edits, the lane is NOT_REACHABLE, not PASS.
 
 ## Anti-laundering rules
 
