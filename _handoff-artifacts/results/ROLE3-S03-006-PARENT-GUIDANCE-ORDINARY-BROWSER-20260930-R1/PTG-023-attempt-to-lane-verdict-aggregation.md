@@ -5,7 +5,7 @@ assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 scope: Sprint3 PTG immutable attempt evidence to current-product lane verdict aggregation
 source-lineage: thin-bt/dollworld master
-base-authority: PTG-014 blob c9951b4e717baf1b63f1fc795d8f9b0869c2a6a7; PTG-019 blob 335ae01aee100bb4e235ed7075db7b5f36e0a4b8; PTG-022 blob bd2f655e86b172947da3775f8f760bd1f1d08b43
+base-authority: PTG-014 blob 4c857ea7c9733603ee8266e6341815090e3ce039; PTG-019 blob 335ae01aee100bb4e235ed7075db7b5f36e0a4b8; PTG-022 blob cec25a5f8eb6f5297562dd78f211cfa4fa31fef4
 depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-019-acceptance-evidence-record-schema.md; PTG-020-acceptance-scenario-matrix.md; PTG-021-execution-readiness-gates.md; PTG-022-verdict-closure-crosswalk.md; PTG-029-neutral-factor-assertion-migration-contract.md
 
 ## Purpose
