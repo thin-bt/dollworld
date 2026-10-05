@@ -1,6 +1,6 @@
 # Tournament annual schedule accessible-scroll implementation plan
 
-Status: **PLAN_PUBLISHED / PRODUCTION_UNAPPLIED / EXECUTION_EVIDENCE_PENDING**
+Status: **PLAN_AND_CORE_PATCH_PUBLISHED / PRODUCTION_UNAPPLIED / TEST_PATCH_PENDING / EXECUTION_EVIDENCE_PENDING**
 
 Repository: `thin-bt/dollworld`  
 Target branch: `master`  
@@ -10,7 +10,12 @@ Mock commit: `d316c1565cc91915e1ee887b493ea6acad7743fd`
 Mock blob: `4b17b276307e338949d6993e6e98b45267927490`  
 Production matrix blob: `ce6d9635c30f224600fb69a06a608250e698a245`  
 Production CSS blob: `0766da25b1c8a7c0f70afb40935682326ebcdd8a`  
-Production Playwright blob: `925c8a9c985f74c22314c559cd60bf555bd358c8`
+Production Playwright blob: `925c8a9c985f74c22314c559cd60bf555bd358c8`  
+Core patch: `_handoff-artifacts/audit/ui-page-mocks-20260922/01_implementation_plans/05_tournament_schedule_accessible_scroll_core.patch`  
+Core patch commit: `d4ff9ef40a5eb52f75eb9a962f660c4b65470ee6`  
+Core patch blob: `56f6d2aa9006892cf7833db70fa9ec7046db6099`
+
+The core patch is complete and apply-ready for the pinned matrix/CSS blobs above, but remains **unapplied to production**. Playwright test code is intentionally tracked as a separate pending patch so implementation and evidence are not conflated.
 
 ## Purpose
 
