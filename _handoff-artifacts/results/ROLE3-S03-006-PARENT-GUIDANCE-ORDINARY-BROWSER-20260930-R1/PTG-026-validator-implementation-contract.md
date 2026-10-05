@@ -5,7 +5,7 @@ assignment-generation: 20260929-P0-01
 assignment-id: 20260929-P0-01-R3
 scope: Sprint3 deterministic PTG evidence-bundle validator implementation handoff
 source-lineage: thin-bt/dollworld master
-base-authority: PTG-024 blob 02113e8de2fa5399329bf2910d679dc695435daa; PTG-025 blob 412d94adaf22192d2747f7210882a85af601d59f
+base-authority: PTG-024 blob 02113e8de2fa5399329bf2910d679dc695435daa; PTG-025 blob f3cf669c1bffad54b3bb87afe09935658b69887a
 depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-023-attempt-to-lane-verdict-aggregation.md; PTG-024-acceptance-evidence-bundle-schema.json; PTG-025-evidence-bundle-conformance-vectors.md; PTG-029-neutral-factor-assertion-migration-contract.md
 
 ## Purpose
@@ -76,7 +76,7 @@ After structure succeeds, build immutable maps:
 - lane + productSha -> all ordinary candidate attempts;
 - lane + productSha -> all synthetic non-candidates.
 
-Reject repeated attemptId before comparing record bytes. Identical duplicates are still `SEM_DUPLICATE_ATTEMPT_ID`; differing duplicates additionally emit an immutability diagnostic, but the first code remains determined by PTG-025 priority.
+Reject repeated attemptId before comparing record bytes. Identical duplicates are still `SEM_DUPLICATE_ATTEMPT_ID`; differing duplicates additionally emit `SEM_IMMUTABILITY_VIOLATION`, but the first code remains `SEM_DUPLICATE_ATTEMPT_ID` because identity uniqueness precedes content comparison. PTG-025 M20 therefore requires both diagnostics while retaining the identity failure as `firstFailureCode`.
 
 Every referenced attemptId must resolve exactly once. Do not create placeholder attempts for missing references.
 
@@ -199,7 +199,7 @@ Exit 2 is not evidence that the product passed or failed. Print one JSON report 
 Before the validator may assess acceptance evidence:
 
 1. execute every PTG-025 V01-V06, S01-S13, M01-M20, and ND-01-ND-06 vector;
-2. require expected class and first failure code for all 45 vectors;
+2. require expected class and first failure code for all 45 vectors, and for M20 additionally require the secondary `SEM_IMMUTABILITY_VIOLATION` diagnostic;
 3. run every vector twice and require byte-identical normalized reports after excluding the outer execution timestamp;
 4. prove no network call, product mutation, or evidence rewrite occurs;
 5. record validator product SHA and canonical PTG-024/PTG-025 blobs.
