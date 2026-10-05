@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dollworld — 大会試合詳細アクセシビリティモック</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090d18;
+      --surface: #121827;
+      --surface-2: #192238;
+      --line: #33415f;
+      --text: #f3f6ff;
+      --muted: #b3bfd8;
+      --accent: #8ee7ff;
+      --accent-strong: #42c8ee;
+      --win: #8de0b0;
+      --danger: #ff9fa9;
+      --focus: #ffd96a;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      min-width: 320px;
+      overflow-x: clip;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% -10%, rgba(66, 200, 238, .14), transparent 38rem),
+        var(--bg);
+      font-family: Inter, "Noto Sans JP", system-ui, sans-serif;
+      line-height: 1.6;
+    }
+    a { color: var(--accent); }
+    button, a { touch-action: manipulation; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .shell { width: min(100% - 32px, 1080px); margin: 0 auto; padding: 28px 0 64px; }
+    .back {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 4px;
+      font-weight: 700;
+      text-underline-offset: 4px;
+    }
+    .eyebrow { margin: 20px 0 4px; color: var(--accent); font-size: .82rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+    h1 { margin: 0; font-size: clamp(1.65rem, 5vw, 2.7rem); line-height: 1.15; }
+    .lead { max-width: 68ch; margin: 10px 0 24px; color: var(--muted); }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 20px;
+      padding: 0;
+      list-style: none;
+    }
+    .meta li { padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: rgba(18,24,39,.82); }
+    .card {
+      min-width: 0;
+      margin-block: 18px;
+      padding: clamp(16px, 3vw, 24px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(25,34,56,.95), rgba(18,24,39,.98));
+      box-shadow: 0 14px 40px rgba(0,0,0,.22);
+    }
+    .result {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+      align-items: stretch;
+      gap: 16px;
+    }
+    .fighter { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: rgba(9,13,24,.56); }
+    .fighter[data-winner="true"] { border-color: var(--win); box-shadow: inset 0 0 0 1px rgba(141,224,176,.24); }
+    .fighter p { margin: 4px 0 0; color: var(--muted); }
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; color: #062215; background: var(--win); font-size: .76rem; font-weight: 900; }
+    .versus { display: grid; place-items: center; color: var(--muted); font-weight: 900; }
+    .section-heading { margin: 0 0 8px; font-size: 1.25rem; }
+    .scroll-help { margin: 0 0 10px; color: var(--muted); font-size: .92rem; }
+    .table-region {
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(9,13,24,.66);
+      scrollbar-color: var(--accent-strong) #111827;
+    }
+    .table-region:focus-visible { outline-offset: 4px; }
+    table { width: 100%; min-width: 680px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    thead th { color: var(--accent); background: #111a2c; font-size: .85rem; letter-spacing: .02em; }
+    tbody th { color: var(--text); }
+    tbody tr:last-child > * { border-bottom: 0; }
+    tbody tr:nth-child(even) { background: rgba(25,34,56,.42); }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .log { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .log li { display: grid; grid-template-columns: 6.5rem minmax(0,1fr); gap: 12px; padding: 12px 14px; border-left: 4px solid var(--accent-strong); border-radius: 8px; background: rgba(9,13,24,.58); }
+    .turn-label { font-weight: 900; }
+    .unavailable { border-left: 4px solid var(--danger); }
+    .unavailable p { margin-bottom: 0; color: var(--muted); }
+    .review-notes { margin-top: 32px; border-style: dashed; }
+    .review-notes li + li { margin-top: 8px; }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 24px, 1080px); padding-top: 16px; }
+      .result { grid-template-columns: 1fr; }
+      .versus { min-height: 30px; }
+      .card { margin-block: 14px; }
+    }
+    @media (max-width: 520px) {
+      .shell { width: min(100% - 20px, 1080px); }
+      .card { padding: 14px; border-radius: 12px; }
+      .log li { grid-template-columns: 1fr; gap: 2px; }
+      .meta { gap: 6px; }
+      .meta li { width: 100%; border-radius: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <a class="back" href="#review-notes" aria-label="大会一覧へ戻る">← 大会一覧へ戻る</a>
+    <p class="eyebrow">Competition / Match detail</p>
+    <h1>決勝戦 — 試合詳細</h1>
+    <p class="lead">対戦結果、ターン行動順、戦闘ログを同じ読み順で確認できます。ページ全体は横スクロールせず、幅の広い表だけが独立して移動します。</p>
+
+    <ul class="meta" aria-label="試合情報">
+      <li>春季グランプリ 2026</li>
+      <li>決勝</li>
+      <li>2026年4月18日 15:30</li>
+      <li>全8ターン</li>
+    </ul>
+
+    <section class="card" aria-labelledby="result-heading">
+      <h2 class="section-heading" id="result-heading">対戦結果</h2>
+      <div class="result">
+        <article class="fighter" data-winner="true">
+          <span class="badge">WINNER</span>
+          <h3>ルナ・アストリア</h3>
+          <p>残りHP 428 / 1,200</p>
+        </article>
+        <div class="versus" aria-hidden="true">VS</div>
+        <article class="fighter">
+          <h3>ミオ・フロスト</h3>
+          <p>残りHP 0 / 1,160</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="turn-order-heading">
+      <h2 class="section-heading" id="turn-order-heading">ターン行動順</h2>
+      <p class="scroll-help" id="turn-order-help">表が画面幅を超える場合は、表の領域を左右にスクロールできます。キーボードではこの領域にフォーカスして Shift＋ホイール、または方向キーを使用します。</p>
+      <div class="table-region" tabindex="0" role="region" aria-labelledby="turn-order-heading" aria-describedby="turn-order-help">
+        <table>
+          <caption class="sr-only">各ターンの先手と、両選手の行動優先度</caption>
+          <thead>
+            <tr>
+              <th scope="col">ターン</th>
+              <th scope="col">先手</th>
+              <th scope="col">ルナ優先度</th>
+              <th scope="col">ミオ優先度</th>
+              <th scope="col">速度補正</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">1</th><td>ルナ・アストリア</td><td>128</td><td>116</td><td>ルナ +12</td></tr>
+            <tr><th scope="row">2</th><td>ミオ・フロスト</td><td>104</td><td>131</td><td>ミオ +27</td></tr>
+            <tr><th scope="row">3</th><td>ルナ・アストリア</td><td>142</td><td>110</td><td>ルナ +32</td></tr>
+            <tr><th scope="row">4</th><td>ルナ・アストリア</td><td>121</td><td>119</td><td>ルナ +2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="battle-log-heading">
+      <h2 class="section-heading" id="battle-log-heading">戦闘ログ</h2>
+      <ol class="log">
+        <li><span class="turn-label">ターン 1</span><span>ルナ・アストリアの「スターライト」。ミオ・フロストに 184 ダメージ。</span></li>
+        <li><span class="turn-label">ターン 2</span><span>ミオ・フロストの「アイスバリア」。被ダメージ軽減を獲得。</span></li>
+        <li><span class="turn-label">ターン 3</span><span>ルナ・アストリアのクリティカル。ミオ・フロストに 312 ダメージ。</span></li>
+      </ol>
+    </section>
+
+    <aside class="card unavailable" aria-labelledby="unavailable-heading">
+      <h2 class="section-heading" id="unavailable-heading">保持期限を過ぎた試合</h2>
+      <p>この試合の詳細ログは保持期間を過ぎたため表示できません。大会一覧と対戦結果は引き続き確認できます。</p>
+    </aside>
+
+    <aside class="card review-notes" id="review-notes" aria-labelledby="notes-heading">
+      <h2 class="section-heading" id="notes-heading">レビュー／実装マッピング</h2>
+      <ul>
+        <li><strong>CompetitionMatchPage:</strong> ページ自体を横スクロール所有者にしない。戻る導線・見出し・ローディング／エラー分岐は維持する。</li>
+        <li><strong>CompetitionMatchDetailedLog:</strong> 行動順ラッパーだけに <code>tabindex="0"</code>、名前付き region、説明文、caption、列／行ヘッダーの scope を追加する。</li>
+        <li><strong>BattleLogViewPanel:</strong> 既存表示・データ契約を変更しない。このモックのログカードは読み順の確認用で、全面改稿の指示ではない。</li>
+        <li><strong>Responsive:</strong> 1280 / 760 / 520 / 360 pxで本文の横はみ出しゼロ。表は独立スクロール、戻るリンクは44px以上の操作高。</li>
+        <li><strong>状態:</strong> 上段は保持済みログ、下段は削除済みログの参照状態。productionでは既存の条件分岐を保ち、同時表示しない。</li>
+      </ul>
+    </aside>
+  </main>
+</body>
+</html>
