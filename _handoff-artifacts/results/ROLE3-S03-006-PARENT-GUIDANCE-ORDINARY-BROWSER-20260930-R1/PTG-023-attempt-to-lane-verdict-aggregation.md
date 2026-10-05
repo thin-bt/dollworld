@@ -6,7 +6,7 @@ assignment-id: 20260929-P0-01-R3
 scope: Sprint3 PTG immutable attempt evidence to current-product lane verdict aggregation
 source-lineage: thin-bt/dollworld master
 base-authority: PTG-014 blob c9951b4e717baf1b63f1fc795d8f9b0869c2a6a7; PTG-019 blob 335ae01aee100bb4e235ed7075db7b5f36e0a4b8; PTG-022 blob bd2f655e86b172947da3775f8f760bd1f1d08b43
-depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-019-acceptance-evidence-record-schema.md; PTG-020-acceptance-scenario-matrix.md; PTG-021-execution-readiness-gates.md; PTG-022-verdict-closure-crosswalk.md
+depends-on: PTG-018-fixture-provenance-and-verdict-contract.md; PTG-019-acceptance-evidence-record-schema.md; PTG-020-acceptance-scenario-matrix.md; PTG-021-execution-readiness-gates.md; PTG-022-verdict-closure-crosswalk.md; PTG-029-neutral-factor-assertion-migration-contract.md
 
 ## Purpose
 
@@ -34,11 +34,11 @@ Before all mandatory assertions can be evaluated, laneState=OPEN and finalVerdic
 
 | lane | mandatory assertion set |
 |---|---|
-| PTG-014A | A14-PROV-01; A14-ARITH-01; A14-NATIVE-01; A14-PERSIST-01; A14-ARITH-02; A14-REL-01; A14-ARITH-03; A14-DISC-01 |
+| PTG-014A | A14-PROV-01; A14-ARITH-01; A14-NATIVE-01; A14-PERSIST-01; A14-ARITH-02; A14-REL-01; A14-DISC-01 |
 | PTG-015 | A15-PROV-01; A15-TEACH-01; A15-WEEKLY-01 |
-| PTG-016 | A16-PROV-01; A16-ISO-01; A16-NATIVE-01 |
+| PTG-016 | A16-PROV-01; A16-ISO-01; A16-ARITH-01; A16-NATIVE-01 |
 
-No lane PASS is possible with a proper subset.
+The migrated partition is 7/3/4 and still contains fourteen unique mandatory assertion IDs. A14-ARITH-03 is retired by PTG-029 and cannot close any migrated lane. No lane PASS is possible with a proper subset.
 
 ## Candidate-set construction
 
@@ -103,7 +103,8 @@ A lane summary is invalid when any of the following is true:
 5. laneState=OPEN includes finalVerdict;
 6. laneState=FINAL omits finalVerdict;
 7. candidate inventory omits a preserved same-lane, same-product attempt merely because its verdict is unfavorable;
-8. an old attempt record was overwritten or relabeled to make aggregation succeed.
+8. an old attempt record was overwritten or relabeled to make aggregation succeed;
+9. requiredAssertionIds contains retired A14-ARITH-03 or omits active A16-ARITH-01.
 
 ## Execution handoff
 
