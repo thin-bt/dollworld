@@ -1,0 +1,275 @@
+diff --git a/apps/web/src/client/competition/competition-schedule-matrix.tsx b/apps/web/src/client/competition/competition-schedule-matrix.tsx
+--- a/apps/web/src/client/competition/competition-schedule-matrix.tsx
++++ b/apps/web/src/client/competition/competition-schedule-matrix.tsx
+@@ -1,4 +1,6 @@
+-import type { CompetitionScheduleEntry, CompetitionScheduleOverview } from "./ui009-views.js";
++import { useCallback, useLayoutEffect, useRef, useState } from "react";
++
++import type { CompetitionScheduleEntry, CompetitionScheduleOverview } from "./ui009-views.js";
+ 
+ const ROW_LABELS: Record<string, string> = {
+   F: "F",
+@@ -41,9 +43,48 @@
+   onViewYear?: (worldYear: number) => void;
+ };
+ 
+-export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps) {
+-  const { overview, selectedKey, onSelect, onViewYear } = props;
+-  if (overview.entries.length === 0) {
++export function CompetitionScheduleMatrix(props: CompetitionScheduleMatrixProps) {
++  const { overview, selectedKey, onSelect, onViewYear } = props;
++  const scheduleScrollRef = useRef<HTMLDivElement>(null);
++  const [atScrollStart, setAtScrollStart] = useState(true);
++  const [atScrollEnd, setAtScrollEnd] = useState(false);
++
++  const syncScrollEdges = useCallback(() => {
++    const element = scheduleScrollRef.current;
++    if (element === null) return;
++    const maxScrollLeft = Math.max(0, element.scrollWidth - element.clientWidth);
++    setAtScrollStart(element.scrollLeft <= 2);
++    setAtScrollEnd(element.scrollLeft >= maxScrollLeft - 2);
++  }, []);
++
++  useLayoutEffect(() => {
++    const element = scheduleScrollRef.current;
++    if (element === null) return undefined;
++    syncScrollEdges();
++    const observer = new ResizeObserver(syncScrollEdges);
++    observer.observe(element);
++    return () => observer.disconnect();
++  }, [overview.entries, overview.worldYear, syncScrollEdges]);
++
++  const scrollByWeeks = (direction: -1 | 1) => {
++    const element = scheduleScrollRef.current;
++    if (element === null) return;
++    const headers = Array.from(
++      element.querySelectorAll<HTMLElement>(".competition-schedule-week"),
++    );
++    const distance =
++      headers.length > 4
++        ? headers[4].offsetLeft - headers[0].offsetLeft
++        : (headers[0]?.offsetWidth ?? 0) * 4;
++    if (distance <= 0) return;
++    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
++    element.scrollBy({
++      left: direction * distance,
++      behavior: reducedMotion ? "auto" : "smooth",
++    });
++  };
++
++  if (overview.entries.length === 0) {
+     return (
+       <p className="competition-schedule-empty" data-testid="competition-schedule-empty">
+         今年度の大会日程を表示できませんでした。
+@@ -109,18 +150,50 @@
+       <p className="competition-schedule-time" data-testid="competition-world-time">
+         現在: <strong>{overview.worldTimeLabel}</strong>
+       </p>
+-      <p id="competition-schedule-scroll-help" className="competition-schedule-scroll-help">
+-        横にスクロールして1〜12月の日程を確認できます。
+-        キーボードでは日程表にフォーカスして左右の矢印キーを使用します。
+-      </p>
+-      <div
+-        className="competition-schedule-scroll"
+-        data-testid="competition-annual-schedule"
+-        tabIndex={0}
+-        role="region"
+-        aria-label={`${overview.worldYear}年 大会日程の横スクロール領域`}
+-        aria-describedby="competition-schedule-scroll-help"
+-      >
++      <div className="competition-schedule-tools">
++        <p id="competition-schedule-scroll-help" className="competition-schedule-scroll-help">
++          横にスクロールして1〜12月の日程を確認できます。
++          キーボードでは日程表にフォーカスして左右の矢印キーを使用します。
++        </p>
++        <div className="competition-schedule-scroll-actions" aria-label="日程表の横移動">
++          <button
++            type="button"
++            data-testid="competition-schedule-scroll-prev"
++            aria-controls="competition-annual-schedule-region"
++            aria-label="4週間戻る"
++            disabled={atScrollStart}
++            onClick={() => scrollByWeeks(-1)}
++          >
++            ← 4週戻る
++          </button>
++          <button
++            type="button"
++            data-testid="competition-schedule-scroll-next"
++            aria-controls="competition-annual-schedule-region"
++            aria-label="4週間進む"
++            disabled={atScrollEnd}
++            onClick={() => scrollByWeeks(1)}
++          >
++            4週進む →
++          </button>
++        </div>
++      </div>
++      <div
++        className="competition-schedule-frame"
++        data-at-start={atScrollStart}
++        data-at-end={atScrollEnd}
++      >
++        <div
++          id="competition-annual-schedule-region"
++          ref={scheduleScrollRef}
++          className="competition-schedule-scroll"
++          data-testid="competition-annual-schedule"
++          tabIndex={0}
++          role="region"
++          aria-label={`${overview.worldYear}年 大会日程の横スクロール領域`}
++          aria-describedby="competition-schedule-scroll-help"
++          onScroll={syncScrollEdges}
++        >
+         <table className="competition-schedule-table">
+           <caption className="dw-visually-hidden">{overview.worldYear}年 大会日程表</caption>
+           <thead>
+@@ -224,9 +297,10 @@
+               );
+             })}
+           </tbody>
+-        </table>
+-      </div>
+-    </section>
++        </table>
++        </div>
++      </div>
++    </section>
+   );
+ }
+ 
+diff --git a/apps/web/src/client/presentation.css b/apps/web/src/client/presentation.css
+--- a/apps/web/src/client/presentation.css
++++ b/apps/web/src/client/presentation.css
+@@ -1739,30 +1739,107 @@
+   font-size: 0.95rem;
+ }
+ 
+-.competition-schedule-scroll-help {
+-  margin: 0 0 0.5rem;
+-  color: var(--dw-muted);
+-  font-size: 0.85rem;
+-  line-height: 1.5;
+-}
+-
+-.competition-schedule-scroll {
+-  display: block;
+-  width: 100%;
+-  overflow-x: auto;
+-  max-width: 100%;
+-  min-width: 0;
+-  contain: inline-size;
+-  border: 1px solid var(--dw-line);
+-  border-radius: 10px;
+-  background: var(--dw-panel);
+-  -webkit-overflow-scrolling: touch;
+-}
+-
+-.competition-schedule-scroll:focus-visible {
+-  outline: 2px solid var(--dw-accent);
+-  outline-offset: 3px;
+-}
++.competition-schedule-tools {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 0.75rem;
++  margin-bottom: 0.5rem;
++}
++
++.competition-schedule-scroll-help {
++  margin: 0;
++  color: var(--dw-muted);
++  font-size: 0.85rem;
++  line-height: 1.5;
++}
++
++.competition-schedule-scroll-actions {
++  display: flex;
++  flex: 0 0 auto;
++  gap: 0.35rem;
++}
++
++.competition-schedule-scroll-actions button {
++  min-width: 7rem;
++  padding: 0.35rem 0.55rem;
++  font-size: 0.82rem;
++}
++
++.competition-schedule-frame {
++  position: relative;
++  min-width: 0;
++}
++
++.competition-schedule-frame::before,
++.competition-schedule-frame::after {
++  position: absolute;
++  z-index: 3;
++  top: 1px;
++  bottom: 1px;
++  width: 1.75rem;
++  pointer-events: none;
++  content: "";
++  opacity: 1;
++  transition: opacity 0.16s ease;
++}
++
++.competition-schedule-frame::before {
++  left: calc(2.5rem + 1px);
++  background: linear-gradient(90deg, rgba(17, 20, 17, 0.9), transparent);
++}
++
++.competition-schedule-frame::after {
++  right: 1px;
++  background: linear-gradient(-90deg, rgba(17, 20, 17, 0.9), transparent);
++}
++
++.competition-schedule-frame[data-at-start="true"]::before,
++.competition-schedule-frame[data-at-end="true"]::after {
++  opacity: 0;
++}
++
++.competition-schedule-scroll {
++  display: block;
++  width: 100%;
++  overflow-x: auto;
++  max-width: 100%;
++  min-width: 0;
++  contain: inline-size;
++  border: 1px solid var(--dw-line);
++  border-radius: 10px;
++  background: var(--dw-panel);
++  -webkit-overflow-scrolling: touch;
++}
++
++.competition-schedule-scroll:focus-visible {
++  outline: 2px solid var(--dw-accent);
++  outline-offset: 3px;
++}
++
++@media (max-width: 760px) {
++  .competition-schedule-tools {
++    align-items: stretch;
++    flex-direction: column;
++  }
++
++  .competition-schedule-scroll-actions {
++    display: grid;
++    grid-template-columns: repeat(2, minmax(0, 1fr));
++  }
++
++  .competition-schedule-scroll-actions button {
++    min-width: 0;
++    min-height: 44px;
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .competition-schedule-frame::before,
++  .competition-schedule-frame::after {
++    transition: none;
++  }
++}
+ 
+ .competition-schedule-table {
+   width: max-content;
