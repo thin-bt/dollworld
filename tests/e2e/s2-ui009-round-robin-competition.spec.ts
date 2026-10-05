@@ -303,6 +303,7 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
   }) => {
     test.setTimeout(120_000);
     await page.setViewportSize({ width: 1280, height: 1000 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await bootstrapAcceptedCompetitionSession(page, context);
     await page.goto("/competition");
     await expect(page.getByTestId("session-state")).toHaveAttribute("data-session-state", "ready", {
@@ -357,6 +358,7 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
   }) => {
     test.setTimeout(120_000);
     await page.setViewportSize({ width: 1280, height: 1000 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await bootstrapAcceptedCompetitionSession(page, context);
 
     let sessionGets = 0;
@@ -379,6 +381,9 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     });
 
     const schedule = page.getByTestId("competition-annual-schedule");
+    const scheduleFrame = page.getByTestId("competition-schedule-frame");
+    const scrollPrev = page.getByTestId("competition-schedule-scroll-prev");
+    const scrollNext = page.getByTestId("competition-schedule-scroll-next");
     const help = page.locator("#competition-schedule-scroll-help");
     const table = schedule.locator("table");
     const weekHeaders = table.locator("thead tr:nth-child(2) th.competition-schedule-week");
@@ -397,6 +402,10 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     await expect(weekHeaders).toHaveCount(48);
     await expect(currentWeekHeader).toHaveCount(1);
     await expect(currentWeekHeader).toHaveAttribute("aria-label", /現在週$/);
+    await expect(scrollPrev).toBeDisabled();
+    await expect(scrollNext).toBeEnabled();
+    await expect(scheduleFrame).toHaveAttribute("data-at-start", "true");
+    await expect(scheduleFrame).toHaveAttribute("data-at-end", "false");
 
     const requestBaseline = { sessionGets, competitionGets, competitionSteps };
     const scrollMetrics = await schedule.evaluate((element) => ({
@@ -404,6 +413,41 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
       scrollWidth: element.scrollWidth,
     }));
     expect(scrollMetrics.scrollWidth).toBeGreaterThan(scrollMetrics.clientWidth);
+    const fourWeekDistance = await weekHeaders.evaluateAll(
+      (headers) => (headers[4] as HTMLElement).offsetLeft - (headers[0] as HTMLElement).offsetLeft,
+    );
+    const marker = schedule.getByTestId("competition-schedule-cell").first();
+    await marker.click();
+    await expect(marker).toHaveAttribute("aria-pressed", "true");
+
+    await scrollNext.click();
+    await expect(scrollNext).toBeFocused();
+    await expect
+      .poll(() => schedule.evaluate((element) => element.scrollLeft))
+      .toBeGreaterThan(fourWeekDistance - 3);
+    await expect(scrollPrev).toBeEnabled();
+    await expect(scheduleFrame).toHaveAttribute("data-at-start", "false");
+    expect({ sessionGets, competitionGets, competitionSteps }).toEqual(requestBaseline);
+
+    for (let index = 0; index < 20 && !(await scrollNext.isDisabled()); index += 1) {
+      const before = await schedule.evaluate((element) => element.scrollLeft);
+      await scrollNext.evaluate((button: HTMLButtonElement) => {
+        if (!button.disabled) button.click();
+      });
+      await expect
+        .poll(async () => {
+          const after = await schedule.evaluate((element) => element.scrollLeft);
+          return after > before || (await scrollNext.isDisabled());
+        })
+        .toBe(true);
+    }
+    await expect(scrollNext).toBeDisabled();
+    await expect(scheduleFrame).toHaveAttribute("data-at-end", "true");
+    await scrollPrev.click();
+    await expect(scrollPrev).toBeFocused();
+    await expect(marker).toHaveAttribute("aria-pressed", "true");
+    expect({ sessionGets, competitionGets, competitionSteps }).toEqual(requestBaseline);
+
     await schedule.focus();
     await page.keyboard.press("Tab");
     await page.keyboard.press("Shift+Tab");
@@ -416,13 +460,19 @@ test.describe("Sprint2 UI009 round-robin competition", () => {
     await page.keyboard.press("ArrowRight");
     await expect.poll(() => schedule.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
 
-    const marker = schedule.getByTestId("competition-schedule-cell").first();
-    await marker.click();
-    await expect(marker).toHaveAttribute("aria-pressed", "true");
     expect({ sessionGets, competitionGets, competitionSteps }).toEqual(requestBaseline);
 
     for (const width of [760, 520, 360]) {
       await page.setViewportSize({ width, height: 1000 });
+      await schedule.evaluate((element) => {
+        element.scrollLeft = 0;
+      });
+      await expect(scrollPrev).toBeDisabled();
+      await expect(scrollNext).toBeEnabled();
+      for (const button of [scrollPrev, scrollNext]) {
+        const box = await button.boundingBox();
+        expect(box?.height, `scroll button height at ${width}px`).toBeGreaterThanOrEqual(44);
+      }
       await schedule.focus();
       await page.keyboard.press("Tab");
       await page.keyboard.press("Shift+Tab");

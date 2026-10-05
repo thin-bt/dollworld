@@ -1739,11 +1739,79 @@ a.dw-person-name-link:focus-visible {
   font-size: 0.95rem;
 }
 
-.competition-schedule-scroll-help {
+.competition-schedule-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
   margin: 0 0 0.5rem;
+}
+
+.competition-schedule-scroll-help {
+  flex: 1 1 auto;
+  margin: 0;
   color: var(--dw-muted);
   font-size: 0.85rem;
   line-height: 1.5;
+}
+
+.competition-schedule-scroll-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.35rem;
+}
+
+.competition-schedule-scroll-actions button {
+  min-height: 2.5rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--dw-line);
+  border-radius: 8px;
+  background: #2b302b;
+  color: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.competition-schedule-scroll-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.competition-schedule-scroll-actions button:not(:disabled):hover {
+  border-color: var(--dw-accent);
+}
+
+.competition-schedule-frame {
+  position: relative;
+  min-width: 0;
+}
+
+.competition-schedule-frame::before,
+.competition-schedule-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 1px;
+  bottom: 1px;
+  width: 2rem;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+.competition-schedule-frame::before {
+  left: calc(2.5rem + 1px);
+  background: linear-gradient(90deg, rgba(15, 18, 15, 0.9), transparent);
+}
+
+.competition-schedule-frame::after {
+  right: 1px;
+  background: linear-gradient(-90deg, rgba(15, 18, 15, 0.9), transparent);
+}
+
+.competition-schedule-frame[data-at-start="true"]::before,
+.competition-schedule-frame[data-at-end="true"]::after {
+  opacity: 0;
 }
 
 .competition-schedule-scroll {
@@ -2115,6 +2183,20 @@ table.data-table {
 }
 
 @media (max-width: 760px) {
+  .competition-schedule-tools {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .competition-schedule-scroll-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .competition-schedule-scroll-actions button {
+    min-height: 44px;
+  }
+
   .competition-participant-scroll {
     overflow: visible;
   }
@@ -2178,6 +2260,13 @@ table.data-table {
     display: inline-flex;
     min-height: 44px;
     align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .competition-schedule-frame::before,
+  .competition-schedule-frame::after {
+    transition: none;
   }
 }
 
